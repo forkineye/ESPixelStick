@@ -1,9 +1,11 @@
 <map id="c_ExternalInput::ProcessConfig" name="c_ExternalInput::ProcessConfig">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,170,75"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,170,103"/>
 <area shape="rect" id="Node000002" href="$classfsm___external_input__boot.html#a0335b6f4d497ac2ee19de76678625c52" title=" " alt="" coords="218,5,375,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,41,202,36,203,42,171,46"/>
-<area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="244,70,349,96"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="171,63,228,71,228,77,170,69"/>
-<area shape="rect" id="Node000004" href="$_web_mgr_8cpp.html#a47bc5f5aa91e940e6cfc297466285595" title=" " alt="" coords="423,70,505,96"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="349,80,408,80,408,86,349,86"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="163,60,204,48,206,53,165,65"/>
+<area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a" title=" " alt="" coords="255,70,338,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="170,80,240,80,240,86,170,86"/>
+<area shape="rect" id="Node000004" href="$_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="244,120,349,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="171,100,229,114,228,119,170,105"/>
+<area shape="rect" id="Node000005" href="$_web_mgr_8cpp.html#a47bc5f5aa91e940e6cfc297466285595" title=" " alt="" coords="423,120,505,145"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="349,130,408,130,408,135,349,135"/>
 </map>

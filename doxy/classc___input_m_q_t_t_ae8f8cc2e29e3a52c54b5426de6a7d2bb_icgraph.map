@@ -1,6 +1,6 @@
 <map id="c_InputMQTT::NetworkStateChanged" name="c_InputMQTT::NetworkStateChanged">
 <area shape="rect" id="Node000001" title=" " alt="" coords="217,29,404,70"/>
 <area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="347,16,333,10,310,8,289,10,276,15,271,21,273,28,268,29,266,19,273,10,288,5,310,3,335,5,349,11"/>
-<area shape="rect" id="Node000002" href="$classc___input_m_q_t_t.html#a82f5323123d44bba063f058694a4b210" title="Set a new config in the driver." alt="" coords="5,37,169,63"/>
+<area shape="rect" id="Node000002" href="$classc___input_m_q_t_t.html#a82f5323123d44bba063f058694a4b210" title="Set a new config in the driver." alt="" coords="5,37,169,62"/>
 <area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="201,52,169,52,169,47,201,47"/>
 </map>

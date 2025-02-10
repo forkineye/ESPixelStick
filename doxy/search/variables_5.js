@@ -1,11 +1,11 @@
 var searchData=
 [
   ['e131_0',['e131',['../classc___input_e131.html#ae53831a0c135a8a1d2a58af3eaa60028',1,'c_InputE131']]],
-  ['effect_1',['effect',['../structc___input_effect_engine_1_1_m_q_t_t_configuration__s.html#ae58707a0e852840915f63c040826f6fc',1,'c_InputEffectEngine::MQTTConfiguration_s']]],
+  ['effect_1',['effect',['../structc___input_effect_engine_1_1_m_q_t_t_configuration__t.html#aec90a607cfb64f37ec22e3410d47965e',1,'c_InputEffectEngine::MQTTConfiguration_t']]],
   ['effectallleds_2',['EffectAllLeds',['../classc___input_effect_engine.html#ad921d2884e3282104e8577c6e38d52f3',1,'c_InputEffectEngine']]],
   ['effectbrightness_3',['EffectBrightness',['../classc___input_effect_engine.html#a18ed4df2461fffa00499578000946825',1,'c_InputEffectEngine']]],
   ['effectcolor_4',['EffectColor',['../classc___input_effect_engine.html#a728d914d1b5e7b226ac7399d6b25dd62',1,'c_InputEffectEngine']]],
-  ['effectconfig_5',['effectConfig',['../classc___input_m_q_t_t.html#ac7be421cb3781e46b8de07d4364d277a',1,'c_InputMQTT']]],
+  ['effectconfig_5',['effectConfig',['../classc___input_m_q_t_t.html#a96b4c4ea54358036945c4a838b806474',1,'c_InputMQTT']]],
   ['effectcounter_6',['EffectCounter',['../classc___input_effect_engine.html#a47d3d8f591fee5159a70c3415e78711e',1,'c_InputEffectEngine']]],
   ['effectdelay_7',['EffectDelay',['../classc___input_effect_engine.html#a01df4bbcf6c566165eab42083ec75e2b',1,'c_InputEffectEngine']]],
   ['effectdelaytimer_8',['EffectDelayTimer',['../classc___input_effect_engine.html#a0e1d7ac3f9782458a82aca5fce6e4ba5',1,'c_InputEffectEngine']]],
@@ -24,7 +24,7 @@ var searchData=
   ['elapsedplaytimems_21',['ElapsedPlayTimeMS',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#afabd2e7a215bb39f0358bbd67fd71887',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
   ['enable_22',['Enable',['../structc___input_effect_engine_1_1_flash_info__t.html#ad0dac95dfe7d15c9a766f8d0fffe82e6',1,'c_InputEffectEngine::FlashInfo_t']]],
   ['enabled_23',['Enabled',['../classc___external_input.html#a829a67d0af2b787d02568d2bf9e816ae',1,'c_ExternalInput']]],
-  ['endingintensity_24',['EndingIntensity',['../structc___input_effect_engine_1_1_marquee_group.html#a206df6bf43eb052172b4c4d825d0a56a',1,'c_InputEffectEngine::MarqueeGroup']]],
+  ['endingintensity_24',['EndingIntensity',['../structc___input_effect_engine_1_1_marquee_group__t.html#ab809850e138ce5fac4bb6fb5c0368ac3',1,'c_InputEffectEngine::MarqueeGroup_t']]],
   ['endtimems_25',['EndTimeMS',['../class_fast_timer.html#a447c5c36947087b67fe991ea9f3a2334',1,'FastTimer']]],
   ['entryid_26',['entryId',['../structc___file_mgr_1_1_file_list_entry__t.html#a888f7c203e6b411d5e15b512694a4fa9',1,'c_FileMgr::FileListEntry_t']]],
   ['espalexa_27',['espalexa',['../_web_mgr_8cpp.html#a85205b64c6f0e3c33d00c8ec3556025c',1,'WebMgr.cpp']]],

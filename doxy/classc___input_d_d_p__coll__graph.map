@@ -1,7 +1,7 @@
 <map id="c_InputDDP" name="c_InputDDP">
-<area shape="rect" id="Node000001" title=" " alt="" coords="105,94,196,120"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="104,94,196,120"/>
 <area shape="rect" id="Node000002" href="$classc___input_common.html" title=" " alt="" coords="5,5,122,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,40,140,92,136,96,84,44"/>
-<area shape="rect" id="Node000003" href="$structc___input_d_d_p_1_1_packet_buffer__t.html" title=" " alt="" coords="145,5,329,31"/>
+<area shape="rect" id="Node000003" href="$structc___input_d_d_p_1_1_packet_buffer__t.html" title=" " alt="" coords="145,5,328,31"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="216,44,164,96,160,92,212,40"/>
 </map>

@@ -1,9 +1,9 @@
 <map id="fsm_ExternalInput_off_state::Poll" name="fsm_ExternalInput_off_state::Poll">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,35,152,75"/>
-<area shape="rect" id="Node000002" href="$classfsm___external_input__on__wait__long__state.html#aa79accc3ef0ed97fc3128e0694fe4b5b" title=" " alt="" coords="214,5,361,46"/>
+<area shape="rect" id="Node000002" href="$classfsm___external_input__on__wait__long__state.html#aa79accc3ef0ed97fc3128e0694fe4b5b" title=" " alt="" coords="214,5,360,46"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="152,42,198,35,199,41,152,47"/>
 <area shape="rect" id="Node000004" href="$classc___external_input.html#aa8c12cd0c690a094962ba8f7f5361282" title=" " alt="" coords="200,70,375,96"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="152,62,184,66,184,72,152,67"/>
-<area shape="rect" id="Node000003" href="$class_fast_timer.html#a775ab52aa49e9a1f7092eefcbdbd673e" title="&lt; Start the module" alt="" coords="423,13,570,39"/>
+<area shape="rect" id="Node000003" href="$class_fast_timer.html#a775ab52aa49e9a1f7092eefcbdbd673e" title="&lt; Start the module" alt="" coords="423,13,570,38"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="361,23,407,23,407,28,361,28"/>
 </map>

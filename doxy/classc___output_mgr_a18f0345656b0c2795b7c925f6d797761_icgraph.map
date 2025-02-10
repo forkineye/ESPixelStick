@@ -2,7 +2,7 @@
 <area shape="rect" id="Node000001" title="Read the current configuration data from nvram." alt="" coords="290,31,457,56"/>
 <area shape="rect" id="Node000002" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,5,242,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="274,34,242,29,243,24,275,28"/>
-<area shape="rect" id="Node000004" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="112,55,237,80"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="112,55,236,80"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="275,58,237,63,237,57,274,53"/>
 <area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>

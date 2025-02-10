@@ -1,15 +1,15 @@
 <map id="/github/workspace/include/input/InputAlexa.h" name="/github/workspace/include/input/InputAlexa.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="558,5,731,46"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="558,5,730,46"/>
 <area shape="rect" id="Node000002" href="$_input_common_8hpp.html" title=" " alt="" coords="532,94,658,120"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="634,48,613,82,608,79,630,45"/>
 <area shape="rect" id="Node000020" href="$_web_mgr_8hpp.html" title=" " alt="" coords="672,168,766,193"/>
 <area shape="poly" id="edge30_Node000001_Node000020" title=" " alt="" coords="656,45,709,152,704,155,651,47"/>
 <area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html" title=" " alt="" coords="390,389,496,414"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="598,120,598,161,593,219,576,284,561,315,542,342,517,366,488,384,485,379,513,362,538,339,557,312,571,282,587,218,593,160,593,120"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="598,120,598,161,592,219,575,284,560,315,541,342,515,366,487,384,484,379,512,361,537,339,556,312,570,282,587,218,593,160,593,120"/>
 <area shape="rect" id="Node000011" href="$_input_mgr_8hpp.html" title=" " alt="" coords="275,168,371,193"/>
 <area shape="poly" id="edge13_Node000002_Node000011" title=" " alt="" coords="550,123,385,166,384,161,548,118"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="683,536,758,562"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="497,407,574,424,614,440,653,460,685,489,708,521,704,524,681,493,649,465,612,444,572,429,496,412"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="497,406,574,424,615,439,654,460,686,489,709,521,704,524,682,493,651,465,613,444,573,429,496,411"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="5,462,73,488"/>
 <area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="390,415,378,417,88,468,87,463,377,412,389,410"/>
 <area shape="rect" id="Node000006" title=" " alt="" coords="391,462,495,488"/>
@@ -27,7 +27,7 @@
 <area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="343,459,414,420,417,425,345,464"/>
 <area shape="poly" id="edge14_Node000011_Node000003" title=" " alt="" coords="317,195,300,223,284,261,278,302,281,321,289,339,302,350,324,362,381,381,379,386,322,367,299,355,285,342,276,323,272,302,279,259,295,221,312,192"/>
 <area shape="poly" id="edge29_Node000011_Node000005" title=" " alt="" coords="289,196,229,222,157,262,121,288,88,318,59,352,36,390,30,418,34,447,28,448,25,418,31,388,54,349,84,315,118,284,154,258,227,217,287,191"/>
-<area shape="rect" id="Node000012" href="$_file_mgr_8hpp.html" title=" " alt="" coords="136,315,225,341"/>
+<area shape="rect" id="Node000012" href="$_file_mgr_8hpp.html" title=" " alt="" coords="136,315,224,341"/>
 <area shape="poly" id="edge15_Node000011_Node000012" title=" " alt="" coords="306,196,276,217,245,243,219,273,198,303,193,300,215,270,241,239,273,212,302,191"/>
 <area shape="rect" id="Node000017" href="$_output_mgr_8hpp.html" title=" " alt="" coords="411,241,558,267"/>
 <area shape="poly" id="edge21_Node000011_Node000017" title=" " alt="" coords="351,191,444,232,442,237,349,196"/>
@@ -49,7 +49,7 @@
 <area shape="poly" id="edge24_Node000017_Node000012" title=" " alt="" coords="433,270,240,315,239,310,432,265"/>
 <area shape="poly" id="edge25_Node000017_Node000018" title=" " alt="" coords="484,268,477,300,472,299,479,267"/>
 <area shape="poly" id="edge27_Node000019_Node000003" title=" " alt="" coords="369,339,418,377,414,381,366,343"/>
-<area shape="poly" id="edge31_Node000020_Node000003" title=" " alt="" coords="711,195,673,243,658,271,649,296,637,319,615,343,591,359,565,373,512,391,510,386,563,368,589,355,612,339,633,316,644,294,653,269,669,240,706,192"/>
+<area shape="poly" id="edge31_Node000020_Node000003" title=" " alt="" coords="711,195,675,243,659,271,649,296,638,319,615,343,591,359,565,373,512,391,510,385,563,368,589,355,612,339,633,316,645,294,654,269,670,240,707,192"/>
 <area shape="poly" id="edge33_Node000020_Node000017" title=" " alt="" coords="680,196,540,239,538,234,678,191"/>
 <area shape="rect" id="Node000021" href="$_e_f_update_8h.html" title=" " alt="" coords="684,241,773,267"/>
 <area shape="poly" id="edge32_Node000020_Node000021" title=" " alt="" coords="723,193,727,226,722,226,718,194"/>

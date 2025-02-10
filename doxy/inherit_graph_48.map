@@ -2,10 +2,10 @@
 <area shape="rect" id="Node000000" href="$classfsm___external_input__state.html" title=" " alt="" coords="5,96,167,122"/>
 <area shape="rect" id="Node000001" href="$classfsm___external_input__boot.html" title=" " alt="" coords="215,5,372,31"/>
 <area shape="poly" id="edge14_Node000000_Node000001" title=" " alt="" coords="123,86,214,41,246,29,248,34,216,46,125,90"/>
-<area shape="rect" id="Node000002" href="$classfsm___external_input__off__state.html" title=" " alt="" coords="220,55,367,96"/>
+<area shape="rect" id="Node000002" href="$classfsm___external_input__off__state.html" title=" " alt="" coords="220,55,366,96"/>
 <area shape="poly" id="edge15_Node000000_Node000002" title=" " alt="" coords="181,91,219,85,220,90,182,96"/>
-<area shape="rect" id="Node000003" href="$classfsm___external_input__on__wait__long__state.html" title=" " alt="" coords="220,121,367,161"/>
+<area shape="rect" id="Node000003" href="$classfsm___external_input__on__wait__long__state.html" title=" " alt="" coords="220,120,366,161"/>
 <area shape="poly" id="edge16_Node000000_Node000003" title=" " alt="" coords="183,121,220,127,219,132,182,126"/>
-<area shape="rect" id="Node000004" href="$classfsm___external_input__wait__for__off__state.html" title=" " alt="" coords="215,186,372,227"/>
+<area shape="rect" id="Node000004" href="$classfsm___external_input__wait__for__off__state.html" title=" " alt="" coords="215,186,372,226"/>
 <area shape="poly" id="edge17_Node000000_Node000004" title=" " alt="" coords="127,127,216,170,243,183,241,188,214,175,125,132"/>
 </map>

@@ -1,5 +1,5 @@
 <map id="c_OutputCommon::GetBufferUsedSize" name="c_OutputCommon::GetBufferUsedSize">
 <area shape="rect" id="Node000001" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="250,5,437,46"/>
-<area shape="rect" id="Node000002" href="$classc___output_common.html#adc129a5642920dc4d36e3e717aaf1f3c" title=" " alt="" coords="5,13,202,39"/>
+<area shape="rect" id="Node000002" href="$classc___output_common.html#adc129a5642920dc4d36e3e717aaf1f3c" title=" " alt="" coords="5,13,202,38"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="234,28,202,28,202,23,234,23"/>
 </map>

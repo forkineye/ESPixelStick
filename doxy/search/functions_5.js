@@ -13,7 +13,7 @@ var searchData=
   ['effectsolidcolor_10',['effectSolidColor',['../classc___input_effect_engine.html#acdb74858432f745ac97391b24751bf68',1,'c_InputEffectEngine']]],
   ['effecttransition_11',['effectTransition',['../classc___input_effect_engine.html#afaf6b474467520e248c2e79d3bdc8146',1,'c_InputEffectEngine']]],
   ['efupdate_12',['EFUpdate',['../class_e_f_update.html#a953dcadc2e7f1d42f977f8f6cc734351',1,'EFUpdate']]],
-  ['enable_13',['enable',['../classc___wi_fi_driver.html#a282b20cd06da439d8fcf1890b2e75361',1,'c_WiFiDriver::Enable()'],['../classc___f_p_p_discovery.html#af8b8c645e4a23ec95ab938891b4953f1',1,'c_FPPDiscovery::Enable()']]],
+  ['enable_13',['Enable',['../classc___wi_fi_driver.html#a282b20cd06da439d8fcf1890b2e75361',1,'c_WiFiDriver::Enable()'],['../classc___f_p_p_discovery.html#af8b8c645e4a23ec95ab938891b4953f1',1,'c_FPPDiscovery::Enable()']]],
   ['enableuartinterrupts_14',['EnableUartInterrupts',['../classc___output_uart.html#aae993e4f02690abebc32d024b15521c8',1,'c_OutputUart']]],
   ['end_15',['end',['../class_e_f_update.html#afb0f0f8cb2e8f129c08ca11d42ed578f',1,'EFUpdate']]],
   ['endbreak_16',['EndBreak',['../classc___output_uart.html#a85d75030c3b644c954ca5a6eed619429',1,'c_OutputUart']]],

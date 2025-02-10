@@ -2,13 +2,13 @@
 <area shape="rect" id="Node000001" title="Set a new config in the driver." alt="" coords="5,156,170,182"/>
 <area shape="rect" id="Node000002" href="$classc___output_pixel.html#ac10e3bc6c2561bdd7a256e23d801ad75" title="Get the current config used by the driver." alt="" coords="244,5,409,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,154,143,98,177,66,216,40,228,34,231,39,219,44,181,71,147,102,100,157"/>
-<area shape="rect" id="Node000004" href="$classc___output_common.html#acc5c49f206afba001b6514aeb4b6b2ba" title="Set a new config in the driver." alt="" coords="232,55,421,80"/>
+<area shape="rect" id="Node000004" href="$classc___output_common.html#acc5c49f206afba001b6514aeb4b6b2ba" title="Set a new config in the driver." alt="" coords="232,55,420,80"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="109,153,158,125,217,97,257,83,259,88,219,102,160,130,112,158"/>
 <area shape="rect" id="Node000005" href="$_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="525,80,630,106"/>
 <area shape="poly" id="edge7_Node000001_Node000005" title=" " alt="" coords="153,153,217,141,509,99,510,104,218,146,154,158"/>
 <area shape="rect" id="Node000007" href="$classc___output_pixel.html#a4a7f12a23b4f2ce0eb5cfeccd8bcb3e2" title=" " alt="" coords="218,156,435,182"/>
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="170,166,202,166,202,172,170,172"/>
-<area shape="rect" id="Node000008" href="$classc___output_pixel.html#a9ba93bde21a6a41d53ad4b5773ad331b" title="Update color order." alt="" coords="238,206,415,247"/>
+<area shape="rect" id="Node000008" href="$classc___output_pixel.html#a9ba93bde21a6a41d53ad4b5773ad331b" title="Update color order." alt="" coords="238,206,415,246"/>
 <area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="145,180,225,199,223,204,144,185"/>
 <area shape="rect" id="Node000009" href="$classc___output_pixel.html#ae85f097b7467cb4aeb13a6dce4902127" title="Generate gamma correction table." alt="" coords="230,271,423,312"/>
 <area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="106,180,155,217,219,256,235,263,233,268,216,261,152,221,103,184"/>

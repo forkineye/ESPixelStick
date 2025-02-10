@@ -1,5 +1,11 @@
 <map id="c_InputFPPRemote::PlayingRemoteFile" name="c_InputFPPRemote::PlayingRemoteFile">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,189,46"/>
-<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="237,13,441,39"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,23,221,23,221,28,189,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,189,71"/>
+<area shape="rect" id="Node000002" href="$classc___f_p_p_discovery.html#a4f0121bf7adb45f18c3b3d74f2d85650" title=" " alt="" coords="243,13,434,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="189,39,227,35,228,40,189,44"/>
+<area shape="rect" id="Node000005" href="$classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="237,62,441,88"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="189,57,221,61,221,66,189,63"/>
+<area shape="rect" id="Node000003" href="$classc___f_p_p_discovery.html#ab4198d4f7d573455827f0f4d087f3466" title=" " alt="" coords="489,13,676,38"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="435,23,473,23,473,28,435,28"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_file.html#a832119422e2b13fc06059dd73215cf75" title=" " alt="" coords="724,5,906,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="677,23,709,23,709,28,677,28"/>
 </map>

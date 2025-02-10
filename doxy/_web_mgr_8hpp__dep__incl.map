@@ -1,14 +1,14 @@
 <map id="/github/workspace/include/WebMgr.hpp" name="/github/workspace/include/WebMgr.hpp">
 <area shape="rect" id="Node000001" title=" " alt="" coords="458,5,630,46"/>
-<area shape="rect" id="Node000002" href="$_input_alexa_8h.html" title=" " alt="" coords="77,94,249,135"/>
+<area shape="rect" id="Node000002" href="$_input_alexa_8h.html" title=" " alt="" coords="76,94,249,135"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="443,52,249,96,248,91,442,47"/>
-<area shape="rect" id="Node000005" href="$_input_f_p_p_remote_8h.html" title=" " alt="" coords="273,94,445,135"/>
+<area shape="rect" id="Node000005" href="$_input_f_p_p_remote_8h.html" title=" " alt="" coords="272,94,445,135"/>
 <area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="489,55,402,96,399,91,487,50"/>
 <area shape="rect" id="Node000007" href="$_web_mgr_8cpp.html" title=" " alt="" coords="469,94,619,135"/>
 <area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="547,62,547,94,541,94,541,62"/>
 <area shape="rect" id="Node000008" href="$main_8cpp.html" title=" " alt="" coords="643,94,792,135"/>
 <area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="598,51,679,91,677,96,596,56"/>
-<area shape="rect" id="Node000009" href="$_network_mgr_8cpp.html" title=" " alt="" coords="816,94,987,135"/>
+<area shape="rect" id="Node000009" href="$_network_mgr_8cpp.html" title=" " alt="" coords="816,94,986,135"/>
 <area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="641,48,821,91,820,96,640,53"/>
 <area shape="rect" id="Node000003" href="$_input_alexa_8cpp.html" title=" " alt="" coords="5,183,155,223"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="135,148,101,184,97,180,131,144"/>

@@ -13,5 +13,6 @@ var dir_d44c64559bbebec7f509842c48db8b23 =
     [ "FileMgr.hpp", "_file_mgr_8hpp.html", "_file_mgr_8hpp" ],
     [ "GPIO_Defs.hpp", "_g_p_i_o___defs_8hpp.html", null ],
     [ "memdebug.h", "memdebug_8h.html", "memdebug_8h" ],
+    [ "UnzipFiles.hpp", "_unzip_files_8hpp.html", null ],
     [ "WebMgr.hpp", "_web_mgr_8hpp.html", "_web_mgr_8hpp" ]
 ];

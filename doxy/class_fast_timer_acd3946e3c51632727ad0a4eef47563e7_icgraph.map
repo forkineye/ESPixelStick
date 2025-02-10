@@ -2,9 +2,9 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="575,35,735,60"/>
 <area shape="rect" id="Node000002" href="$class_fast_timer.html#abcba4aeca10d03ec192ba31b4e55025f" title="&lt; Start up the driver and put it into a safe mode" alt="" coords="382,5,527,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="560,36,527,31,528,26,560,31"/>
-<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#a3986476ec33d9e3aedde9c1ae3953d61" title=" " alt="" coords="387,55,523,96"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#a3986476ec33d9e3aedde9c1ae3953d61" title=" " alt="" coords="386,55,523,96"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="560,63,523,69,523,63,560,58"/>
-<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563" title="Call from loop(), renders Input data." alt="" coords="198,22,334,63"/>
+<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563" title="Call from loop(), renders Input data." alt="" coords="198,22,334,62"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="371,63,334,57,335,52,372,58"/>
 <area shape="rect" id="Node000005" href="$classc___input_effect_engine.html#a77cbebfae3207a36a760ed4e5b439c66" title="Call from loop(), renders Input data." alt="" coords="198,87,334,128"/>
 <area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="372,92,335,99,334,93,371,87"/>

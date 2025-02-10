@@ -1,6 +1,6 @@
 <map id="c_InputArtnet::validateConfiguration" name="c_InputArtnet::validateConfiguration">
 <area shape="rect" id="Node000001" title=" " alt="" coords="444,31,669,56"/>
-<area shape="rect" id="Node000002" href="$classc___input_artnet.html#a563a8812372831c86d5db8bee8e3cba9" title="set up the operating environment based on the current config (or defaults)" alt="" coords="246,5,385,31"/>
+<area shape="rect" id="Node000002" href="$classc___input_artnet.html#a563a8812372831c86d5db8bee8e3cba9" title="set up the operating environment based on the current config (or defaults)" alt="" coords="246,5,384,31"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="428,33,385,28,385,23,429,27"/>
 <area shape="rect" id="Node000004" href="$classc___input_artnet.html#aa8ef414340a74ff9ba8caaf222e33b9b" title="Set a new config in the driver." alt="" coords="235,55,396,80"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="428,59,397,62,396,57,428,54"/>

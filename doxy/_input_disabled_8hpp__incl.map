@@ -1,7 +1,7 @@
 <map id="/github/workspace/include/input/InputDisabled.hpp" name="/github/workspace/include/input/InputDisabled.hpp">
 <area shape="rect" id="Node000001" title=" " alt="" coords="557,5,729,46"/>
 <area shape="rect" id="Node000002" href="$_input_common_8hpp.html" title=" " alt="" coords="580,94,706,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="646,46,646,78,641,78,641,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="646,46,646,78,640,78,640,46"/>
 <area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html" title=" " alt="" coords="519,389,626,414"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="649,120,660,183,663,225,660,267,653,306,636,342,620,363,602,380,598,377,616,359,632,339,648,305,655,267,658,225,655,183,644,121"/>
 <area shape="rect" id="Node000011" href="$_input_mgr_8hpp.html" title=" " alt="" coords="524,168,621,193"/>
@@ -30,7 +30,7 @@
 <area shape="rect" id="Node000017" href="$_output_mgr_8hpp.html" title=" " alt="" coords="298,241,444,267"/>
 <area shape="poly" id="edge21_Node000011_Node000017" title=" " alt="" coords="539,196,421,238,419,233,537,191"/>
 <area shape="rect" id="Node000018" title=" " alt="" coords="451,315,529,341"/>
-<area shape="poly" id="edge28_Node000011_Node000018" title=" " alt="" coords="556,196,531,216,509,243,498,271,494,300,488,299,493,270,505,240,527,212,552,192"/>
+<area shape="poly" id="edge28_Node000011_Node000018" title=" " alt="" coords="556,196,532,216,511,243,500,271,494,300,489,299,494,270,506,240,528,212,553,192"/>
 <area shape="rect" id="Node000019" href="$external_input_8h.html" title=" " alt="" coords="520,241,625,267"/>
 <area shape="poly" id="edge26_Node000011_Node000019" title=" " alt="" coords="575,194,575,226,570,226,570,194"/>
 <area shape="poly" id="edge16_Node000012_Node000003" title=" " alt="" coords="306,337,505,382,504,387,305,342"/>

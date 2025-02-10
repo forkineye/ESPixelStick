@@ -1,14 +1,14 @@
 <map id="c_InputFPPRemotePlayItem::IsIdle" name="c_InputFPPRemotePlayItem::IsIdle">
 <area shape="rect" id="Node000001" title=" " alt="" coords="1282,100,1468,141"/>
-<area shape="rect" id="Node000002" href="$classfsm___play_list__state___playing_file.html#a6d4ff27930b37b98f423091145487648" title=" " alt="" coords="1062,5,1196,46"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_list__state___playing_effect.html#afe6b59d135d0c3467e6f8014de53cdb1" title=" " alt="" coords="1062,5,1196,46"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1315,96,1233,61,1195,48,1197,43,1235,57,1317,91"/>
-<area shape="rect" id="Node000003" href="$classfsm___play_list__state___playing_effect.html#afe6b59d135d0c3467e6f8014de53cdb1" title=" " alt="" coords="1062,71,1196,111"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_list__state___playing_file.html#a6d4ff27930b37b98f423091145487648" title=" " alt="" coords="1062,71,1196,111"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="1266,110,1196,102,1196,96,1267,105"/>
-<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="255,197,445,223"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote.html#a443df599d56a819b87102cefe5d45cd3" title="Call from loop(), renders Input data." alt="" coords="255,197,444,223"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="1267,132,445,204,445,199,1266,127"/>
 <area shape="rect" id="Node000005" href="$classc___input_f_p_p_remote.html#a7b84b8b1119182f7a2c6a72c00d1d1da" title=" " alt="" coords="1024,278,1234,304"/>
 <area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="1333,152,1151,280,1148,276,1330,148"/>
-<area shape="rect" id="Node000006" href="$classc___input_f_p_p_remote.html#a2e5e64a21ad76c7015c6500393be7da3" title=" " alt="" coords="243,393,457,419"/>
+<area shape="rect" id="Node000006" href="$classc___input_f_p_p_remote.html#a2e5e64a21ad76c7015c6500393be7da3" title=" " alt="" coords="243,393,457,418"/>
 <area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="1110,318,1054,373,1018,400,977,420,899,442,818,455,736,459,656,458,580,452,511,442,404,422,405,416,512,437,581,446,656,452,736,454,817,449,898,437,975,415,1015,395,1051,369,1106,314"/>
 <area shape="rect" id="Node000008" href="$classc___input_f_p_p_remote.html#a25cf9123173d9c89fe7e5f2f77f90f42" title=" " alt="" coords="505,308,716,333"/>
 <area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="1008,286,890,284,765,291,664,309,663,304,764,286,890,279,1008,281"/>
@@ -22,7 +22,7 @@
 <area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="227,408,195,408,195,403,227,403"/>
 <area shape="poly" id="edge9_Node000008_Node000004" title=" " alt="" coords="563,303,381,226,383,221,565,298"/>
 <area shape="poly" id="edge8_Node000008_Node000006" title=" " alt="" coords="555,341,392,395,391,390,554,336"/>
-<area shape="rect" id="Node000009" href="$classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61" title="Set a new config in the driver." alt="" coords="251,308,449,333"/>
+<area shape="rect" id="Node000009" href="$classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61" title="Set a new config in the driver." alt="" coords="251,308,448,333"/>
 <area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="489,323,449,323,449,318,489,318"/>
 <area shape="poly" id="edge12_Node000010_Node000008" title=" " alt="" coords="749,323,717,323,717,318,749,318"/>
 <area shape="poly" id="edge14_Node000011_Node000008" title=" " alt="" coords="771,364,664,336,665,331,772,358"/>

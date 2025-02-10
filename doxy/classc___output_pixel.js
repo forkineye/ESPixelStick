@@ -1,7 +1,7 @@
 var classc___output_pixel =
 [
     [ "ColorOffsets_s", "unionc___output_pixel_1_1_color_offsets__s.html", "unionc___output_pixel_1_1_color_offsets__s" ],
-    [ "ColorOffsets_t", "classc___output_pixel.html#aacdb92de62504b5d5f352b1aed8222d6", null ],
+    [ "ColorOffsets_t", "classc___output_pixel.html#a6506a1363b425dc32816a233be211e2f", null ],
     [ "c_OutputPixel", "classc___output_pixel.html#a31a016d8d365e4ffbe17cb4c5696a362", null ],
     [ "~c_OutputPixel", "classc___output_pixel.html#a2a04e5cde945478f4f3e3b05a3572dd4", null ],
     [ "CalculateIntensityOffset", "classc___output_pixel.html#a96bafc94f784719059dba54b3f81d107", null ],

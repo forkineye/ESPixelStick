@@ -8,7 +8,7 @@
 <area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="501,88,469,92,468,86,500,83"/>
 <area shape="rect" id="Node000004" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,5,242,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="280,33,242,29,243,23,280,28"/>
-<area shape="rect" id="Node000006" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="112,55,237,80"/>
+<area shape="rect" id="Node000006" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="112,55,236,80"/>
 <area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="280,57,237,62,237,57,280,52"/>
 <area shape="rect" id="Node000005" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>

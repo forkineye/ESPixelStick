@@ -23,6 +23,7 @@ var classc___input_f_p_p_remote_play_item =
     [ "FileControl", "classc___input_f_p_p_remote_play_item.html#aa6c1aa7c11896832ec79c0569942fdb0", null ],
     [ "InputChannelId", "classc___input_f_p_p_remote_play_item.html#aa343859257656b16467ea49ca913c651", null ],
     [ "InputPaused", "classc___input_f_p_p_remote_play_item.html#a9afea78793d9a822a3c8c6ef6f4ffc1c", null ],
+    [ "LocalIntensityBufferSize", "classc___input_f_p_p_remote_play_item.html#af1c8bc02264c3e3bf78bbed11da856ab", null ],
     [ "PlayDurationSec", "classc___input_f_p_p_remote_play_item.html#a8327a95abc807e625a2b82fef912e3fc", null ],
     [ "SendFppSync", "classc___input_f_p_p_remote_play_item.html#a0bf2dd0492e17cd4f7b7f536f51fffc2", null ],
     [ "SyncOffsetMS", "classc___input_f_p_p_remote_play_item.html#a19ffc50aebca04a52fe132edaa3a31dd", null ]

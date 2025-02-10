@@ -2,7 +2,7 @@ var classc___output_uart =
 [
     [ "ConvertIntensityToUartDataStreamEntry_t", "structc___output_uart_1_1_convert_intensity_to_uart_data_stream_entry__t.html", "structc___output_uart_1_1_convert_intensity_to_uart_data_stream_entry__t" ],
     [ "OutputUartConfig_t", "structc___output_uart_1_1_output_uart_config__t.html", "structc___output_uart_1_1_output_uart_config__t" ],
-    [ "CitudsArray_t", "classc___output_uart.html#ae17c47e20d09bd0c20d83bb732e1913f", null ],
+    [ "CitudsArray_t", "classc___output_uart.html#a632302a12b11911700dfc33bd78435f3", null ],
     [ "TranslateIntensityData_t", "classc___output_uart.html#afa50de8c9fc4b848160d18576694c4b8", [
       [ "NoTranslation", "classc___output_uart.html#afa50de8c9fc4b848160d18576694c4b8a84e7bc8789d38d9f54c35bf95f4555a4", null ],
       [ "OneToOne", "classc___output_uart.html#afa50de8c9fc4b848160d18576694c4b8aebae574ab6f1a9e3a5b50eaa524de6ad", null ],

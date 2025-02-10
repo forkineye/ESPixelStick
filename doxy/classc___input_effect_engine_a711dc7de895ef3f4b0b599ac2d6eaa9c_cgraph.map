@@ -1,5 +1,5 @@
 <map id="c_InputEffectEngine::GetConfig" name="c_InputEffectEngine::GetConfig">
 <area shape="rect" id="Node000001" title="Get the current config used by the driver." alt="" coords="5,5,142,46"/>
-<area shape="rect" id="Node000002" href="$_safer_string_conversion_8hpp.html#abaa5f3baa5ae9ae6df677674285ab8da" title=" " alt="" coords="190,13,370,39"/>
+<area shape="rect" id="Node000002" href="$_safer_string_conversion_8hpp.html#abaa5f3baa5ae9ae6df677674285ab8da" title=" " alt="" coords="190,13,370,38"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,23,174,23,174,28,142,28"/>
 </map>

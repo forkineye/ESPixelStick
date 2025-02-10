@@ -1,6 +1,6 @@
 <map id="fsm_PlayList_state_PlayingFile::Stop" name="fsm_PlayList_state_PlayingFile::Stop">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,39,139,79"/>
-<area shape="rect" id="Node000002" href="$classfsm___play_list__state___idle.html#abfa40fccfc7ba68b1a00d6774823519b" title=" " alt="" coords="213,5,347,46"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_list__state___idle.html#abfa40fccfc7ba68b1a00d6774823519b" title=" " alt="" coords="213,5,346,46"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,46,197,36,198,41,139,51"/>
 <area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="187,71,373,111"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="139,67,172,72,171,77,138,72"/>

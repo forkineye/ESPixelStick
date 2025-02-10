@@ -1,9 +1,5 @@
 <map id="c_InputFPPRemote::GetConfig" name="c_InputFPPRemote::GetConfig">
-<area shape="rect" id="Node000001" title="Get the current config used by the driver." alt="" coords="5,78,204,104"/>
-<area shape="rect" id="Node000002" href="$classc___f_p_p_discovery.html#a49efeb9d3c38d8e3e4017d54cb4b7815" title=" " alt="" coords="265,5,443,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="156,75,258,48,259,53,157,80"/>
-<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html#a18aa37d56d43b19d1b5801a7a304e06c" title=" " alt="" coords="261,71,447,111"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="204,88,245,88,245,94,204,94"/>
-<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="252,136,456,161"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,102,280,129,279,134,163,107"/>
+<area shape="rect" id="Node000001" title="Get the current config used by the driver." alt="" coords="5,5,204,31"/>
+<area shape="rect" id="Node000002" href="$classc___f_p_p_discovery.html#a14601813176cdaa56f1eec5c42e0ad24" title=" " alt="" coords="252,5,433,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="204,16,236,16,236,21,204,21"/>
 </map>

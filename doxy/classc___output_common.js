@@ -1,7 +1,7 @@
 var classc___output_common =
 [
-    [ "OID_t", "classc___output_common.html#ac1d890a6e510ca5903ff8bc66d1edaed", null ],
-    [ "OTYPE_t", "classc___output_common.html#a8ce2a0b959923837191429b23b088003", null ],
+    [ "OID_t", "classc___output_common.html#a462f6a012ba9e655caadd26949813386", null ],
+    [ "OTYPE_t", "classc___output_common.html#ab98d2f91c96c1800a642c8aa4ee3d6c8", null ],
     [ "c_OutputCommon", "classc___output_common.html#a62fe4a63a7cf103685b64cf5e1c22452", null ],
     [ "~c_OutputCommon", "classc___output_common.html#a18e0118f2a588c46e467556bab72010f", null ],
     [ "BaseGetStatus", "classc___output_common.html#a8f58ca24d1d37983afab81c9eebf6a85", null ],
