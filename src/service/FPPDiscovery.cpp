@@ -689,7 +689,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
     do // once
     {
         String path = request->url();
-        if (path.startsWith("/fpp/"))
+        if (path.startsWith(F("/fpp/")))
         {
             path = path.substring(4);
         }
@@ -974,6 +974,11 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (version));
     JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&version[2]));
     JsonWrite(jsonResponse, F ("typeId"),       FPP_TYPE_ID);
+#ifdef SUPPORT_UNZIP
+    JsonWrite(jsonResponse, F ("zip"),          true);
+#else
+    JsonWrite(jsonResponse, F ("zip"),          false);
+#endif // def SUPPORT_UNZIP
 
     JsonObject jsonResponseUtilization = jsonResponse[F ("Utilization")].to<JsonObject> ();
     JsonWrite(jsonResponseUtilization, F ("MemoryFree"), ESP.getFreeHeap ());
