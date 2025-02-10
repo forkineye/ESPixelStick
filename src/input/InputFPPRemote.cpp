@@ -437,7 +437,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
 
-        DEBUG_V (String ("Start Playing FileName: '") + FileName + "'");
+        // DEBUG_V (String ("Start Playing FileName: '") + FileName + "'");
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         pInputFPPRemotePlayItem->Start (FileName, 0, 1);
