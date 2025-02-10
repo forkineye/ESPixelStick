@@ -69,8 +69,8 @@ private:
 
     int32_t SyncOffsetMS = 0;
     bool    SendFppSync = false;
-    String  FileBeingPlayed = No_LocalFileToPlay;
-    String  ConfiguredFileToPlay = No_LocalFileToPlay;
+    String  FileBeingPlayed = CN_No_LocalFileToPlay;
+    String  ConfiguredFileToPlay = CN_No_LocalFileToPlay;
     bool    Stopping = false;
     bool    FppSyncOverride = false;
 };

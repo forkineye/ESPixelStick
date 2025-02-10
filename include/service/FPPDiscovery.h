@@ -145,6 +145,5 @@ public:
 #   define SYNC_PKT_OPEN        3
 
 };
-#define No_LocalFileToPlay F("...")
 
 extern c_FPPDiscovery FPPDiscovery;

@@ -143,6 +143,7 @@ const CN_PROGMEM char CN_name                     [] = "name";
 const CN_PROGMEM char CN_NeedAutoConfig           [] = "NeedAutoConfig";
 const CN_PROGMEM char CN_netmask                  [] = "netmask";
 const CN_PROGMEM char CN_network                  [] = "network";
+const CN_PROGMEM char CN_No_LocalFileToPlay       [] = "...";
 const CN_PROGMEM char CN_num_chan                 [] = "num_chan";
 const CN_PROGMEM char CN_num_packets              [] = "num_packets";
 const CN_PROGMEM char CN_off                      [] = "off";

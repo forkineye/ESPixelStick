@@ -370,7 +370,7 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
             break;
         }
 
-        if (FileName.equals(No_LocalFileToPlay))
+        if (FileName.equals(CN_No_LocalFileToPlay))
         {
             StartPlayingRemoteFile (FileName);
         }

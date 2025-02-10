@@ -152,6 +152,7 @@ extern const CN_PROGMEM char CN_name [];
 extern const CN_PROGMEM char CN_NeedAutoConfig [];
 extern const CN_PROGMEM char CN_netmask [];
 extern const CN_PROGMEM char CN_network [];
+extern const CN_PROGMEM char CN_No_LocalFileToPlay [];
 extern const CN_PROGMEM char CN_num_chan [];
 extern const CN_PROGMEM char CN_num_packets [];
 extern const CN_PROGMEM char CN_off [];
