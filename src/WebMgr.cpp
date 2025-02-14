@@ -702,7 +702,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
                 logcon(F("ERROR: Could not open List of Fseq files for reading"));
                 response = FileMgr.GetDefaultFseqFileList(buffer, maxlen);
                 delay(500);
-                FileMgr.BuildFseqList(false, false);
+                FileMgr.BuildFseqList(false);
 
                 break;
             }
@@ -743,12 +743,10 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
         memset(buffer, 0x0, maxlen-1);
         FileMgr.ReadSdFile(FileHandle,
                            buffer,
-                           DataToSendThisChunk);
-        // buffer[DataToSendThisChunk] = 'A';
+                           DataToSendThisChunk,
+                           NumberOfBytesTransfered);
         NumberOfBytesTransfered += DataToSendThisChunk;
         response = DataToSendThisChunk;
-        // DEBUG_V(String("buffer: ") + String((char*)buffer));
-
     } while(false);
 
     // DEBUG_V(String("            response: ") + String(response));

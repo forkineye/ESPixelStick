@@ -62,7 +62,7 @@ void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned in
 
         case FTP_FREE_SPACE_CHANGE:
         {
-            FileMgr.BuildFseqList(false, false);
+            FileMgr.BuildFseqList(false);
             LOG_PORT.printf("FTP: Free space change, free %u of %u! Rebuilding FSEQ file list\n", freeSpace, totalSpace);
             break;
         }
@@ -149,9 +149,9 @@ c_FileMgr::c_FileMgr ()
 ///< deallocate any resources and put the output channels into a safe state
 c_FileMgr::~c_FileMgr ()
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // ~c_FileMgr
 
@@ -159,7 +159,7 @@ c_FileMgr::~c_FileMgr ()
 ///< Start the module
 void c_FileMgr::Begin ()
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     do // once
     {
@@ -196,19 +196,19 @@ void c_FileMgr::Begin ()
 
     } while (false);
 
-    // DEBUG_END;
+    // DEBUG__END;
 } // begin
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::NetworkStateChanged (bool NewState)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 #ifdef SUPPORT_FTP
     ftpSrv.end();
 
-    // DEBUG_V(String("       NewState: ") + String(NewState));
-    // DEBUG_V(String("SdCardInstalled: ") + String(SdCardInstalled));
-    // DEBUG_V(String("     FtpEnabled: ") + String(FtpEnabled));
+    // DEBUG__V(String("       NewState: ") + String(NewState));
+    // DEBUG__V(String("SdCardInstalled: ") + String(SdCardInstalled));
+    // DEBUG__V(String("     FtpEnabled: ") + String(FtpEnabled));
     if(NewState && SdCardInstalled && FtpEnabled)
     {
         ftpSrv.end();
@@ -219,13 +219,13 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
     }
 #endif // def SUPPORT_FTP
 
-    // DEBUG_END;
+    // DEBUG__END;
 } // NetworkStateChanged
 
 //-----------------------------------------------------------------------------
- void c_FileMgr::Poll()
+void c_FileMgr::Poll()
  {
-    /// DEBUG_START;
+    // xDEBUG_START;
 #ifdef SUPPORT_FTP
     if(FtpEnabled)
     {
@@ -233,13 +233,13 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
         ftpSrv.handleFTP();
     }
 #endif // def SUPPORT_FTP
-    /// DEBUG_END;
+    // xDEBUG_END;
  } // Poll
 
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SetConfig (JsonObject & json)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     bool ConfigChanged = false;
     JsonObject JsonDeviceConfig = json[(char*)CN_device].as<JsonObject>();
@@ -247,10 +247,10 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     {
         // PrettyPrint (JsonDeviceConfig, "c_FileMgr");
 
-        // DEBUG_V("miso_pin: " + String(miso_pin));
-        // DEBUG_V("mosi_pin: " + String(mosi_pin));
-        // DEBUG_V(" clk_pin: " + String(clk_pin));
-        // DEBUG_V("  cs_pin: " + String(cs_pin));
+        // DEBUG__V("miso_pin: " + String(miso_pin));
+        // DEBUG__V("mosi_pin: " + String(mosi_pin));
+        // DEBUG__V(" clk_pin: " + String(clk_pin));
+        // DEBUG__V("  cs_pin: " + String(cs_pin));
 
         ConfigChanged |= setFromJSON (miso_pin,   JsonDeviceConfig, CN_miso_pin);
         ConfigChanged |= setFromJSON (mosi_pin,   JsonDeviceConfig, CN_mosi_pin);
@@ -262,20 +262,20 @@ bool c_FileMgr::SetConfig (JsonObject & json)
         ConfigChanged |= setFromJSON (FtpPassword, JsonDeviceConfig, CN_password);
         ConfigChanged |= setFromJSON (FtpEnabled,  JsonDeviceConfig, CN_enabled);
 
-        // DEBUG_V("miso_pin: " + String(miso_pin));
-        // DEBUG_V("mosi_pin: " + String(mosi_pin));
-        // DEBUG_V(" clk_pin: " + String(clk_pin));
-        // DEBUG_V("  cs_pin: " + String(cs_pin));
-        // DEBUG_V("   Speed: " + String(MaxSdSpeed));
+        // DEBUG__V("miso_pin: " + String(miso_pin));
+        // DEBUG__V("mosi_pin: " + String(mosi_pin));
+        // DEBUG__V(" clk_pin: " + String(clk_pin));
+        // DEBUG__V("  cs_pin: " + String(cs_pin));
+        // DEBUG__V("   Speed: " + String(MaxSdSpeed));
 
-        // DEBUG_V("ConfigChanged: " + String(ConfigChanged));
+        // DEBUG__V("ConfigChanged: " + String(ConfigChanged));
     }
     else
     {
         logcon (F ("No File Manager settings found."));
     }
 
-    // DEBUG_V (String ("ConfigChanged: ") + String (ConfigChanged));
+    // DEBUG__V (String ("ConfigChanged: ") + String (ConfigChanged));
 
     if (ConfigChanged)
     {
@@ -283,7 +283,7 @@ bool c_FileMgr::SetConfig (JsonObject & json)
         NetworkStateChanged(NetworkMgr.IsConnected());
     }
 
-    // DEBUG_END;
+    // DEBUG__END;
 
     return ConfigChanged;
 
@@ -292,7 +292,7 @@ bool c_FileMgr::SetConfig (JsonObject & json)
 //-----------------------------------------------------------------------------
 void c_FileMgr::GetConfig (JsonObject& json)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     JsonWrite(json, CN_miso_pin,  miso_pin);
     JsonWrite(json, CN_mosi_pin,  mosi_pin);
@@ -304,21 +304,21 @@ void c_FileMgr::GetConfig (JsonObject& json)
     JsonWrite(json, CN_password,  FtpPassword);
     JsonWrite(json, CN_enabled,   FtpEnabled);
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // GetConfig
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::GetStatus (JsonObject& json)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
 #ifdef ARDUINO_ARCH_ESP32
     json[F ("size")] = LittleFS.totalBytes ();
     json[F ("used")] = LittleFS.usedBytes ();
 #endif // def ARDUINO_ARCH_ESP32
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // GetConfig
 
@@ -353,25 +353,25 @@ void dateTime(uint16_t* date, uint16_t* time, uint8_t* ms10)
 //-----------------------------------------------------------------------------
 void c_FileMgr::SetSpiIoPins ()
 {
-    // DEBUG_START;
+    // DEBUG__START;
 #if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     if (SdCardInstalled)
     {
-        // DEBUG_V("Terminate current SD session");
+        // DEBUG__V("Terminate current SD session");
         ESP_SD.end ();
     }
 
     FsDateTime::setCallback(dateTime);
 #ifdef ARDUINO_ARCH_ESP32
-    // DEBUG_V();
+    // DEBUG__V();
     try
 #endif // def ARDUINO_ARCH_ESP32
     {
 #ifdef SUPPORT_SD_MMC
-        // DEBUG_V (String ("  Data 0: ") + String (SD_CARD_DATA_0));
-        // DEBUG_V (String ("  Data 1: ") + String (SD_CARD_DATA_1));
-        // DEBUG_V (String ("  Data 2: ") + String (SD_CARD_DATA_2));
-        // DEBUG_V (String ("  Data 3: ") + String (SD_CARD_DATA_3));
+        // DEBUG__V (String ("  Data 0: ") + String (SD_CARD_DATA_0));
+        // DEBUG__V (String ("  Data 1: ") + String (SD_CARD_DATA_1));
+        // DEBUG__V (String ("  Data 2: ") + String (SD_CARD_DATA_2));
+        // DEBUG__V (String ("  Data 3: ") + String (SD_CARD_DATA_3));
 
         pinMode(SD_CARD_DATA_0, PULLUP);
         pinMode(SD_CARD_DATA_1, PULLUP);
@@ -381,23 +381,23 @@ void c_FileMgr::SetSpiIoPins ()
         if(!ESP_SD.begin())
 #else // ! SUPPORT_SD_MMC
 #   ifdef ARDUINO_ARCH_ESP32
-        // DEBUG_V (String ("miso_pin: ") + String (miso_pin));
-        // DEBUG_V (String ("mosi_pin: ") + String (mosi_pin));
-        // DEBUG_V (String (" clk_pin: ") + String (clk_pin));
-        // DEBUG_V (String ("  cs_pin: ") + String (cs_pin));
+        // DEBUG__V (String ("miso_pin: ") + String (miso_pin));
+        // DEBUG__V (String ("mosi_pin: ") + String (mosi_pin));
+        // DEBUG__V (String (" clk_pin: ") + String (clk_pin));
+        // DEBUG__V (String ("  cs_pin: ") + String (cs_pin));
 
-        // DEBUG_V();
+        // DEBUG__V();
         SPI.end ();
-        // DEBUG_V();
+        // DEBUG__V();
         ResetGpio(gpio_num_t(cs_pin));
         pinMode(cs_pin, OUTPUT);
 #       ifdef USE_MISO_PULLUP
-        // DEBUG_V("USE_MISO_PULLUP");
+        // DEBUG__V("USE_MISO_PULLUP");
         // on some hardware MISO is missing a required pull-up resistor, use internal pull-up.
         ResetGpio(gpio_num_t(mosi_pin));
         pinMode(miso_pin, INPUT_PULLUP);
 #       else
-        // DEBUG_V();
+        // DEBUG__V();
         ResetGpio(gpio_num_t(miso_pin));
         pinMode(miso_pin, INPUT);
 #       endif // def USE_MISO_PULLUP
@@ -409,14 +409,14 @@ void c_FileMgr::SetSpiIoPins ()
         SPI.end ();
         SPI.begin ();
 #   endif // ! ARDUINO_ARCH_ESP32
-        // DEBUG_V();
+        // DEBUG__V();
         if (!ESP_SD.begin (SdSpiConfig(cs_pin, SHARED_SPI, SD_SCK_MHZ(16))))
 #endif // !def SUPPORT_SD_MMC
         {
-            // DEBUG_V();
+            // DEBUG__V();
             logcon(String(F("No SD card installed")));
             SdCardInstalled = false;
-            // DEBUG_V();
+            // DEBUG__V();
             if(nullptr == ESP_SD.card())
             {
                 logcon(F("SD 'Card' setup failed."));
@@ -424,7 +424,7 @@ void c_FileMgr::SetSpiIoPins ()
             else if (ESP_SD.card()->errorCode())
             {
                 logcon(String(F("SD initialization failed - code: ")) + String(ESP_SD.card()->errorCode()));
-                // DEBUG_V(String(F("SD initialization failed - data: ")) + String(ESP_SD.card()->errorData()));
+                // DEBUG__V(String(F("SD initialization failed - data: ")) + String(ESP_SD.card()->errorData()));
                 printSdErrorText(&Serial, ESP_SD.card()->errorCode()); LOG_PORT.println("");
             }
             else if (ESP_SD.vol()->fatType() == 0)
@@ -438,17 +438,17 @@ void c_FileMgr::SetSpiIoPins ()
         }
         else
         {
-            // DEBUG_V();
+            // DEBUG__V();
             SdCardInstalled = true;
-            // DEBUG_V();
+            // DEBUG__V();
             SetSdSpeed ();
 
-            // DEBUG_V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
+            // DEBUG__V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
 
             DescribeSdCardToUser ();
-            // DEBUG_V();
-            BuildFseqList(false, true);
-            // DEBUG_V();
+            // DEBUG__V();
+            BuildFseqList(false);
+            // DEBUG__V();
         }
     }
 #ifdef ARDUINO_ARCH_ESP32
@@ -465,26 +465,26 @@ void c_FileMgr::SetSpiIoPins ()
     SdCardInstalled = false;
 #endif // defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // SetSpiIoPins
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::SetSdSpeed ()
 {
-    // DEBUG_START;
+    // DEBUG__START;
 #if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     if (SdCardInstalled)
     {
-        // DEBUG_V();
+        // DEBUG__V();
         csd_t csd;
         uint8_t tran_speed = 0;
 
         CSD MyCsd;
-        // DEBUG_V();
+        // DEBUG__V();
         ESP_SD.card()->readCSD(&csd);
         memcpy (&MyCsd, &csd.csd[0], sizeof(csd.csd));
-        // DEBUG_V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
+        // DEBUG__V(String("TRAN Speed: 0x") + String(MyCsd.Decode_0.tran_speed,HEX));
         tran_speed = MyCsd.Decode_0.tran_speed;
         uint32_t FinalTranSpeedMHz = MaxSdSpeed;
 
@@ -515,17 +515,17 @@ void c_FileMgr::SetSdSpeed ()
                 FinalTranSpeedMHz = 25;
             }
         }
-        // DEBUG_V();
+        // DEBUG__V();
         FinalTranSpeedMHz = min(FinalTranSpeedMHz, MaxSdSpeed);
         SPI.setFrequency(FinalTranSpeedMHz * 1024 * 1024);
         logcon(String("Set SD speed to ") + String(FinalTranSpeedMHz) + "Mhz");
 
         SdCardSizeMB = 0.000512 * csd.capacity();
-        // DEBUG_V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
+        // DEBUG__V(String("SdCardSizeMB: ") + String(SdCardSizeMB));
     }
 #endif // defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // SetSdSpeed
 
@@ -537,13 +537,13 @@ void c_FileMgr::SetSdSpeed ()
 */
 void c_FileMgr::ResetSdCard()
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     // send 0xff bytes until we get 0xff back
     byte ResetValue = 0x00;
     digitalWrite(cs_pin, LOW);
     SPI.beginTransaction(SPISettings());
-    // DEBUG_V();
+    // DEBUG__V();
     uint32_t retry = 2000;
     while((0xff != ResetValue) && (--retry))
     {
@@ -553,24 +553,24 @@ void c_FileMgr::ResetSdCard()
     SPI.endTransaction();
     digitalWrite(cs_pin, HIGH);
 
-    // DEBUG_END;
+    // DEBUG__END;
 } // ResetSdCard
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::DeleteFlashFile (const String& FileName)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     LittleFS.remove (FileName);
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // DeleteConfigFile
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 {
-    // DEBUG_START;
+    // DEBUG__START;
     do // once
     {
         logcon (String (F ("Listing directory: ")) + dirname);
@@ -613,7 +613,7 @@ void c_FileMgr::listDir (fs::FS& fs, String dirname, uint8_t levels)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Handler)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     bool retval = false;
 
@@ -621,7 +621,7 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
     {
         String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
 
-        // DEBUG_V ("allocate the JSON Doc");
+        // DEBUG__V ("allocate the JSON Doc");
 /*
         String RawFileData;
         if (false == ReadConfigFile (FileName, RawFileData))
@@ -631,9 +631,9 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
         }
         logcon(RawFileData);
 */
-        // DEBUG_V();
+        // DEBUG__V();
         fs::File file = LittleFS.open (FileName.c_str (), "r");
-        // DEBUG_V();
+        // DEBUG__V();
         if (!file)
         {
             if (!IsBooting)
@@ -645,36 +645,34 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
 
         JsonDocument jsonDoc;
 
-        // DEBUG_V ("Convert File to JSON document");
+        // DEBUG__V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (jsonDoc, file);
         file.close ();
 
-        // DEBUG_V ("Error Check");
+        // DEBUG__V ("Error Check");
         if (error)
         {
             // logcon (CN_Heap_colon + String (ESP.getMaxFreeBlockSize ()));
             logcon (String(CN_stars) + CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str () + CN_stars);
             // logcon (CN_plussigns + RawFileData + CN_minussigns);
-	        // DEBUG_V (String ("                heap: ") + String (ESP.getFreeHeap ()));
-    	    /// DEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
-        	// DEBUG_V (String ("           file.size: ") + String (file.size ()));
-	        // DEBUG_V (String ("Expected JsonDocSize: ") + String (JsonDocSize));
-    	    // DEBUG_V (String ("    jsonDoc.capacity: ") + String (jsonDoc.capacity ()));
+	        // DEBUG__V (String ("                heap: ") + String (ESP.getFreeHeap ()));
+    	    //  xDEBUG_V (String (" getMaxFreeBlockSize: ") + String (ESP.getMaxFreeBlockSize ()));
+        	// xDEBUG_V (String ("           file.size: ") + String (file.size ()));
             break;
         }
 
-        // DEBUG_V ();
+        // DEBUG__V ();
         logcon (CfgFileMessagePrefix + String (F ("loaded.")));
 
-        // DEBUG_V ();
+        // DEBUG__V ();
         Handler (jsonDoc);
 
-        // DEBUG_V();
+        // DEBUG__V();
         retval = true;
 
     } while (false);
 
-    // DEBUG_END;
+    // DEBUG__END;
     return retval;
 
 } // LoadConfigFile
@@ -682,22 +680,22 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SaveFlashFile (const String& FileName, String& FileData)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     bool Response = SaveFlashFile (FileName, FileData.c_str ());
 
-    // DEBUG_END;
+    // DEBUG__END;
     return Response;
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SaveFlashFile (const String& FileName, const char * FileData)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     bool Response = false;
     String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
-    // DEBUG_V (FileData);
+    // DEBUG__V (FileData);
 
     fs::File file = LittleFS.open (FileName.c_str (), "w");
     if (!file)
@@ -717,27 +715,27 @@ bool c_FileMgr::SaveFlashFile (const String& FileName, const char * FileData)
         Response = true;
     }
 
-    // DEBUG_END;
+    // DEBUG__END;
     return Response;
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
 {
-    // DEBUG_START;
+    // DEBUG__START;
     bool Response = false;
 
     String CfgFileMessagePrefix = String(CN_Configuration_File_colon) + "'" + FileName + "' ";
-    // DEBUG_V(String("CfgFileMessagePrefix: ") + CfgFileMessagePrefix);
+    // DEBUG__V(String("CfgFileMessagePrefix: ") + CfgFileMessagePrefix);
 
     // serializeJson(FileData, LOG_PORT);
-    // DEBUG_V("");
+    // DEBUG__V("");
 
     // delay(100);
-    // DEBUG_V("");
+    // DEBUG__V("");
 
     fs::File file = LittleFS.open(FileName.c_str(), "w");
-    // DEBUG_V("");
+    // DEBUG__V("");
 
     if (!file)
     {
@@ -745,12 +743,12 @@ bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
     }
     else
     {
-        // DEBUG_V("");
+        // DEBUG__V("");
         file.seek(0, SeekSet);
-        // DEBUG_V("");
+        // DEBUG__V("");
 
         size_t NumBytesSaved = serializeJson(FileData, file);
-        // DEBUG_V("");
+        // DEBUG__V("");
 
         file.close();
 
@@ -759,7 +757,7 @@ bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
         Response = true;
     }
 
-    // DEBUG_END;
+    // DEBUG__END;
 
     return Response;
 } // SaveConfigFile
@@ -767,15 +765,15 @@ bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SaveFlashFile(const String FileName, uint32_t index, uint8_t *data, uint32_t len, bool final)
 {
-    // DEBUG_START;
+    // DEBUG__START;
     bool Response = false;
 
     String CfgFileMessagePrefix = String(CN_Configuration_File_colon) + "'" + FileName + "' ";
-    // DEBUG_V(String("CfgFileMessagePrefix: ") + CfgFileMessagePrefix);
-    // DEBUG_V(String("            FileName: ") + FileName);
-    // DEBUG_V(String("               index: ") + String(index));
-    // DEBUG_V(String("                 len: ") + String(len));
-    // DEBUG_V(String("               final: ") + String(final));
+    // DEBUG__V(String("CfgFileMessagePrefix: ") + CfgFileMessagePrefix);
+    // DEBUG__V(String("            FileName: ") + FileName);
+    // DEBUG__V(String("               index: ") + String(index));
+    // DEBUG__V(String("                 len: ") + String(len));
+    // DEBUG__V(String("               final: ") + String(final));
 
     fs::File file;
 
@@ -787,7 +785,7 @@ bool c_FileMgr::SaveFlashFile(const String FileName, uint32_t index, uint8_t *da
     {
         file = LittleFS.open(FileName.c_str(), "a");
     }
-    // DEBUG_V("");
+    // DEBUG__V("");
 
     if (!file)
     {
@@ -795,12 +793,12 @@ bool c_FileMgr::SaveFlashFile(const String FileName, uint32_t index, uint8_t *da
     }
     else
     {
-        // DEBUG_V("");
+        // DEBUG__V("");
         file.seek(int(index), SeekMode::SeekSet);
-        // DEBUG_V("");
+        // DEBUG__V("");
 
         size_t NumBytesSaved = file.write(data, size_t(len));
-        // DEBUG_V("");
+        // DEBUG__V("");
 
         file.close();
 
@@ -809,7 +807,7 @@ bool c_FileMgr::SaveFlashFile(const String FileName, uint32_t index, uint8_t *da
         Response = true;
     }
 
-    // DEBUG_END;
+    // DEBUG__END;
 
     return Response;
 } // SaveConfigFile
@@ -817,39 +815,39 @@ bool c_FileMgr::SaveFlashFile(const String FileName, uint32_t index, uint8_t *da
 //-----------------------------------------------------------------------------
 bool c_FileMgr::ReadFlashFile (const String& FileName, String& FileData)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     bool GotFileData = false;
     String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
 
-    // DEBUG_V (String("File '") + FileName + "' is being opened.");
+    // DEBUG__V (String("File '") + FileName + "' is being opened.");
     fs::File file = LittleFS.open (FileName.c_str (), CN_r);
     if (file)
     {
         // Suppress this for now, may add it back later
         //logcon (CfgFileMessagePrefix + String (F ("reading ")) + String (file.size()) + F (" bytes."));
 
-        // DEBUG_V (String("File '") + FileName + "' is open.");
+        // DEBUG__V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
         FileData = file.readString ();
         file.close ();
         GotFileData = true;
 
-        // DEBUG_V (FileData);
+        // DEBUG__V (FileData);
     }
     else
     {
         logcon (String (CN_stars) + CN_Configuration_File_colon + "'" + FileName + F ("' not found.") + CN_stars);
     }
 
-    // DEBUG_END;
+    // DEBUG__END;
     return GotFileData;
 } // ReadConfigFile
 
 //-----------------------------------------------------------------------------
 bool c_FileMgr::ReadFlashFile (const String& FileName, JsonDocument & FileData)
 {
-    // DEBUG_START;
+    // DEBUG__START;
     bool GotFileData = false;
 
     do // once
@@ -857,23 +855,23 @@ bool c_FileMgr::ReadFlashFile (const String& FileName, JsonDocument & FileData)
         String RawFileData;
         if (false == ReadFlashFile (FileName, RawFileData))
         {
-            // DEBUG_V ("Failed to read file");
+            // DEBUG__V ("Failed to read file");
             break;
         }
 
         // did we actually get any data
         if (0 == RawFileData.length ())
         {
-            // DEBUG_V ("File is empty");
+            // DEBUG__V ("File is empty");
             // nope, no data
             GotFileData = false;
             break;
         }
 
-        // DEBUG_V ("Convert File to JSON document");
+        // DEBUG__V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (FileData, (const String)RawFileData);
 
-        // DEBUG_V ("Error Check");
+        // DEBUG__V ("Error Check");
         if (error)
         {
             String CfgFileMessagePrefix = String (CN_Configuration_File_colon) + "'" + FileName + "' ";
@@ -883,12 +881,12 @@ bool c_FileMgr::ReadFlashFile (const String& FileName, JsonDocument & FileData)
             break;
         }
 
-        // DEBUG_V ("Got config data");
+        // DEBUG__V ("Got config data");
         GotFileData = true;
 
     } while (false);
 
-    // DEBUG_END;
+    // DEBUG__END;
     return GotFileData;
 
 } // ReadConfigFile
@@ -901,7 +899,7 @@ bool c_FileMgr::ReadFlashFile (const String & FileName, byte * FileData, size_t 
 
     do // once
     {
-        // DEBUG_V (String("File '") + FileName + "' is being opened.");
+        // DEBUG__V (String("File '") + FileName + "' is being opened.");
         fs::File file = LittleFS.open (FileName.c_str (), CN_r);
         if (!file)
         {
@@ -923,14 +921,14 @@ bool c_FileMgr::ReadFlashFile (const String & FileName, byte * FileData, size_t 
         // LOG_PORT.print   (file.size ());
         // LOG_PORT.println (" bytes.");
 
-        // DEBUG_V (String("File '") + FileName + "' is open.");
+        // DEBUG__V (String("File '") + FileName + "' is open.");
         file.seek (0, SeekSet);
         file.read (FileData, file.size());
         file.close ();
 
         GotFileData = true;
 
-        /// DEBUG_V (FileData);
+        // DEBUG_V (FileData);
 
     } while (false);
 
@@ -951,7 +949,7 @@ bool c_FileMgr::FlashFileExists (const String & FileName)
 //-----------------------------------------------------------------------------
 void c_FileMgr::InitSdFileList ()
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     int index = 0;
     for (auto& currentFileListEntry : FileList)
@@ -960,24 +958,24 @@ void c_FileMgr::InitSdFileList ()
         currentFileListEntry.entryId = index++;
     }
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // InitFileList
 
 //-----------------------------------------------------------------------------
 int c_FileMgr::FileListFindSdFileHandle (FileId HandleToFind)
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     int response = -1;
-    // DEBUG_V (String ("HandleToFind: ") + String (HandleToFind));
+    // DEBUG__V (String ("HandleToFind: ") + String (HandleToFind));
 
     if(INVALID_FILE_HANDLE != HandleToFind)
     {
         for (auto & currentFileListEntry : FileList)
         {
-            // DEBUG_V (String ("currentFileListEntry.handle: ")  + String (currentFileListEntry.handle));
-            // DEBUG_V (String ("currentFileListEntry.entryId: ") + String (currentFileListEntry.entryId));
+            // DEBUG__V (String ("currentFileListEntry.handle: ")  + String (currentFileListEntry.handle));
+            // DEBUG__V (String ("currentFileListEntry.entryId: ") + String (currentFileListEntry.entryId));
 
             if (currentFileListEntry.handle == HandleToFind)
             {
@@ -987,7 +985,7 @@ int c_FileMgr::FileListFindSdFileHandle (FileId HandleToFind)
         }
     }
 
-    // DEBUG_END;
+    // DEBUG__END;
 
     return response;
 } // FileListFindSdFileHandle
@@ -995,7 +993,7 @@ int c_FileMgr::FileListFindSdFileHandle (FileId HandleToFind)
 //-----------------------------------------------------------------------------
 c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
 {
-    // DEBUG_START;
+    // DEBUG__START;
 
     FileId response = INVALID_FILE_HANDLE;
     FileId FileHandle = millis ();
@@ -1013,7 +1011,7 @@ c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
         {
             currentFileListEntry.handle = FileHandle;
             response = FileHandle;
-            // DEBUG_V(String("handle: ") + currentFileListEntry.handle);
+            // DEBUG__V(String("handle: ") + currentFileListEntry.handle);
             break;
         }
     }
@@ -1022,29 +1020,31 @@ c_FileMgr::FileId c_FileMgr::CreateSdFileHandle ()
     {
         logcon (String (CN_stars) + F (" Could not allocate another file handle ") + CN_stars);
     }
-    // DEBUG_V (String ("FileHandle: ") + String (FileHandle));
+    // DEBUG__V (String ("FileHandle: ") + String (FileHandle));
 
-    // DEBUG_END;
+    // DEBUG__END;
 
     return response;
 } // CreateFileHandle
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::DeleteSdFile (const String & FileName, bool LockStatus)
+void c_FileMgr::DeleteSdFile (const String & FileName)
 {
     // DEBUG_START;
-    LockSd(LockStatus);
-
-    if (ESP_SD.exists (FileName))
+    LockSd();
+    bool FileExists = ESP_SD.exists (FileName);
+    UnLockSd();
+    if (FileExists)
     {
         // DEBUG_V (String ("Deleting '") + FileName + "'");
+        LockSd();
         ESP_SD.remove (FileName);
+        UnLockSd();
         if(!FileName.equals(FSEQFILELIST))
         {
-            BuildFseqList(true, false);
+            BuildFseqList(true);
         }
     }
-    UnLockSd(LockStatus);
 
     // DEBUG_END;
 
@@ -1057,28 +1057,28 @@ void c_FileMgr::DescribeSdCardToUser ()
 
     logcon (String (F ("SD Card Size: ")) + int64String (SdCardSizeMB) + "MB");
 /*
-    // DEBUG_V("Open Root");
+    // DEBUG__V("Open Root");
     FsFile root;
     ESP_SD.chdir();
     root.open("/", O_READ);
     printDirectory (root, 0);
     root.close();
-    // DEBUG_V("Close Root");
+    // DEBUG__V("Close Root");
 */
     // DEBUG_END;
 
 } // DescribeSdCardToUser
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response, bool LockStatus)
+void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response)
 {
     // DEBUG_START;
-    LockSd(LockStatus);
 
     char entryName[256];
     FsFile Entry;
 
     Response.clear();
+    LockSd();
     do // once
     {
         if (false == SdCardIsInstalled ())
@@ -1124,7 +1124,7 @@ void c_FileMgr::GetListOfSdFiles (std::vector<String> & Response, bool LockStatu
 
         dir.close();
     } while (false);
-    UnLockSd(LockStatus);
+    UnLockSd();
 
     // DEBUG_END;
 } // GetListOfSdFiles
@@ -1171,48 +1171,45 @@ void c_FileMgr::printDirectory (FsFile & dir, int numTabs)
 } // printDirectory
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::SaveSdFile (const String & FileName, String & FileData, bool LockStatus)
+void c_FileMgr::SaveSdFile (const String & FileName, String & FileData)
 {
     // DEBUG_START;
-    LockSd(LockStatus);
 
     do // once
     {
         FileId FileHandle = INVALID_FILE_HANDLE;
-        if (false == OpenSdFile (FileName, FileMode::FileWrite, FileHandle, -1, true))
+        if (false == OpenSdFile (FileName, FileMode::FileWrite, FileHandle, -1))
         {
             logcon (String (F ("Could not open '")) + FileName + F ("' for writting."));
             break;
         }
 
-        int WriteCount = WriteSdFile (FileHandle, (byte*)FileData.c_str (), (size_t)FileData.length (), true);
+        int WriteCount = WriteSdFile (FileHandle, (byte*)FileData.c_str (), (uint64_t)FileData.length ());
         logcon (String (F ("Wrote '")) + FileName + F ("' ") + String(WriteCount));
 
-        CloseSdFile (FileHandle, true);
+        CloseSdFile (FileHandle);
 
     } while (false);
 
     // DEBUG_END;
-    UnLockSd(LockStatus);
 
 } // SaveSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::SaveSdFile (const String & FileName, JsonVariant & FileData, bool LockStatus)
-{
-    String Temp;
-    serializeJson (FileData, Temp);
-    SaveSdFile (FileName, Temp, false);
-
-} // SaveSdFile
-
-//-----------------------------------------------------------------------------
-bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & FileHandle, int FileListIndex, bool LockStatus)
+void c_FileMgr::SaveSdFile (const String & FileName, JsonVariant & FileData)
 {
     // DEBUG_START;
+    String Temp;
+    serializeJson (FileData, Temp);
+    SaveSdFile (FileName, Temp);
+    // DEBUG_END;
+} // SaveSdFile
 
+//-----------------------------------------------------------------------------
+bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & FileHandle, int FileListIndex)
+{
+    // DEBUG_START;
     // DEBUG_V(String("Mode: ") + String(Mode));
-    LockSd(LockStatus);
 
     bool FileIsOpen = false;
 
@@ -1262,30 +1259,35 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
             // DEBUG_V(String("Valid FileListIndex: ") + String(FileListIndex));
             FileList[FileListIndex].Filename = FileName;
             // DEBUG_V(String("Got file handle: ") + String(FileHandle));
+            LockSd();
             FileList[FileListIndex].IsOpen = FileList[FileListIndex].fsFile.open(FileList[FileListIndex].Filename.c_str(), XlateFileMode[Mode]);
+            UnLockSd();
 
             // DEBUG_V(String("ReadWrite: ") + String(XlateFileMode[Mode]));
-            // DEBUG_V(String("File Size: ") + String64(FileList[FileListIndex].fsFile.size()));
+            // xDEBUG_V(String("File Size: ") + String64(FileList[FileListIndex].fsFile.size()));
             FileList[FileListIndex].mode = Mode;
-            FileList[FileListIndex].Paused = false;
 
             // DEBUG_V("Open return");
             if (!FileList[FileListIndex].IsOpen)
             {
                 logcon(String(F("ERROR: Could not open '")) + FileName + F("'."));
                 // release the file list entry
-                CloseSdFile(FileHandle, true);
+                CloseSdFile(FileHandle);
                 break;
             }
             // DEBUG_V("");
 
+            LockSd();
             FileList[FileListIndex].size = FileList[FileListIndex].fsFile.size();
-            // DEBUG_V(String(FileList[FileListIndex].info.name()) + " - " + String(FileList[FileListIndex].size));
+            UnLockSd();
+            // DEBUG_V(String(FileList[FileListIndex].Filename) + " - " + String(FileList[FileListIndex].size));
 
             if (FileMode::FileWrite == Mode)
             {
                 // DEBUG_V ("Write Mode");
+                LockSd();
                 FileList[FileListIndex].fsFile.seek (0);
+                UnLockSd();
             }
             // DEBUG_V ();
 
@@ -1299,47 +1301,42 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
 
     } while (false);
 
-    UnLockSd(LockStatus);
-
     // DEBUG_END;
     return FileIsOpen;
 
 } // OpenSdFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData, bool LockStatus)
+bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData)
 {
     // DEBUG_START;
-    LockSd(LockStatus);
 
    bool GotFileData = false;
     FileId FileHandle = INVALID_FILE_HANDLE;
 
     // DEBUG_V (String("File '") + FileName + "' is being opened.");
-    if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle, -1, true))
+    if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle, -1))
     {
         // DEBUG_V (String("File '") + FileName + "' is open.");
         int FileListIndex;
         if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
-            LockSd(LockStatus);
+            LockSd();
             FileList[FileListIndex].fsFile.seek (0);
             FileData = FileList[FileListIndex].fsFile.readString ();
-            UnLockSd(LockStatus);
+            UnLockSd();
         }
 
-        CloseSdFile (FileHandle, true);
+        CloseSdFile (FileHandle);
         GotFileData = (0 != FileData.length());
 
         // DEBUG_V (FileData);
     }
     else
     {
-        CloseSdFile (FileHandle, true);
+        CloseSdFile (FileHandle);
         logcon (String (F ("SD file: '")) + FileName + String (F ("' not found.")));
     }
-
-    UnLockSd(LockStatus);
 
     // DEBUG_END;
     return GotFileData;
@@ -1347,25 +1344,24 @@ bool c_FileMgr::ReadSdFile (const String & FileName, String & FileData, bool Loc
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData, bool LockStatus)
+bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData)
 {
     // DEBUG_START;
 
     bool GotFileData = false;
     FileId FileHandle = INVALID_FILE_HANDLE;
-    LockSd(LockStatus);
 
     // DEBUG_V (String("File '") + FileName + "' is being opened.");
-    if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle, -1, true))
+    if (true == OpenSdFile (FileName, FileMode::FileRead, FileHandle, -1))
     {
         // DEBUG_V (String("File '") + FileName + "' is open.");
         int FileListIndex;
         if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
-            LockSd(LockStatus);
+            LockSd();
             FileList[FileListIndex].fsFile.seek (0);
             String RawFileData = FileList[FileListIndex].fsFile.readString ();
-            UnLockSd(LockStatus);
+            UnLockSd();
 
             // DEBUG_V ("Convert File to JSON document");
             DeserializationError error = deserializeJson (FileData, RawFileData);
@@ -1383,133 +1379,68 @@ bool c_FileMgr::ReadSdFile (const String & FileName, JsonDocument & FileData, bo
                 GotFileData = true;
             }
         }
-        CloseSdFile(FileHandle, true);
+        CloseSdFile(FileHandle);
     }
     else
     {
         logcon (String (F ("SD file: '")) + FileName + String (F ("' not found.")));
     }
 
-    UnLockSd(LockStatus);
-
     // DEBUG_END;
     return GotFileData;
 
 } // ReadSdFile
 
-#ifdef DEBUG_SD_READS
-	size_t LastStartingPosition = 0;
-	size_t NextExpectedStartingPosition = 0;
-#endif // def DEBUG_SD_READS
-
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToRead, size_t StartingPosition, bool LockStatus)
+uint64_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, uint64_t NumBytesToRead, uint64_t StartingPosition)
 {
     // DEBUG_START;
-    LockSd(LockStatus);
 
-    size_t response = 0;
+    uint64_t response = 0;
 
     // DEBUG_V (String ("       FileHandle: ") + String (FileHandle));
     // DEBUG_V (String ("   NumBytesToRead: ") + String (NumBytesToRead));
     // DEBUG_V (String (" StartingPosition: ") + String (StartingPosition));
-#ifdef DEBUG_SD_READS
-    if(StartingPosition < NextExpectedStartingPosition)
-    {
-        DEBUG_V("Unexpected Start Position");
-        DEBUG_V (String ("NextExpectedStartingPosition: ") + String (NextExpectedStartingPosition));
-        DEBUG_V (String ("     Actual StartingPosition: ") + String (StartingPosition));
-    }
-    NextExpectedStartingPosition = StartingPosition + NumBytesToRead;
-    if(StartingPosition <= LastStartingPosition)
-    {
-        DEBUG_V("Unexpected Start Position");
-        DEBUG_V (String ("   LastStartingPosition: ") + String (LastStartingPosition));
-        DEBUG_V (String ("Actual StartingPosition: ") + String (StartingPosition));
-    }
-    LastStartingPosition = StartingPosition;
-#endif // def DEBUG_SD_READS
 
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        size_t BytesRemaining = size_t(FileList[FileListIndex].size - StartingPosition);
-        size_t ActualBytesToRead = min(NumBytesToRead, BytesRemaining);
+        uint64_t BytesRemaining = uint64_t(FileList[FileListIndex].size - StartingPosition);
+        uint64_t ActualBytesToRead = min(NumBytesToRead, BytesRemaining);
         // DEBUG_V(String("   BytesRemaining: ") + String(BytesRemaining));
         // DEBUG_V(String("ActualBytesToRead: ") + String(ActualBytesToRead));
-        if(!FileList[FileListIndex].fsFile.seek(StartingPosition))
-        {
-            logcon(F("ERROR: SD Card: Could not set file read start position"));
-        }
-        else
-        {
-            response = ReadSdFile(FileHandle, FileData, ActualBytesToRead, true);
-            // DEBUG_V(String("         response: ") + String(response));
-        }
+        LockSd();
+        FileList[FileListIndex].fsFile.seek(StartingPosition);
+        response = FileList[FileListIndex].fsFile.readBytes(FileData, ActualBytesToRead);
+        UnLockSd();
+        // DEBUG_V(String("         response: ") + String64(response));
     }
     else
     {
         logcon (String (F ("ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
-    UnLockSd(LockStatus);
     // DEBUG_END;
     return response;
 
 } // ReadSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToRead, bool LockStatus)
-{
-    // DEBUG_START;
-    LockSd(LockStatus);
-
-    // DEBUG_V (String ("       FileHandle: ") + String (FileHandle));
-    // DEBUG_V (String ("   numBytesToRead: ") + String (NumBytesToRead));
-
-    size_t response = 0;
-    int FileListIndex;
-    if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
-    {
-        // DEBUG_V(String("   NumBytesToRead: ") + String(NumBytesToRead));
-        response = FileList[FileListIndex].fsFile.readBytes(((char *)FileData), NumBytesToRead);
-        // DEBUG_V(String("         response: ") + String(response));
-    }
-    else
-    {
-        logcon (String (F ("ReadSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
-    }
-
-    UnLockSd(LockStatus);
-    // DEBUG_END;
-    return response;
-
-} // ReadSdFile
-
-//-----------------------------------------------------------------------------
-void c_FileMgr::CloseSdFile (FileId& FileHandle, bool LockStatus)
+void c_FileMgr::CloseSdFile (FileId& FileHandle)
 {
     // DEBUG_START;
     // DEBUG_V(String("      FileHandle: ") + String(FileHandle));
-    LockSd(LockStatus);
 
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
-        if(!FileList[FileListIndex].Paused)
-        {
-            // DEBUG_V("Close the file");
-            delay(10);
-            FileList[FileListIndex].fsFile.close ();
-        }
-        else
-        {
-            // DEBUG_V("File is paused. Not closing");
-        }
+        // DEBUG_V("Close the file");
+        LockSd();
+        FileList[FileListIndex].fsFile.close ();
+        UnLockSd();
 
         FileList[FileListIndex].IsOpen = false;
         FileList[FileListIndex].handle = INVALID_FILE_HANDLE;
-        FileList[FileListIndex].Paused = false;
 
         if (nullptr != FileList[FileListIndex].buffer.DataBuffer)
         {
@@ -1530,18 +1461,16 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle, bool LockStatus)
 
     FileHandle = INVALID_FILE_HANDLE;
 
-    UnLockSd(LockStatus);
     // DEBUG_END;
 
 } // CloseSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToWrite, bool LockStatus)
+uint64_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, uint64_t NumBytesToWrite)
 {
     // DEBUG_START;
-    LockSd(LockStatus);
 
-    size_t NumBytesWritten = 0;
+    uint64_t NumBytesWritten = 0;
     do // once
     {
         int FileListIndex;
@@ -1555,8 +1484,10 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
 
         delay(10);
         FeedWDT();
+        LockSd();
         NumBytesWritten = FileList[FileListIndex].fsFile.write(FileData, NumBytesToWrite);
         FileList[FileListIndex].fsFile.flush();
+        UnLockSd();
         FeedWDT();
         delay(10);
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
@@ -1570,7 +1501,6 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
         }
     } while(false);
 
-    UnLockSd(LockStatus);
     // DEBUG_END;
     return NumBytesWritten;
 
@@ -1581,30 +1511,21 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
     Specialized function that buffers data until the buffer is
     full and then writes out the buffer as a single operation.
 */
-size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size_t NumBytesInSourceBuffer, bool LockStatus)
+uint64_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, uint64_t NumBytesInSourceBuffer)
 {
     // DEBUG_START;
-    LockSd(LockStatus);
 
-    size_t NumBytesWrittenToDestBuffer = 0;
+    uint64_t NumBytesWrittenToDestBuffer = 0;
     bool ForceWriteToSD = (0 == NumBytesInSourceBuffer);
     do // once
     {
         int FileListIndex;
-        // DEBUG_V (String("NumBytesToWrite: ") + String(NumBytesToWrite));
+        // DEBUG_V (String("NumBytesInSourceBuffer: ") + String(NumBytesInSourceBuffer));
         if (-1 == (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
             logcon (String (F ("WriteSdFileBuf::ERROR::Invalid File Handle: ")) + String (FileHandle));
             break;
         }
-#ifdef ARDUINO_ARCH_ESP32x
-        if (nullptr == FileList[FileListIndex].buffer.DataBuffer)
-        {
-            FileList[FileListIndex].buffer.DataBuffer = (byte *)malloc(DATABUFFERSIZE);
-            FileList[FileListIndex].buffer.size = DATABUFFERSIZE;
-            FileList[FileListIndex].buffer.offset = 0;
-        }
-#endif // defined (ARDUINO_ARCH_ESP32)
 
         // are we using a buffer in front of the SD card?
         if(nullptr == FileList[FileListIndex].buffer.DataBuffer)
@@ -1613,8 +1534,10 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
             FeedWDT();
 
             // DEBUG_V("Not using buffers");
+            LockSd();
             NumBytesWrittenToDestBuffer = FileList[FileListIndex].fsFile.write(FileData, NumBytesInSourceBuffer);
             FileList[FileListIndex].fsFile.flush();
+            UnLockSd();
 
             delay(20);
             FeedWDT();
@@ -1626,8 +1549,8 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
 
             while(NumBytesInSourceBuffer || ForceWriteToSD)
             {
-                size_t SpaceRemaining = FileList[FileListIndex].buffer.size - FileList[FileListIndex].buffer.offset;
-                size_t NumBytesToWrite = min(SpaceRemaining, NumBytesInSourceBuffer);
+                uint64_t SpaceRemaining = FileList[FileListIndex].buffer.size - FileList[FileListIndex].buffer.offset;
+                uint64_t NumBytesToWrite = min(SpaceRemaining, NumBytesInSourceBuffer);
                 // DEBUG_V(String("             SpaceRemaining: ") + String(SpaceRemaining));
                 // DEBUG_V(String("            NumBytesToWrite: ") + String(NumBytesToWrite));
 
@@ -1647,8 +1570,10 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
                     // delay(20);
                     // DEBUG_V(String("       BytesToBeWrittenToSD: ") + String(FileList[FileListIndex].buffer.offset));
                     FeedWDT();
-                    size_t WroteToSdSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
+                    LockSd();
+                    uint64_t WroteToSdSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
                     FileList[FileListIndex].fsFile.flush();
+                    UnLockSd();
                     delay(30);
                     FeedWDT();
                     // DEBUG_V(String("              WroteToSdSize: ") + String(WroteToSdSize));
@@ -1671,23 +1596,23 @@ size_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, size
 
     } while(false);
 
-    UnLockSd(LockStatus);
     // DEBUG_END;
     return NumBytesWrittenToDestBuffer;
 
 } // WriteSdFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t NumBytesToWrite, size_t StartingPosition, bool LockStatus)
+uint64_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, uint64_t NumBytesToWrite, uint64_t StartingPosition)
 {
-    LockSd(LockStatus);
-    size_t response = 0;
+    uint64_t response = 0;
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
+        LockSd();
         FileList[FileListIndex].fsFile.seek (StartingPosition);
+        LockSd();
         response = WriteSdFile (FileHandle, FileData, NumBytesToWrite, true);
     }
     else
@@ -1695,43 +1620,42 @@ size_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, size_t 
         logcon (String (F ("WriteSdFile::ERROR::Invalid File Handle: ")) + String (FileHandle));
     }
 
-    UnLockSd(LockStatus);
     return response;
 
 } // WriteSdFile
 
 //-----------------------------------------------------------------------------
-uint64_t c_FileMgr::GetSdFileSize (const String& FileName, bool LockStatus)
+uint64_t c_FileMgr::GetSdFileSize (const String& FileName)
 {
-    LockSd(LockStatus);
+    // DEBUG_START;
     uint64_t response = 0;
     FileId Handle = INVALID_FILE_HANDLE;
-    if(OpenSdFile (FileName,   FileMode::FileRead, Handle, -1, true))
+    if(OpenSdFile (FileName,   FileMode::FileRead, Handle, -1))
     {
-        response = GetSdFileSize(Handle, true);
-        CloseSdFile(Handle, true);
+        response = GetSdFileSize(Handle);
+        CloseSdFile(Handle);
     }
     else
     {
         logcon(String(F("Could not open '")) + FileName + F("' to check size."));
     }
-
-    UnLockSd(LockStatus);
+    // DEBUG_END;
     return response;
 
 } // GetSdFileSize
 
 //-----------------------------------------------------------------------------
-uint64_t c_FileMgr::GetSdFileSize (const FileId& FileHandle, bool LockStatus)
+uint64_t c_FileMgr::GetSdFileSize (const FileId& FileHandle)
 {
     // DEBUG_START;
 
-    LockSd(LockStatus);
     uint64_t response = 0;
     int FileListIndex;
     if (-1 != (FileListIndex = FileListFindSdFileHandle (FileHandle)))
     {
+        LockSd();
         response = FileList[FileListIndex].fsFile.size ();
+        UnLockSd();
     }
     else
     {
@@ -1739,7 +1663,6 @@ uint64_t c_FileMgr::GetSdFileSize (const FileId& FileHandle, bool LockStatus)
     }
     // DEBUG_V(String("response: ") + String(response));
 
-    UnLockSd(LockStatus);
     // DEBUG_END;
     return response;
 
@@ -1752,6 +1675,7 @@ void c_FileMgr::RenameSdFile(String & OldName, String & NewName)
     // DEBUG_V(String("OldName: '") + OldName + "'");
     // DEBUG_V(String("NewName: '") + NewName + "'");
 
+    LockSd();
     // only do this in the root dir
     ESP_SD.chdir();
     // rename does not work if the target already exists
@@ -1760,16 +1684,15 @@ void c_FileMgr::RenameSdFile(String & OldName, String & NewName)
     {
         logcon(String(CN_stars) + F("Could not rename '") + OldName + F("' to '") + NewName + F("'") + CN_stars);
     }
-
+    UnLockSd();
     // DEBUG_END;
 } // RenameSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
+void c_FileMgr::BuildFseqList(bool DisplayFileNames)
 {
     // DEBUG_START;
     char entryName [256];
-    LockSd(LockStatus);
 
     do // once
     {
@@ -1781,22 +1704,26 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
 
         FeedWDT();
 
+        LockSd();
         FsFile InputFile;
         ESP_SD.chdir(); // Set to sd root
         if(!InputFile.open ("/", O_READ))
         {
+            UnLockSd();
             logcon(F("ERROR: Could not open SD card for Reading FSEQ List."));
             break;
         }
 
         // open output file, erase old data
         ESP_SD.chdir(); // Set to sd root
-        DeleteSdFile(String(F(FSEQFILELIST)), true);
-
+        UnLockSd();
+        DeleteSdFile(String(F(FSEQFILELIST)));
+        LockSd();
         FsFile OutputFile;
         if(!OutputFile.open (String(F(FSEQFILELIST)).c_str(), O_WRITE | O_CREAT))
         {
             InputFile.close();
+            UnLockSd();
             logcon(F("ERROR: Could not open SD card for writting FSEQ List."));
             break;
         }
@@ -1829,9 +1756,9 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
             memset(entryName, 0x0, sizeof(entryName));
             CurrentEntry.getName (entryName, sizeof(entryName)-1);
             String EntryName = String (entryName);
-            // DEBUG_V (         "EntryName: " + EntryName);
-            // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
-            // DEBUG_V ("      entry.size(): " + int64String(CurrentEntry.size ()));
+            // DEBUG__V (         "EntryName: " + EntryName);
+            // DEBUG__V ("EntryName.length(): " + String(EntryName.length ()));
+            // DEBUG__V ("      entry.size(): " + int64String(CurrentEntry.size ()));
 
             if ((!EntryName.isEmpty ()) &&
 //                (!EntryName.equals(String (F ("System Volume Information")))) &&
@@ -1851,7 +1778,7 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
                 // do we need to add a separator?
                 if(numFiles)
                 {
-                    // DEBUG_V("Adding trailing comma");
+                    // DEBUG__V("Adding trailing comma");
                     OutputFile.print(",");
                     // LOG_PORT.print(",");
                 }
@@ -1866,15 +1793,15 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
                 uint16_t Date;
                 uint16_t Time;
                 CurrentEntry.getCreateDateTime (&Date, &Time);
-                // DEBUG_V(String("Date: ") + String(Date));
-                // DEBUG_V(String("Year: ") + String(FS_YEAR(Date)));
-                // DEBUG_V(String("Day: ") + String(FS_DAY(Date)));
-                // DEBUG_V(String("Month: ") + String(FS_MONTH(Date)));
+                // DEBUG__V(String("Date: ") + String(Date));
+                // DEBUG__V(String("Year: ") + String(FS_YEAR(Date)));
+                // DEBUG__V(String("Day: ") + String(FS_DAY(Date)));
+                // DEBUG__V(String("Month: ") + String(FS_MONTH(Date)));
 
-                // DEBUG_V(String("Time: ") + String(Time));
-                // DEBUG_V(String("Hours: ") + String(FS_HOUR(Time)));
-                // DEBUG_V(String("Minutes: ") + String(FS_MINUTE(Time)));
-                // DEBUG_V(String("Seconds: ") + String(FS_SECOND(Time)));
+                // DEBUG__V(String("Time: ") + String(Time));
+                // DEBUG__V(String("Hours: ") + String(FS_HOUR(Time)));
+                // DEBUG__V(String("Minutes: ") + String(FS_MINUTE(Time)));
+                // DEBUG__V(String("Seconds: ") + String(FS_SECOND(Time)));
 
                 tmElements_t tm;
                 tm.Year = FS_YEAR(Date) - 1970;
@@ -1884,7 +1811,7 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
                 tm.Minute = FS_MINUTE(Time);
                 tm.Second = FS_SECOND(Time);
 
-                // DEBUG_V(String("tm: ") + String(time_t(makeTime(tm))));
+                // DEBUG__V(String("tm: ") + String(time_t(makeTime(tm))));
 
                 OutputFile.print(String("{\"name\" : \"") + EntryName +
                                  "\",\"date\" : " + String(makeTime(tm)) +
@@ -1896,7 +1823,7 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
             }
             else
             {
-                // DEBUG_V("Skipping File");
+                // DEBUG__V("Skipping File");
             }
             CurrentEntry.close();
         } // end while true
@@ -1913,23 +1840,22 @@ void c_FileMgr::BuildFseqList(bool LockStatus, bool DisplayFileNames)
 
         OutputFile.close();
         InputFile.close();
+        UnLockSd();
     } while(false);
 
     // String Temp;
     // ReadSdFile(FSEQFILELIST, Temp);
-    // DEBUG_V(Temp);
-    UnLockSd(LockStatus);
+    // xDEBUG_V(Temp);
 
-    // DEBUG_END;
+    // DEBUG__END;
 
 } // BuildFseqList
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::FindFirstZipFile(String &FileName, bool LockStatus)
+void c_FileMgr::FindFirstZipFile(String &FileName)
 {
     // DEBUG_START;
     char entryName [256];
-    LockSd(LockStatus);
 
     do // once
     {
@@ -1940,11 +1866,12 @@ void c_FileMgr::FindFirstZipFile(String &FileName, bool LockStatus)
         }
 
         FeedWDT();
-
+        LockSd();
         FsFile InputFile;
         ESP_SD.chdir(); // Set to sd root
         if(!InputFile.open ("/", O_READ))
         {
+            UnLockSd();
             logcon(F("ERROR: Could not open SD card for Reading FSEQ List."));
             break;
         }
@@ -1955,12 +1882,12 @@ void c_FileMgr::FindFirstZipFile(String &FileName, bool LockStatus)
         FsFile CurrentEntry;
         while (CurrentEntry.openNext (&InputFile, O_READ))
         {
-            // DEBUG_V("Process a file entry");
+            // DEBUG__V("Process a file entry");
             FeedWDT();
 
             if(CurrentEntry.isDirectory() || CurrentEntry.isHidden())
             {
-                // DEBUG_V("Skip embedded directory and hidden files");
+                // DEBUG__V("Skip embedded directory and hidden files");
                 CurrentEntry.close();
                 continue;
             }
@@ -1968,9 +1895,9 @@ void c_FileMgr::FindFirstZipFile(String &FileName, bool LockStatus)
             memset(entryName, 0x0, sizeof(entryName));
             CurrentEntry.getName (entryName, sizeof(entryName)-1);
             String EntryName = String (entryName);
-            // DEBUG_V (         "EntryName: " + EntryName);
-            // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
-            // DEBUG_V ("      entry.size(): " + int64String(CurrentEntry.size ()));
+            // DEBUG__V (         "EntryName: " + EntryName);
+            // DEBUG__V ("EntryName.length(): " + String(EntryName.length ()));
+            // DEBUG__V ("      entry.size(): " + int64String(CurrentEntry.size ()));
 
             // is this a zipped file?
             if((-1 != EntryName.indexOf(F(".zip"))) ||
@@ -1984,15 +1911,14 @@ void c_FileMgr::FindFirstZipFile(String &FileName, bool LockStatus)
             }
             else
             {
-                // DEBUG_V("Skipping File");
+                // DEBUG__V("Skipping File");
             }
             CurrentEntry.close();
         } // end while true
 
         InputFile.close();
+        UnLockSd();
     } while(false);
-
-    UnLockSd(LockStatus);
 
     // DEBUG_END;
 
@@ -2033,17 +1959,17 @@ bool c_FileMgr::handleFileUpload (
             {
                 logcon (String(F("ERROR: Expected index: ")) + String(expectedIndex) + F(" does not match actual index: ") + String(index));
 
-                CloseSdFile(fsUploadFileHandle, false);
-                DeleteSdFile (fsUploadFileName, false);
+                CloseSdFile (fsUploadFileHandle);
+                DeleteSdFile (fsUploadFileName);
                 delay(100);
-                BuildFseqList(false, false);
+                BuildFseqList(false);
                 expectedIndex = 0;
                 fsUploadFileName = emptyString;
             }
             break;
         }
 
-        // DEBUG_V (String ("fsUploadFile: ") + String (fsUploadFile));
+        // DEBUG_V (String ("fsUploadFileName: ") + String (fsUploadFileName));
 
         // update the next expected chunk id
         expectedIndex = index + len;
@@ -2053,7 +1979,7 @@ bool c_FileMgr::handleFileUpload (
         {
             // Write data
             // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
-            bytesWritten = WriteSdFileBuf (fsUploadFileHandle, data, len, false);
+            bytesWritten = WriteSdFileBuf (fsUploadFileHandle, data, len);
             // DEBUG_V (String ("Writing bytes: ") + String (index));
             LOG_PORT.println(String("\033[Fprogress: ") + String(expectedIndex) + ", heap: " + String(ESP.getFreeHeap ()));
             LOG_PORT.flush();
@@ -2063,8 +1989,8 @@ bool c_FileMgr::handleFileUpload (
         if(len != bytesWritten)
         {
             // DEBUG_V("Write failed. Stop transfer");
-            CloseSdFile(fsUploadFileHandle, false);
-            DeleteSdFile (fsUploadFileName, false);
+            CloseSdFile(fsUploadFileHandle);
+            DeleteSdFile (fsUploadFileName);
             expectedIndex = 0;
             fsUploadFileName = emptyString;
             break;
@@ -2075,22 +2001,22 @@ bool c_FileMgr::handleFileUpload (
     if ((true == final) && (fsUploadFileHandle != INVALID_FILE_HANDLE))
     {
         // cause the remainder in the buffer to be written.
-        WriteSdFileBuf (fsUploadFileHandle, data, 0, false);
+        WriteSdFileBuf (fsUploadFileHandle, data, 0);
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
         FeedWDT();
-        CloseSdFile (fsUploadFileHandle, false);
+        CloseSdFile (fsUploadFileHandle);
 
         logcon (String (F ("Upload File: '")) + fsUploadFileName +
                 F ("' Done (") + String (uploadTime) +
                 F ("s). Received: ") + String(expectedIndex) +
                 F(" Bytes out of ") + String(totalLen) +
-                F(" bytes. FileLen: ") + GetSdFileSize(filename, false));
+                F(" bytes. FileLen: ") + GetSdFileSize(filename));
 
         FeedWDT();
         expectedIndex = 0;
 
         delay(100);
-        BuildFseqList(false, false);
+        BuildFseqList(false);
 
         // DEBUG_V(String("Expected: ") + String(totalLen));
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
@@ -2114,7 +2040,7 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
     if (0 != fsUploadFileName.length ())
     {
         logcon (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
-        CloseSdFile (fsUploadFileHandle, false);
+        CloseSdFile (fsUploadFileHandle);
         fsUploadFileName = "";
     }
 
@@ -2123,12 +2049,11 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 
     logcon (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Started")));
 
-    DeleteSdFile (fsUploadFileName, false);
+    DeleteSdFile (fsUploadFileName);
 
     // Open the file for writing
-    OpenSdFile (fsUploadFileName, FileMode::FileWrite, fsUploadFileHandle, -1 /*first access*/, false);
+    OpenSdFile (fsUploadFileName, FileMode::FileWrite, fsUploadFileHandle, -1 /*first access*/);
     int FileListIndex;
-    // DEBUG_V (String("NumBytesToWrite: ") + String(NumBytesToWrite));
     if (-1 == (FileListIndex = FileListFindSdFileHandle (fsUploadFileHandle)))
     {
         logcon (String (F ("WriteSdFileBuf::ERROR::Invalid File Handle: ")) + String (fsUploadFileHandle));
@@ -2147,21 +2072,21 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 } // handleFileUploadNewFile
 
 //-----------------------------------------------------------------------------
-size_t c_FileMgr::GetDefaultFseqFileList(uint8_t * buffer, size_t maxlen)
+uint64_t c_FileMgr::GetDefaultFseqFileList(uint8_t * buffer, uint64_t maxlen)
 {
     // DEBUG_START;
 
     memset(buffer, 0x0, maxlen);
     strcpy_P((char*)&buffer[0], DefaultFseqResponse);
 
-    // DEBUG_V(String("buffer: ") + String((char*)buffer));
+    // DEBUG__V(String("buffer: ") + String((char*)buffer));
     // DEBUG_END;
 
     return strlen((char*)&buffer[0]);
 } // GetDefaultFseqFileList
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SeekSdFile(const FileId & FileHandle, size_t position, SeekMode Mode)
+bool c_FileMgr::SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMode Mode)
 {
     // DEBUG_START;
 
@@ -2169,9 +2094,9 @@ bool c_FileMgr::SeekSdFile(const FileId & FileHandle, size_t position, SeekMode 
     // DEBUG_V(String("  position: ") + String(position));
     // DEBUG_V(String("      Mode: ") + String(uint32_t(Mode)));
 
-    uint64_t response = false;
+    bool response = false;
     int FileListIndex;
-
+    LockSd();
     do // once
     {
         if (-1 == (FileListIndex = FileListFindSdFileHandle (FileHandle)))
@@ -2206,6 +2131,7 @@ bool c_FileMgr::SeekSdFile(const FileId & FileHandle, size_t position, SeekMode 
             }
         } // end switch mode
     } while(false);
+    UnLockSd();
 
     // DEBUG_END;
     return response;
@@ -2213,38 +2139,28 @@ bool c_FileMgr::SeekSdFile(const FileId & FileHandle, size_t position, SeekMode 
 } // SeekSdFile
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::LockSd(bool CurrentLockState)
+void c_FileMgr::LockSd()
 {
     // DEBUG_START;
-
-    // DEBUG_V(String(" CurrentLockState: ") + CurrentLockState);
     // DEBUG_V(String("SdAccessSemaphore: ") + SdAccessSemaphore);
 
-    // are we at the top level method that locked the SD?
-    if(false == CurrentLockState)
+    // wait to get access to the SD card
+    while(true == SdAccessSemaphore)
     {
-        // wait to get access to the SD card
-        while(true == SdAccessSemaphore)
-        {
-            delay(1);
-        }
-        SdAccessSemaphore = true;
+        delay(10);
     }
+    SdAccessSemaphore = true;
+
     // DEBUG_END;
 } // LockSd
 
 //-----------------------------------------------------------------------------
-void c_FileMgr::UnLockSd(bool TargetLockState)
+void c_FileMgr::UnLockSd()
 {
     // DEBUG_START;
 
-    // DEBUG_V(String("  TargetLockState: ") + TargetLockState);
     // DEBUG_V(String("SdAccessSemaphore: ") + SdAccessSemaphore);
-    // are we at the top level method that locked the SD?
-    if(false == TargetLockState && true == SdAccessSemaphore)
-    {
-        SdAccessSemaphore = false;
-    }
+    SdAccessSemaphore = false;
     // DEBUG_END;
 } // UnLockSd
 

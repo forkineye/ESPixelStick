@@ -89,7 +89,7 @@ void UnzipFiles::Run()
     {
         FeedWDT();
         FileName = emptyString;
-        FileMgr.FindFirstZipFile(FileName, false);
+        FileMgr.FindFirstZipFile(FileName);
         if(FileName.isEmpty())
         {
             break;
@@ -228,6 +228,8 @@ void * UnzipFiles::OpenZipFile(const char *FileName, int32_t *size)
     // DEBUG_V(String("FileHandle: ") + String(FileHandle));
     // DEBUG_V(String("      size: ") + String(*size));
 
+    SeekPosition = 0;
+
     // DEBUG_END;
     return (void *)FileHandle;
 
@@ -244,6 +246,7 @@ void UnzipFiles::CloseZipFile(void *p)
     // DEBUG_V(String("FileHandle: ") + String(FileHandle));
 
     FileMgr.CloseSdFile(FileHandle);
+    SeekPosition = 0;
 
     // DEBUG_END;
 } // CloseZipFile
@@ -258,8 +261,10 @@ int32_t UnzipFiles::ReadZipFile(void *p, uint8_t *buffer, int32_t length)
     c_FileMgr::FileId FileHandle = (c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle);
     // DEBUG_V(String("FileHandle: ") + String(FileHandle));
 
-    size_t BytesRead = FileMgr.ReadSdFile(FileHandle, buffer, length);
+    size_t BytesRead = FileMgr.ReadSdFile(FileHandle, buffer, length, SeekPosition);
     // DEBUG_V(String(" BytesRead: ") + String(BytesRead));
+
+    SeekPosition += BytesRead;
 
     // DEBUG_END;
     return BytesRead;
@@ -270,7 +275,7 @@ int32_t UnzipFiles::ReadZipFile(void *p, uint8_t *buffer, int32_t length)
 int32_t UnzipFiles::SeekZipFile(void *p, int32_t position, int iType)
 {
     // DEBUG_START;
-
+    SeekPosition = position;
     // DEBUG_V(String("         p: 0x") + String(uint32_t(p), HEX));
 
     c_FileMgr::FileId FileHandle = (c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle);
@@ -279,7 +284,7 @@ int32_t UnzipFiles::SeekZipFile(void *p, int32_t position, int iType)
     // DEBUG_V(String("     iType: ") + String(iType));
 
     // DEBUG_END;
-    return FileMgr.SeekSdFile(FileHandle, position, SeekMode(iType));
+    return SeekPosition; // FileMgr.SeekSdFile(FileHandle, position, SeekMode(iType));
 } // SeekZipFile
 
 UnzipFiles gUnzipFiles;

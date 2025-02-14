@@ -71,10 +71,10 @@ void InputMgrTask (void *arg)
 {
     // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
     // DEBUG_V(String("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
+    const uint32_t MinPollTimeMs = FPP_TICKER_PERIOD_MS;
     uint32_t PollStartTime = millis();
     uint32_t PollEndTime = PollStartTime;
-    uint32_t PollTime = pdMS_TO_TICKS(25);
-    const uint32_t MinPollTimeMs = 25;
+    uint32_t PollTime = pdMS_TO_TICKS(MinPollTimeMs);
 
     while(1)
     {
@@ -724,8 +724,9 @@ void c_InputMgr::Process ()
             {
                 continue;
             }
-            // DEBUG_V(String("pInputChannelDriver: 0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
+            // DEBUG_V(String("pInputChannelDriver:Start 0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
             CurrentInput.pInputChannelDriver->Process ();
+            // DEBUG_V(String("pInputChannelDriver:Done  0x") + String(uint32_t(CurrentInput.pInputChannelDriver), HEX));
 
             if (!BlankTimerHasExpired (CurrentInput.pInputChannelDriver->GetInputChannelId()))
             {

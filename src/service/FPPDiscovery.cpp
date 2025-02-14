@@ -1258,7 +1258,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
     // DEBUG_V (String ("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
-    // xDEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
+    // DEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
     // DEBUG_V (String ("IsEnabled '") + String(IsEnabled));
 
     // prevent reentrant issues
@@ -1266,7 +1266,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
     {
         StopInProgress = true;
         // only process if the pointer is valid
-        while (true)
+        while (InputFPPRemotePlayFile)
         {
             // DEBUG_V("Pointer is valid");
             if(InputFPPRemotePlayFile->IsIdle())
@@ -1289,7 +1289,6 @@ void c_FPPDiscovery::StopPlaying (bool wait)
                 break;
             }
         }
-        ForgetInputFPPRemotePlayFile();
         StopInProgress = false;
     }
     else

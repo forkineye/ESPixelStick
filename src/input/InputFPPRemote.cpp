@@ -518,7 +518,7 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
             break;
         }
 
-        if (!FPPDiscovery.PlayingAfile())
+        if (!FileBeingPlayed.equals(CN_No_LocalFileToPlay))
         {
             break;
         }
