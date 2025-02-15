@@ -844,8 +844,10 @@ void c_FPPDiscovery::ProcessFile (
                 request->send (500);
                 break;
             }
+            // DEBUG_V (String ("         name: ") + filename);
             // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
             // DEBUG_V("wait for the player to become idle");
+            // DEBUG_V (String ("ContentLength: ") + String (ContentLength));
             StopPlaying(true);
             inFileUpload = true;
             UploadFileName = filename;
