@@ -447,7 +447,7 @@ void c_FileMgr::SetSpiIoPins ()
 
             DescribeSdCardToUser ();
             // DEBUG__V();
-            BuildFseqList(false);
+            BuildFseqList(true);
             // DEBUG__V();
         }
     }
@@ -1042,7 +1042,7 @@ void c_FileMgr::DeleteSdFile (const String & FileName)
         UnLockSd();
         if(!FileName.equals(FSEQFILELIST))
         {
-            BuildFseqList(true);
+            BuildFseqList(false);
         }
     }
 
@@ -1520,7 +1520,8 @@ uint64_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, ui
     do // once
     {
         int FileListIndex;
-        // DEBUG_V (String("NumBytesInSourceBuffer: ") + String(NumBytesInSourceBuffer));
+        // DEBUG_V (String("    NumBytesInSourceBuffer: ") + String(NumBytesInSourceBuffer));
+        // DEBUG_V (String("            ForceWriteToSD: ") + String(ForceWriteToSD));
         if (-1 == (FileListIndex = FileListFindSdFileHandle (FileHandle)))
         {
             logcon (String (F ("WriteSdFileBuf::ERROR::Invalid File Handle: ")) + String (FileHandle));
@@ -1546,49 +1547,52 @@ uint64_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, ui
         {
             // DEBUG_V("Using buffers");
             // DEBUG_V(String("     NumBytesInSourceBuffer: ") + String(NumBytesInSourceBuffer));
+            uint64_t SpaceRemaining = FileList[FileListIndex].buffer.size - FileList[FileListIndex].buffer.offset;
+            // DEBUG_V(String("             SpaceRemaining: ") + String(SpaceRemaining));
 
-            while(NumBytesInSourceBuffer || ForceWriteToSD)
+            if(ForceWriteToSD ||
+                  (NumBytesInSourceBuffer &&
+                  (SpaceRemaining < NumBytesInSourceBuffer)))
             {
-                uint64_t SpaceRemaining = FileList[FileListIndex].buffer.size - FileList[FileListIndex].buffer.offset;
-                uint64_t NumBytesToWrite = min(SpaceRemaining, NumBytesInSourceBuffer);
-                // DEBUG_V(String("             SpaceRemaining: ") + String(SpaceRemaining));
-                // DEBUG_V(String("            NumBytesToWrite: ") + String(NumBytesToWrite));
+                // DEBUG_V("Write out the buffer");
+                // delay(20);
+                // DEBUG_V(String("       BytesToBeWrittenToSD: ") + String(FileList[FileListIndex].buffer.offset));
+                FeedWDT();
+                LockSd();
+                uint64_t WroteToSdSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
+                FileList[FileListIndex].fsFile.flush();
+                UnLockSd();
+                delay(30);
+                FeedWDT();
+                // DEBUG_V(String("                     offset: ") + String(FileList[FileListIndex].buffer.offset));
+                // DEBUG_V(String("              WroteToSdSize: ") + String(WroteToSdSize));
+                if(FileList[FileListIndex].buffer.offset != WroteToSdSize)
+                {
+                    logcon (String("WriteSdFileBuf:ERROR:SD Write Failed. Tried to write: ") +
+                            String(FileList[FileListIndex].buffer.offset) +
+                            " bytes. Actually wrote: " + String(WroteToSdSize))
+                    NumBytesWrittenToDestBuffer = 0;
+                    break;
+                } // end write failed
+                // reset the buffer
+                FileList[FileListIndex].buffer.offset = 0;
+                // DEBUG_V(String("                 New offset: ") + String(FileList[FileListIndex].buffer.offset));
+                ForceWriteToSD = false;
+            }
 
-                // DEBUG_V(String("Writing ") + String(NumBytesToWrite) + " bytes to the buffer");
+            if(NumBytesInSourceBuffer)
+            {
+                // DEBUG_V(String("                    Writing ") + String(NumBytesInSourceBuffer) + " bytes to the buffer");
+                // DEBUG_V(String("                     offset: ") + String(FileList[FileListIndex].buffer.offset));
                 memcpy(&(FileList[FileListIndex].buffer.DataBuffer[FileList[FileListIndex].buffer.offset]), FileData, NumBytesInSourceBuffer);
 
-                FileList[FileListIndex].buffer.offset += NumBytesToWrite;
-                NumBytesWrittenToDestBuffer += NumBytesToWrite;
-                NumBytesInSourceBuffer -= NumBytesToWrite;
+                FileList[FileListIndex].buffer.offset += NumBytesInSourceBuffer;
+                NumBytesWrittenToDestBuffer += NumBytesInSourceBuffer;
+                NumBytesInSourceBuffer -= NumBytesInSourceBuffer;
                 // DEBUG_V(String("NumBytesWrittenToDestBuffer: ") + String(NumBytesWrittenToDestBuffer));
                 // DEBUG_V(String("     NumBytesInSourceBuffer: ") + String(NumBytesInSourceBuffer));
+                // DEBUG_V(String("                 New offset: ") + String(FileList[FileListIndex].buffer.offset));
 
-                // is the buffer full?
-                if(ForceWriteToSD || (FileList[FileListIndex].buffer.offset == FileList[FileListIndex].buffer.size))
-                {
-                    // DEBUG_V("Buffer is full. Write out the buffer");
-                    // delay(20);
-                    // DEBUG_V(String("       BytesToBeWrittenToSD: ") + String(FileList[FileListIndex].buffer.offset));
-                    FeedWDT();
-                    LockSd();
-                    uint64_t WroteToSdSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
-                    FileList[FileListIndex].fsFile.flush();
-                    UnLockSd();
-                    delay(30);
-                    FeedWDT();
-                    // DEBUG_V(String("              WroteToSdSize: ") + String(WroteToSdSize));
-                    if(FileList[FileListIndex].buffer.offset != WroteToSdSize)
-                    {
-                        logcon (String("WriteSdFileBuf:ERROR:SD Write Failed. Tried to write: ") +
-                                String(FileList[FileListIndex].buffer.offset) +
-                                " bytes. Actually wrote: " + String(WroteToSdSize))
-                        NumBytesWrittenToDestBuffer = 0;
-                        break;
-                    } // end write failed
-                    // reset the buffer
-                    FileList[FileListIndex].buffer.offset = 0;
-                    ForceWriteToSD = false;
-                }
             }; // End write to buffer
         }
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
