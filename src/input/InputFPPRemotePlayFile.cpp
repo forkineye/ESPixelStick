@@ -103,7 +103,7 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 //-----------------------------------------------------------------------------
 bool c_InputFPPRemotePlayFile::Poll ()
 {
-    // DEBUG_START;
+    // xDEBUG_START;
     bool Response = false;
 
     if(!InputIsPaused())
@@ -113,7 +113,7 @@ bool c_InputFPPRemotePlayFile::Poll ()
         // DEBUG_V("Poll the FSM: Done");
     }
 
-    // DEBUG_END;
+    // xDEBUG_END;
     return Response;
 
 } // Poll
@@ -480,10 +480,12 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
         }
         while (NumBytesRead < NumBytesToRead)
         {
+            // DEBUG_V();
             uint64_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
                                                                LocalIntensityBuffer,
                                                                min((NumBytesToRead - NumBytesRead), LocalIntensityBufferSize),
                                                                FileOffset);
+            // DEBUG_V();
 #ifdef DEBUG_FSEQ
 /*
             uint32_t nonZeroCount = 0;
