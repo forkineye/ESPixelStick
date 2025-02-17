@@ -219,7 +219,8 @@ bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_PlayingFile::Poll ()
 {
-    // DEBUG_START;
+    // xDEBUG_START;
+    // xDEBUG_V("fsm_PlayFile_state_PlayingFile::Poll");
 
     bool Response = false;
 
@@ -289,6 +290,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         InputMgr.RestartBlankTimer (p_Parent->GetInputChannelId ());
+        // xDEBUG_V();
 
         if(p_Parent->SendFppSync)
         {
@@ -326,7 +328,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
 
     } while (false);
 
-    // DEBUG_END;
+    // xDEBUG_END;
     return Response;
 
 } // fsm_PlayFile_state_PlayingFile::Poll
