@@ -160,6 +160,7 @@ void UnzipFiles::ProcessZipFile(String & FileName)
 void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
 {
     // DEBUG_START;
+    // DEBUG_V(String("open Filename: ") + FileName);
 
     int BytesRead = 0;
     uint32_t TotalBytesWritten = 0;
@@ -196,8 +197,8 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
                 break;
             }
             TotalBytesWritten += BytesRead;
-            LOG_PORT.println(String("\033[Fprogress: ") + String(TotalBytesWritten));
-            LOG_PORT.flush();
+            // LOG_PORT.println(String("\033[Fprogress: ") + String(TotalBytesWritten));
+            // LOG_PORT.flush();
 
         } while (BytesRead > 0);
 
@@ -205,6 +206,7 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
         zip.closeCurrentFile();
     } while(false);
 
+    // DEBUG_V(String("Close Filename: ") + FileName);
     // DEBUG_END;
 } // ProcessCurrentFileInZip
 
