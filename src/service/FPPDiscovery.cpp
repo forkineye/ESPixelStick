@@ -456,7 +456,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
     if (IsEnabled)
     {
         StopPlaying (false);
-        memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
+        OutputMgr.ClearBuffer();
     }
     // DEBUG_END;
 } // ProcessBlankPacket
