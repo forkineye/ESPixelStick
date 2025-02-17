@@ -167,7 +167,7 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
 
     logcon(FileName +
     " - " + String(fi.compressed_size, DEC) +
-    "/" + String(fi.uncompressed_size, DEC) + "\n");
+    "/" + String(fi.uncompressed_size, DEC) + " Started.\n");
 
     do // once
     {
@@ -175,6 +175,7 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
         if(ReturnCode != UNZ_OK)
         {
             // DEBUG_V(String("ReturnCode: ") + String(ReturnCode));
+            logcon(FileName + F(" Failed."));
             break;
         }
 
@@ -193,17 +194,18 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
             // DEBUG_V(String("BytesRead: ") + String(BytesRead));
             if(BytesRead != FileMgr.WriteSdFile(FileHandle, pOutputBuffer, BytesRead))
             {
-                logcon(String("Failed to write data to '") + FileName + "'");
+                logcon(String(F("Failed to write data to '")) + FileName + "'");
                 break;
             }
             TotalBytesWritten += BytesRead;
-            // LOG_PORT.println(String("\033[Fprogress: ") + String(TotalBytesWritten));
-            // LOG_PORT.flush();
+            LOG_PORT.println(String("\033[Fprogress: ") + String(TotalBytesWritten));
+            LOG_PORT.flush();
 
         } while (BytesRead > 0);
 
         FileMgr.CloseSdFile(FileHandle);
         zip.closeCurrentFile();
+        logcon(FileName + F(" - Done."));
     } while(false);
 
     // DEBUG_V(String("Close Filename: ") + FileName);
