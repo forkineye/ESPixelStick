@@ -1318,7 +1318,7 @@ bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     do // once
     {
@@ -1354,7 +1354,7 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
     } while(false);
 
 
-    // DEBUG_END;
+    // xDEBUG_END;
 } // GenerateFppSyncMsg
 
 //-----------------------------------------------------------------------------
