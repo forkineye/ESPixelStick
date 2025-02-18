@@ -119,6 +119,7 @@ bool fsm_PlayFile_state_Starting::Poll ()
         if (!p_Parent->ParseFseqFile ())
         {
             // DEBUG_V("fsm_PlayFile_state_PlayingFile::Poll FSEQ Parse Error");
+            p_Parent->fsm_PlayFile_state_Error_imp.Init(p_Parent);
             break;
         }
 

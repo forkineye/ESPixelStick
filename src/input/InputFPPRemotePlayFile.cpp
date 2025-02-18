@@ -249,12 +249,24 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
 
+        if(FileControl[CurrentFile].FileName.isEmpty() ||
+           LastFailedFilename.equals(FileControl[CurrentFile].FileName))
+        {
+            // just go away. Not a valid filename
+            break;
+        }
+
         if (false == FileMgr.OpenSdFile (FileControl[CurrentFile].FileName,
                                          c_FileMgr::FileMode::FileRead,
                                          FileControl[CurrentFile].FileHandleForFileBeingPlayed, -1))
         {
-            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not open file: filename: '")) + FileControl[CurrentFile].FileName + "'");
-            logcon (LastFailedPlayStatusMsg);
+            if(!LastFailedFilename.equals(FileControl[CurrentFile].FileName))
+            {
+                // only output the message once
+                LastFailedPlayStatusMsg = String (F ("ParseFseqFile:: Could not open file: filename: '")) + FileControl[CurrentFile].FileName + "'";
+                LastFailedFilename = FileControl[CurrentFile].FileName;
+                logcon (LastFailedPlayStatusMsg);
+            }
             break;
         }
 
