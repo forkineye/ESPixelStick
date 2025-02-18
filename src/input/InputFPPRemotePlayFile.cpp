@@ -84,7 +84,7 @@ void c_InputFPPRemotePlayFile::Stop ()
 //-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
 {
-    // xDEBUG_START;
+    // DEBUG_START;
 
     if(!InputIsPaused())
     {
@@ -96,7 +96,7 @@ void c_InputFPPRemotePlayFile::Sync (String & FileName, float SecondsElapsed)
         }
     }
 
-    // xDEBUG_END;
+    // DEBUG_END;
 
 } // Sync
 
@@ -108,8 +108,9 @@ bool c_InputFPPRemotePlayFile::Poll ()
 
     if(!InputIsPaused())
     {
-        // xDEBUG_V("Poll the FSM");
-        Response =  pCurrentFsmState->Poll ();
+        // DEBUG_V("Poll the FSM: Start");
+        Response = pCurrentFsmState->Poll ();
+        // DEBUG_V("Poll the FSM: Done");
     }
 
     // xDEBUG_END;
@@ -130,7 +131,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     uint32_t mseconds = FileControl[CurrentFile].ElapsedPlayTimeMS;
     uint32_t msecondsTotal;
     if (__builtin_mul_overflow(FileControl[CurrentFile].FrameStepTimeMS, FileControl[CurrentFile].TotalNumberOfFramesInSequence, &msecondsTotal)) {
-        // returned non-zero: there has been an overflow
+        // DEBUG_V("returned non-zero: there has been an overflow");
         msecondsTotal = MilliSecondsInASecond; // set to one second total when overflow occurs
     }
 
@@ -139,7 +140,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     uint32_t secsTot = msecondsTotal / MilliSecondsInASecond;
     uint32_t secsRem;
     if (__builtin_sub_overflow(secsTot, secs, &secsRem)) {
-        // returned non-zero: there has been an overflow
+        // DEBUG_V("returned non-zero: there has been an overflow");
         secsRem = 0; // set to zero remaining seconds when overflow occurs
     }
 
@@ -202,6 +203,7 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t
         // xDEBUG_V (String ("AdjustedPlayTime: ") + String (AdjustedPlayTime));
         if ((0 > SyncOffsetMS) && (ElapsedMS < abs(SyncOffsetMS)))
         {
+            CurrentFrameId = 0;
             // DEBUG_V (String ("SyncOffsetMS: ") + String (SyncOffsetMS));
             // DEBUG_V (String ("   ElapsedMS: ") + String (ElapsedMS));
             break;
@@ -212,9 +214,14 @@ uint32_t c_InputFPPRemotePlayFile::CalculateFrameId (uint32_t ElapsedMS, int32_t
 #ifdef DEBUG_FSEQ
         if(2 < abs(int(CurrentFrameId) - int(FileControl[CurrentFile].LastPlayedFrameId)))
         {
-            DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
-            DEBUG_V (String (" PreviousFrameId: ") + String (FileControl[CurrentFile].LastPlayedFrameId));
-            DEBUG_V (String ("     Frame Delta: ") + String(abs(int(CurrentFrameId) - int(FileControl[CurrentFile].LastPlayedFrameId))));
+            // DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
+            // DEBUG_V (String (" PreviousFrameId: ") + String (FileControl[CurrentFile].LastPlayedFrameId));
+            // DEBUG_V (String ("     Frame Delta: ") + String(abs(int(CurrentFrameId) - int(FileControl[CurrentFile].LastPlayedFrameId))));
+        }
+        if(CurrentFrameId < FileControl[CurrentFile].LastPlayedFrameId)
+        {
+            // DEBUG_V (String ("  CurrentFrameId: ") + String (CurrentFrameId));
+            // DEBUG_V (String (" PreviousFrameId: ") + String (FileControl[CurrentFile].LastPlayedFrameId));
         }
 #endif // def DEBUG_FSEQ
 
@@ -242,12 +249,24 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
 
+        if(FileControl[CurrentFile].FileName.isEmpty() ||
+           LastFailedFilename.equals(FileControl[CurrentFile].FileName))
+        {
+            // just go away. Not a valid filename
+            break;
+        }
+
         if (false == FileMgr.OpenSdFile (FileControl[CurrentFile].FileName,
                                          c_FileMgr::FileMode::FileRead,
                                          FileControl[CurrentFile].FileHandleForFileBeingPlayed, -1))
         {
-            LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not open file: filename: '")) + FileControl[CurrentFile].FileName + "'");
-            logcon (LastFailedPlayStatusMsg);
+            if(!LastFailedFilename.equals(FileControl[CurrentFile].FileName))
+            {
+                // only output the message once
+                LastFailedPlayStatusMsg = String (F ("ParseFseqFile:: Could not open file: filename: '")) + FileControl[CurrentFile].FileName + "'";
+                LastFailedFilename = FileControl[CurrentFile].FileName;
+                logcon (LastFailedPlayStatusMsg);
+            }
             break;
         }
 
@@ -430,17 +449,27 @@ void c_InputFPPRemotePlayFile::ClearFileInfo()
     FileControl[NextFile].ElapsedPlayTimeMS             = 0;
     FileControl[NextFile].DataOffset                    = 0;
     FileControl[NextFile].ChannelsPerFrame              = 0;
-    FileControl[NextFile].FrameStepTimeMS               = 25;
+    FileControl[NextFile].FrameStepTimeMS               = 0;
     FileControl[NextFile].TotalNumberOfFramesInSequence = 0;
     // DEBUG_END;
 } // ClearFileInfo
 
+#ifdef DEBUG_FSEQ
+uint32_t NextFileOffset = 0;
+uint32_t NextChannelOffset = 0;
+size_t LastStartingPosition = 0;
+size_t NextExpectedStartingPosition = 0;
+uint32_t LocalIntensityBufferIndex = 0;
+uint32_t PreviousOnPosition = 0;
+uint32_t PreviousFileOffset = 0;
+#endif // def DEBUG_FSEQ
+
 //-----------------------------------------------------------------------------
-uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset)
+uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uint64_t NumBytesToRead, uint64_t FileOffset)
 {
     // xDEBUG_START;
 
-    uint32_t NumBytesRead = 0;
+    uint64_t NumBytesRead = 0;
 
     do // once
     {
@@ -453,7 +482,7 @@ uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uin
         if(nullptr == LocalIntensityBuffer)
         {
             LocalIntensityBuffer = (byte*)malloc(LocalIntensityBufferSize);
-            DEBUG_V("Allocating local buffer.");
+            // DEBUG_V("Allocating local buffer.");
             if(nullptr == LocalIntensityBuffer)
             {
                 logcon(String(CN_stars) + F("Could not allocate a buffer to read SD files. Rebooting. ") + CN_stars);
@@ -463,10 +492,93 @@ uint32_t c_InputFPPRemotePlayFile::ReadFile(uint32_t DestinationIntensityId, uin
         }
         while (NumBytesRead < NumBytesToRead)
         {
-            uint32_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
+            // DEBUG_V();
+            uint64_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
                                                                LocalIntensityBuffer,
                                                                min((NumBytesToRead - NumBytesRead), LocalIntensityBufferSize),
                                                                FileOffset);
+            // DEBUG_V();
+#ifdef DEBUG_FSEQ
+/*
+            uint32_t nonZeroCount = 0;
+            for(uint32_t index = 0; index < NumBytesReadThisPass; ++index)
+            {
+                if(LocalIntensityBuffer[index] != 0)
+                {
+                    ++ nonZeroCount;
+                }
+                if(LocalIntensityBuffer[index+1] != 0)
+                {
+                    ++ index;
+                }
+            }
+            if(1 < nonZeroCount)
+            {
+                // DEBUG_V(String("Found too many non zero bytes: ") + String(nonZeroCount));
+            }
+            if(0 != DestinationIntensityId)
+            {
+                // DEBUG_V(String("Unexpected DestinationIntensityId: ") + String(DestinationIntensityId));
+            }
+            if(130 != NumBytesReadThisPass)
+            {
+                // DEBUG_V(String("Unexpected NumBytesReadThisPass: ") + String(NumBytesReadThisPass));
+            }
+            if(0 != abs(int(FileOffset) - int(NextFileOffset)))
+            {
+                // DEBUG_V(String("Unexpected FileOffset: ") + String(FileOffset));
+                // DEBUG_V(String("       NextFileOffset: ") + String(NextFileOffset));
+                // DEBUG_V(String("                delta: ") + String(abs(int(FileOffset) - int(NextFileOffset))));
+            }
+            NextFileOffset = FileOffset + NumBytesReadThisPass;
+            if(FileOffset < NextExpectedStartingPosition)
+            {
+                // DEBUG_V("Unexpected Start Position");
+                // DEBUG_V (String ("NextExpectedStartingPosition: ") + String (NextExpectedStartingPosition));
+                // DEBUG_V (String ("     Actual StartingPosition: ") + String (FileOffset));
+            }
+            NextExpectedStartingPosition = FileOffset + NumBytesToRead;
+            if(FileOffset <= LastStartingPosition)
+            {
+                // DEBUG_V("Unexpected Start Position");
+                // DEBUG_V (String ("   LastStartingPosition: ") + String (LastStartingPosition));
+                // DEBUG_V (String ("Actual StartingPosition: ") + String (FileOffset));
+            }
+            LastStartingPosition = FileOffset;
+            memset(LocalIntensityBuffer, 0x00, LocalIntensityBufferSize);
+            LocalIntensityBuffer[LocalIntensityBufferIndex >> 2] = 255;
+            ++LocalIntensityBufferIndex;
+            if((LocalIntensityBufferSize - 1) < (LocalIntensityBufferIndex >> 2))
+            {
+                LocalIntensityBufferIndex = 0;
+            }
+*/
+            uint32_t CurrentOnPosition = 0;
+            for(uint32_t index = 0; index < LocalIntensityBufferSize; ++index)
+            {
+                if(0 != LocalIntensityBuffer[index])
+                {
+                    CurrentOnPosition = index;
+                    break;
+                }
+            }
+            if((CurrentOnPosition == PreviousOnPosition) ||
+               (CurrentOnPosition == PreviousOnPosition + 1))
+            {
+                // found what we are looking for
+            }
+            else
+            {
+                // DEBUG_V(String("PreviousOnPosition: ")   + String(PreviousOnPosition));
+                // DEBUG_V(String(" CurrentOnPosition: ")   + String(CurrentOnPosition));
+                // DEBUG_V(String("             delta: ")   + String(abs(int(CurrentOnPosition) - int(PreviousOnPosition))));
+                // DEBUG_V(String("PreviousFileOffset: 0x") + String(PreviousFileOffset, HEX));
+                // DEBUG_V(String("        FileOffset: 0x") + String(FileOffset, HEX));
+                // DEBUG_V(String("       deltaOffset: ")   + String(abs(int(FileOffset) - int(PreviousFileOffset))));
+            }
+            PreviousOnPosition = CurrentOnPosition;
+            PreviousFileOffset = FileOffset;
+#endif // def DEBUG_FSEQ
 
             OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
 

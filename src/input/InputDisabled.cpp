@@ -98,4 +98,4 @@ void c_InputDisabled::Process()
 
     // DEBUG_END;
 
-} // Render
+} // Process

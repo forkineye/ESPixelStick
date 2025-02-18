@@ -42,6 +42,7 @@ private:
     UNZIP       zip; // statically allocate the UNZIP structure (41K)
     uint8_t     *pOutputBuffer = nullptr;
     uint32_t    BufferSize = 0;
+    int32_t     SeekPosition = 0;
 
 protected:
 

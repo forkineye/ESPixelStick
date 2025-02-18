@@ -456,7 +456,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
     if (IsEnabled)
     {
         StopPlaying (false);
-        memset (OutputMgr.GetBufferAddress(), 0x0, OutputMgr.GetBufferUsedSize ());
+        OutputMgr.ClearBuffer();
     }
     // DEBUG_END;
 } // ProcessBlankPacket
@@ -844,8 +844,10 @@ void c_FPPDiscovery::ProcessFile (
                 request->send (500);
                 break;
             }
+            // DEBUG_V (String ("         name: ") + filename);
             // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
             // DEBUG_V("wait for the player to become idle");
+            // DEBUG_V (String ("ContentLength: ") + String (ContentLength));
             StopPlaying(true);
             inFileUpload = true;
             UploadFileName = filename;
@@ -1258,7 +1260,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
     // DEBUG_V (String ("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
-    // xDEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
+    // DEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
     // DEBUG_V (String ("IsEnabled '") + String(IsEnabled));
 
     // prevent reentrant issues
@@ -1266,7 +1268,7 @@ void c_FPPDiscovery::StopPlaying (bool wait)
     {
         StopInProgress = true;
         // only process if the pointer is valid
-        while (true)
+        while (InputFPPRemotePlayFile)
         {
             // DEBUG_V("Pointer is valid");
             if(InputFPPRemotePlayFile->IsIdle())
@@ -1289,7 +1291,6 @@ void c_FPPDiscovery::StopPlaying (bool wait)
                 break;
             }
         }
-        ForgetInputFPPRemotePlayFile();
         StopInProgress = false;
     }
     else
@@ -1317,7 +1318,7 @@ bool c_FPPDiscovery::AllowedToRemotePlayFiles()
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime)
 {
-    // DEBUG_START;
+    // xDEBUG_START;
 
     do // once
     {
@@ -1353,7 +1354,7 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
     } while(false);
 
 
-    // DEBUG_END;
+    // xDEBUG_END;
 } // GenerateFppSyncMsg
 
 //-----------------------------------------------------------------------------

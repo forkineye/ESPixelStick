@@ -81,9 +81,10 @@ private:
     void        UpdateElapsedPlayTimeMS ();
     uint32_t    CalculateFrameId (uint32_t ElapsedMS, int32_t SyncOffsetMS);
     bool        ParseFseqFile ();
-    uint32_t    ReadFile(uint32_t DestinationIntensityId, uint32_t NumBytesToRead, uint32_t FileOffset);
+    uint64_t    ReadFile(uint64_t DestinationIntensityId, uint64_t NumBytesToRead, uint64_t FileOffset);
 
-    String      LastFailedPlayStatusMsg;
+    String      LastFailedPlayStatusMsg = emptyString;
+    String      LastFailedFilename = emptyString;
 
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t TimerPollTaskHandle = NULL;

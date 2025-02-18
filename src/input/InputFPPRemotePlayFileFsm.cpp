@@ -25,8 +25,8 @@
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Idle::Poll ()
 {
-    // xDEBUG_START;
-    // xDEBUG_V("fsm_PlayFile_state_Idle::Poll");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Idle::Poll");
 
     // is there a new file to play?
     if(!p_Parent->FileControl[NextFile].FileName.isEmpty())
@@ -34,7 +34,7 @@ bool fsm_PlayFile_state_Idle::Poll ()
         p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
     }
 
-    // xDEBUG_END;
+    // DEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Idle::Poll
@@ -119,6 +119,7 @@ bool fsm_PlayFile_state_Starting::Poll ()
         if (!p_Parent->ParseFseqFile ())
         {
             // DEBUG_V("fsm_PlayFile_state_PlayingFile::Poll FSEQ Parse Error");
+            p_Parent->fsm_PlayFile_state_Error_imp.Init(p_Parent);
             break;
         }
 
@@ -220,6 +221,7 @@ bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 bool fsm_PlayFile_state_PlayingFile::Poll ()
 {
     // xDEBUG_START;
+    // xDEBUG_V("fsm_PlayFile_state_PlayingFile::Poll");
 
     bool Response = false;
 
@@ -289,6 +291,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         InputMgr.RestartBlankTimer (p_Parent->GetInputChannelId ());
+        // xDEBUG_V();
 
         if(p_Parent->SendFppSync)
         {
@@ -338,8 +341,6 @@ void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
     // DEBUG_V("fsm_PlayFile_state_PlayingFile::Init");
 
     p_Parent = Parent;
-
-    // LastPlayedFrameId = 0;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
 
     // DEBUG_END;
@@ -391,8 +392,8 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSeconds)
 {
-    // xDEBUG_START;
-    // xDEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
 
     bool response = false;
 
@@ -462,7 +463,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 
     } while (false);
 
-    // xDEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // fsm_PlayFile_state_PlayingFile::Sync

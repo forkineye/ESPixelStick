@@ -273,7 +273,7 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
 
     // DEBUG_V ("Config Processing");
     // Clear outbuffer on config change
-    memset (OutputMgr.GetBufferAddress (), 0x0, OutputMgr.GetBufferUsedSize ());
+    OutputMgr.ClearBuffer();
     StartPlaying (FileToPlay);
 
     // DEBUG_END;
@@ -518,7 +518,7 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
             break;
         }
 
-        if (!FPPDiscovery.PlayingAfile())
+        if (!FileBeingPlayed.equals(CN_No_LocalFileToPlay))
         {
             break;
         }

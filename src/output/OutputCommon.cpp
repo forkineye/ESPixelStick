@@ -59,7 +59,7 @@ void c_OutputCommon::ClearBuffer ()
 {
     // DEBUG_START;
 
-    memset(GetBufferAddress(), 0x00, GetBufferUsedSize());
+    memset(GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
 
     // DEBUG_END;
 } // ClearBuffer

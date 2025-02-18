@@ -28,9 +28,9 @@ protected:
     time_t          PlayDurationSec = 0;
     bool            SendFppSync = false;
 #if defined(ARDUINO_ARCH_ESP8266)
-const uint32_t  LocalIntensityBufferSize = 512;
+const uint64_t  LocalIntensityBufferSize = 512;
 #else
-const uint32_t  LocalIntensityBufferSize = 2048;
+const uint64_t  LocalIntensityBufferSize = 2048;
 #endif // defined(ARDUINO_ARCH_ESP8266)
 
 private:
