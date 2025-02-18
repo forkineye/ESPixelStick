@@ -49,7 +49,7 @@ var searchData=
   ['clearuartinterrupts_46',['ClearUartInterrupts',['../classc___output_uart.html#a4114ee257c21daddc9638697900ef948',1,'c_OutputUart']]],
   ['client_5ftimeout_47',['CLIENT_TIMEOUT',['../_e_s_pixel_stick_8h.html#acbb5358766b3fd26fcb09271b5f8b1e3',1,'ESPixelStick.h']]],
   ['clk_5fpin_48',['clk_pin',['../classc___file_mgr.html#a31b003b27b3b4d3970603c34d6b655c0',1,'c_FileMgr']]],
-  ['closesdfile_49',['CloseSdFile',['../classc___file_mgr.html#ae43240caa74e07c85bb523875729e0f1',1,'c_FileMgr']]],
+  ['closesdfile_49',['CloseSdFile',['../classc___file_mgr.html#a98e34d829e7d324400091213a4416bf9',1,'c_FileMgr']]],
   ['cmdgetconfig_50',['CmdGetConfig',['../structc___f_p_p_discovery_1_1_system_debug_stats__t.html#a5bf429ebec2bb8a444fa27775c3d6d98',1,'c_FPPDiscovery::SystemDebugStats_t']]],
   ['cmdgetfppstatus_51',['CmdGetFPPstatus',['../structc___f_p_p_discovery_1_1_system_debug_stats__t.html#adb3d35e6c143e55144e009b1d4296caf',1,'c_FPPDiscovery::SystemDebugStats_t']]],
   ['cmdgethostname_52',['CmdGetHostname',['../structc___f_p_p_discovery_1_1_system_debug_stats__t.html#a158e88967c8f8e07789e7960bc897210',1,'c_FPPDiscovery::SystemDebugStats_t']]],

@@ -118,8 +118,6 @@ Public Attributes</h2></td></tr>
 <tr class="separator:a888f7c203e6b411d5e15b512694a4fa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3893ab03d3a42402df8b892ae89f13f5" id="r_a3893ab03d3a42402df8b892ae89f13f5"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3893ab03d3a42402df8b892ae89f13f5">Filename</a> = emptyString</td></tr>
 <tr class="separator:a3893ab03d3a42402df8b892ae89f13f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d9ca7c63a65b1353adba4d28c79a427" id="r_a8d9ca7c63a65b1353adba4d28c79a427"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8d9ca7c63a65b1353adba4d28c79a427">Paused</a> = false</td></tr>
-<tr class="separator:a8d9ca7c63a65b1353adba4d28c79a427"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5abc068b74a8164f9062926b6341d54a" id="r_a5abc068b74a8164f9062926b6341d54a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___file_mgr.html#a8d56eea107a803ee4a53b9223d9c3853">FileMode</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5abc068b74a8164f9062926b6341d54a">mode</a> = <a class="el" href="classc___file_mgr.html#a8d56eea107a803ee4a53b9223d9c3853a940cf0fa5d631b5b097f6a1a5e8a65b9">FileMode::FileRead</a></td></tr>
 <tr class="separator:a5abc068b74a8164f9062926b6341d54a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae54d6b4e0f171ff08d51b381c7bdd140" id="r_ae54d6b4e0f171ff08d51b381c7bdd140"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae54d6b4e0f171ff08d51b381c7bdd140">IsOpen</a> = false</td></tr>
@@ -128,10 +126,10 @@ Public Attributes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9123d240bd7c2105b5471918456fd93e" id="r_a9123d240bd7c2105b5471918456fd93e"><td class="memItemLeft" >&#160;&#160;&#160;byte *&#160;&#160;&#160;<a class="el" href="#ab088423d58792a3fb57c80276f1ebc9d">DataBuffer</a> = nullptr&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
 <tr class="separator:a9123d240bd7c2105b5471918456fd93e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50e204f7435337d7948aec88c4331237" id="r_a50e204f7435337d7948aec88c4331237"><td class="memItemLeft" >&#160;&#160;&#160;size_t&#160;&#160;&#160;<a class="el" href="#a6cbdcf00417922e507323ef0bcb91eaa">size</a> = 0&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="separator:a50e204f7435337d7948aec88c4331237"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3f107ddff9a92fb607c7ef271a83375b" id="r_a3f107ddff9a92fb607c7ef271a83375b"><td class="memItemLeft" >&#160;&#160;&#160;size_t&#160;&#160;&#160;<a class="el" href="#a448974d21693dcaed944ab45166c31e9">offset</a> = 0&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
-<tr class="separator:a3f107ddff9a92fb607c7ef271a83375b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dd2e3c75b853e0cf9d54672d0133903" id="r_a7dd2e3c75b853e0cf9d54672d0133903"><td class="memItemLeft" >&#160;&#160;&#160;uint64_t&#160;&#160;&#160;<a class="el" href="#a004583b0bfee708652aa238b715bc57c">size</a> = 0&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:a7dd2e3c75b853e0cf9d54672d0133903"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7a779c2919def55fdfd232af5990445" id="r_ad7a779c2919def55fdfd232af5990445"><td class="memItemLeft" >&#160;&#160;&#160;uint64_t&#160;&#160;&#160;<a class="el" href="#a13eeed476f97fa9f4960d011146f98b1">offset</a> = 0&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
+<tr class="separator:ad7a779c2919def55fdfd232af5990445"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92292e1f9f9971dbb3a254dc51b8c02a" id="r_a92292e1f9f9971dbb3a254dc51b8c02a"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a92292e1f9f9971dbb3a254dc51b8c02a">buffer</a>&#160;</td><td class="memItemRight" valign="bottom"></td></tr>
 <tr class="separator:a92292e1f9f9971dbb3a254dc51b8c02a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -248,28 +246,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a448974d21693dcaed944ab45166c31e9" name="a448974d21693dcaed944ab45166c31e9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a448974d21693dcaed944ab45166c31e9">&#9670;&#160;</a></span>offset</h2>
+<a id="a13eeed476f97fa9f4960d011146f98b1" name="a13eeed476f97fa9f4960d011146f98b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a13eeed476f97fa9f4960d011146f98b1">&#9670;&#160;</a></span>offset</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">size_t c_FileMgr::FileListEntry_t::offset = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a8d9ca7c63a65b1353adba4d28c79a427" name="a8d9ca7c63a65b1353adba4d28c79a427"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d9ca7c63a65b1353adba4d28c79a427">&#9670;&#160;</a></span>Paused</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool c_FileMgr::FileListEntry_t::Paused = false</td>
+          <td class="memname">uint64_t c_FileMgr::FileListEntry_t::offset = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -277,27 +261,13 @@ Public Attributes</h2></td></tr>
 </div>
 </div>
 <a id="a004583b0bfee708652aa238b715bc57c" name="a004583b0bfee708652aa238b715bc57c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a004583b0bfee708652aa238b715bc57c">&#9670;&#160;</a></span>size <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a004583b0bfee708652aa238b715bc57c">&#9670;&#160;</a></span>size</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
           <td class="memname">uint64_t c_FileMgr::FileListEntry_t::size = 0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a6cbdcf00417922e507323ef0bcb91eaa" name="a6cbdcf00417922e507323ef0bcb91eaa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6cbdcf00417922e507323ef0bcb91eaa">&#9670;&#160;</a></span>size <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">size_t c_FileMgr::FileListEntry_t::size = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">

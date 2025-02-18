@@ -36,7 +36,7 @@ var searchData=
   ['clearfileinfo_33',['ClearFileInfo',['../classc___input_f_p_p_remote_play_file.html#a2848f54d1ec8462d0fc54a47c564b035',1,'c_InputFPPRemotePlayFile']]],
   ['clearrange_34',['clearRange',['../classc___input_effect_engine.html#af5616863679e4db9a29fbbb98c7c1ed7',1,'c_InputEffectEngine']]],
   ['clearuartinterrupts_35',['ClearUartInterrupts',['../classc___output_uart.html#a4114ee257c21daddc9638697900ef948',1,'c_OutputUart']]],
-  ['closesdfile_36',['CloseSdFile',['../classc___file_mgr.html#ae43240caa74e07c85bb523875729e0f1',1,'c_FileMgr']]],
+  ['closesdfile_36',['CloseSdFile',['../classc___file_mgr.html#a98e34d829e7d324400091213a4416bf9',1,'c_FileMgr']]],
   ['colorhasreachedtarget_37',['ColorHasReachedTarget',['../classc___input_effect_engine.html#af2ccb5a38c8047af44dbcc403e840035',1,'c_InputEffectEngine::ColorHasReachedTarget()'],['../classc___input_effect_engine.html#aa6099131c79396f001199759863754f0',1,'c_InputEffectEngine::ColorHasReachedTarget(double tc, double cc, double step)']]],
   ['colorwheel_38',['colorWheel',['../classc___input_effect_engine.html#acb553865fd413505e74b21eb82974c3a',1,'c_InputEffectEngine']]],
   ['conditionalincrementcolor_39',['ConditionalIncrementColor',['../classc___input_effect_engine.html#af644c98b39b0208e8ac0fdeae19ea999',1,'c_InputEffectEngine']]],

@@ -1,7 +1,7 @@
 var searchData=
 [
   ['off_0',['OFF',['../classc___input_alexa.html#a952005642b4f9f5ac4910e5015e884fa',1,'c_InputAlexa::OFF'],['../classc___input_m_q_t_t.html#a7ab0569ade8e9922479e7e2ba21cf485',1,'c_InputMQTT::OFF']]],
-  ['offset_1',['offset',['../structc___file_mgr_1_1_file_list_entry__t.html#a448974d21693dcaed944ab45166c31e9',1,'c_FileMgr::FileListEntry_t::offset'],['../unionc___output_pixel_1_1_color_offsets__s.html#a735419bf5c0cb1bb255b07756b1befe3',1,'c_OutputPixel::ColorOffsets_s::offset']]],
+  ['offset_1',['offset',['../structc___file_mgr_1_1_file_list_entry__t.html#a13eeed476f97fa9f4960d011146f98b1',1,'c_FileMgr::FileListEntry_t::offset'],['../unionc___output_pixel_1_1_color_offsets__s.html#a735419bf5c0cb1bb255b07756b1befe3',1,'c_OutputPixel::ColorOffsets_s::offset']]],
   ['offsetms_2',['OffsetMS',['../class_fast_timer.html#ac19f05d841c58f1f910daa1c3d91c56c',1,'FastTimer']]],
   ['on_3',['ON',['../classc___input_alexa.html#a5c49720ac0879ae33f32bbbae9a3d3b7',1,'c_InputAlexa::ON'],['../classc___input_m_q_t_t.html#a5718aa4eb2ae6c577f0716aec5f2662e',1,'c_InputMQTT::ON']]],
   ['operatingmode_4',['operatingMode',['../union_f_p_p_ping_packet.html#aa1ff3b951241da29137ccdd53109908d',1,'FPPPingPacket::operatingMode'],['../fseq_8h.html#ae80af39e1c30f8c715e09e88065cacb1',1,'operatingMode:&#160;fseq.h']]],

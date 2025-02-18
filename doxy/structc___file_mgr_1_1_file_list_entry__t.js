@@ -8,8 +8,6 @@ var structc___file_mgr_1_1_file_list_entry__t =
     [ "handle", "structc___file_mgr_1_1_file_list_entry__t.html#a3c89703d5d76227e4ce9cc4c341cdc39", null ],
     [ "IsOpen", "structc___file_mgr_1_1_file_list_entry__t.html#ae54d6b4e0f171ff08d51b381c7bdd140", null ],
     [ "mode", "structc___file_mgr_1_1_file_list_entry__t.html#a5abc068b74a8164f9062926b6341d54a", null ],
-    [ "offset", "structc___file_mgr_1_1_file_list_entry__t.html#a448974d21693dcaed944ab45166c31e9", null ],
-    [ "Paused", "structc___file_mgr_1_1_file_list_entry__t.html#a8d9ca7c63a65b1353adba4d28c79a427", null ],
-    [ "size", "structc___file_mgr_1_1_file_list_entry__t.html#a004583b0bfee708652aa238b715bc57c", null ],
-    [ "size", "structc___file_mgr_1_1_file_list_entry__t.html#a6cbdcf00417922e507323ef0bcb91eaa", null ]
+    [ "offset", "structc___file_mgr_1_1_file_list_entry__t.html#a13eeed476f97fa9f4960d011146f98b1", null ],
+    [ "size", "structc___file_mgr_1_1_file_list_entry__t.html#a004583b0bfee708652aa238b715bc57c", null ]
 ];

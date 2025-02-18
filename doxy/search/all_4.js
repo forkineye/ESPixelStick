@@ -70,7 +70,7 @@ var searchData=
   ['delaytimer_67',['delaytimer',['../structc___input_effect_engine_1_1_flash_info__t.html#a64e5175c2e32bb31a3335c35b906ac77',1,'c_InputEffectEngine::FlashInfo_t']]],
   ['deleteconfig_68',['DeleteConfig',['../classc___input_mgr.html#a468e07f1080b710b35059bc87b9b8729',1,'c_InputMgr::DeleteConfig()'],['../classc___output_mgr.html#a697acb245b061406959eacd968eb74d7',1,'c_OutputMgr::DeleteConfig()'],['../main_8cpp.html#ab580e28a58fa670ec1ad2166f9f18711',1,'DeleteConfig():&#160;main.cpp']]],
   ['deleteflashfile_69',['DeleteFlashFile',['../classc___file_mgr.html#a17ce44b69df18bcc928b89b6702d766e',1,'c_FileMgr']]],
-  ['deletesdfile_70',['DeleteSdFile',['../classc___file_mgr.html#aa3509bd3f11604cc32f5974e71b5342c',1,'c_FileMgr']]],
+  ['deletesdfile_70',['DeleteSdFile',['../classc___file_mgr.html#a3008d14fd822eaf0f4077de2c85d63a1',1,'c_FileMgr']]],
   ['deltatime_71',['DeltaTime',['../_input_mgr_8cpp.html#ac559d5f286282934ce3da7e365d73660',1,'InputMgr.cpp']]],
   ['describesdcardtouser_72',['DescribeSdCardToUser',['../classc___file_mgr.html#a96fc290cd73476fc1f47b0ab86031cb2',1,'c_FileMgr']]],
   ['deserializationhandler_73',['DeserializationHandler',['../classc___file_mgr.html#a6e26c91b067547f4b8ec9bd3770ae9d7',1,'c_FileMgr']]],
