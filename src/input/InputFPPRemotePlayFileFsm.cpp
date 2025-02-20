@@ -25,8 +25,8 @@
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Idle::Poll ()
 {
-    // DEBUG_START;
-    // DEBUG_V("fsm_PlayFile_state_Idle::Poll");
+    // xDEBUG_START;
+    // xDEBUG_V("fsm_PlayFile_state_Idle::Poll");
 
     // is there a new file to play?
     if(!p_Parent->FileControl[NextFile].FileName.isEmpty())
@@ -34,7 +34,7 @@ bool fsm_PlayFile_state_Idle::Poll ()
         p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
     }
 
-    // DEBUG_END;
+    // xDEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Idle::Poll
