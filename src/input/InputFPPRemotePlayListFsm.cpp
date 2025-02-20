@@ -23,6 +23,7 @@
 #include "utility/SaferStringConversion.hpp"
 #include "FileMgr.hpp"
 #include "input/InputFPPRemotePlayEffect.hpp"
+#include "input/InputFPPRemotePlayFile.hpp"
 
 //-----------------------------------------------------------------------------
 bool fsm_PlayList_state_WaitForStart::Poll ()

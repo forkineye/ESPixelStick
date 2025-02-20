@@ -200,9 +200,9 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
         // DEBUG_V ("Is Enabled");
         JsonObject MyJsonStatus = jsonStatus[F ("FPPDiscovery")].to<JsonObject> ();
         JsonWrite(MyJsonStatus, F ("FppRemoteIp"), FppRemoteIp.toString ());
-        if (InputFPPRemotePlayFile)
+        if (AllowedToPlayRemoteFile())
         {
-            InputFPPRemotePlayFile->GetStatus (MyJsonStatus);
+            InputFPPRemote->GetFppRemotePlayStatus (MyJsonStatus);
         }
     }
     else
@@ -362,7 +362,7 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
     // DEBUG_START;
     do // once
     {
-        if (!AllowedToRemotePlayFiles ())
+        if (!AllowedToPlayRemoteFile ())
         {
             // DEBUG_V ("Not allowed to play remote files");
             break;
@@ -407,21 +407,21 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
                 // DEBUG_V (String ("   PlayingFile: ") + PlayingFile ());
                 // DEBUG_V (String ("      FileName: ") + FileName);
                 // DEBUG_V (String ("     IsEnabled: ") + IsEnabled);
-                // DEBUG_V (String ("   GetFileName: ") + InputFPPRemotePlayFile.GetFileName ());
+                // DEBUG_V (String ("   GetFileName: ") + InputFPPRemote.GetFileName ());
                 // DEBUG_V (String ("SecondsElapsed: ") + SecondsElapsed);
 
                 /*
                 logcon (String(float(millis()/1000.0)) + "," +
-                                  String(InputFPPRemotePlayFile.GetLastFrameId()) + "," +
+                                  String(InputFPPRemote.GetLastFrameId()) + "," +
                                   String (seconds_elapsed) + "," +
                                   String (FrameId) + "," +
-                                  String(InputFPPRemotePlayFile.GetTimeOffset(),5));
+                                  String(InputFPPRemote.GetTimeOffset(),5));
                 */
                 MultiSyncStats.pktSyncSeqSync++;
                 // DEBUG_V (String ("SecondsElapsed: ") + String (SecondsElapsed));
-                if (InputFPPRemotePlayFile)
+                if (AllowedToPlayRemoteFile())
                 {
-                    InputFPPRemotePlayFile->Sync (FileName, SecondsElapsed);
+                    InputFPPRemote->FppSyncRemoteFilePlay (FileName, SecondsElapsed);
                 }
                 break;
             }
@@ -465,9 +465,9 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 bool c_FPPDiscovery::PlayingFile ()
 {
     bool Response = false;
-    if (InputFPPRemotePlayFile)
+    if (AllowedToPlayRemoteFile())
     {
-        Response = !InputFPPRemotePlayFile->IsIdle ();
+        Response = !InputFPPRemote->IsIdle ();
     }
     return Response;
 } // PlayingFile
@@ -701,7 +701,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
         // DEBUG_V (String ("Path: ") + path);
 
-        if (path.startsWith (F ("/api/sequence/")) && AllowedToRemotePlayFiles())
+        if (path.startsWith (F ("/api/sequence/")) && AllowedToPlayRemoteFile())
         {
             // DEBUG_V (emptyString);
 
@@ -968,7 +968,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, F ("HostDescription"), config.id);
     JsonWrite(jsonResponse, CN_Platform,           String(CN_ESPixelStick));
     JsonWrite(jsonResponse, F ("Variant"),         FPP_VARIANT_NAME);
-    JsonWrite(jsonResponse, F ("Mode"),            String((true == AllowedToRemotePlayFiles()) ? CN_remote : CN_bridge));
+    JsonWrite(jsonResponse, F ("Mode"),            String((true == AllowedToPlayRemoteFile()) ? CN_remote : CN_bridge));
     JsonWrite(jsonResponse, CN_Version,            VERSION);
 
     const char* version = VERSION.c_str ();
@@ -1045,10 +1045,10 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
     else
     {
         // DEBUG_V();
-        if (InputFPPRemotePlayFile)
+        if (AllowedToPlayRemoteFile())
         {
             // DEBUG_V();
-            InputFPPRemotePlayFile->GetStatus (JsonData);
+            InputFPPRemote->GetStatus (JsonData);
         }
         JsonWrite(JsonData, CN_status,      1);
         JsonWrite(JsonData, CN_status_name, F ("playing"));
@@ -1242,10 +1242,10 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
         }
         // DEBUG_V ("Asking for file to play");
 
-        if (InputFPPRemotePlayFile)
+        if (AllowedToPlayRemoteFile())
         {
             // DEBUG_V ("Ask FSM to start playing");
-            InputFPPRemotePlayFile->Start (FileName, SecondsElapsed, 1);
+            InputFPPRemote->FppStartRemoteFilePlay (FileName, SecondsElapsed);
         }
 
     } while (false);
@@ -1260,60 +1260,17 @@ void c_FPPDiscovery::StopPlaying (bool wait)
 {
     // DEBUG_START;
     // DEBUG_V (String ("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));
-    // DEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemotePlayFile->GetFileName() + "'");
+    // DEBUG_V (String ("FPPDiscovery::StopPlaying '") + InputFPPRemote->GetFileName() + "'");
     // DEBUG_V (String ("IsEnabled '") + String(IsEnabled));
 
-    // prevent reentrant issues
-    if(!StopInProgress && IsEnabled)
+    if(AllowedToPlayRemoteFile())
     {
-        StopInProgress = true;
-        // only process if the pointer is valid
-        while (InputFPPRemotePlayFile)
-        {
-            // DEBUG_V("Pointer is valid");
-            if(InputFPPRemotePlayFile->IsIdle())
-            {
-                // DEBUG_V("we are done");
-                break;
-            }
-
-            // DEBUG_V("try to stop");
-            InputFPPRemotePlayFile->Stop ();
-            InputFPPRemotePlayFile->Poll ();
-
-            if(wait)
-            {
-                FeedWDT();
-                delay(5);
-            }
-            else
-            {
-                break;
-            }
-        }
-        StopInProgress = false;
-    }
-    else
-    {
-        // DEBUG_V("Ignoring duplicate request to stop");
+        InputFPPRemote->FppStopRemoteFilePlay();
     }
 
     // DEBUG_END;
 
 } // StopPlaying
-
-//-----------------------------------------------------------------------------
-bool c_FPPDiscovery::AllowedToRemotePlayFiles()
-{
-    // DEBUG_START;
-
-    // DEBUG_V (String ("SdCardIsInstalled: ")  + String (FileMgr.SdCardIsInstalled ()));
-    // DEBUG_V (String ("        IsEnabled: ")  + String (IsEnabled));
-
-    // DEBUG_END;
-
-    return (FileMgr.SdCardIsInstalled() && IsEnabled);
-} // AllowedToRemotePlayFiles
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime)
@@ -1358,11 +1315,11 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
 } // GenerateFppSyncMsg
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::SetInputFPPRemotePlayFile (c_InputFPPRemotePlayFile * value)
+void c_FPPDiscovery::SetInputFPPRemotePlayFile (c_InputFPPRemote * value)
 {
     // DEBUG_START;
 
-    InputFPPRemotePlayFile = value;
+    InputFPPRemote = value;
 
     // DEBUG_END;
 
@@ -1373,14 +1330,28 @@ void c_FPPDiscovery::ForgetInputFPPRemotePlayFile ()
 {
     // DEBUG_START;
 
-    if(nullptr != InputFPPRemotePlayFile)
-    {
-        delete InputFPPRemotePlayFile;
-        InputFPPRemotePlayFile = nullptr;
-    }
+    InputFPPRemote = nullptr;
 
     // DEBUG_END;
 
 } // SetInputFPPRemotePlayFile
+
+//-----------------------------------------------------------------------------
+bool c_FPPDiscovery::AllowedToPlayRemoteFile()
+{
+    // DEBUG_START;
+
+    bool Response = false;
+
+    if(InputFPPRemote &&
+       FileMgr.SdCardIsInstalled() &&
+       IsEnabled)
+    {
+        Response = InputFPPRemote->AllowedToPlayRemoteFile();
+    }
+
+    // DEBUG_END;
+    return Response;
+} // AllowedToPlayRemoteFile
 
 c_FPPDiscovery FPPDiscovery;

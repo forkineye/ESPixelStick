@@ -45,6 +45,8 @@ c_InputFPPRemote::~c_InputFPPRemote ()
     {
         // DEBUG_V();
         StopPlaying ();
+        FPPDiscovery.ForgetInputFPPRemotePlayFile ();
+        FPPDiscovery.Disable();
     }
 
 } // ~c_InputFPPRemote
@@ -317,10 +319,6 @@ void c_InputFPPRemote::StopPlaying ()
         }
         Stopping = true;
 
-        // DEBUG_V ("Disable FPP Discovery");
-        // FPPDiscovery.Disable ();
-        FPPDiscovery.ForgetInputFPPRemotePlayFile ();
-
         if(PlayingFile())
         {
             // DEBUG_V();
@@ -481,7 +479,7 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
         StatusType = CN_File;
         FileBeingPlayed = FileName;
 
-        FPPDiscovery.SetInputFPPRemotePlayFile ((c_InputFPPRemotePlayFile *) pInputFPPRemotePlayItem);
+        FPPDiscovery.SetInputFPPRemotePlayFile (this);
         FPPDiscovery.Enable ();
 
     } while (false);
@@ -531,3 +529,103 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
     return response;
 
 } // PlayingRemoteFile
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::FppStartRemoteFilePlay (String & FileName, uint32_t ElapsedTimeSec)
+{
+    // DEBUG_START;
+
+    if (AllowedToPlayRemoteFile())
+    {
+        // DEBUG_V ("Ask FSM to start playing");
+        pInputFPPRemotePlayItem->Start (FileName, ElapsedTimeSec, 1);
+    }
+
+    // DEBUG_END;
+} // FppStartRemoteFilePlay
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::FppStopRemoteFilePlay ()
+{
+    // DEBUG_START;
+
+    // only process if the pointer is valid
+    while (AllowedToPlayRemoteFile())
+    {
+        // DEBUG_V("Pointer is valid");
+        if(pInputFPPRemotePlayItem->IsIdle())
+        {
+            // DEBUG_V("Play item is Idle.");
+            break;
+        }
+
+        // DEBUG_V("try to stop");
+        pInputFPPRemotePlayItem->Stop ();
+        pInputFPPRemotePlayItem->Poll ();
+
+        FeedWDT();
+        delay(5);
+    }
+
+    // DEBUG_END;
+} // FppStopRemoteFilePlay
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::FppSyncRemoteFilePlay (String & FileName, uint32_t ElapsedTimeSec)
+{
+    // DEBUG_START;
+
+    if (AllowedToPlayRemoteFile())
+    {
+        // DEBUG_V("Send Sync message")
+        pInputFPPRemotePlayItem->Sync(FileName, ElapsedTimeSec);
+    }
+
+    // DEBUG_END;
+} // FppSyncRemoteFilePlay
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::GetFppRemotePlayStatus (JsonObject& jsonStatus)
+{
+    // DEBUG_START;
+
+    if (pInputFPPRemotePlayItem)
+    {
+        // DEBUG_V ("Ask FSM to start playing");
+        pInputFPPRemotePlayItem->GetStatus (jsonStatus);
+    }
+
+    // DEBUG_END;
+} // GetFppRemotePlayStatus
+
+//-----------------------------------------------------------------------------
+bool c_InputFPPRemote::IsIdle ()
+{
+    // DEBUG_START;
+    bool Response = true;
+    if (pInputFPPRemotePlayItem)
+    {
+        // DEBUG_V ("Ask FSM to start playing");
+        Response = pInputFPPRemotePlayItem->IsIdle ();
+    }
+    return Response;
+    // DEBUG_END;
+} // GetFppRemotePlayStatus
+
+//-----------------------------------------------------------------------------
+bool c_InputFPPRemote::AllowedToPlayRemoteFile()
+{
+    // DEBUG_START;
+
+    bool Response = false;
+
+    if (pInputFPPRemotePlayItem &&
+        (ConfiguredFileToPlay.equals(CN_No_LocalFileToPlay) || FppSyncOverride))
+    {
+        // DEBUG_V ("FPP Is allowed to control playing files");
+        Response = true;
+    }
+
+    // DEBUG_END;
+    return Response;
+} // AllowedToPlayRemoteFile

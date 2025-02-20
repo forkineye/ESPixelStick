@@ -20,7 +20,7 @@
 
 #include "ESPixelStick.h"
 #include "input/InputMgr.hpp"
-#include "input/InputFPPRemotePlayFile.hpp"
+#include "input/InputFPPRemote.h"
 
 #ifdef ESP32
 #	include <WiFi.h>
@@ -55,15 +55,15 @@ private:
     String  ConfiguredFileToPlay;
     String UploadFileName;
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
-    c_InputFPPRemotePlayFile * InputFPPRemotePlayFile = nullptr;
+    c_InputFPPRemote * InputFPPRemote = nullptr;
     const IPAddress MulticastAddress = IPAddress (239, 70, 80, 80);
 
-    void GetStatusJSON     (JsonObject& jsonResponse, bool advanced);
-    void BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp);
-    void StopPlaying       (bool wait = true);
-    void StartPlaying      (String & FileName, float SecondsElapsed);
-    bool AllowedToRemotePlayFiles ();
-    void GetDriverName     (String & Name) { Name = "FPPD"; }
+    void GetStatusJSON           (JsonObject& jsonResponse, bool advanced);
+    void BuildFseqResponse       (String fname, c_FileMgr::FileId fseq, String & resp);
+    void StopPlaying             (bool wait = true);
+    void StartPlaying            (String & FileName, float SecondsElapsed);
+    bool AllowedToPlayRemoteFile ();
+    void GetDriverName           (String & Name) { Name = "FPPD"; }
 
     struct MultiSyncStats_t
     {
@@ -133,7 +133,7 @@ public:
     bool SetConfig           (JsonObject& jsonConfig);
     void GetConfig           (JsonObject& jsonConfig);
 
-    void SetInputFPPRemotePlayFile    (c_InputFPPRemotePlayFile * value);
+    void SetInputFPPRemotePlayFile    (c_InputFPPRemote * value);
     void ForgetInputFPPRemotePlayFile ();
     void GenerateFppSyncMsg           (uint8_t Action, const String & FileName, uint32_t CurrentFrame, const float & ElpsedTime);
     void GetSysInfoJSON               (JsonObject& jsonResponse);
