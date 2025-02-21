@@ -271,16 +271,7 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
     {
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
-        if(FppSyncOverride)
-        {
-            String Background = FileToPlay.equals(CN_No_LocalFileToPlay) ? emptyString : FileToPlay;
-            pInputFPPRemotePlayItem->SetBackgroundFileName(Background);
-            // DEBUG_V(String("Background: ") + Background);
-        }
-        else
-        {
-            pInputFPPRemotePlayItem->ClearFileNames();
-        }
+        SetBackgroundFile();
     }
 
     // DEBUG_V ("Config Processing");
@@ -331,18 +322,8 @@ void c_InputFPPRemote::StopPlaying ()
 
         if(PlayingFile())
         {
-            pInputFPPRemotePlayItem->ClearFileNames();
             // DEBUG_V("Tell player to stop");
-            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
-            pInputFPPRemotePlayItem->Stop ();
-
-            // DEBUG_V();
-            while (!pInputFPPRemotePlayItem->IsIdle ())
-            {
-                pInputFPPRemotePlayItem->Poll ();
-                // DEBUG_V("Tell Player to stop");
-                pInputFPPRemotePlayItem->Stop ();
-            }
+            FppStopRemoteFilePlay();
 
             // DEBUG_V("Delete current playing file");
             delete pInputFPPRemotePlayItem;
@@ -447,6 +428,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         }
 
         // DEBUG_V (String ("Start Playing FileName: '") + FileName + "'");
+        pInputFPPRemotePlayItem->ClearFileNames();
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         pInputFPPRemotePlayItem->Start (FileName, 0, 1);
@@ -488,12 +470,8 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
         // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
-        if(FppSyncOverride)
-        {
-            String Background = FileName.equals(CN_No_LocalFileToPlay) ? emptyString : FileName;
-            pInputFPPRemotePlayItem->SetBackgroundFileName(Background);
-            // DEBUG_V(String("Background: ") + Background);
-        }
+
+        SetBackgroundFile();
 
         StatusType = CN_File;
         FileBeingPlayed = FileName;
@@ -579,6 +557,7 @@ void c_InputFPPRemote::FppStopRemoteFilePlay ()
         }
 
         // DEBUG_V("try to stop");
+        pInputFPPRemotePlayItem->ClearFileNames();
         pInputFPPRemotePlayItem->Stop ();
         pInputFPPRemotePlayItem->Poll ();
 
@@ -648,3 +627,22 @@ bool c_InputFPPRemote::AllowedToPlayRemoteFile()
     // DEBUG_END;
     return Response;
 } // AllowedToPlayRemoteFile
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::SetBackgroundFile ()
+{
+    // DEBUG_START;
+
+    if(FppSyncOverride)
+    {
+        String Background = ConfiguredFileToPlay.equals(CN_No_LocalFileToPlay) ? emptyString : ConfiguredFileToPlay;
+        pInputFPPRemotePlayItem->SetBackgroundFileName(Background);
+        // DEBUG_V(String("Background: ") + Background);
+    }
+    else
+    {
+        pInputFPPRemotePlayItem->ClearFileNames();
+    }
+
+    // DEBUG_END;
+} // SetBackgroundFile

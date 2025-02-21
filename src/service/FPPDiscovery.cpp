@@ -51,7 +51,7 @@ void c_FPPDiscovery::begin ()
 {
     // DEBUG_START;
 
-    StopPlaying ();
+    // StopPlaying ();
     // DEBUG_V();
 
     inFileUpload = false;
@@ -396,7 +396,12 @@ void c_FPPDiscovery::ProcessSyncPacket (uint8_t action, String FileName, float S
                 }
                 else
                 {
-                    StopPlaying (false);
+                    StopPlaying ();
+                }
+
+                if(FppSyncOverride)
+                {
+                    InputFPPRemote->SetBackgroundFile();
                 }
                 break;
             }
@@ -455,7 +460,7 @@ void c_FPPDiscovery::ProcessBlankPacket ()
 
     if (IsEnabled)
     {
-        StopPlaying (false);
+        StopPlaying ();
         OutputMgr.ClearBuffer();
     }
     // DEBUG_END;
@@ -709,9 +714,9 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             if (seq.endsWith (F ("/meta")))
             {
                 // DEBUG_V (emptyString);
-
                 seq = seq.substring (0, seq.length () - 5);
-                StopPlaying (false);
+                // DEBUG_V("Stop Input");
+                StopPlaying ();
 
                 c_FileMgr::FileId FileHandle;
                 // DEBUG_V (String (" seq: ") + seq);
@@ -848,7 +853,8 @@ void c_FPPDiscovery::ProcessFile (
             // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
             // DEBUG_V("wait for the player to become idle");
             // DEBUG_V (String ("ContentLength: ") + String (ContentLength));
-            StopPlaying(true);
+            // DEBUG_V("Stop Input");
+            StopPlaying();
             inFileUpload = true;
             UploadFileName = filename;
             InputMgr.SetOperationalState(false);
@@ -1256,7 +1262,7 @@ void c_FPPDiscovery::StartPlaying (String & FileName, float SecondsElapsed)
 
 //-----------------------------------------------------------------------------
 // Wait for idle.
-void c_FPPDiscovery::StopPlaying (bool wait)
+void c_FPPDiscovery::StopPlaying ()
 {
     // DEBUG_START;
     // DEBUG_V (String ("Current Task Priority: ") + String(uxTaskPriorityGet(NULL)));

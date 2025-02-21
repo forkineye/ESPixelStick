@@ -60,7 +60,7 @@ private:
 
     void GetStatusJSON           (JsonObject& jsonResponse, bool advanced);
     void BuildFseqResponse       (String fname, c_FileMgr::FileId fseq, String & resp);
-    void StopPlaying             (bool wait = true);
+    void StopPlaying             ();
     void StartPlaying            (String & FileName, float SecondsElapsed);
     bool AllowedToPlayRemoteFile ();
     void GetDriverName           (String & Name) { Name = "FPPD"; }

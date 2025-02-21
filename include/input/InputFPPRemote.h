@@ -49,6 +49,7 @@ class c_InputFPPRemote : public c_InputCommon
       void GetFppRemotePlayStatus (JsonObject& jsonStatus);
       bool IsIdle();
       bool AllowedToPlayRemoteFile();
+      void SetBackgroundFile      ();
 
 protected:
 
