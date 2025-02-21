@@ -2,7 +2,7 @@
 * InputFPPRemotePlayItem.cpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -25,7 +25,6 @@ byte *LocalIntensityBuffer = nullptr;
 
 //-----------------------------------------------------------------------------
 c_InputFPPRemotePlayItem::c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelIds _InputChannelId)
-
 {
     // DEBUG_START;
 
@@ -40,3 +39,13 @@ c_InputFPPRemotePlayItem::~c_InputFPPRemotePlayItem ()
 
 } // ~c_InputFPPRemotePlayItem
 
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayItem::ClearFileNames()
+{
+    // DEBUG_START;
+
+    BackgroundFileName = emptyString;
+    FileControl[NextFile].FileName = emptyString;
+
+    // DEBUG_END;
+}

@@ -25,8 +25,10 @@
 class c_InputFPPRemotePlayItem
 {
 protected:
-    time_t          PlayDurationSec = 0;
-    bool            SendFppSync = false;
+    time_t  PlayDurationSec = 0;
+    bool    SendFppSync = false;
+    String  BackgroundFileName = emptyString;
+
 #if defined(ARDUINO_ARCH_ESP8266)
 const uint64_t  LocalIntensityBufferSize = 512;
 #else
@@ -76,6 +78,8 @@ public:
             c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
             bool     InputIsPaused   () { return InputPaused; }
             void     SetOperationalState (bool ActiveFlag) {InputPaused = !ActiveFlag;}
+            void     SetBackgroundFileName(String & FileName) {BackgroundFileName = FileName;}
+            void     ClearFileNames  ();
 
 }; // c_InputFPPRemotePlayItem
 extern byte *LocalIntensityBuffer;

@@ -31,6 +31,13 @@ bool fsm_PlayFile_state_Idle::Poll ()
     // is there a new file to play?
     if(!p_Parent->FileControl[NextFile].FileName.isEmpty())
     {
+        // DEBUG_V(String("Start existing file: ") + p_Parent->FileControl[NextFile].FileName);
+        p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
+    }
+    else if (!p_Parent->BackgroundFileName.isEmpty())
+    {
+        // DEBUG_V(String("Start background file: ") + p_Parent->BackgroundFileName);
+        Start(p_Parent->BackgroundFileName, 0.0, 1);
         p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
     }
 
@@ -67,6 +74,7 @@ void fsm_PlayFile_state_Idle::Start (String& FileName, float ElapsedSeconds, uin
     p_Parent->FileControl[NextFile].StartingTimeMS = p_Parent->FileControl[NextFile].LastPollTimeMS - p_Parent->FileControl[NextFile].ElapsedPlayTimeMS;
     p_Parent->FileControl[NextFile].RemainingPlayCount = RemainingPlayCount;
 
+    // DEBUG_V (String ("          Backgroud: ") + p_Parent->BackgroundFileName);
     // DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
     // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
     // DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
