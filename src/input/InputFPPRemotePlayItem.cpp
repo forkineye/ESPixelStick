@@ -48,4 +48,4 @@ void c_InputFPPRemotePlayItem::ClearFileNames()
     FileControl[NextFile].FileName = emptyString;
 
     // DEBUG_END;
-}
+} // ClearFileNames
