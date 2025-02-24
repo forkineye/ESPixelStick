@@ -9,7 +9,7 @@ var searchData=
   ['adjustedbrightness_6',['AdjustedBrightness',['../classc___output_pixel.html#a1f5a9e4f3bc06fd7ff5ee0811171b855',1,'c_OutputPixel']]],
   ['advertisenewstate_7',['AdvertiseNewState',['../classc___network_mgr.html#af2b9dc93956b88607802667e89c76f75',1,'c_NetworkMgr']]],
   ['allleds_8',['allLeds',['../structc___input_effect_engine_1_1_m_q_t_t_configuration__t.html#a1bd1889519fbbaa21fea9395ee7a1bcc',1,'c_InputEffectEngine::MQTTConfiguration_t']]],
-  ['allowedtoremoteplayfiles_9',['AllowedToRemotePlayFiles',['../classc___f_p_p_discovery.html#a5259de082686887cbd0f7997c3d7dfe3',1,'c_FPPDiscovery']]],
+  ['allowedtoplayremotefile_9',['AllowedToPlayRemoteFile',['../classc___input_f_p_p_remote.html#a49952f48c45c1d31ffb14a18a030a853',1,'c_InputFPPRemote::AllowedToPlayRemoteFile()'],['../classc___f_p_p_discovery.html#af4d43b6ccbd2643c81e064f9264182f6',1,'c_FPPDiscovery::AllowedToPlayRemoteFile()']]],
   ['allowwifiandethupsimultaneously_10',['AllowWiFiAndEthUpSimultaneously',['../classc___network_mgr.html#aed8669649b1aad20da87b3c4bb176926',1,'c_NetworkMgr']]],
   ['announcestate_11',['AnnounceState',['../classc___wi_fi_driver.html#a960683ad5c592accc895d9335c25b942',1,'c_WiFiDriver']]],
   ['ap_5fchannelnumber_12',['ap_channelNumber',['../classc___wi_fi_driver.html#a501894f065563ab82a9359961b5bc0bd',1,'c_WiFiDriver']]],

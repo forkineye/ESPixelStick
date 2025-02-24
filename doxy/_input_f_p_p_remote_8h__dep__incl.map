@@ -1,7 +1,30 @@
 <map id="/github/workspace/include/input/InputFPPRemote.h" name="/github/workspace/include/input/InputFPPRemote.h">
-<area shape="rect" id="Node000001" title=" " alt="" coords="104,5,277,46"/>
-<area shape="rect" id="Node000002" href="$_input_f_p_p_remote_8cpp.html" title=" " alt="" coords="5,94,187,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="160,59,119,96,116,92,156,55"/>
-<area shape="rect" id="Node000003" href="$_input_mgr_8cpp.html" title=" " alt="" coords="211,94,360,135"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="225,55,266,92,262,96,222,59"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="944,5,1117,46"/>
+<area shape="rect" id="Node000002" href="$_f_p_p_discovery_8h.html" title=" " alt="" coords="944,94,1117,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="1033,62,1033,94,1028,94,1028,62"/>
+<area shape="rect" id="Node000005" href="$_input_f_p_p_remote_8cpp.html" title=" " alt="" coords="5,190,187,231"/>
+<area shape="poly" id="edge13_Node000001_Node000005" title=" " alt="" coords="930,46,604,104,402,143,199,185,170,192,169,187,198,180,401,137,603,99,929,41"/>
+<area shape="rect" id="Node000014" href="$_input_mgr_8cpp.html" title=" " alt="" coords="1141,94,1291,135"/>
+<area shape="poly" id="edge14_Node000001_Node000014" title=" " alt="" coords="1088,50,1175,91,1173,96,1085,55"/>
+<area shape="rect" id="Node000003" href="$_web_mgr_8cpp.html" title=" " alt="" coords="211,190,360,231"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="929,122,675,142,523,160,373,185,345,192,344,187,371,180,523,155,675,136,929,117"/>
+<area shape="rect" id="Node000004" href="$_input_d_d_p_8cpp.html" title=" " alt="" coords="384,190,533,231"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="930,128,750,149,647,165,546,185,519,192,518,187,545,180,646,160,749,144,929,122"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="929,121,786,127,603,139,401,157,199,185,166,192,165,187,198,180,401,152,603,133,785,122,929,116"/>
+<area shape="rect" id="Node000006" href="$_input_f_p_p_remote_play_effect_fsm_8cpp.html" title=" " alt="" coords="558,183,773,238"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="940,142,772,185,771,179,939,136"/>
+<area shape="rect" id="Node000007" href="$_input_f_p_p_remote_play_file_8cpp.html" title=" " alt="" coords="797,190,1024,231"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="996,146,937,192,934,188,992,142"/>
+<area shape="rect" id="Node000008" href="$_input_f_p_p_remote_play_file_fsm_8cpp.html" title=" " alt="" coords="1049,183,1252,238"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="1069,142,1117,180,1114,184,1066,146"/>
+<area shape="rect" id="Node000009" href="$_input_f_p_p_remote_play_list_8cpp.html" title=" " alt="" coords="1276,190,1505,231"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="1122,137,1316,187,1315,192,1120,142"/>
+<area shape="rect" id="Node000010" href="$_input_f_p_p_remote_play_list_fsm_8cpp.html" title=" " alt="" coords="1528,183,1733,238"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="1132,132,1241,147,1327,155,1411,164,1518,180,1529,182,1528,187,1517,185,1411,169,1326,160,1241,152,1132,138"/>
+<area shape="rect" id="Node000011" href="$main_8cpp.html" title=" " alt="" coords="1757,190,1907,231"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="1133,132,1226,142,1306,147,1442,150,1576,156,1654,165,1746,180,1775,187,1774,192,1745,185,1654,170,1576,162,1441,156,1305,153,1226,148,1132,138"/>
+<area shape="rect" id="Node000012" href="$_network_mgr_8cpp.html" title=" " alt="" coords="1931,190,2101,231"/>
+<area shape="poly" id="edge11_Node000002_Node000012" title=" " alt="" coords="1133,132,1252,144,1354,150,1528,151,1701,155,1801,164,1919,180,1952,187,1951,192,1918,185,1801,169,1700,160,1528,156,1354,155,1252,149,1132,138"/>
+<area shape="rect" id="Node000013" href="$_f_p_p_discovery_8cpp.html" title=" " alt="" coords="2126,190,2304,231"/>
+<area shape="poly" id="edge12_Node000002_Node000013" title=" " alt="" coords="1132,132,1282,146,1409,152,1625,150,1729,149,1841,152,1966,161,2114,180,2148,187,2147,192,2113,185,1966,166,1840,157,1729,155,1625,156,1409,157,1281,151,1132,137"/>
 </map>

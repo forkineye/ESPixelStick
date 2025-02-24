@@ -7,7 +7,7 @@ var searchData=
   ['inputchannelid_4',['InputChannelId',['../classc___input_common.html#a0eba8f685e86b7f6831a8e4163079ebb',1,'c_InputCommon::InputChannelId'],['../classc___input_f_p_p_remote_play_item.html#aa343859257656b16467ea49ca913c651',1,'c_InputFPPRemotePlayItem::InputChannelId']]],
   ['inputdatabuffersize_5',['InputDataBufferSize',['../classc___input_common.html#ad9a18b2db333d979e7dce166f1912006',1,'c_InputCommon::InputDataBufferSize'],['../classc___input_mgr.html#a6ab1fc130e64f8a25a03a31f532362e9',1,'c_InputMgr::InputDataBufferSize']]],
   ['inputdebouncecount_6',['InputDebounceCount',['../classc___external_input.html#ab876eda22ea25a0c154d16570532fef2',1,'c_ExternalInput']]],
-  ['inputfppremoteplayfile_7',['InputFPPRemotePlayFile',['../classc___f_p_p_discovery.html#ad815b8e81ce26ffbf0a226c77229937c',1,'c_FPPDiscovery']]],
+  ['inputfppremote_7',['InputFPPRemote',['../classc___f_p_p_discovery.html#a4e15f5703ca6699347db84b4e33d380a',1,'c_FPPDiscovery']]],
   ['inputholdtimer_8',['InputHoldTimer',['../classc___external_input.html#a839043f5d427e6170ff613f39efa5867',1,'c_ExternalInput']]],
   ['inputmgr_9',['InputMgr',['../_input_mgr_8cpp.html#a496a8590fb601e0147c9699b48251f18',1,'InputMgr:&#160;InputMgr.cpp'],['../_input_mgr_8hpp.html#a496a8590fb601e0147c9699b48251f18',1,'InputMgr:&#160;InputMgr.cpp']]],
   ['inputpaused_10',['InputPaused',['../classc___input_f_p_p_remote_play_item.html#a9afea78793d9a822a3c8c6ef6f4ffc1c',1,'c_InputFPPRemotePlayItem']]],

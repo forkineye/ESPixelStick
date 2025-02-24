@@ -1,7 +1,15 @@
 <map id="c_FPPDiscovery::PlayingAfile" name="c_FPPDiscovery::PlayingAfile">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,13,197,38"/>
-<area shape="rect" id="Node000002" href="$classc___f_p_p_discovery.html#ab4198d4f7d573455827f0f4d087f3466" title=" " alt="" coords="245,13,432,38"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,23,229,23,229,28,197,28"/>
-<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_file.html#a832119422e2b13fc06059dd73215cf75" title=" " alt="" coords="480,5,661,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="432,23,465,23,465,28,432,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,100,197,125"/>
+<area shape="rect" id="Node000002" href="$classc___f_p_p_discovery.html#ab4198d4f7d573455827f0f4d087f3466" title=" " alt="" coords="245,100,432,125"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="197,110,229,110,229,115,197,115"/>
+<area shape="rect" id="Node000003" href="$classc___f_p_p_discovery.html#af4d43b6ccbd2643c81e064f9264182f6" title=" " alt="" coords="480,63,665,103"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="432,98,464,94,465,99,433,103"/>
+<area shape="rect" id="Node000006" href="$classc___input_f_p_p_remote.html#a4b1edbe2cb9e8465f729058ee582d1a2" title=" " alt="" coords="486,128,659,153"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="433,121,471,125,470,131,432,126"/>
+<area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote.html#a49952f48c45c1d31ffb14a18a030a853" title=" " alt="" coords="713,5,901,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="658,60,706,48,707,53,659,65"/>
+<area shape="rect" id="Node000005" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="713,70,901,96"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="666,80,698,80,698,86,666,86"/>
+<area shape="rect" id="Node000007" href="$classc___input_f_p_p_remote_play_item.html#a635e6efe611a2c4219289de24b93c585" title=" " alt="" coords="714,120,900,161"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="660,138,698,138,698,143,660,143"/>
 </map>
