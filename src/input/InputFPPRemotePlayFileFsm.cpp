@@ -25,16 +25,23 @@
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Idle::Poll ()
 {
-    // DEBUG_START;
-    // DEBUG_V("fsm_PlayFile_state_Idle::Poll");
+    // xDEBUG_START;
+    // xDEBUG_V("fsm_PlayFile_state_Idle::Poll");
 
     // is there a new file to play?
     if(!p_Parent->FileControl[NextFile].FileName.isEmpty())
     {
+        // DEBUG_V(String("Start existing file: ") + p_Parent->FileControl[NextFile].FileName);
+        p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
+    }
+    else if (!p_Parent->BackgroundFileName.isEmpty())
+    {
+        // DEBUG_V(String("Start background file: ") + p_Parent->BackgroundFileName);
+        Start(p_Parent->BackgroundFileName, 0.0, 1);
         p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
     }
 
-    // DEBUG_END;
+    // xDEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Idle::Poll
@@ -47,7 +54,6 @@ void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
 
     // DEBUG_V (String ("Parent: 0x") + String ((uint32_t)Parent, HEX));
     p_Parent = Parent;
-    p_Parent->ClearFileInfo ();
     p_Parent->pCurrentFsmState = &(p_Parent->fsm_PlayFile_state_Idle_imp);
 
     // DEBUG_END;
@@ -67,6 +73,7 @@ void fsm_PlayFile_state_Idle::Start (String& FileName, float ElapsedSeconds, uin
     p_Parent->FileControl[NextFile].StartingTimeMS = p_Parent->FileControl[NextFile].LastPollTimeMS - p_Parent->FileControl[NextFile].ElapsedPlayTimeMS;
     p_Parent->FileControl[NextFile].RemainingPlayCount = RemainingPlayCount;
 
+    // DEBUG_V (String ("          Backgroud: ") + p_Parent->BackgroundFileName);
     // DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
     // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
     // DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
@@ -353,8 +360,7 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, float ElapsedSecon
     // DEBUG_START;
     // DEBUG_V("fsm_PlayFile_state_PlayingFile::Start");
 
-    // DEBUG_V("Set up a next file");
-
+    // DEBUG_V("Set up the next file");
     p_Parent->FileControl[NextFile].FileName = FileName;
     p_Parent->FileControl[NextFile].ElapsedPlayTimeMS = uint32_t (ElapsedSeconds * 1000.0);
     p_Parent->FileControl[NextFile].LastPollTimeMS = millis();
@@ -367,7 +373,7 @@ void fsm_PlayFile_state_PlayingFile::Start (String& FileName, float ElapsedSecon
     // DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
     // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
 
-    // DEBUG_V("Stop old file");
+    // DEBUG_V("Stop the current file");
     Stop ();
 
     // DEBUG_END;
@@ -392,8 +398,8 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSeconds)
 {
-    // DEBUG_START;
-    // DEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
+    // xDEBUG_START;
+    // xDEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
 
     bool response = false;
 
@@ -402,8 +408,10 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
         // are we on the correct file?
         if (!FileName.equals(p_Parent->GetFileName ()))
         {
-            // DEBUG_V ("Sync: Filename change: Start");
-            p_Parent->Start (FileName, ElapsedSeconds, 1);
+            // DEBUG_V ("Sync: Filename change");
+            // DEBUG_V (String("New FileName: ") + FileName);
+            // DEBUG_V (String("Old FileName: ") + p_Parent->GetFileName ());
+            Start (FileName, ElapsedSeconds, 1);
             break;
         }
 
@@ -463,7 +471,7 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 
     } while (false);
 
-    // DEBUG_END;
+    // xDEBUG_END;
     return response;
 
 } // fsm_PlayFile_state_PlayingFile::Sync
@@ -562,22 +570,22 @@ bool fsm_PlayFile_state_Stopping::Sync (String&, float)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Error::Poll ()
 {
-    // DEBUG_START;
-    // DEBUG_V("fsm_PlayFile_state_Error::Poll");
+    // xDEBUG_START;
+    // xDEBUG_V("fsm_PlayFile_state_Error::Poll");
 
     if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
     {
-        // DEBUG_V("Unexpected file handle in Error handler.");
+        // xDEBUG_V("Unexpected file handle in Error handler.");
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
     }
     else
     {
-        // DEBUG_V("Unexpected missing file handle");
+        // xDEBUG_V("Unexpected missing file handle");
     }
 
     p_Parent->FileControl[CurrentFile].FileName.clear();
 
-    // DEBUG_END;
+    // xDEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Error::Poll

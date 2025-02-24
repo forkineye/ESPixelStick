@@ -20,7 +20,6 @@
 
 #include "InputCommon.hpp"
 #include "WebMgr.hpp"
-#include "service/FPPDiscovery.h"
 #include "InputFPPRemotePlayItem.hpp"
 
 class c_InputFPPRemote : public c_InputCommon
@@ -43,6 +42,14 @@ class c_InputFPPRemote : public c_InputCommon
       void SetBufferInfo (uint32_t BufferSize);
       void ProcessButtonActions(c_ExternalInput::InputValue_t value);
       void SetOperationalState (bool ActiveFlag);
+
+      void FppStartRemoteFilePlay (String & FileName, uint32_t ElapsedTimeSec);
+      void FppStopRemoteFilePlay  ();
+      void FppSyncRemoteFilePlay  (String & FileName, uint32_t ElapsedTimeMS);
+      void GetFppRemotePlayStatus (JsonObject& jsonStatus);
+      bool IsIdle();
+      bool AllowedToPlayRemoteFile();
+      void SetBackgroundFile      ();
 
 protected:
 
