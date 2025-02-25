@@ -55,11 +55,11 @@ void c_InputArtnet::Begin ()
         // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
 
         validateConfiguration ();
-        // DEBUG_V ("");
+        // DEBUG_V ();
 
         NetworkStateChanged (NetworkMgr.IsConnected (), false);
 
-        // DEBUG_V ("");
+        // DEBUG_V ();
         HasBeenInitialized = true;
 
     } while (false);
@@ -90,7 +90,7 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
     JsonWrite(ArtnetStatus, CN_unifirst,   startUniverse);
     JsonWrite(ArtnetStatus, CN_unilast,    LastUniverse);
     JsonWrite(ArtnetStatus, CN_unichanlim, ChannelsPerUniverse);
-    // DEBUG_V ("");
+    // DEBUG_V ();
 
     JsonWrite(ArtnetStatus, F ("lastData"),   lastData);
     JsonWrite(ArtnetStatus, CN_num_packets,   num_packets);
@@ -190,7 +190,8 @@ void c_InputArtnet::SetBufferInfo (uint32_t BufferSize)
         Begin ();
     }
 
-    SetBufferTranslation ();
+    // validate config and set the buffer translations.
+    validateConfiguration();
 
     // DEBUG_END;
 
@@ -213,7 +214,7 @@ void c_InputArtnet::SetBufferTranslation ()
 
     for (auto& CurrentUniverse : UniverseArray)
     {
-        uint32_t BytesInThisUniverse        = min (BytesInUniverse, BytesLeftToMap);
+        uint32_t BytesInThisUniverse      = min (BytesInUniverse, BytesLeftToMap);
         CurrentUniverse.DestinationOffset = DestinationOffset;
         CurrentUniverse.BytesToCopy       = BytesInThisUniverse;
         CurrentUniverse.SourceDataOffset  = InputOffset;
@@ -267,7 +268,7 @@ void c_InputArtnet::SetUpArtnet ()
 
     if (nullptr == pArtnet)
     {
-        // DEBUG_V ("");
+        // DEBUG_V ();
         pArtnet = new Artnet ();
         pArtnet->begin ();
 
@@ -275,7 +276,7 @@ void c_InputArtnet::SetUpArtnet ()
         pArtnet->setBroadcast (broadcast);
         logcon (String (F ("Subscribed to broadcast")));
 
-        // DEBUG_V ("");
+        // DEBUG_V ();
 
         fMe = this; // hate this
         pArtnet->setArtDmxCallback ([](uint16_t UniverseId, uint16_t length, uint8_t sequence, uint8_t* data, IPAddress remoteIP)
@@ -288,7 +289,7 @@ void c_InputArtnet::SetUpArtnet ()
             fMe->onDmxPoll (BroadcastIP);
         });
     }
-    // DEBUG_V ("");
+    // DEBUG_V ();
 
     logcon (String (F ("Listening for ")) + InputDataBufferSize +
         F (" channels from Universe ") + startUniverse +
@@ -305,16 +306,17 @@ void c_InputArtnet::validateConfiguration ()
     // DEBUG_V (String ("             startUniverse: ") + String (startUniverse));
     // DEBUG_V (String ("       ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
     // DEBUG_V (String ("FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
-    // DEBUG_V (String ("              LastUniverse: ") + String (startUniverse));
+    // DEBUG_V (String ("              LastUniverse: ") + String (LastUniverse));
+    // DEBUG_V (String ("       InputDataBufferSize: ") + String (InputDataBufferSize));
 
-    // DEBUG_V ("");
+    // DEBUG_V ();
     if (ChannelsPerUniverse > UNIVERSE_MAX || ChannelsPerUniverse < 1)
     {
         // DEBUG_V (String ("ERROR: ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
         ChannelsPerUniverse = UNIVERSE_MAX;
     }
 
-    // DEBUG_V ("");
+    // DEBUG_V ();
     if (FirstUniverseChannelOffset < 1)
     {
         // DEBUG_V (String ("ERROR: FirstUniverseChannelOffset: ") + String (FirstUniverseChannelOffset));
@@ -330,23 +332,14 @@ void c_InputArtnet::validateConfiguration ()
     }
 
     // Find the last universe we should listen for
-     // DEBUG_V ("");
-    uint32_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
-    if (span % ChannelsPerUniverse)
-    {
-        LastUniverse = startUniverse + span / ChannelsPerUniverse;
-    }
-    else
-    {
-        LastUniverse = startUniverse + span / ChannelsPerUniverse - 1;
-    }
-
-    // DEBUG_V ("");
+    // DEBUG_V ("Calculate Last Universe");
+    uint16_t span = FirstUniverseChannelOffset + InputDataBufferSize;
+    // DEBUG_V (String ("                      span: ") + String(span));
+    LastUniverse = startUniverse + (span / ChannelsPerUniverse);
+     // DEBUG_V (String ("                 Remainder: ") + String (span % ChannelsPerUniverse));
+     // DEBUG_V (String ("          New LastUniverse: ") + String (LastUniverse));
 
     SetBufferTranslation ();
-
-    // DEBUG_V ("");
-    // pArtnet->stats.num_packets = 0;
 
     // DEBUG_END;
 
