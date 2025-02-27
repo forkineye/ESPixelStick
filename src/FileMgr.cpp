@@ -1721,10 +1721,10 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
         // open output file, erase old data
         ESP_SD.chdir(); // Set to sd root
         UnLockSd();
-        DeleteSdFile(String(F(FSEQFILELIST)));
+        DeleteSdFile(FSEQFILELIST);
         LockSd();
         FsFile OutputFile;
-        if(!OutputFile.open (String(F(FSEQFILELIST)).c_str(), O_WRITE | O_CREAT))
+        if(!OutputFile.open (FSEQFILELIST.c_str(), O_WRITE | O_CREAT))
         {
             InputFile.close();
             UnLockSd();
