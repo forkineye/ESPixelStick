@@ -104,7 +104,7 @@ public:
     uint64_t GetDefaultFseqFileList (uint8_t * buffer, uint64_t maxlen);
     void     FindFirstZipFile (String &FileName);
 
-const String FSEQFILELIST = F("fseqfilelist.json");
+const String FSEQFILELIST = "fseqfilelist.json";
 #define SD_BLOCK_SIZE 512
 
 #if defined ARDUINO_ARCH_ESP8266
