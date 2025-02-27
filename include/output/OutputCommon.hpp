@@ -60,7 +60,6 @@ public:
     virtual uint32_t     GetNumOutputBufferBytesNeeded () = 0;
     virtual uint32_t     GetNumOutputBufferChannelsServiced () = 0;
     virtual void         PauseOutput (bool NewState) {Paused = NewState;}
-    virtual void         ClearBuffer ();
     virtual void         WriteChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData);
     virtual void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     virtual bool         ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio);

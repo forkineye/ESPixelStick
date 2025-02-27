@@ -55,16 +55,6 @@ c_OutputCommon::~c_OutputCommon ()
 } // ~c_OutputCommon
 
 //-----------------------------------------------------------------------------
-void c_OutputCommon::ClearBuffer ()
-{
-    // DEBUG_START;
-
-    memset(GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
-
-    // DEBUG_END;
-} // ClearBuffer
-
-//-----------------------------------------------------------------------------
 void c_OutputCommon::BaseGetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
