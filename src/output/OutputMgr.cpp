@@ -1413,7 +1413,7 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
     UsedBufferSize = OutputBufferOffset;
     // DEBUG_V (String ("       OutputBuffer: 0x") + String (uint32_t (OutputBuffer), HEX));
     // DEBUG_V (String ("     UsedBufferSize: ") + String (uint32_t (UsedBufferSize)));
-    InputMgr.SetBufferInfo (OutputChannelOffset);
+    InputMgr.SetBufferInfo (UsedBufferSize);
 
     // DEBUG_END;
 
