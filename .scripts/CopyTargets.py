@@ -49,7 +49,7 @@ SRC_MAP  = SRC_DIR + PROGNAME + ".map"
 SRC_MAP2 = "./" + PROGNAME + ".map"
 # print("SRC_BIN " + SRC_BIN)
 
-DST_ROOT  = BUILD_DIR + "/firmware/"
+DST_ROOT  = "./firmware/"
 DST_DIR   = DST_ROOT + BOARD_MCU + "/"
 DST_BIN   = DST_DIR + PIOENV + "-app.bin"
 DST_PART  = DST_DIR + PIOENV + "-partitions.bin"
@@ -58,7 +58,7 @@ DST_MERG  = DST_DIR + PIOENV + "-merged.bin"
 DST_FS    = DST_DIR + PIOENV + "-littlefs.bin"
 # print("DST_BIN " + DST_BIN)
 
-DBG_ROOT  = BUILD_DIR + "/debug/"
+DBG_ROOT  = "./debug/"
 DBG_DIR   = DBG_ROOT + BOARD_MCU + "/"
 DST_ELF   = DBG_DIR + PIOENV + ".elf"
 DST_MAP   = DBG_DIR + PIOENV + ".map"
