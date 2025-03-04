@@ -162,8 +162,8 @@ jobs:
           chip: ${{ matrix.chip }}
         run: |
           pio run -e ${{ matrix.target }}
-          ls -al ./firmware/${{ matrix.chip }}
-          ls -al ./debug/${{ matrix.chip }}
+          ls -al ./.pio/build/firmware/${{ matrix.chip }}
+          ls -al ./.pio/build/debug/${{ matrix.chip }}
 
       - name: Upload Firmware Artifacts
         uses: actions/upload-artifact@v4
