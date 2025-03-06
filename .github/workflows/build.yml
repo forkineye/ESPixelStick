@@ -113,6 +113,9 @@ jobs:
           - target: "esp32_ka"
             chip: "esp32"
           #
+          - target: "esp32_ka_4"
+            chip: "esp32"
+          #
           - target: "esp32_breakdancev2"
             chip: "esp32"
 
