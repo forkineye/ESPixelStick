@@ -271,6 +271,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         }
 
         // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (FileControl[CurrentFile].FileHandleForFileBeingPlayed));
+        DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         uint32_t BytesRead = FileMgr.ReadSdFile (FileControl[CurrentFile].FileHandleForFileBeingPlayed,
                                                (uint8_t*)&fsqRawHeader,
                                                sizeof (fsqRawHeader), size_t(0));
@@ -359,6 +360,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
             FSEQRawRangeEntry FseqRawRanges[MAX_NUM_SPARSE_RANGES];
 
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.ReadSdFile (FileControl[CurrentFile].FileHandleForFileBeingPlayed,
                                 (uint8_t*)&FseqRawRanges[0],
                                 sizeof (FseqRawRanges),
@@ -493,6 +495,7 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
         while (NumBytesRead < NumBytesToRead)
         {
             // xDEBUG_V();
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             uint64_t NumBytesReadThisPass = FileMgr.ReadSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed,
                                                                LocalIntensityBuffer,
                                                                min((NumBytesToRead - NumBytesRead), LocalIntensityBufferSize),

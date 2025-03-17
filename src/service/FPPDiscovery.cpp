@@ -554,7 +554,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
 #endif // !def PRINT_DEBUG
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, String & resp)
+void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseqFileHandle, String & resp)
 {
     // DEBUG_START;
 
@@ -564,7 +564,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
     // DEBUG_V(String("FileHandle: ") + String(fseq));
 
     FSEQRawHeader fsqHeader;
-    FileMgr.ReadSdFile (fseq, (byte*)&fsqHeader, sizeof (fsqHeader), size_t(0));
+    DEBUG_FILE_HANDLE(fseqFileHandle);
+    FileMgr.ReadSdFile (fseqFileHandle, (byte*)&fsqHeader, sizeof (fsqHeader), size_t(0));
 
     JsonWrite(JsonData, F ("Name"),            fname);
     JsonWrite(JsonData, CN_Version,            String (fsqHeader.majorVersion) + "." + String (fsqHeader.minorVersion));
@@ -613,7 +614,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
         uint8_t* RangeDataBuffer = (uint8_t*)malloc (sizeof(FSEQRawRangeEntry) * fsqHeader.numSparseRanges);
         FSEQRawRangeEntry* CurrentFSEQRangeEntry = (FSEQRawRangeEntry*)RangeDataBuffer;
 
-        FileMgr.ReadSdFile (fseq, RangeDataBuffer, sizeof (FSEQRawRangeEntry), size_t(fsqHeader.numCompressedBlocks * 8 + 32));
+        DEBUG_FILE_HANDLE(fseqFileHandle);
+        FileMgr.ReadSdFile (fseqFileHandle, RangeDataBuffer, sizeof (FSEQRawRangeEntry), size_t(fsqHeader.numCompressedBlocks * 8 + 32));
 
         for (int CurrentRangeIndex = 0;
              CurrentRangeIndex < fsqHeader.numSparseRanges;
@@ -654,7 +656,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
 
         while (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
         {
-            FileMgr.ReadSdFile (fseq, (byte*)FSEQVariableDataHeaderBuffer, sizeof (FSEQRawVariableDataHeader), FileOffsetToCurrentHeaderRecord);
+            DEBUG_FILE_HANDLE(fseqFileHandle);
+            FileMgr.ReadSdFile (fseqFileHandle, (byte*)FSEQVariableDataHeaderBuffer, sizeof (FSEQRawVariableDataHeader), FileOffsetToCurrentHeaderRecord);
 
             int VariableDataHeaderTotalLength = read16 ((uint8_t*)&(pCurrentVariableHeader->length));
             int VariableDataHeaderDataLength  = VariableDataHeaderTotalLength - sizeof (FSEQRawVariableDataHeader);
@@ -666,7 +669,8 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseq, St
                 char * VariableDataHeaderDataBuffer = (char*)malloc (VariableDataHeaderDataLength + 1);
                 memset (VariableDataHeaderDataBuffer, 0x00, VariableDataHeaderDataLength + 1);
 
-                FileMgr.ReadSdFile (fseq, (byte*)VariableDataHeaderDataBuffer, VariableDataHeaderDataLength, FileOffsetToCurrentHeaderRecord);
+                DEBUG_FILE_HANDLE(fseqFileHandle);
+                FileMgr.ReadSdFile (fseqFileHandle, (byte*)VariableDataHeaderDataBuffer, VariableDataHeaderDataLength, FileOffsetToCurrentHeaderRecord);
 
                 JsonObject JsonDataHeader = JsonDataHeaders.add<JsonObject> ();
                 JsonWrite(JsonDataHeader, HeaderTypeCode.c_str(), String (VariableDataHeaderDataBuffer));
@@ -727,6 +731,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                     {
                         // DEBUG_V ("found the file. return metadata as json");
                         String resp = emptyString;
+                        DEBUG_FILE_HANDLE(FileHandle);
                         BuildFseqResponse (seq, FileHandle, resp);
                         FileMgr.CloseSdFile (FileHandle);
                         request->send (200, CN_applicationSLASHjson, resp);
@@ -798,6 +803,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 
         // DEBUG_V ("BuildFseqResponse");
         String resp = emptyString;
+        DEBUG_FILE_HANDLE(FileHandle);
         BuildFseqResponse (filename, FileHandle, resp);
         FileMgr.CloseSdFile (FileHandle);
         request->send (200, CN_applicationSLASHjson, resp);
