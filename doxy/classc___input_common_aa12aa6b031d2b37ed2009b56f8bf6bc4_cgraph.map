@@ -1,5 +1,9 @@
 <map id="c_InputCommon::~c_InputCommon" name="c_InputCommon::~c_InputCommon">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,230,31"/>
-<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8" title=" " alt="" coords="278,5,444,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,16,262,16,262,21,230,21"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,230,56"/>
+<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8" title=" " alt="" coords="278,31,444,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="230,41,262,41,262,46,230,46"/>
+<area shape="rect" id="Node000003" href="$classc___output_mgr.html#aec62685e8fb4eff73bfefd3ed5321b01" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="492,5,697,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="444,32,476,28,477,34,445,37"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="504,55,686,80"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="445,49,488,54,488,59,444,55"/>
 </map>

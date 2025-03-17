@@ -43,7 +43,7 @@ var searchData=
   ['citudsarray_5ft_40',['CitudsArray_t',['../classc___output_uart.html#a632302a12b11911700dfc33bd78435f3',1,'c_OutputUart']]],
   ['cleansessionrequired_41',['CleanSessionRequired',['../classc___input_m_q_t_t.html#acfe0b1eadd157e64e086ea1c5c342e41',1,'c_InputMQTT']]],
   ['clearall_42',['clearAll',['../classc___input_effect_engine.html#a708751b80faa0d0832858768373c5de6',1,'c_InputEffectEngine']]],
-  ['clearbuffer_43',['ClearBuffer',['../classc___output_common.html#adc129a5642920dc4d36e3e717aaf1f3c',1,'c_OutputCommon::ClearBuffer()'],['../classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8',1,'c_OutputMgr::ClearBuffer()']]],
+  ['clearbuffer_43',['ClearBuffer',['../classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8',1,'c_OutputMgr']]],
   ['clearfileinfo_44',['ClearFileInfo',['../classc___input_f_p_p_remote_play_file.html#a2848f54d1ec8462d0fc54a47c564b035',1,'c_InputFPPRemotePlayFile']]],
   ['clearfilenames_45',['ClearFileNames',['../classc___input_f_p_p_remote_play_item.html#ac3dab9ea5afed487d175d3dca6dc7b23',1,'c_InputFPPRemotePlayItem']]],
   ['clearrange_46',['clearRange',['../classc___input_effect_engine.html#af5616863679e4db9a29fbbb98c7c1ed7',1,'c_InputEffectEngine']]],

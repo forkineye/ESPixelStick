@@ -32,7 +32,7 @@ var searchData=
   ['canceltimer_29',['CancelTimer',['../class_fast_timer.html#acd3946e3c51632727ad0a4eef47563e7',1,'FastTimer']]],
   ['canrefresh_30',['canRefresh',['../classc___output_common.html#a571adc45a6ceab09aaad36802507cc69',1,'c_OutputCommon']]],
   ['clearall_31',['clearAll',['../classc___input_effect_engine.html#a708751b80faa0d0832858768373c5de6',1,'c_InputEffectEngine']]],
-  ['clearbuffer_32',['ClearBuffer',['../classc___output_common.html#adc129a5642920dc4d36e3e717aaf1f3c',1,'c_OutputCommon::ClearBuffer()'],['../classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8',1,'c_OutputMgr::ClearBuffer()']]],
+  ['clearbuffer_32',['ClearBuffer',['../classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8',1,'c_OutputMgr']]],
   ['clearfileinfo_33',['ClearFileInfo',['../classc___input_f_p_p_remote_play_file.html#a2848f54d1ec8462d0fc54a47c564b035',1,'c_InputFPPRemotePlayFile']]],
   ['clearfilenames_34',['ClearFileNames',['../classc___input_f_p_p_remote_play_item.html#ac3dab9ea5afed487d175d3dca6dc7b23',1,'c_InputFPPRemotePlayItem']]],
   ['clearrange_35',['clearRange',['../classc___input_effect_engine.html#af5616863679e4db9a29fbbb98c7c1ed7',1,'c_InputEffectEngine']]],

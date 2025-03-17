@@ -318,9 +318,9 @@ Macros</h2></td></tr>
 <tr class="separator:a2950110c970b04d476d45273635a5d85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45b6758583c33d0a16c97e1389e8f155" id="r_a45b6758583c33d0a16c97e1389e8f155"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a45b6758583c33d0a16c97e1389e8f155">NO_CONFIG_NEEDED</a>&#160;&#160;&#160;time_t(-1)</td></tr>
 <tr class="separator:a45b6758583c33d0a16c97e1389e8f155"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f8e57be85acf1580548dcbec0019a18" id="r_a5f8e57be85acf1580548dcbec0019a18"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f8e57be85acf1580548dcbec0019a18">OM_IS_UART</a>&#160;&#160;&#160;(CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)</td></tr>
+<tr class="memitem:a5f8e57be85acf1580548dcbec0019a18" id="r_a5f8e57be85acf1580548dcbec0019a18"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f8e57be85acf1580548dcbec0019a18">OM_IS_UART</a>&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Uart)</td></tr>
 <tr class="separator:a5f8e57be85acf1580548dcbec0019a18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4aa294a2f6c841a2ab5aa2f541e8b0df" id="r_a4aa294a2f6c841a2ab5aa2f541e8b0df"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4aa294a2f6c841a2ab5aa2f541e8b0df">OM_IS_RMT</a>&#160;&#160;&#160;(CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)</td></tr>
+<tr class="memitem:a4aa294a2f6c841a2ab5aa2f541e8b0df" id="r_a4aa294a2f6c841a2ab5aa2f541e8b0df"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4aa294a2f6c841a2ab5aa2f541e8b0df">OM_IS_RMT</a>&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Rmt)</td></tr>
 <tr class="separator:a4aa294a2f6c841a2ab5aa2f541e8b0df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
@@ -366,7 +366,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define OM_IS_RMT&#160;&#160;&#160;(CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)</td>
+          <td class="memname">#define OM_IS_RMT&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Rmt)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -380,7 +380,7 @@ Variables</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define OM_IS_UART&#160;&#160;&#160;(CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)</td>
+          <td class="memname">#define OM_IS_UART&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Uart)</td>
         </tr>
       </table>
 </div><div class="memdoc">

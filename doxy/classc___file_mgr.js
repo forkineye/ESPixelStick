@@ -68,6 +68,7 @@ var classc___file_mgr =
     [ "FileList", "classc___file_mgr.html#a590f024974133356d8f2d6da48266ffa", null ],
     [ "FileSendDir", "classc___file_mgr.html#a2cee9bd729f2622f518889c3794f544f", null ],
     [ "FoundZipFile", "classc___file_mgr.html#a0ad989fab99631270433bfbf6acdcb00", null ],
+    [ "FSEQFILELIST", "classc___file_mgr.html#a7171ef438b95aa846a011148e7d0dd10", null ],
     [ "fsUploadFileHandle", "classc___file_mgr.html#a95ce91ea55ac222562d83f87aca429bb", null ],
     [ "fsUploadFileName", "classc___file_mgr.html#a1cb372ace094d52c26f6c6d98e006cbd", null ],
     [ "fsUploadFileSavedIsEnabled", "classc___file_mgr.html#ad02883207cdebd5dae72ae7851127d39", null ],

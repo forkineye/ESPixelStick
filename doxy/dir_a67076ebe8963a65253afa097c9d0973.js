@@ -9,6 +9,7 @@ var dir_a67076ebe8963a65253afa097c9d0973 =
     [ "GPIO_Defs_ESP32_ESP3DEUXQuattro_DMX.hpp", "_g_p_i_o___defs___e_s_p32___e_s_p3_d_e_u_x_quattro___d_m_x_8hpp.html", "_g_p_i_o___defs___e_s_p32___e_s_p3_d_e_u_x_quattro___d_m_x_8hpp" ],
     [ "GPIO_Defs_ESP32_generic.hpp", "_g_p_i_o___defs___e_s_p32__generic_8hpp.html", null ],
     [ "GPIO_Defs_ESP32_KA.hpp", "_g_p_i_o___defs___e_s_p32___k_a_8hpp.html", "_g_p_i_o___defs___e_s_p32___k_a_8hpp" ],
+    [ "GPIO_Defs_ESP32_KA_4.hpp", "_g_p_i_o___defs___e_s_p32___k_a__4_8hpp.html", "_g_p_i_o___defs___e_s_p32___k_a__4_8hpp" ],
     [ "GPIO_Defs_ESP32_kr_lights_msm.hpp", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp" ],
     [ "GPIO_Defs_ESP32_LoLin_D32_PRO.hpp", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp" ],
     [ "GPIO_Defs_ESP32_LoLin_D32_PRO_ETH.hpp", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp.html", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp" ],

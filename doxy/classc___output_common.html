@@ -179,8 +179,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a68284ed16932a4f76be6ccddd7871f26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a827738159d56992021250d85905782b7" id="r_a827738159d56992021250d85905782b7"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a827738159d56992021250d85905782b7">PauseOutput</a> (bool NewState)</td></tr>
 <tr class="separator:a827738159d56992021250d85905782b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc129a5642920dc4d36e3e717aaf1f3c" id="r_adc129a5642920dc4d36e3e717aaf1f3c"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adc129a5642920dc4d36e3e717aaf1f3c">ClearBuffer</a> ()</td></tr>
-<tr class="separator:adc129a5642920dc4d36e3e717aaf1f3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a89a48db3e49b37b61b0049d4c411cded" id="r_a89a48db3e49b37b61b0049d4c411cded"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a89a48db3e49b37b61b0049d4c411cded">WriteChannelData</a> (uint32_t StartChannelId, uint32_t ChannelCount, byte *pSourceData)</td></tr>
 <tr class="separator:a89a48db3e49b37b61b0049d4c411cded"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adbf439d37fe45012612f47c83012f6fc" id="r_adbf439d37fe45012612f47c83012f6fc"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adbf439d37fe45012612f47c83012f6fc">ReadChannelData</a> (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData)</td></tr>
@@ -445,43 +443,6 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="adc129a5642920dc4d36e3e717aaf1f3c" name="adc129a5642920dc4d36e3e717aaf1f3c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adc129a5642920dc4d36e3e717aaf1f3c">&#9670;&#160;</a></span>ClearBuffer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void c_OutputCommon::ClearBuffer </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<div class="dynheader">
-Here is the call graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classc___output_common_adc129a5642920dc4d36e3e717aaf1f3c_cgraph.png" border="0" usemap="#aclassc___output_common_adc129a5642920dc4d36e3e717aaf1f3c_cgraph" alt=""/></div>
-<map name="aclassc___output_common_adc129a5642920dc4d36e3e717aaf1f3c_cgraph" id="aclassc___output_common_adc129a5642920dc4d36e3e717aaf1f3c_cgraph">
-<area shape="rect" title=" " alt="" coords="5,42,202,68"/>
-<area shape="rect" href="classc___output_common.html#a83f1ea04a95de1af5ad0e5a5130bdcad" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="250,5,437,46"/>
-<area shape="poly" title=" " alt="" coords="202,40,234,36,235,42,203,46"/>
-<area shape="rect" href="classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="252,70,434,96"/>
-<area shape="poly" title=" " alt="" coords="203,64,237,68,236,73,202,69"/>
-</map>
-</div>
-
-</div>
-</div>
 <a id="a6b5a27c4548473466e0832698401a489" name="a6b5a27c4548473466e0832698401a489"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6b5a27c4548473466e0832698401a489">&#9670;&#160;</a></span>DriverIsSendingIntensityData()</h2>
 
@@ -536,15 +497,13 @@ Here is the caller graph for this function:</div>
 <div class="dyncontent">
 <div class="center"><img src="classc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph.png" border="0" usemap="#aclassc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph" alt=""/></div>
 <map name="aclassc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph" id="aclassc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph">
-<area shape="rect" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="734,23,922,64"/>
-<area shape="rect" href="classc___output_common.html#adc129a5642920dc4d36e3e717aaf1f3c" title=" " alt="" coords="488,5,684,31"/>
-<area shape="poly" title=" " alt="" coords="719,35,684,31,685,26,719,29"/>
-<area shape="rect" href="classc___output_pixel.html#a65dc26d4fe491978858f65fc21b549f1" title=" " alt="" coords="486,55,686,80"/>
-<area shape="poly" title=" " alt="" coords="719,57,687,60,687,55,719,52"/>
-<area shape="rect" href="classc___output_uart.html#ac75a7fa5ee8100cb3780633a6732352a" title=" " alt="" coords="251,47,438,88"/>
-<area shape="poly" title=" " alt="" coords="470,70,439,70,439,65,470,65"/>
-<area shape="rect" href="classc___output_uart.html#ad201cf8c69ead52acf4a885f90a91a3b" title=" " alt="" coords="5,55,203,80"/>
-<area shape="poly" title=" " alt="" coords="235,70,203,70,203,65,235,65"/>
+<area shape="rect" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="734,5,922,46"/>
+<area shape="rect" href="classc___output_pixel.html#a65dc26d4fe491978858f65fc21b549f1" title=" " alt="" coords="486,13,686,38"/>
+<area shape="poly" title=" " alt="" coords="719,28,687,28,687,23,719,23"/>
+<area shape="rect" href="classc___output_uart.html#ac75a7fa5ee8100cb3780633a6732352a" title=" " alt="" coords="251,5,438,46"/>
+<area shape="poly" title=" " alt="" coords="470,28,439,28,439,23,470,23"/>
+<area shape="rect" href="classc___output_uart.html#ad201cf8c69ead52acf4a885f90a91a3b" title=" " alt="" coords="5,13,203,38"/>
+<area shape="poly" title=" " alt="" coords="235,28,203,28,203,23,235,23"/>
 </map>
 </div>
 
