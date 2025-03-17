@@ -696,8 +696,8 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
             TotalFileSizeToTransfer = 0;
             buffer[0] = '\0';
 
-            // DEBUG_V("Try to open the file");
-            if(!FileMgr.OpenSdFile(FSEQFILELIST, c_FileMgr::FileMode::FileRead, FileHandle, -1))
+            // DEBUG_V(F("Try to open the file"));
+            if(!FileMgr.OpenSdFile(FileMgr.FSEQFILELIST, c_FileMgr::FileMode::FileRead, FileHandle, -1))
             {
                 logcon(F("ERROR: Could not open List of Fseq files for reading"));
                 response = FileMgr.GetDefaultFseqFileList(buffer, maxlen);

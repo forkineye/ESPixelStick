@@ -8,7 +8,10 @@ f.write(env.Dump())
 f.close()
 
 def PrepareDestinationDirectory(DirRoot, DirPath):
-    # os.system("ls -al ./")
+    # print("PrepareDestinationDirectory")
+    # print("DirRoot " + DirRoot)
+    # print("DirPath " + DirPath)
+    # os.system("ls -al " + DirPath)
     # print("mkdirs: Remove path - '" + DirRoot + "'")
     # shutil.rmtree(DirRoot, True)
     # os.system("ls -al ./")
@@ -44,7 +47,6 @@ SRC_PART = SRC_DIR + "partitions.bin"
 SRC_ELF  = SRC_DIR + PROGNAME + ".elf"
 SRC_MAP  = SRC_DIR + PROGNAME + ".map"
 SRC_MAP2 = "./" + PROGNAME + ".map"
-
 # print("SRC_BIN " + SRC_BIN)
 
 DST_ROOT  = "./firmware/"
@@ -54,11 +56,13 @@ DST_PART  = DST_DIR + PIOENV + "-partitions.bin"
 DST_BOOT  = DST_DIR + PIOENV + "-bootloader.bin"
 DST_MERG  = DST_DIR + PIOENV + "-merged.bin"
 DST_FS    = DST_DIR + PIOENV + "-littlefs.bin"
+# print("DST_BIN " + DST_BIN)
 
 DBG_ROOT  = "./debug/"
 DBG_DIR   = DBG_ROOT + BOARD_MCU + "/"
 DST_ELF   = DBG_DIR + PIOENV + ".elf"
 DST_MAP   = DBG_DIR + PIOENV + ".map"
+# print("DBG_DIR " + DBG_DIR)
 
 OS_NAME = platform.system().lower()
 FS_BLD_PATH = "./dist/bin/"
@@ -75,11 +79,13 @@ else:
     print("ERROR: Could not determine OS type. Got: " + str (OS_NAME))
     exit(-1)
 
+# print("FS_BLD_PATH " + FS_BLD_PATH)
+
 def merge_bin():
-    # create a file system image
+    print ("create a file system image")
     FS_BLD_CMD = FS_BLD_PATH + " -b 4096 -p 256 -s 0x50000 -c ./ESPixelStick/data " + DST_FS
     MERGE_CMD = "./dist/bin/esptool/esptool.exe" + " --chip " + BOARD_MCU + " merge_bin " + " -o " + DST_MERG + " --flash_mode dio" + " --flash_freq 80m" + " --flash_size 4MB" + " 0x0000 " + DST_BOOT + " 0x8000 " + DST_PART + " 0xe000 "  + DST_DIR + "boot_app0.bin" + " 0x10000 " + DST_BIN + " 0x003b0000 " + DST_FS + ""
-    
+
     if OS_NAME == "windows" :
         FS_BLD_CMD = FS_BLD_CMD.replace("/", "\\")
         MERGE_CMD  = MERGE_CMD.replace("/", "\\")
@@ -88,9 +94,9 @@ def merge_bin():
     os.system(FS_BLD_CMD)
     print("MERGE_CMD: " + MERGE_CMD)
     os.system(MERGE_CMD)
-    
-def after_build(source, target, env):
 
+def after_build(source, target, env):
+    print ("Starting After build")
     DstPath = os.path.join("", DST_DIR)
     PrepareDestinationDirectory(DST_ROOT, DstPath)
     print("Copy from: '" + SRC_BIN + "' to '" + DST_BIN + "'")
@@ -124,18 +130,19 @@ def after_build(source, target, env):
             ImagePath = FLASH_EXTRA_IMAGES[imageId][1]
             # print(ImagePath)
             if("boot_app0" in ImagePath):
-                print("Copy: " + ImagePath)
+                print("Copy: " + ImagePath + " to " + DST_DIR)
                 shutil.copyfile(ImagePath, DST_DIR + "boot_app0.bin")
 
             elif ("partitions" in ImagePath):
-                print("Copy: " + ImagePath)
+                print("Copy: " + ImagePath + " to " + DST_PART)
                 shutil.copyfile(ImagePath, DST_PART)
 
             elif("bootloader" in ImagePath):
                 SRC_BL_DIR = ImagePath.replace('${BOARD_FLASH_MODE}', BOARD_FLASH_MODE).replace("${__get_board_f_flash(__env__)}", BOARD_F_FLASH)
                 # print("Copy SRC_BL_DIR: " + SRC_BL_DIR)
-                print("Copy: " + SRC_BL_DIR)
+                print("Copy: " + SRC_BL_DIR + " to " + SRC_BL_DIR)
                 shutil.copyfile(SRC_BL_DIR, DST_BOOT)
     # merge_bin()
 
 env.AddPostAction("buildprog", after_build)
+# print("Done processing the python file")

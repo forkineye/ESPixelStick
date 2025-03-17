@@ -86,7 +86,7 @@ public:
     void     SaveSdFile       (const String & FileName, String & FileData);
     void     SaveSdFile       (const String & FileName, JsonVariant & FileData);
     bool     OpenSdFile       (const String & FileName, FileMode Mode, FileId & FileHandle, int FileListIndex);
-    uint64_t ReadSdFile     (const FileId & FileHandle, byte * FileData, uint64_t NumBytesToRead, uint64_t StartingPosition);
+    uint64_t ReadSdFile       (const FileId & FileHandle, byte * FileData, uint64_t NumBytesToRead, uint64_t StartingPosition);
     bool     ReadSdFile       (const String & FileName,   String & FileData);
     bool     ReadSdFile       (const String & FileName,   JsonDocument & FileData);
     uint64_t WriteSdFileBuf   (const FileId & FileHandle, byte * FileData, uint64_t NumBytesToWrite);
@@ -94,8 +94,8 @@ public:
     uint64_t WriteSdFile      (const FileId & FileHandle, byte * FileData, uint64_t NumBytesToWrite, uint64_t StartingPosition);
     void     CloseSdFile      (FileId & FileHandle);
     void     GetListOfSdFiles (std::vector<String> & Response);
-    uint64_t GetSdFileSize  (const String & FileName);
-    uint64_t GetSdFileSize  (const FileId & FileHandle);
+    uint64_t GetSdFileSize    (const String & FileName);
+    uint64_t GetSdFileSize    (const FileId & FileHandle);
     void     RenameSdFile     (String & OldName, String & NewName);
     void     BuildFseqList    (bool DisplayFileNames);
 
@@ -104,7 +104,7 @@ public:
     uint64_t GetDefaultFseqFileList (uint8_t * buffer, uint64_t maxlen);
     void     FindFirstZipFile (String &FileName);
 
-#define FSEQFILELIST "fseqfilelist.json"
+const String FSEQFILELIST = "fseqfilelist.json";
 #define SD_BLOCK_SIZE 512
 
 #if defined ARDUINO_ARCH_ESP8266

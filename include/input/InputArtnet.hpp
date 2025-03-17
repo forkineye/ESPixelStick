@@ -26,14 +26,14 @@ class c_InputArtnet : public c_InputCommon
   private:
     static const uint16_t   UNIVERSE_MAX = 512;
     static const char       ConfigFileName[];
-    static const uint8_t    MAX_NUM_UNIVERSES = 10;
+    static const uint8_t    MAX_NUM_UNIVERSES = (OM_MAX_NUM_CHANNELS / UNIVERSE_MAX) + 1;
 
     Artnet * pArtnet = nullptr;
 
     /// JSON configuration parameters
     uint16_t    startUniverse              = 1;    ///< Universe to listen for
     uint16_t    LastUniverse               = 1;    ///< Last Universe to listen for
-    uint16_t    ChannelsPerUniverse        = 512;  ///< Universe boundary limit
+    uint16_t    ChannelsPerUniverse        = UNIVERSE_MAX;  ///< Universe boundary limit
     uint16_t    FirstUniverseChannelOffset = 1;    ///< Channel to start listening at - 1 based
     uint32_t    num_packets                = 0;
     uint32_t    packet_errors              = 0;

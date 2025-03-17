@@ -1203,6 +1203,41 @@
             }
         },
         {
+            "name": "ESP32 KA 4",
+            "description": "ESP32 based 4 port + Relay controller",
+            "chip": "esp32",
+            "appbin": "esp32/esp32_ka_4-app.bin",
+            "esptool": {
+                "baudrate": "460800",
+                "options": "",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32/esp32_ka_4-bootloader.bin",
+                    "offset": "0x01000"
+                },
+                {
+                    "name": "esp32/esp32_ka_4-partitions.bin",
+                    "offset": "0x08000"
+                },
+                {
+                    "name": "esp32/boot_app0.bin",
+                    "offset": "0x0e000"
+                },
+                {
+                    "name": "esp32/esp32_ka_4-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
             "name": "ESP32S Break Dance V2",
             "description": "ESP32S based 4 port controller",
             "chip": "esp32",

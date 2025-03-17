@@ -254,8 +254,8 @@ private:
     // uint32_t PollCount = 0;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-#define OM_IS_UART (CurrentOutputChannelDriver.PortType == OM_PortType_t::Uart)
-#define OM_IS_RMT  (CurrentOutputChannelDriver.PortType == OM_PortType_t::Rmt)
+#define OM_IS_UART (CurrentOutput.PortType == OM_PortType_t::Uart)
+#define OM_IS_RMT  (CurrentOutput.PortType == OM_PortType_t::Rmt)
 
 }; // c_OutputMgr
 
