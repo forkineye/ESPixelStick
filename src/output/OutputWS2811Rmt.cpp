@@ -166,7 +166,7 @@ bool c_OutputWS2811Rmt::RmtPoll ()
 
         // DEBUG_V(String("get the next frame started on ") + String(DataPin));
         ReportNewFrame ();
-        Rmt.StartNewFrame ();
+        Response = Rmt.StartNewFrame ();
 
         // DEBUG_V();
 
