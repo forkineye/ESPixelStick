@@ -741,6 +741,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
 
         // DEBUG_V("Read a chunk");
         memset(buffer, 0x0, maxlen-1);
+        DEBUG_FILE_HANDLE(FileHandle);
         FileMgr.ReadSdFile(FileHandle,
                            buffer,
                            DataToSendThisChunk,
@@ -761,8 +762,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
 {
     // DEBUG_START;
 
-    JsonDocument WebJsonDoc;
-    WebJsonDoc.clear ();
+    // WebJsonDoc.clear ();
     JsonObject status = WebJsonDoc[(char*)CN_status].to<JsonObject> ();
     JsonObject system = status[(char*)CN_system].to<JsonObject> ();
 
@@ -791,6 +791,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     // Ask Output Stats
     // DEBUG_V ("OutputMgr.GetStatus");
     OutputMgr.GetStatus (status);
+
     // Get File Manager Stats
     // DEBUG_V ("FileMgr.GetStatus");
     FileMgr.GetStatus (system);
@@ -803,11 +804,11 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     }
     else
     {
-        String Temp;
-        serializeJson(WebJsonDoc, Temp);
-        client->send (200, CN_applicationSLASHjson, Temp);
+        // DEBUG_V("Send XJ response");
+        serializeJson(WebJsonDoc, XjResult);
+        client->send (200, CN_applicationSLASHjson, XjResult);
     }
-
+    // WebJsonDoc.clear();
     // DEBUG_END;
 
 } // ProcessXJRequest
