@@ -716,9 +716,10 @@ bool c_OutputRmt::StartNewFrame ()
 
         ClearRmtInterrupts;
         EnableRmtInterrupts;
-
+        vPortYieldOtherCore(0);
         // DEBUG_V("start the transmitter");
         RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.tx_start = 1;
+        delay(1);
 
         Response = true;
     } while(false);
