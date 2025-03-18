@@ -40,32 +40,8 @@ void RMT_Task (void *arg)
 {
     // DEBUG_V(String("Current CPU ID: ") + String(xPortGetCoreID()));
 
-    unsigned long  FrameStartTimeMS = millis();
-    unsigned long  FrameEndTimeMS = FrameStartTimeMS;
-    const uint32_t MinFrameTimeMs = 25;
-    TickType_t     DelayTimeTicks = pdMS_TO_TICKS(MinFrameTimeMs);
-
     while(1)
     {
-/*
-        uint32_t DeltaTimeMS = FrameEndTimeMS - FrameStartTimeMS;
-        // did the timer wrap?
-        if (DeltaTimeMS > MinFrameTimeMs)
-        {
-            // Timer has wrapped or
-            // frame took longer than 25MS to run.
-            // Dont wait a long time for the next one.
-            DelayTimeTicks = pdMS_TO_TICKS(1);
-        }
-        else
-        {
-            DelayTimeTicks = pdMS_TO_TICKS( MinFrameTimeMs - DeltaTimeMS );
-        }
-
-        vTaskDelay(DelayTimeTicks);
-
-        FrameStartTimeMS = millis();
-*/
         // process all possible channels
         for (c_OutputRmt * pRmt : rmt_isr_ThisPtrs)
         {
@@ -88,16 +64,8 @@ void RMT_Task (void *arg)
                         // DEBUG_V("Transmit Timed Out.");
                     }
                 }
-/*
-                else
-                {
-                    sys_delay_ms(1000);
-                }
-*/
             }
         }
-        // record the loop end time
-        // FrameEndTimeMS = millis();
     }
 } // RMT_Task
 
