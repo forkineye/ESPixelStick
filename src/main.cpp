@@ -174,6 +174,9 @@ void setup()
 #ifdef ARDUINO_ARCH_ESP32
     logcon(String("CPU Frequency: ") + String(getCpuFrequencyMhz()) + "MHz");
     logcon(String("APB Frequency: ") + String(getApbFrequency() / 1000000) + "MHz");
+
+    // DEBUG_V(String("Configured Stack Size: ") + String(getArduinoLoopTaskStackSize()));
+    // DEBUG_V(String("Remaining Stack Space: ") + String(uxTaskGetStackHighWaterMark(NULL)));
 #endif // def ARDUINO_ARCH_ESP32
 
     FileMgr.Begin();

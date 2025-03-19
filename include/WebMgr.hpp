@@ -50,6 +50,8 @@ private:
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice *       pAlexaDevice   = nullptr;
     bool                   HasBeenInitialized = false;
+    JsonDocument           WebJsonDoc;
+    String                 XjResult = emptyString;
 
 #ifdef ARDUINO_ARCH_ESP32
 #   define     STATUS_DOC_SIZE 4000
@@ -76,7 +78,6 @@ private:
 
     using WebJsonDocument = JsonDocument;
 
-    WebJsonDocument *WebJsonDoc = nullptr;
     size_t GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t index);
     c_FileMgr::FileId FileHandle = c_FileMgr::INVALID_FILE_HANDLE;
     size_t TotalFileSizeToTransfer = 0;

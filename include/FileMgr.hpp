@@ -251,4 +251,16 @@ protected:
 
 }; // c_FileMgr
 
+#ifdef DEBUG_FILE_HANDLES
+#define DEBUG_FILE_HANDLE(fh) \
+{ \
+    if (fh == c_FileMgr::INVALID_FILE_HANDLE) \
+    { \
+        DEBUG_V("Found an invalid file handle before a request to FileMgr."); \
+    } \
+}
+#else
+#define DEBUG_FILE_HANDLE(fh)
+#endif // def DEBUG_FILE_HANDLE
+
 extern c_FileMgr FileMgr;

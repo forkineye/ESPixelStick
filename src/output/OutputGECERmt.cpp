@@ -151,7 +151,7 @@ bool c_OutputGECERmt::RmtPoll ()
 
         // DEBUG_V("get the next frame started");
         ReportNewFrame ();
-        Rmt.StartNewFrame ();
+        Response = Rmt.StartNewFrame ();
 
         // DEBUG_V();
 
