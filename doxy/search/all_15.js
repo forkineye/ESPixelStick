@@ -1,7 +1,7 @@
 var searchData=
 [
   ['w_0',['w',['../structc___output_pixel_1_1_color_offsets__s_1_1offsets.html#a5fbdb092b2ac96c4db63c1fd350142f0',1,'c_OutputPixel::ColorOffsets_s::offsets']]],
-  ['webjsondoc_1',['WebJsonDoc',['../classc___web_mgr.html#a6936fc2ae73d8462210a0bf461a83a79',1,'c_WebMgr']]],
+  ['webjsondoc_1',['WebJsonDoc',['../classc___web_mgr.html#afe378ceb8fd7939902728a5dff84c255',1,'c_WebMgr']]],
   ['webjsondocument_2',['WebJsonDocument',['../classc___web_mgr.html#ab4b98e04e2eb85420450597c7c692b2c',1,'c_WebMgr']]],
   ['webmgr_3',['WebMgr',['../_web_mgr_8cpp.html#aff0c9421511c7f4c149e388c0b5e14f2',1,'WebMgr:&#160;WebMgr.cpp'],['../_web_mgr_8hpp.html#aff0c9421511c7f4c149e388c0b5e14f2',1,'WebMgr:&#160;WebMgr.cpp']]],
   ['webmgr_2ecpp_4',['WebMgr.cpp',['../_web_mgr_8cpp.html',1,'']]],

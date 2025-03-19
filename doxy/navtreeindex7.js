@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"_input_mgr_8cpp.html":[1,0,1,0,16],
 "_input_mgr_8cpp.html#a496a8590fb601e0147c9699b48251f18":[1,0,1,0,16,3],
 "_input_mgr_8cpp.html#ac2937599ef7a8b45166c4bcb83745e16":[1,0,1,0,16,4],
 "_input_mgr_8cpp.html#ac559d5f286282934ce3da7e365d73660":[1,0,1,0,16,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "class_fast_timer.html#abcba4aeca10d03ec192ba31b4e55025f":[0,0,27,0],
 "class_fast_timer.html#ac19f05d841c58f1f910daa1c3d91c56c":[0,0,27,9],
 "class_fast_timer.html#acd3946e3c51632727ad0a4eef47563e7":[0,0,27,2],
-"class_fast_timer.html#af7b9d5dce2428a8da704ffd33feb3656":[0,0,27,6],
-"class_fast_timer.html#affbcc3e442511a075d4cb8c44bb76bd3":[0,0,27,3]
+"class_fast_timer.html#af7b9d5dce2428a8da704ffd33feb3656":[0,0,27,6]
 };

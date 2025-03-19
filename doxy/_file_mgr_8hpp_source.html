@@ -361,7 +361,19 @@ $(function(){initNavTree('_file_mgr_8hpp_source.html',''); initResizable(true); 
 <div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>}; <span class="comment">// c_FileMgr</span></div>
 </div>
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span> </div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="keyword">extern</span> <a class="code hl_class" href="classc___file_mgr.html">c_FileMgr</a> <a class="code hl_variable" href="_file_mgr_8hpp.html#a30bcd8170c0e3eadfec3d60c98b46770">FileMgr</a>;</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span><span class="preprocessor">#ifdef DEBUG_FILE_HANDLES</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span><span class="preprocessor">#define DEBUG_FILE_HANDLE(fh) \</span></div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span><span class="preprocessor">{ \</span></div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span><span class="preprocessor">    if (fh == c_FileMgr::INVALID_FILE_HANDLE) \</span></div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span><span class="preprocessor">    { \</span></div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span><span class="preprocessor">        DEBUG_V(&quot;Found an invalid file handle before a request to FileMgr.&quot;); \</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span><span class="preprocessor">    } \</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span><span class="preprocessor">}</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno"><a class="line" href="_file_mgr_8hpp.html#a96a56d70b58875d3e79e583fbce2cd2c">  263</a></span><span class="preprocessor">#define DEBUG_FILE_HANDLE(fh)</span></div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="preprocessor">#endif </span><span class="comment">// def DEBUG_FILE_HANDLE</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span> </div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="keyword">extern</span> <a class="code hl_class" href="classc___file_mgr.html">c_FileMgr</a> <a class="code hl_variable" href="_file_mgr_8hpp.html#a30bcd8170c0e3eadfec3d60c98b46770">FileMgr</a>;</div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_file_mgr_8cpp_html_a6385eecb021ea6dc1e9b5597cfe94b85"><div class="ttname"><a href="_file_mgr_8cpp.html#a6385eecb021ea6dc1e9b5597cfe94b85">sd</a></div><div class="ttdeci">SdFs sd</div><div class="ttdef"><b>Definition</b> FileMgr.cpp:29</div></div>
 <div class="ttc" id="a_file_mgr_8hpp_html_a30bcd8170c0e3eadfec3d60c98b46770"><div class="ttname"><a href="_file_mgr_8hpp.html#a30bcd8170c0e3eadfec3d60c98b46770">FileMgr</a></div><div class="ttdeci">c_FileMgr FileMgr</div><div class="ttdef"><b>Definition</b> FileMgr.cpp:2192</div></div>

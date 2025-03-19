@@ -35,5 +35,6 @@ var classc___web_mgr =
     [ "pAlexaCallback", "classc___web_mgr.html#a3782b2eb5d97f8a003422e69bb8d19d9", null ],
     [ "pAlexaDevice", "classc___web_mgr.html#a29f8f2bc3fffe8b65384a145ab654b33", null ],
     [ "TotalFileSizeToTransfer", "classc___web_mgr.html#a7fe55dcdb367ec60b88c283e584c7bd0", null ],
-    [ "WebJsonDoc", "classc___web_mgr.html#a6936fc2ae73d8462210a0bf461a83a79", null ]
+    [ "WebJsonDoc", "classc___web_mgr.html#afe378ceb8fd7939902728a5dff84c255", null ],
+    [ "XjResult", "classc___web_mgr.html#a4a945e5573c038df73c6cc9e4af0faff", null ]
 ];
