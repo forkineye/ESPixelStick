@@ -31,12 +31,12 @@ bool fsm_PlayFile_state_Idle::Poll ()
     // is there a new file to play?
     if(!p_Parent->FileControl[NextFile].FileName.isEmpty())
     {
-        DEBUG_V(String("Start existing file: ") + p_Parent->FileControl[NextFile].FileName);
+        // DEBUG_V(String("Start existing file: ") + p_Parent->FileControl[NextFile].FileName);
         p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
     }
     else if (!p_Parent->BackgroundFileName.isEmpty())
     {
-        DEBUG_V(String("Start background file: ") + p_Parent->BackgroundFileName);
+        // DEBUG_V(String("Start background file: ") + p_Parent->BackgroundFileName);
         Start(p_Parent->BackgroundFileName, 0.0, 1);
         p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
     }
@@ -49,23 +49,23 @@ bool fsm_PlayFile_state_Idle::Poll ()
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Init (c_InputFPPRemotePlayFile* Parent)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Idle::Init");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Idle::Init");
 
-    DEBUG_V (String ("Parent: 0x") + String ((uint32_t)Parent, HEX));
+    // DEBUG_V (String ("Parent: 0x") + String ((uint32_t)Parent, HEX));
     p_Parent = Parent;
     p_Parent->pCurrentFsmState = &(p_Parent->fsm_PlayFile_state_Idle_imp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Idle::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Start (String& FileName, float ElapsedSeconds, uint32_t RemainingPlayCount)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Idle::Start");
-    DEBUG_V (String ("FileName: ") + FileName);
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Idle::Start");
+    // DEBUG_V (String ("FileName: ") + FileName);
 
     p_Parent->FileControl[NextFile].FileName = FileName;
     p_Parent->FileControl[NextFile].ElapsedPlayTimeMS = uint32_t (ElapsedSeconds * 1000.0);
@@ -73,38 +73,38 @@ void fsm_PlayFile_state_Idle::Start (String& FileName, float ElapsedSeconds, uin
     p_Parent->FileControl[NextFile].StartingTimeMS = p_Parent->FileControl[NextFile].LastPollTimeMS - p_Parent->FileControl[NextFile].ElapsedPlayTimeMS;
     p_Parent->FileControl[NextFile].RemainingPlayCount = RemainingPlayCount;
 
-    DEBUG_V (String ("          Backgroud: ") + p_Parent->BackgroundFileName);
-    DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
-    DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
-    DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
-    DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
-    DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
+    // DEBUG_V (String ("          Backgroud: ") + p_Parent->BackgroundFileName);
+    // DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
+    // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
+    // DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
+    // DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
+    // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Idle::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Idle::Stop (void)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Idle::Stop");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Idle::Stop");
 
     // Do nothing
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Idle::Stop
 
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Idle::Sync (String& FileName, float ElapsedSeconds)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Idle::Sync");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Idle::Sync");
 
     Start (FileName, ElapsedSeconds, 1);
 
-    DEBUG_END;
+    // DEBUG_END;
 
     return false;
 
@@ -115,8 +115,8 @@ bool fsm_PlayFile_state_Idle::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Starting::Poll ()
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Starting::Poll");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Starting::Poll");
 
     do // once
     {
@@ -125,7 +125,7 @@ bool fsm_PlayFile_state_Starting::Poll ()
 
         if (!p_Parent->ParseFseqFile ())
         {
-            DEBUG_V("fsm_PlayFile_state_PlayingFile::Poll FSEQ Parse Error");
+            // DEBUG_V("fsm_PlayFile_state_PlayingFile::Poll FSEQ Parse Error");
             p_Parent->fsm_PlayFile_state_Error_imp.Init(p_Parent);
             break;
         }
@@ -135,19 +135,19 @@ bool fsm_PlayFile_state_Starting::Poll ()
         p_Parent->FileControl[CurrentFile].StartingTimeMS = p_Parent->FileControl[CurrentFile].LastPollTimeMS - p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS;
         p_Parent->FileControl[CurrentFile].LastPlayedFrameId = p_Parent->CalculateFrameId (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS, p_Parent->GetSyncOffsetMS ());
 
-        DEBUG_V (String ("                FileName: ") + p_Parent->FileControl[CurrentFile].FileName);
-        DEBUG_V (String ("       ElapsedPlayTimeMS: ") + p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS);
-        DEBUG_V (String ("          LastPollTimeMS: ") + p_Parent->FileControl[CurrentFile].LastPollTimeMS);
-        DEBUG_V (String ("          StartingTimeMS: ") + p_Parent->FileControl[CurrentFile].StartingTimeMS);
-        DEBUG_V (String ("      RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
-        DEBUG_V (String ("       LastPlayedFrameId: ") + p_Parent->FileControl[CurrentFile].LastPlayedFrameId);
-        DEBUG_V (String ("NumberOfFramesInSequence: ") + p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence);
+        // DEBUG_V (String ("                FileName: ") + p_Parent->FileControl[CurrentFile].FileName);
+        // DEBUG_V (String ("       ElapsedPlayTimeMS: ") + p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS);
+        // DEBUG_V (String ("          LastPollTimeMS: ") + p_Parent->FileControl[CurrentFile].LastPollTimeMS);
+        // DEBUG_V (String ("          StartingTimeMS: ") + p_Parent->FileControl[CurrentFile].StartingTimeMS);
+        // DEBUG_V (String ("      RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
+        // DEBUG_V (String ("       LastPlayedFrameId: ") + p_Parent->FileControl[CurrentFile].LastPlayedFrameId);
+        // DEBUG_V (String ("NumberOfFramesInSequence: ") + p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence);
 
         p_Parent->fsm_PlayFile_state_PlayingFile_imp.Init (p_Parent);
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
     return true;
 
 } // fsm_PlayFile_state_Starting::Poll
@@ -155,8 +155,8 @@ bool fsm_PlayFile_state_Starting::Poll ()
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Starting::Init (c_InputFPPRemotePlayFile* Parent)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Starting::Init");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Starting::Init");
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Starting_imp);
@@ -166,15 +166,15 @@ void fsm_PlayFile_state_Starting::Init (c_InputFPPRemotePlayFile* Parent)
         FPPDiscovery.GenerateFppSyncMsg(SYNC_PKT_START, p_Parent->GetFileName(), 0, float(0.0));
     }
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Starting::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Starting::Start (String& FileName, float ElapsedSeconds, uint32_t RemainingPlayCount)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Starting::Start");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Starting::Start");
 
     p_Parent->FileControl[NextFile].FileName = FileName;
     p_Parent->FileControl[NextFile].ElapsedPlayTimeMS = uint32_t (ElapsedSeconds * 1000.0);
@@ -182,42 +182,42 @@ void fsm_PlayFile_state_Starting::Start (String& FileName, float ElapsedSeconds,
     p_Parent->FileControl[NextFile].StartingTimeMS = p_Parent->FileControl[NextFile].LastPollTimeMS - p_Parent->FileControl[NextFile].ElapsedPlayTimeMS;
     p_Parent->FileControl[NextFile].RemainingPlayCount = RemainingPlayCount;
 
-    DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
-    DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
-    DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
-    DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
-    DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
+    // DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
+    // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
+    // DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
+    // DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
+    // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
 
     p_Parent->fsm_PlayFile_state_Stopping_imp.Init(p_Parent);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Starting::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Starting::Stop (void)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Starting::Stop");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Starting::Stop");
 
     p_Parent->FileControl[CurrentFile].RemainingPlayCount = 0;
     p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Starting::Stop
 
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Starting::Sync");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Starting::Sync");
 
     bool response = false;
 
     Start (FileName, ElapsedSeconds, 1);
 
-    DEBUG_END;
+    // DEBUG_END;
     return response;
 
 } // fsm_PlayFile_state_Starting::Sync
@@ -236,7 +236,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
     {
         if(c_FileMgr::INVALID_FILE_HANDLE == p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
-            DEBUG_V("Unexpected missing file handle");
+            // DEBUG_V("Unexpected missing file handle");
             Stop();
             break;
         }
@@ -248,14 +248,14 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         // have we reached the end of the file?
         if (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence <= CurrentFrame)
         {
-            DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
+            // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
             if (0 != p_Parent->FileControl[CurrentFile].RemainingPlayCount)
             {
-                DEBUG_V (String ("   Restart Playing:: FileName: '") + p_Parent->GetFileName () + "'");
-                DEBUG_V (String ("RemainingPlayCount: ") + String (p_Parent->FileControl[CurrentFile].RemainingPlayCount));
-                DEBUG_V (String ("Replaying:: FileName:      '") + p_Parent->GetFileName () + "'");
+                // DEBUG_V (String ("   Restart Playing:: FileName: '") + p_Parent->GetFileName () + "'");
+                // DEBUG_V (String ("RemainingPlayCount: ") + String (p_Parent->FileControl[CurrentFile].RemainingPlayCount));
+                // DEBUG_V (String ("Replaying:: FileName:      '") + p_Parent->GetFileName () + "'");
                 --p_Parent->FileControl[CurrentFile].RemainingPlayCount;
-                DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
+                // DEBUG_V (String ("RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
 
                 p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS = 0;
                 p_Parent->FileControl[CurrentFile].RemainingPlayCount --;
@@ -263,18 +263,18 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
                 p_Parent->FileControl[CurrentFile].StartingTimeMS = p_Parent->FileControl[CurrentFile].LastPollTimeMS;
                 p_Parent->FileControl[CurrentFile].LastPlayedFrameId = p_Parent->CalculateFrameId (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS, p_Parent->GetSyncOffsetMS ());
 
-                DEBUG_V (String ("                FileName: ") + p_Parent->FileControl[CurrentFile].FileName);
-                DEBUG_V (String ("       ElapsedPlayTimeMS: ") + p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS);
-                DEBUG_V (String ("          LastPollTimeMS: ") + p_Parent->FileControl[CurrentFile].LastPollTimeMS);
-                DEBUG_V (String ("          StartingTimeMS: ") + p_Parent->FileControl[CurrentFile].StartingTimeMS);
-                DEBUG_V (String ("      RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
-                DEBUG_V (String ("       LastPlayedFrameId: ") + p_Parent->FileControl[CurrentFile].LastPlayedFrameId);
-                DEBUG_V (String ("NumberOfFramesInSequence: ") + p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence);
+                // DEBUG_V (String ("                FileName: ") + p_Parent->FileControl[CurrentFile].FileName);
+                // DEBUG_V (String ("       ElapsedPlayTimeMS: ") + p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS);
+                // DEBUG_V (String ("          LastPollTimeMS: ") + p_Parent->FileControl[CurrentFile].LastPollTimeMS);
+                // DEBUG_V (String ("          StartingTimeMS: ") + p_Parent->FileControl[CurrentFile].StartingTimeMS);
+                // DEBUG_V (String ("      RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
+                // DEBUG_V (String ("       LastPlayedFrameId: ") + p_Parent->FileControl[CurrentFile].LastPlayedFrameId);
+                // DEBUG_V (String ("NumberOfFramesInSequence: ") + p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence);
             }
             else
             {
-                DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence));
-                DEBUG_V (String ("      Done Playing:: FileName: '") + p_Parent->FileControl[CurrentFile].FileName + "'");
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("      Done Playing:: FileName: '") + p_Parent->FileControl[CurrentFile].FileName + "'");
                 Stop ();
                 Response = true;
                 break;
@@ -320,19 +320,19 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
             ///DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
             ///DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
             ///DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            DEBUG_FILE_HANDLE(p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+            // DEBUG_FILE_HANDLE(p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             uint32_t ActualBytesRead = p_Parent->
             ReadFile(CurrentOutputBufferOffset, ActualBytesToRead, AdjustedFilePosition);
-            DEBUG_FILE_HANDLE(p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+            // DEBUG_FILE_HANDLE(p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
             MaxBytesToRead -= ActualBytesRead;
             CurrentOutputBufferOffset += ActualBytesRead;
 
             if (ActualBytesRead != ActualBytesToRead)
             {
-                DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence));
-                DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
-                DEBUG_V (F ("File Playback Failed to read enough data"));
+                // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence));
+                // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
+                // DEBUG_V (F ("File Playback Failed to read enough data"));
                 Stop ();
             }
         }
@@ -347,53 +347,53 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_PlayingFile::Init (c_InputFPPRemotePlayFile* Parent)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_PlayingFile::Init");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_PlayingFile::Init");
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_PlayingFile_imp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_PlayingFile::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_PlayingFile::Start (String& FileName, float ElapsedSeconds, uint32_t RemainingPlayCount)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_PlayingFile::Start");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_PlayingFile::Start");
 
-    DEBUG_V("Set up the next file");
+    // DEBUG_V("Set up the next file");
     p_Parent->FileControl[NextFile].FileName = FileName;
     p_Parent->FileControl[NextFile].ElapsedPlayTimeMS = uint32_t (ElapsedSeconds * 1000.0);
     p_Parent->FileControl[NextFile].LastPollTimeMS = millis();
     p_Parent->FileControl[NextFile].StartingTimeMS = p_Parent->FileControl[NextFile].LastPollTimeMS - p_Parent->FileControl[NextFile].ElapsedPlayTimeMS;
     p_Parent->FileControl[NextFile].RemainingPlayCount = RemainingPlayCount;
 
-    DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
-    DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
-    DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
-    DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
-    DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
+    // DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
+    // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
+    // DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
+    // DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
+    // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
 
-    DEBUG_V("Stop the current file");
+    // DEBUG_V("Stop the current file");
     Stop ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_PlayingFile::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_PlayingFile::Stop");
-    DEBUG_V (String (F ("Stop Playing::  FileName: '")) + p_Parent->FileControl[CurrentFile].FileName + "'");
-    DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_PlayingFile::Stop");
+    // DEBUG_V (String (F ("Stop Playing::  FileName: '")) + p_Parent->FileControl[CurrentFile].FileName + "'");
+    // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
 
     p_Parent->fsm_PlayFile_state_Stopping_imp.Init (p_Parent);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_PlayingFile::Stop
 
@@ -410,9 +410,9 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
         // are we on the correct file?
         if (!FileName.equals(p_Parent->GetFileName ()))
         {
-            DEBUG_V ("Sync: Filename change");
-            DEBUG_V (String("New FileName: ") + FileName);
-            DEBUG_V (String("Old FileName: ") + p_Parent->GetFileName ());
+            // DEBUG_V ("Sync: Filename change");
+            // DEBUG_V (String("New FileName: ") + FileName);
+            // DEBUG_V (String("Old FileName: ") + p_Parent->GetFileName ());
             Start (FileName, ElapsedSeconds, 1);
             break;
         }
@@ -483,19 +483,19 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Stopping::Poll ()
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Stopping::Poll");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Stopping::Poll");
 
-    DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed));
+    // DEBUG_V (String ("FileHandleForFileBeingPlayed: ") + String (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed));
 
     if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
     {
-        DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+        // DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
     }
     else
     {
-        DEBUG_V("Unexpected missing file handle");
+        // DEBUG_V("Unexpected missing file handle");
     }
 
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
@@ -505,7 +505,7 @@ bool fsm_PlayFile_state_Stopping::Poll ()
         FPPDiscovery.GenerateFppSyncMsg(SYNC_PKT_STOP, emptyString, 0, float(0.0));
     }
 
-    DEBUG_END;
+    // DEBUG_END;
     return true;
 
 } // fsm_PlayFile_state_Stopping::Poll
@@ -513,23 +513,23 @@ bool fsm_PlayFile_state_Stopping::Poll ()
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Stopping::Init (c_InputFPPRemotePlayFile* Parent)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Stopping::Init");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Stopping::Init");
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Stopping_imp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Stopping::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Stopping::Start (String& FileName, float ElapsedSeconds, uint32_t RemainingPlayCount)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Stopping::Start");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Stopping::Start");
 
-    DEBUG_V("Set up a next file");
+    // DEBUG_V("Set up a next file");
 
     p_Parent->FileControl[NextFile].FileName = FileName;
     p_Parent->FileControl[NextFile].ElapsedPlayTimeMS = uint32_t (ElapsedSeconds * 1000.0);
@@ -537,33 +537,33 @@ void fsm_PlayFile_state_Stopping::Start (String& FileName, float ElapsedSeconds,
     p_Parent->FileControl[NextFile].StartingTimeMS = p_Parent->FileControl[NextFile].LastPollTimeMS - p_Parent->FileControl[NextFile].ElapsedPlayTimeMS;
     p_Parent->FileControl[NextFile].RemainingPlayCount = RemainingPlayCount;
 
-    DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
-    DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
-    DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
-    DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
-    DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
+    // DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
+    // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
+    // DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
+    // DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
+    // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Stopping::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Stopping::Stop (void)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Stopping::Stop");
-    DEBUG_V("Not actually doing anything");
-    DEBUG_END;
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Stopping::Stop");
+    // DEBUG_V("Not actually doing anything");
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Stopping::Stop
 
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Stopping::Sync (String&, float)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Stopping::Sync");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Stopping::Sync");
 
-    DEBUG_END;
+    // DEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Stopping::Sync
@@ -579,7 +579,7 @@ bool fsm_PlayFile_state_Error::Poll ()
     if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
     {
         ///DEBUG_V("Unexpected file handle in Error handler.");
-        DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+        // DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
     }
     else
@@ -597,23 +597,23 @@ bool fsm_PlayFile_state_Error::Poll ()
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Error::Init (c_InputFPPRemotePlayFile* Parent)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Error::Init");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Error::Init");
 
     p_Parent = Parent;
     Parent->pCurrentFsmState = &(Parent->fsm_PlayFile_state_Error_imp);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Error::Init
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Error::Start (String& FileName, float ElapsedSeconds, uint32_t RemainingPlayCount)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Error::Start");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Error::Start");
 
-    DEBUG_V("Set up a next file");
+    // DEBUG_V("Set up a next file");
 
     p_Parent->FileControl[NextFile].FileName = FileName;
     p_Parent->FileControl[NextFile].ElapsedPlayTimeMS = uint32_t (ElapsedSeconds * 1000.0);
@@ -621,39 +621,39 @@ void fsm_PlayFile_state_Error::Start (String& FileName, float ElapsedSeconds, ui
     p_Parent->FileControl[NextFile].StartingTimeMS = p_Parent->FileControl[NextFile].LastPollTimeMS - p_Parent->FileControl[NextFile].ElapsedPlayTimeMS;
     p_Parent->FileControl[NextFile].RemainingPlayCount = RemainingPlayCount;
 
-    DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
-    DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
-    DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
-    DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
-    DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
+    // DEBUG_V (String ("           FileName: ") + p_Parent->FileControl[NextFile].FileName);
+    // DEBUG_V (String ("  ElapsedPlayTimeMS: ") + p_Parent->FileControl[NextFile].ElapsedPlayTimeMS);
+    // DEBUG_V (String ("     LastPollTimeMS: ") + p_Parent->FileControl[NextFile].LastPollTimeMS);
+    // DEBUG_V (String ("     StartingTimeMS: ") + p_Parent->FileControl[NextFile].StartingTimeMS);
+    // DEBUG_V (String (" RemainingPlayCount: ") + p_Parent->FileControl[NextFile].RemainingPlayCount);
 
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
-    DEBUG_END
+    // DEBUG_END
 
 } // fsm_PlayFile_state_Error::Start
 
 //-----------------------------------------------------------------------------
 void fsm_PlayFile_state_Error::Stop (void)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Error::Stop");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Error::Stop");
 
     p_Parent->fsm_PlayFile_state_Idle_imp.Init (p_Parent);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_PlayFile_state_Error::Stop
 
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Error::Sync (String& FileName, float ElapsedSeconds)
 {
-    DEBUG_START;
-    DEBUG_V("fsm_PlayFile_state_Error::Sync");
+    // DEBUG_START;
+    // DEBUG_V("fsm_PlayFile_state_Error::Sync");
 
     Start(FileName, ElapsedSeconds, 1);
 
-    DEBUG_END;
+    // DEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Error::Sync

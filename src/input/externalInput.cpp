@@ -216,7 +216,7 @@ void fsm_ExternalInput_off_state::Poll(c_ExternalInput& pExternalInput)
 
 	// read the input
 	bool bInputValue = pExternalInput.ReadInput();
-	
+
 	// If the input is "on"
 	if (true == bInputValue)
 	{
@@ -229,11 +229,11 @@ void fsm_ExternalInput_off_state::Poll(c_ExternalInput& pExternalInput)
 	}
 	else // still off
 	{
-		//  DEBUG_V ("reset the debounce counter");
+		// DEBUG_V ("reset the debounce counter");
 		pExternalInput.InputDebounceCount = MIN_INPUT_STABLE_VALUE;
 	}
 
-	//  DEBUG_END;
+	// DEBUG_END;
 
 } // fsm_ExternalInput_off_state::Poll
 

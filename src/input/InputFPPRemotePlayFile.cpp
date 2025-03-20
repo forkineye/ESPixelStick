@@ -482,7 +482,7 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
     {
         if(c_FileMgr::INVALID_FILE_HANDLE == FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
-            DEBUG_V("No Valid File Handle");
+            // DEBUG_V("No Valid File Handle");
             break;
         }
 
