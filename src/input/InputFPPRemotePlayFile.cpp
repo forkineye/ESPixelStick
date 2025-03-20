@@ -482,7 +482,7 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
     {
         if(c_FileMgr::INVALID_FILE_HANDLE == FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
-            // DEBUG_V("No Valid File Handle");
+            DEBUG_V("No Valid File Handle");
             break;
         }
 
@@ -497,6 +497,7 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
                 break;
             }
         }
+        DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         while (NumBytesRead < NumBytesToRead)
         {
             // xDEBUG_V();
@@ -587,16 +588,20 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
             PreviousOnPosition = CurrentOnPosition;
             PreviousFileOffset = FileOffset;
 #endif // def DEBUG_FSEQ
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
             OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
 
             FileOffset += NumBytesReadThisPass;
             NumBytesRead += NumBytesReadThisPass;
             DestinationIntensityId += NumBytesReadThisPass;
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
     } while (false);
     // xDEBUG_V(String("NumBytesToRead: ") + String(NumBytesToRead));
     // xDEBUG_V(String("  NumBytesRead: ") + String(NumBytesRead));
+
+    DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
     // xDEBUG_END;
     return NumBytesRead;
