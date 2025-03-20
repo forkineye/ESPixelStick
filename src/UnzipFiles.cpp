@@ -203,6 +203,7 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
 
         } while (BytesRead > 0);
 
+        DEBUG_FILE_HANDLE (FileHandle);
         FileMgr.CloseSdFile(FileHandle);
         zip.closeCurrentFile();
         logcon(FileName + F(" - Done."));
@@ -249,6 +250,7 @@ void UnzipFiles::CloseZipFile(void *p)
     c_FileMgr::FileId FileHandle = (c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle);
     // DEBUG_V(String("FileHandle: ") + String(FileHandle));
 
+    DEBUG_FILE_HANDLE (FileHandle);
     FileMgr.CloseSdFile(FileHandle);
     SeekPosition = 0;
 

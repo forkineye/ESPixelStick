@@ -246,6 +246,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         if(c_FileMgr::INVALID_FILE_HANDLE != FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
 
@@ -282,6 +283,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + FileControl[CurrentFile].FileName + "'");
             logcon (LastFailedPlayStatusMsg);
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
@@ -323,6 +325,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start. ")) + FileControl[CurrentFile].FileName + F (" is not a v2 uncompressed sequence"));
             logcon (LastFailedPlayStatusMsg);
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
@@ -337,6 +340,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
                                       F (" File does not contain enough data to meet the Stated Channel Count * Number of Frames value. Need: ") +
                                       String (NeededDataSize) + F (", SD File Size: ") + String (ActualDataSize));
             logcon (LastFailedPlayStatusMsg);
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
@@ -354,6 +358,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             {
                 LastFailedPlayStatusMsg =  (String (F ("ParseFseqFile:: Could not start. ")) + FileControl[CurrentFile].FileName + F (" Too many sparse ranges defined in file header."));
                 logcon (LastFailedPlayStatusMsg);
+                DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
                 FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
                 break;
             }

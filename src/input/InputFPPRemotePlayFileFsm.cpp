@@ -488,6 +488,7 @@ bool fsm_PlayFile_state_Stopping::Poll ()
 
     if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
     {
+        DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
     }
     else
@@ -576,6 +577,7 @@ bool fsm_PlayFile_state_Error::Poll ()
     if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
     {
         // xDEBUG_V("Unexpected file handle in Error handler.");
+        DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
     }
     else

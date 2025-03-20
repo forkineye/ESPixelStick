@@ -733,6 +733,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
                         String resp = emptyString;
                         DEBUG_FILE_HANDLE(FileHandle);
                         BuildFseqResponse (seq, FileHandle, resp);
+                        DEBUG_FILE_HANDLE (FileHandle);
                         FileMgr.CloseSdFile (FileHandle);
                         request->send (200, CN_applicationSLASHjson, resp);
                         break;
@@ -805,6 +806,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         String resp = emptyString;
         DEBUG_FILE_HANDLE(FileHandle);
         BuildFseqResponse (filename, FileHandle, resp);
+        DEBUG_FILE_HANDLE (FileHandle);
         FileMgr.CloseSdFile (FileHandle);
         request->send (200, CN_applicationSLASHjson, resp);
 

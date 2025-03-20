@@ -717,8 +717,11 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
 
         if (TotalFileSizeToTransfer <= index)
         {
-            FileMgr.CloseSdFile(FileHandle);
-            FileHandle = c_FileMgr::INVALID_FILE_HANDLE;
+            if (FileHandle != c_FileMgr::INVALID_FILE_HANDLE)
+            {
+                DEBUG_FILE_HANDLE (FileHandle);
+                FileMgr.CloseSdFile(FileHandle);
+            }
 
             // we close this request by sending a length of 0
             // DEBUG_V(String("file send complete"));
