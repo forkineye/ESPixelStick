@@ -267,6 +267,7 @@ int32_t UnzipFiles::ReadZipFile(void *p, uint8_t *buffer, int32_t length)
     c_FileMgr::FileId FileHandle = (c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle);
     // DEBUG_V(String("FileHandle: ") + String(FileHandle));
 
+    DEBUG_FILE_HANDLE(FileHandle);
     size_t BytesRead = FileMgr.ReadSdFile(FileHandle, buffer, length, SeekPosition);
     // DEBUG_V(String(" BytesRead: ") + String(BytesRead));
 
