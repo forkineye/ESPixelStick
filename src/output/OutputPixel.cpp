@@ -766,6 +766,12 @@ void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCo
 {
     // DEBUG_START;
 
+    if((StartChannelId + ChannelCount) > OutputBufferSize)
+    {
+        DEBUG_V("ERROR: Writting beyond the end of the output buffer");
+        DEBUG_V(String("StartChannelId: 0x") + String(StartChannelId, HEX));
+        DEBUG_V(String("  ChannelCount: 0x") + String(ChannelCount));
+    }
     // DEBUG_V(String("         StartChannelId: 0x") + String(StartChannelId, HEX));
     // DEBUG_V(String("           ChannelCount: 0x") + String(ChannelCount, HEX));
 
@@ -776,12 +782,33 @@ void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCo
         uint32_t CurrentIntensityData = gamma_table[pSourceData[SourceDataIndex]];
         CurrentIntensityData = uint8_t((uint32_t(CurrentIntensityData) * AdjustedBrightness) >> 8);
         uint32_t CalculatedChannelId = CalculateIntensityOffset(currentChannelId);
-        
         uint8_t *pBuffer = &pOutputBuffer[CalculatedChannelId];
         for(uint32_t CurrentGroupIndex = 0; CurrentGroupIndex < PixelGroupSize; ++CurrentGroupIndex)
         {
             // DEBUG_V(String("      CurrentGroupIndex: 0x") + String(CurrentGroupIndex, HEX));
             // DEBUG_V(String("    CalculatedChannelId: 0x") + String(CalculatedChannelId, HEX));
+            if(uint32_t(pBuffer) >= uint32_t(&pOutputBuffer[OutputBufferSize]))
+            {
+                DEBUG_V("This write is beyond the end of the Output buffer for this channel");
+                DEBUG_V(String("      CalculatedChannelId: ") + String(CalculatedChannelId));
+                DEBUG_V(String("NumIntensityBytesPerPixel: ") + String(NumIntensityBytesPerPixel));
+                DEBUG_V(String("           PixelGroupSize: ") + String(PixelGroupSize));
+                DEBUG_V(String("                Last Data: ") + String((CalculatedChannelId + (NumIntensityBytesPerPixel * PixelGroupSize))));
+                DEBUG_V(String("         OutputBufferSize: ") + String(OutputBufferSize));
+                break;
+            }
+
+            if(uint32_t(pBuffer) >= uint32_t(&(OutputMgr.GetBufferAddress()[OutputMgr.GetBufferSize()])))
+            {
+                DEBUG_V("This write is beyond the end of the Global Output buffer");
+                DEBUG_V(String("      CalculatedChannelId: ") + String(CalculatedChannelId));
+                DEBUG_V(String("NumIntensityBytesPerPixel: ") + String(NumIntensityBytesPerPixel));
+                DEBUG_V(String("           PixelGroupSize: ") + String(PixelGroupSize));
+                DEBUG_V(String("                Last Data: ") + String((CalculatedChannelId + (NumIntensityBytesPerPixel * PixelGroupSize))));
+                DEBUG_V(String("         OutputBufferSize: ") + String(OutputBufferSize));
+                break;
+            }
+
             *pBuffer = CurrentIntensityData;
             pBuffer += NumIntensityBytesPerPixel;
         }

@@ -506,6 +506,12 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
                                                                LocalIntensityBuffer,
                                                                min((NumBytesToRead - NumBytesRead), LocalIntensityBufferSize),
                                                                FileOffset);
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+            if(0 == NumBytesReadThisPass)
+            {
+                DEBUG_V(F("Ran out of data to read"));
+                break;
+            }
             // xDEBUG_V();
 #ifdef DEBUG_FSEQ
 /*
@@ -588,14 +594,13 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
             PreviousOnPosition = CurrentOnPosition;
             PreviousFileOffset = FileOffset;
 #endif // def DEBUG_FSEQ
-            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
             OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
             FileOffset += NumBytesReadThisPass;
             NumBytesRead += NumBytesReadThisPass;
             DestinationIntensityId += NumBytesReadThisPass;
-            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
     } while (false);
     // xDEBUG_V(String("NumBytesToRead: ") + String(NumBytesToRead));

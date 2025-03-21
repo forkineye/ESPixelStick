@@ -1449,10 +1449,10 @@ void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCoun
         }
         if (((StartChannelId + ChannelCount) > UsedBufferSize) || (0 == ChannelCount))
         {
-            // DEBUG_V (String("ERROR: Invalid parameters"));
-            // DEBUG_V (String("StartChannelId: ") + String(StartChannelId, HEX));
-            // DEBUG_V (String("  ChannelCount: ") + String(ChannelCount));
-            // DEBUG_V (String("UsedBufferSize: ") + String(UsedBufferSize));
+            DEBUG_V (String("ERROR: Invalid parameters"));
+            DEBUG_V (String("StartChannelId: ") + String(StartChannelId));
+            DEBUG_V (String("  ChannelCount: ") + String(ChannelCount));
+            DEBUG_V (String("UsedBufferSize: ") + String(UsedBufferSize));
             break;
         }
 

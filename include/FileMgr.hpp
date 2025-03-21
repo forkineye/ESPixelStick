@@ -256,13 +256,13 @@ protected:
 { \
     if (fh == c_FileMgr::INVALID_FILE_HANDLE) \
     { \
-        DEBUG_V(String(F("Found an invalid file handle before a request to FileMgr. FileHandle: ")) + String(fh)); \
+        DEBUG_V(String(F("Found an invalid file handle before a request to FileMgr. File Handle: ")) + String(fh)); \
     } \
     else \
     { \
         if (-1 == FileMgr.FileListFindSdFileHandle (fh)) \
         { \
-            DEBUG_V(String(F("Found an invalid file handle before a request to FileMgr. FileHandle: ")) + String(fh)); \
+            DEBUG_V(String(F("Could not look up File Handle: ")) + String(fh)); \
         } \
     } \
 }
