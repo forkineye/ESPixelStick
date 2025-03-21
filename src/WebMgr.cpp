@@ -706,6 +706,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
 
                 break;
             }
+            DEBUG_FILE_HANDLE (FileHandle);
 
             // DEBUG_V("Get the file size");
             TotalFileSizeToTransfer = FileMgr.GetSdFileSize(FileHandle);
@@ -717,6 +718,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
 
         if (TotalFileSizeToTransfer <= index)
         {
+            DEBUG_FILE_HANDLE (FileHandle);
             if (FileHandle != c_FileMgr::INVALID_FILE_HANDLE)
             {
                 DEBUG_FILE_HANDLE (FileHandle);

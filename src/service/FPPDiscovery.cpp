@@ -727,6 +727,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
                 if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle, -1))
                 {
+                    DEBUG_FILE_HANDLE(FileHandle);
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
                         // DEBUG_V ("found the file. return metadata as json");

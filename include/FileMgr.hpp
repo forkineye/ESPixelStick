@@ -103,6 +103,7 @@ public:
     void     NetworkStateChanged (bool NewState);
     uint64_t GetDefaultFseqFileList (uint8_t * buffer, uint64_t maxlen);
     void     FindFirstZipFile (String &FileName);
+    int      FileListFindSdFileHandle (FileId HandleToFind);
 
 const String FSEQFILELIST = "fseqfilelist.json";
 #define SD_BLOCK_SIZE 512
@@ -238,7 +239,6 @@ public: struct __attribute__((__packed__, aligned(4))) CSD {
 #define DATABUFFERSIZE (5 * 1024)
 
     FileListEntry_t FileList[MaxOpenFiles];
-    int FileListFindSdFileHandle (FileId HandleToFind);
     void InitSdFileList ();
 
     File        FileSendDir;
@@ -256,7 +256,14 @@ protected:
 { \
     if (fh == c_FileMgr::INVALID_FILE_HANDLE) \
     { \
-        DEBUG_V("Found an invalid file handle before a request to FileMgr."); \
+        DEBUG_V(String(F("Found an invalid file handle before a request to FileMgr. FileHandle: ")) + String(fh)); \
+    } \
+    else \
+    { \
+        if (-1 == FileMgr.FileListFindSdFileHandle (fh)) \
+        { \
+            DEBUG_V(String(F("Found an invalid file handle before a request to FileMgr. FileHandle: ")) + String(fh)); \
+        } \
     } \
 }
 #else
