@@ -159,7 +159,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 
         {
             LOG_PORT.println (F("Invalid RMT configuration parameters. Rebooting"));
-            RequestReboot(100000);;
+            RequestReboot(10000);
             break;
         }
 

@@ -452,11 +452,12 @@ void c_WebMgr::init ()
             });
 
         // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",               LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/conf/config.json",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/input_config.json",  LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/conf/output_config.json", LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/conf/admininfo.json",     LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
+   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
 
         // must be last servestatic entry
     	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
@@ -710,6 +711,7 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
 
             // DEBUG_V("Get the file size");
             TotalFileSizeToTransfer = FileMgr.GetSdFileSize(FileHandle);
+            DEBUG_FILE_HANDLE (FileHandle);
         }
 
         // DEBUG_V(String("                  index: ") + String(index));
@@ -718,7 +720,6 @@ size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t ind
 
         if (TotalFileSizeToTransfer <= index)
         {
-            DEBUG_FILE_HANDLE (FileHandle);
             if (FileHandle != c_FileMgr::INVALID_FILE_HANDLE)
             {
                 DEBUG_FILE_HANDLE (FileHandle);
