@@ -446,13 +446,12 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 } // ParseFseqFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::ClearFileInfo()
+void c_InputFPPRemotePlayFile::ClearControlFileInfo()
 {
     // DEBUG_START;
     FileControl[NextFile].FileName                      = emptyString;
     FileControl[NextFile].FileHandleForFileBeingPlayed  = c_FileMgr::INVALID_FILE_HANDLE;
     FileControl[NextFile].RemainingPlayCount            = 0;
-    SyncControl.LastRcvdElapsedSeconds                  = 0.0;
     FileControl[NextFile].ElapsedPlayTimeMS             = 0;
     FileControl[NextFile].DataOffset                    = 0;
     FileControl[NextFile].ChannelsPerFrame              = 0;

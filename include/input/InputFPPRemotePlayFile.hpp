@@ -49,7 +49,7 @@ public:
 private:
 #define ELAPSED_PLAY_TIMER_INTERVAL_MS  10
 
-    void ClearFileInfo ();
+    void ClearControlFileInfo ();
 
     friend class fsm_PlayFile_state_Idle;
     friend class fsm_PlayFile_state_Starting;

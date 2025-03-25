@@ -121,7 +121,8 @@ bool fsm_PlayFile_state_Starting::Poll ()
     do // once
     {
         p_Parent->FileControl[CurrentFile] = p_Parent->FileControl[NextFile];
-        p_Parent->ClearFileInfo();
+        p_Parent->ClearControlFileInfo();
+        p_Parent->SyncControl.LastRcvdElapsedSeconds = 0.0;
 
         if (!p_Parent->ParseFseqFile ())
         {
