@@ -814,7 +814,7 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
     } while (false);
 
     // DEBUG_END;
-}
+} // ProcessPOST
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessFile (
@@ -898,7 +898,7 @@ void c_FPPDiscovery::ProcessFile (
             inFileUpload = false;
             UploadFileName = emptyString;
             writeFailed = false;
-            memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
+            OutputMgr.ClearBuffer();
             InputMgr.SetOperationalState(true);
             OutputMgr.PauseOutputs(false);
             FeedWDT();
