@@ -75,8 +75,8 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.NumIdleBits             = 1;
     OutputRmtConfig.DataDirection           = c_OutputRmt::OutputRmtConfig_t::DataDirection_t::LSB2MSB;
 
-    SetUpRmtBitTimes();
     Rmt.Begin(OutputRmtConfig, this);
+    SetUpRmtBitTimes();
 
     // DEBUG_END;
     return response;

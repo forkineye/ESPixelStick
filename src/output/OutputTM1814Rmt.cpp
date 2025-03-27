@@ -100,7 +100,6 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     BitValue.level0 = 1;
     BitValue.duration1 = ifgTicks / 10;
     BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
@@ -111,6 +110,7 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
 
     Rmt.Begin(OutputRmtConfig, this);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     // DEBUG_END;
     return response;

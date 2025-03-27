@@ -102,7 +102,6 @@ bool c_OutputUCS8903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     BitValue.level0 = 0;
     BitValue.duration1 = ifgTicks / 12;
     BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
@@ -113,6 +112,7 @@ bool c_OutputUCS8903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.pPixelDataSource   = this;
     OutputRmtConfig.CitrdsArray        = ConvertIntensityToRmtDataStream;
     Rmt.Begin(OutputRmtConfig, this);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     // DEBUG_END;
     return response;
