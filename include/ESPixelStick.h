@@ -153,6 +153,7 @@ void inline ResetGpio(const gpio_num_t pinId)
 {
     if(GPIO_IS_VALID_OUTPUT_GPIO(pinId))
     {
+        pinMatrixOutDetach(pinId, false, false);
         gpio_reset_pin(pinId);
         pinMode(pinId, INPUT);
     }
