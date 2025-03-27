@@ -149,7 +149,7 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 //----------------------------------------------------------------------------
 void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -206,8 +206,8 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         RmtConfig.tx_config.loop_en = true;
         RmtConfig.tx_config.idle_output_en = true;
         // DEBUG_V();
-        DEBUG_V(String("RmtChannelId: ") + String(OutputRmtConfig.RmtChannelId));
-        DEBUG_V(String("     Datapin: ") + String(OutputRmtConfig.DataPin));
+        // DEBUG_V(String("RmtChannelId: ") + String(OutputRmtConfig.RmtChannelId));
+        // DEBUG_V(String("     Datapin: ") + String(OutputRmtConfig.DataPin));
         ResetGpio(OutputRmtConfig.DataPin);
         ESP_ERROR_CHECK(rmt_config(&RmtConfig));
 
@@ -216,7 +216,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 
         if(NULL == RMT_intr_handle)
         {
-            DEBUG_V("Allocate interrupt handler");
+            // DEBUG_V("Allocate interrupt handler");
             // ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
             for(auto & currentThisPtr : rmt_isr_ThisPtrs)
             {
@@ -258,7 +258,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
         if(!SendFrameTaskHandle)
         {
-            DEBUG_V("Start SendFrameTask");
+            // DEBUG_V("Start SendFrameTask");
             xTaskCreatePinnedToCore(RMT_Task, "RMT_Task", 4096, NULL, 5, &SendFrameTaskHandle, 0);
             vTaskPrioritySet(SendFrameTaskHandle, 5);
         }
@@ -269,7 +269,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         HasBeenInitialized = true;
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // Begin
 
