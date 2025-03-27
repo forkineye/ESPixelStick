@@ -77,17 +77,6 @@ void c_OutputWS2811Rmt::Begin ()
     c_OutputWS2811::Begin ();
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId      = rmt_channel_t(OutputChannelId);
-    OutputRmtConfig.DataPin           = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level        = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
-    OutputRmtConfig.pPixelDataSource  = this;
-    OutputRmtConfig.NumFrameStartBits = 0;
-    OutputRmtConfig.CitrdsArray       = ConvertIntensityToRmtDataStream;
-    OutputRmtConfig.NumIdleBits       = 1;
-
-    // DEBUG_V();
-    Rmt.Begin(OutputRmtConfig, this);
 
     HasBeenInitialized = true;
 
@@ -115,7 +104,17 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     BitValue.level1    = 0;
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
-    Rmt.set_pin (DataPin);
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId      = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin           = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level        = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    OutputRmtConfig.pPixelDataSource  = this;
+    OutputRmtConfig.NumFrameStartBits = 0;
+    OutputRmtConfig.CitrdsArray       = ConvertIntensityToRmtDataStream;
+    OutputRmtConfig.NumIdleBits       = 1;
+
+    // DEBUG_V();
+    Rmt.Begin(OutputRmtConfig, this);
 
     // DEBUG_END;
     return response;

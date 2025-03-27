@@ -19,6 +19,7 @@
 #include "ESPixelStick.h"
 #ifdef ARDUINO_ARCH_ESP32
 #include "output/OutputRmt.hpp"
+#include <driver/rmt.h>
 
 // forward declaration for the isr handler
 static void IRAM_ATTR   rmt_intr_handler (void* param);
@@ -42,6 +43,8 @@ void RMT_Task (void *arg)
 
     while(1)
     {
+        // Give the outputs a chance to catch up.
+        delay(1);
         // process all possible channels
         for (c_OutputRmt * pRmt : rmt_isr_ThisPtrs)
         {
@@ -146,12 +149,20 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
 //----------------------------------------------------------------------------
 void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     do // once
     {
+        if(HasBeenInitialized)
+        {
+            // release the old GPIO pin.
+            ResetGpio(OutputRmtConfig.DataPin);
+        }
+
+        // save the new config
         OutputRmtConfig = config;
-#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+
+        #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         if ((nullptr == OutputRmtConfig.pPixelDataSource) && (nullptr == OutputRmtConfig.pSerialDataSource))
 #else
         if (nullptr == OutputRmtConfig.pPixelDataSource)
@@ -195,6 +206,8 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         RmtConfig.tx_config.loop_en = true;
         RmtConfig.tx_config.idle_output_en = true;
         // DEBUG_V();
+        DEBUG_V(String("RmtChannelId: ") + String(OutputRmtConfig.RmtChannelId));
+        DEBUG_V(String("     Datapin: ") + String(OutputRmtConfig.DataPin));
         ResetGpio(OutputRmtConfig.DataPin);
         ESP_ERROR_CHECK(rmt_config(&RmtConfig));
 
@@ -203,7 +216,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 
         if(NULL == RMT_intr_handle)
         {
-            // DEBUG_V();
+            DEBUG_V("Allocate interrupt handler");
             // ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
             for(auto & currentThisPtr : rmt_isr_ThisPtrs)
             {
@@ -245,7 +258,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
         if(!SendFrameTaskHandle)
         {
-            // DEBUG_V("Start SendFrameTask");
+            DEBUG_V("Start SendFrameTask");
             xTaskCreatePinnedToCore(RMT_Task, "RMT_Task", 4096, NULL, 5, &SendFrameTaskHandle, 0);
             vTaskPrioritySet(SendFrameTaskHandle, 5);
         }
@@ -253,15 +266,12 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         pParent = _pParent;
         rmt_isr_ThisPtrs[OutputRmtConfig.RmtChannelId] = this;
 
-        ResetGpio(OutputRmtConfig.DataPin);
-        rmt_set_gpio(OutputRmtConfig.RmtChannelId, RMT_MODE_TX, OutputRmtConfig.DataPin, false);
-
         HasBeenInitialized = true;
     } while (false);
 
-    // DEBUG_END;
+    DEBUG_END;
 
-} // init
+} // Begin
 
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)

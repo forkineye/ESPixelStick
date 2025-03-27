@@ -131,7 +131,6 @@ public:
     bool StartNewFrame                          ();
     bool StartNextFrame                         () { return ((nullptr != pParent) & (!OutputIsPaused)) ? pParent->RmtPoll() : false; }
     void GetStatus                              (ArduinoJson::JsonObject& jsonStatus);
-    void set_pin                                (gpio_num_t _DataPin) { OutputRmtConfig.DataPin = _DataPin; rmt_set_gpio (OutputRmtConfig.RmtChannelId, rmt_mode_t::RMT_MODE_TX, OutputRmtConfig.DataPin, false); }
     void PauseOutput                            (bool State);
     inline uint32_t IRAM_ATTR GetRmtIntMask     ()               { return ((RMT_INT_TX_END_BIT | RMT_INT_ERROR_BIT | RMT_INT_ERROR_BIT)); }
     void GetDriverName                          (String &value)  { value = CN_RMT; }

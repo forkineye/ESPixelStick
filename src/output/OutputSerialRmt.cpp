@@ -51,6 +51,18 @@ void c_OutputSerialRmt::Begin ()
 
     c_OutputSerial::Begin ();
 
+    HasBeenInitialized = true;
+
+    // DEBUG_END;
+
+} // Begin
+
+//----------------------------------------------------------------------------
+bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
+{
+    // DEBUG_START;
+
+    bool response = c_OutputSerial::SetConfig (jsonConfig);
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
     OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputChannelId);
@@ -65,22 +77,6 @@ void c_OutputSerialRmt::Begin ()
 
     SetUpRmtBitTimes();
     Rmt.Begin(OutputRmtConfig, this);
-    HasBeenInitialized = true;
-
-    // DEBUG_END;
-
-} // Begin
-
-//----------------------------------------------------------------------------
-bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
-{
-    // DEBUG_START;
-
-    bool response = c_OutputSerial::SetConfig (jsonConfig);
-
-    SetUpRmtBitTimes();
-
-    Rmt.set_pin (DataPin);
 
     // DEBUG_END;
     return response;
