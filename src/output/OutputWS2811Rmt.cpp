@@ -34,7 +34,7 @@ static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensit
 
     {{WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH, 1, WS2811_PIXEL_RMT_TICKS_BIT_0_LOW, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID},
     {{WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH, 1, WS2811_PIXEL_RMT_TICKS_BIT_1_LOW, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID},
-    {{WS2811_PIXEL_RMT_TICKS_IDLE / 12,  0, WS2811_PIXEL_RMT_TICKS_IDLE / 12, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
+    {{WS2811_PIXEL_RMT_TICKS_IDLE / 2,   0, WS2811_PIXEL_RMT_TICKS_IDLE / 2,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
     {{                                2, 1,                                2, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
     {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
     {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
@@ -114,6 +114,7 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     // DEBUG_V();
     Rmt.Begin(OutputRmtConfig, this);
+    Rmt.ValidateBitXlatTable(ConvertIntensityToRmtDataStream);
     Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     // DEBUG_END;
@@ -166,6 +167,9 @@ bool c_OutputWS2811Rmt::RmtPoll ()
         // DEBUG_V(String("get the next frame started on ") + String(DataPin));
         ReportNewFrame ();
         Response = Rmt.StartNewFrame ();
+#ifdef DEBUG_RMT_XLAT_ISSUES
+        Rmt.ValidateBitXlatTable(ConvertIntensityToRmtDataStream);
+#endif // def DEBUG_RMT_XLAT_ISSUES
 
         // DEBUG_V();
 

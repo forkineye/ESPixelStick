@@ -240,19 +240,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         memset((void*)&RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[0], 0x0, sizeof(RMTMEM.chan[0].data32));
 
         // DEBUG_V();
-
-        // this should be a vector.
-        if (nullptr != OutputRmtConfig.CitrdsArray)
-        {
-            // DEBUG_V();
-            const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = OutputRmtConfig.CitrdsArray;
-            while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
-            {
-                // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
-                SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
-                CurrentTranslation++;
-            }
-        }
+        UpdateBitXlatTable(OutputRmtConfig.CitrdsArray);
 
         // DEBUG_V (String ("                Intensity2Rmt[0]: 0x") + String (uint32_t (Intensity2Rmt[0].val), HEX));
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
@@ -272,6 +260,64 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
     // DEBUG_END;
 
 } // Begin
+
+//----------------------------------------------------------------------------
+void c_OutputRmt::UpdateBitXlatTable(const CitrdsArray_t * CitrdsArray)
+{
+    // DEBUG_START;
+
+    if (nullptr != OutputRmtConfig.CitrdsArray)
+    {
+        // DEBUG_V();
+        // this should be a vector.
+        const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = CitrdsArray;
+        while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
+        {
+            // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
+            SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
+            CurrentTranslation++;
+        }
+    }
+    else
+    {
+        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values") + CN_stars);
+    }
+    // DEBUG_END;
+} // UpdateBitXlatTable
+
+//----------------------------------------------------------------------------
+bool c_OutputRmt::ValidateBitXlatTable(const CitrdsArray_t * CitrdsArray)
+{
+    // DEBUG_START;
+    bool Response = false;
+    if (nullptr != OutputRmtConfig.CitrdsArray)
+    {
+        // DEBUG_V();
+        // this should be a vector.
+        const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = CitrdsArray;
+        while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
+        {
+            // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
+            SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
+
+            if(Intensity2Rmt[CurrentTranslation->Id].val != CurrentTranslation->Translation.val)
+            {
+                logcon(String(CN_stars) + F("ERROR: incorrect bit translation deteced. Chan: ") + String(OutputRmtConfig.RmtChannelId) +
+                        F(" Slot: ") + String(CurrentTranslation->Id) +
+                        F(" Got: 0x") + String(Intensity2Rmt[CurrentTranslation->Id].val, HEX) +
+                        F(" Expected: 0x") + String(CurrentTranslation->Translation.val));
+            }
+
+            CurrentTranslation++;
+        }
+    }
+    else
+    {
+        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values") + CN_stars);
+    }
+    // DEBUG_END;
+    return Response;
+} // ValidateBitXlatTable
 
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)

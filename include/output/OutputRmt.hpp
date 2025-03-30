@@ -147,6 +147,8 @@ public:
 #define RMT_Clock_Divisor   2.0
 #define RMT_TickLengthNS    float ( (1/ (RMT_ClockRate/RMT_Clock_Divisor)) * float(NanoSecondsInASecond))
 
+    void UpdateBitXlatTable(const CitrdsArray_t * CitrdsArray);
+    bool ValidateBitXlatTable(const CitrdsArray_t * CitrdsArray);
     void SetIntensity2Rmt (rmt_item32_t NewValue, RmtDataBitIdType_t ID) { Intensity2Rmt[ID] = NewValue; }
 
     bool ThereIsDataToSend = false;
