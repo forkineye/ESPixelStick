@@ -74,10 +74,11 @@ private:
     void load ();          ///< Load configuration from File System
     void save ();          ///< Save configuration to File System
 
-    int32_t SyncOffsetMS = 0;
-    bool    SendFppSync = false;
-    String  FileBeingPlayed = CN_No_LocalFileToPlay;
-    String  ConfiguredFileToPlay = CN_No_LocalFileToPlay;
-    bool    Stopping = false;
-    bool    FppSyncOverride = false;
+    int32_t  SyncOffsetMS = 0;
+    bool     SendFppSync = false;
+    String   FileBeingPlayed = CN_No_LocalFileToPlay;
+    String   ConfiguredFileToPlay = CN_No_LocalFileToPlay;
+    bool     Stopping = false;
+    bool     FppSyncOverride = false;
+    uint32_t FilePlayCount = 0;
 };
