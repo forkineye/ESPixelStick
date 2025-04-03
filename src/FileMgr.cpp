@@ -130,15 +130,6 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
 #endif // def SUPPORT_FTP
 
 //-----------------------------------------------------------------------------
-static PROGMEM const char DefaultFseqResponse[] =
-    "{\"SdCardPresent\" : false," \
-    "\"totalBytes\" : 0," \
-    "\"files\" : []," \
-    "\"usedBytes\" : 0," \
-    "\"numFiles\" : 0" \
-    "}";
-
-//-----------------------------------------------------------------------------
 ///< Start up the driver and put it into a safe mode
 c_FileMgr::c_FileMgr ()
 {
@@ -447,9 +438,10 @@ void c_FileMgr::SetSpiIoPins ()
 
             DescribeSdCardToUser ();
             // DEBUG_V();
-            BuildFseqList(true);
-            // DEBUG_V();
         }
+
+        BuildFseqList(true);
+        // DEBUG_V();
     }
 #ifdef ARDUINO_ARCH_ESP32
     catch (const std::exception &e)
@@ -562,6 +554,11 @@ void c_FileMgr::DeleteFlashFile (const String& FileName)
     // DEBUG_START;
 
     LittleFS.remove (FileName);
+    if(!FileName.equals(FSEQFILELIST))
+    {
+        BuildFseqList(false);
+    }
+
 
     // DEBUG_END;
 
@@ -763,7 +760,7 @@ bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
 } // SaveConfigFile
 
 //-----------------------------------------------------------------------------
-bool c_FileMgr::SaveFlashFile(const String FileName, uint32_t index, uint8_t *data, uint32_t len, bool final)
+bool c_FileMgr::SaveFlashFile(const String & FileName, uint32_t index, uint8_t *data, uint32_t len, bool final)
 {
     // DEBUG_START;
     bool Response = false;
@@ -1040,10 +1037,6 @@ void c_FileMgr::DeleteSdFile (const String & FileName)
         LockSd();
         ESP_SD.remove (FileName);
         UnLockSd();
-        if(!FileName.equals(FSEQFILELIST))
-        {
-            BuildFseqList(false);
-        }
     }
 
     // DEBUG_END;
@@ -1709,6 +1702,7 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
         if(!SdCardIsInstalled())
         {
             // DEBUG_V("No SD card installed.");
+            BuildDefaultFseqList();
             break;
         }
 
@@ -1723,33 +1717,19 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
             logcon(F("ERROR: Could not open SD card for Reading FSEQ List."));
             break;
         }
+        JsonDocument jsonDoc;
+        jsonDoc.to<JsonObject>();
 
         // open output file, erase old data
         ESP_SD.chdir(); // Set to sd root
-        UnLockSd();
-        DeleteSdFile(FSEQFILELIST);
-        LockSd();
-        FsFile OutputFile;
-        if(!OutputFile.open (FSEQFILELIST.c_str(), O_WRITE | O_CREAT))
-        {
-            InputFile.close();
-            UnLockSd();
-            logcon(F("ERROR: Could not open SD card for writting FSEQ List."));
-            break;
-        }
-        OutputFile.print("{");
-        // LOG_PORT.print("{");
         // DEBUG_V();
-
-        String Entry = String(F("\"totalBytes\" : ")) + int64String(SdCardSizeMB * 1024 * 1024) + ",";
-        OutputFile.print(Entry);
-        // LOG_PORT.print(Entry);
+        JsonWrite(jsonDoc, "totalBytes", SdCardSizeMB * 1024 * 1024);
 
         uint64_t usedBytes = 0;
         uint32_t numFiles = 0;
 
-        OutputFile.print("\"files\" : [");
-        // LOG_PORT.print("\"files\" : [");
+        JsonArray jsonDocFileList = jsonDoc["files"].to<JsonArray> ();
+        uint32_t FileIndex = 0;
         FsFile CurrentEntry;
         while (CurrentEntry.openNext (&InputFile, O_READ))
         {
@@ -1772,8 +1752,7 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
 
             if ((!EntryName.isEmpty ()) &&
 //                (!EntryName.equals(String (F ("System Volume Information")))) &&
-                (0 != CurrentEntry.size () &&
-                !EntryName.equals(FSEQFILELIST))
+                (0 != CurrentEntry.size ())
                )
             {
                 // is this a zipped file?
@@ -1783,14 +1762,6 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
                    )
                 {
                     FoundZipFile = true;
-                }
-
-                // do we need to add a separator?
-                if(numFiles)
-                {
-                    // DEBUG_V("Adding trailing comma");
-                    OutputFile.print(",");
-                    // LOG_PORT.print(",");
                 }
 
                 usedBytes += CurrentEntry.size ();
@@ -1822,14 +1793,10 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
                 tm.Second = FS_SECOND(Time);
 
                 // DEBUG_V(String("tm: ") + String(time_t(makeTime(tm))));
-
-                OutputFile.print(String("{\"name\" : \"") + EntryName +
-                                 "\",\"date\" : " + String(makeTime(tm)) +
-                                 ",\"length\" : " + int64String(CurrentEntry.size ()) + "}");
-                /*LOG_PORT.print(String("{\"name\" : \"") + EntryName +
-                                 "\",\"date\" : " + String(Date) +
-                                 ",\"length\" : " + int64String(CurrentEntry.size ()) + "}");
-                */
+                jsonDocFileList[FileIndex]["name"] = EntryName;
+                jsonDocFileList[FileIndex]["date"] = makeTime(tm);
+                jsonDocFileList[FileIndex]["length"] = CurrentEntry.size ();
+                ++FileIndex;
             }
             else
             {
@@ -1838,23 +1805,19 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
             CurrentEntry.close();
         } // end while true
 
-        // close the array and add the descriptive data
-        OutputFile.print(String("], \"usedBytes\" : ") + int64String(usedBytes));
-        // LOG_PORT.print(String("], \"usedBytes\" : ") + int64String(usedBytes));
-        OutputFile.print(String(", \"numFiles\" : ") + String(numFiles));
-        OutputFile.print(String(", \"SdCardPresent\" : true"));
-
-        // close the data section
-        OutputFile.print("}");
-        // LOG_PORT.println("}");
-
-        OutputFile.close();
         InputFile.close();
         UnLockSd();
+
+        // close the array and add the descriptive data
+        JsonWrite(jsonDoc, "usedBytes", usedBytes);
+        JsonWrite(jsonDoc, "numFiles", numFiles);
+        JsonWrite(jsonDoc, "SdCardPresent", true);
+        // PrettyPrint (jsonDoc, String ("FSEQ File List"));
+        SaveFlashFile(FSEQFILELIST, jsonDoc);
     } while(false);
 
     // String Temp;
-    // ReadSdFile(FSEQFILELIST, Temp);
+    // ReadFlashFile(FSEQFILELIST, Temp);
     // xDEBUG_V(Temp);
 
     // DEBUG_END;
@@ -2086,17 +2049,22 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 } // handleFileUploadNewFile
 
 //-----------------------------------------------------------------------------
-uint64_t c_FileMgr::GetDefaultFseqFileList(uint8_t * buffer, uint64_t maxlen)
+void c_FileMgr::BuildDefaultFseqList ()
 {
     // DEBUG_START;
 
-    memset(buffer, 0x0, maxlen);
-    strcpy_P((char*)&buffer[0], DefaultFseqResponse);
+    JsonDocument jsonDoc;
+    jsonDoc.to<JsonObject>();
+    JsonWrite(jsonDoc, "SdCardPresent", false);
+    JsonWrite(jsonDoc, "totalBytes", 0);
+    JsonWrite(jsonDoc, "usedBytes", 0);
+    JsonWrite(jsonDoc, "numFiles", 0);
+    JsonArray jsonDocFileList = jsonDoc["files"].to<JsonArray> ();
+    SaveFlashFile(FSEQFILELIST, jsonDoc);
 
-    // DEBUG_V(String("buffer: ") + String((char*)buffer));
     // DEBUG_END;
 
-    return strlen((char*)&buffer[0]);
+    return;
 } // GetDefaultFseqFileList
 
 //-----------------------------------------------------------------------------

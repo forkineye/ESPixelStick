@@ -41,8 +41,7 @@ public:
     void FirmwareUpload        (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final);
     void NetworkStateChanged   (bool NewNetworkState);
     void GetDriverName         (String & Name) { Name = "WebMgr"; }
-    void CreateAdminInfoFile ();
-    void GetFseqFileListHandler(AsyncWebServerRequest *request);
+    void CreateAdminInfoFile   ();
 
 private:
 
@@ -78,10 +77,6 @@ private:
 
     using WebJsonDocument = JsonDocument;
 
-    size_t GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t index);
-    c_FileMgr::FileId FileHandle = c_FileMgr::INVALID_FILE_HANDLE;
-    size_t TotalFileSizeToTransfer = 0;
-    size_t NumberOfBytesTransfered = 0;
 }; // c_WebMgr
 
 extern c_WebMgr WebMgr;
