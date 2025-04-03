@@ -27,6 +27,7 @@ var dir_a67076ebe8963a65253afa097c9d0973 =
     [ "GPIO_Defs_ESP32_QUINLED_UNO_ESPSV3.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_s_p_s_v3_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_s_p_s_v3_8hpp" ],
     [ "GPIO_Defs_ESP32_QUINLED_UNO_ETH.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_t_h_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_t_h_8hpp" ],
     [ "GPIO_Defs_ESP32_QUINLED_UNO_ETH_ESPSV3.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_t_h___e_s_p_s_v3_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_t_h___e_s_p_s_v3_8hpp" ],
+    [ "GPIO_Defs_ESP32_Solo2go.hpp", "_g_p_i_o___defs___e_s_p32___solo2go_8hpp.html", "_g_p_i_o___defs___e_s_p32___solo2go_8hpp" ],
     [ "GPIO_Defs_ESP32_Tetra2go.hpp", "_g_p_i_o___defs___e_s_p32___tetra2go_8hpp.html", "_g_p_i_o___defs___e_s_p32___tetra2go_8hpp" ],
     [ "GPIO_Defs_ESP32_TTGO_T8.hpp", "_g_p_i_o___defs___e_s_p32___t_t_g_o___t8_8hpp.html", "_g_p_i_o___defs___e_s_p32___t_t_g_o___t8_8hpp" ],
     [ "GPIO_Defs_ESP32_TWILIGHTLORD.hpp", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d_8hpp.html", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d_8hpp" ],

@@ -33,6 +33,7 @@ var classc___input_f_p_p_remote =
     [ "validateConfiguration", "classc___input_f_p_p_remote.html#a53758f81562b012890b568958891b58a", null ],
     [ "ConfiguredFileToPlay", "classc___input_f_p_p_remote.html#a2a8d114c79feeebbbbbf2c78edd0c985", null ],
     [ "FileBeingPlayed", "classc___input_f_p_p_remote.html#ae0661236c6c8f91e0f9162d941b9f2de", null ],
+    [ "FilePlayCount", "classc___input_f_p_p_remote.html#a75c9d55b344cdace8541985539450771", null ],
     [ "FppSyncOverride", "classc___input_f_p_p_remote.html#a1026fa25a114a817ca6a47a3df45d047", null ],
     [ "pInputFPPRemotePlayItem", "classc___input_f_p_p_remote.html#a408bb6bee77015240dce30c447684eb5", null ],
     [ "SendFppSync", "classc___input_f_p_p_remote.html#a5b0598cd573c49535959ed9eb66b0880", null ],

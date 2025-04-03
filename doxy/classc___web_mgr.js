@@ -9,8 +9,6 @@ var classc___web_mgr =
     [ "GetConfiguration", "classc___web_mgr.html#a8f1df03cc184b3c4ee9f5eae87940f7b", null ],
     [ "GetDeviceOptions", "classc___web_mgr.html#aa7afdb1150af1acd1dfdf7cfefffec97", null ],
     [ "GetDriverName", "classc___web_mgr.html#a79793e69a4d52e112a766f0c90768f72", null ],
-    [ "GetFseqFileListChunk", "classc___web_mgr.html#a92f90f9056e5736933eaf4a4932280b9", null ],
-    [ "GetFseqFileListHandler", "classc___web_mgr.html#a206fa25439d99921ad88e6acf67c5d5f", null ],
     [ "GetInputOptions", "classc___web_mgr.html#a0887eeee57f9d98b4ea16b75133423b0", null ],
     [ "GetOptions", "classc___web_mgr.html#ae959e70739b7d2baed8f527572458855", null ],
     [ "GetOutputOptions", "classc___web_mgr.html#ae5441ff672ebcb2c39eb6f5b5b7f8ac8", null ],
@@ -29,12 +27,9 @@ var classc___web_mgr =
     [ "RegisterAlexaCallback", "classc___web_mgr.html#aaad811dbabf3626c6ddb95f13f301f7f", null ],
     [ "ValidateConfig", "classc___web_mgr.html#a02d3fef6b783f26270959e68c8a3c787", null ],
     [ "efupdate", "classc___web_mgr.html#aeb7f891688b50a8ac2ac6865aec01006", null ],
-    [ "FileHandle", "classc___web_mgr.html#aa8846fe1edfcd23bfce6e7b2a6d9985a", null ],
     [ "HasBeenInitialized", "classc___web_mgr.html#aec9409c6cf95e3b810fcaceb5032817a", null ],
-    [ "NumberOfBytesTransfered", "classc___web_mgr.html#a25fae694bb10fa2068b0f7b059b8143d", null ],
     [ "pAlexaCallback", "classc___web_mgr.html#a3782b2eb5d97f8a003422e69bb8d19d9", null ],
     [ "pAlexaDevice", "classc___web_mgr.html#a29f8f2bc3fffe8b65384a145ab654b33", null ],
-    [ "TotalFileSizeToTransfer", "classc___web_mgr.html#a7fe55dcdb367ec60b88c283e584c7bd0", null ],
     [ "WebJsonDoc", "classc___web_mgr.html#afe378ceb8fd7939902728a5dff84c255", null ],
     [ "XjResult", "classc___web_mgr.html#a4a945e5573c038df73c6cc9e4af0faff", null ]
 ];

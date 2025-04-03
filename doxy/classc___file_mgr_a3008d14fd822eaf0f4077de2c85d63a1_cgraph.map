@@ -1,16 +1,7 @@
 <map id="c_FileMgr::DeleteSdFile" name="c_FileMgr::DeleteSdFile">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,68,164,94"/>
-<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a8b9e4f29a70fd6c831f07349a9c32ab0" title=" " alt="" coords="212,68,376,94"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,87,196,87,196,92,164,92"/>
-<area shape="rect" id="Node000004" href="$classc___file_mgr.html#a56a37e82a8da77e0ab8fb293779111ca" title=" " alt="" coords="453,5,582,31"/>
-<area shape="poly" id="edge7_Node000001_Node000004" title=" " alt="" coords="147,65,211,53,437,24,438,29,212,58,148,70"/>
-<area shape="rect" id="Node000006" href="$classc___file_mgr.html#a7a43a2cccd3db13e5a6678a2cc087096" title=" " alt="" coords="444,153,591,179"/>
-<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="153,92,212,104,433,147,432,152,211,109,152,97"/>
-<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="211,75,179,75,179,69,211,69"/>
-<area shape="rect" id="Node000003" href="$main_8cpp.html#ace03924f16faf7e0c24590ede39ae2f2" title=" " alt="" coords="478,55,557,80"/>
-<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="376,73,462,68,462,73,376,79"/>
-<area shape="poly" id="edge4_Node000002_Node000004" title=" " alt="" coords="338,65,423,40,448,33,449,38,425,45,339,70"/>
-<area shape="rect" id="Node000005" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="424,104,611,130"/>
-<area shape="poly" id="edge5_Node000002_Node000005" title=" " alt="" coords="377,91,419,98,419,104,376,97"/>
-<area shape="poly" id="edge6_Node000002_Node000006" title=" " alt="" coords="321,92,368,116,425,140,444,146,442,151,423,145,366,121,319,97"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,164,56"/>
+<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a56a37e82a8da77e0ab8fb293779111ca" title=" " alt="" coords="220,5,350,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="164,31,205,26,205,31,164,36"/>
+<area shape="rect" id="Node000003" href="$classc___file_mgr.html#a7a43a2cccd3db13e5a6678a2cc087096" title=" " alt="" coords="212,55,358,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,50,196,54,196,60,164,56"/>
 </map>
