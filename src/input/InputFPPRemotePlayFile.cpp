@@ -246,6 +246,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 
         if(c_FileMgr::INVALID_FILE_HANDLE != FileControl[CurrentFile].FileHandleForFileBeingPlayed)
         {
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
 
@@ -282,6 +283,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not read FSEQ header: filename: '")) + FileControl[CurrentFile].FileName + "'");
             logcon (LastFailedPlayStatusMsg);
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
@@ -323,6 +325,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
         {
             LastFailedPlayStatusMsg = (String (F ("ParseFseqFile:: Could not start. ")) + FileControl[CurrentFile].FileName + F (" is not a v2 uncompressed sequence"));
             logcon (LastFailedPlayStatusMsg);
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
@@ -337,6 +340,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
                                       F (" File does not contain enough data to meet the Stated Channel Count * Number of Frames value. Need: ") +
                                       String (NeededDataSize) + F (", SD File Size: ") + String (ActualDataSize));
             logcon (LastFailedPlayStatusMsg);
+            DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             break;
         }
@@ -354,6 +358,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             {
                 LastFailedPlayStatusMsg =  (String (F ("ParseFseqFile:: Could not start. ")) + FileControl[CurrentFile].FileName + F (" Too many sparse ranges defined in file header."));
                 logcon (LastFailedPlayStatusMsg);
+                DEBUG_FILE_HANDLE (FileControl[CurrentFile].FileHandleForFileBeingPlayed);
                 FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
                 break;
             }
@@ -441,13 +446,12 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 } // ParseFseqFile
 
 //-----------------------------------------------------------------------------
-void c_InputFPPRemotePlayFile::ClearFileInfo()
+void c_InputFPPRemotePlayFile::ClearControlFileInfo()
 {
     // DEBUG_START;
     FileControl[NextFile].FileName                      = emptyString;
     FileControl[NextFile].FileHandleForFileBeingPlayed  = c_FileMgr::INVALID_FILE_HANDLE;
     FileControl[NextFile].RemainingPlayCount            = 0;
-    SyncControl.LastRcvdElapsedSeconds                  = 0.0;
     FileControl[NextFile].ElapsedPlayTimeMS             = 0;
     FileControl[NextFile].DataOffset                    = 0;
     FileControl[NextFile].ChannelsPerFrame              = 0;
@@ -492,6 +496,7 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
                 break;
             }
         }
+        DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         while (NumBytesRead < NumBytesToRead)
         {
             // xDEBUG_V();
@@ -500,6 +505,12 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
                                                                LocalIntensityBuffer,
                                                                min((NumBytesToRead - NumBytesRead), LocalIntensityBufferSize),
                                                                FileOffset);
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+            if(0 == NumBytesReadThisPass)
+            {
+                DEBUG_V(F("Ran out of data to read"));
+                break;
+            }
             // xDEBUG_V();
 #ifdef DEBUG_FSEQ
 /*
@@ -584,6 +595,7 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
 #endif // def DEBUG_FSEQ
 
             OutputMgr.WriteChannelData(DestinationIntensityId, NumBytesReadThisPass, LocalIntensityBuffer);
+            DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
             FileOffset += NumBytesReadThisPass;
             NumBytesRead += NumBytesReadThisPass;
@@ -592,6 +604,8 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
     } while (false);
     // xDEBUG_V(String("NumBytesToRead: ") + String(NumBytesToRead));
     // xDEBUG_V(String("  NumBytesRead: ") + String(NumBytesRead));
+
+    DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
     // xDEBUG_END;
     return NumBytesRead;

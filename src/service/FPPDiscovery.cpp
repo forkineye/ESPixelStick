@@ -727,12 +727,14 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
                 if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle, -1))
                 {
+                    DEBUG_FILE_HANDLE(FileHandle);
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
                         // DEBUG_V ("found the file. return metadata as json");
                         String resp = emptyString;
                         DEBUG_FILE_HANDLE(FileHandle);
                         BuildFseqResponse (seq, FileHandle, resp);
+                        DEBUG_FILE_HANDLE (FileHandle);
                         FileMgr.CloseSdFile (FileHandle);
                         request->send (200, CN_applicationSLASHjson, resp);
                         break;
@@ -805,13 +807,14 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         String resp = emptyString;
         DEBUG_FILE_HANDLE(FileHandle);
         BuildFseqResponse (filename, FileHandle, resp);
+        DEBUG_FILE_HANDLE (FileHandle);
         FileMgr.CloseSdFile (FileHandle);
         request->send (200, CN_applicationSLASHjson, resp);
 
     } while (false);
 
     // DEBUG_END;
-}
+} // ProcessPOST
 
 //-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessFile (
@@ -895,7 +898,7 @@ void c_FPPDiscovery::ProcessFile (
             inFileUpload = false;
             UploadFileName = emptyString;
             writeFailed = false;
-            memset(OutputMgr.GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
+            OutputMgr.ClearBuffer();
             InputMgr.SetOperationalState(true);
             OutputMgr.PauseOutputs(false);
             FeedWDT();

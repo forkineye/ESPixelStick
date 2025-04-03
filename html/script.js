@@ -2264,6 +2264,7 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
             $('#localFilePlayerFilename').text(FilePlayerStatus.current_sequence);
             $('#localFilePlayerTimeElapsed').text(FilePlayerStatus.time_elapsed);
             $('#localFilePlayerTimeRemaining').text(FilePlayerStatus.time_remaining);
+            $('#localFilePlayerPlayedfilecount').text(FilePlayerStatus.count);
             $('#localFilePlayerlasterror').text(FilePlayerStatus.errors);
         }
         else {

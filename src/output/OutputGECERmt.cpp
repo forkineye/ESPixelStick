@@ -74,19 +74,6 @@ void c_OutputGECERmt::Begin ()
 
     c_OutputGECE::Begin ();
 
-    // DEBUG_V (String ("DataPin: ") + String (DataPin));
-
-    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputChannelId);
-    OutputRmtConfig.DataPin                 = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-    OutputRmtConfig.pPixelDataSource        = this;
-    OutputRmtConfig.IntensityDataWidth      = GECE_PACKET_SIZE;
-    OutputRmtConfig.SendInterIntensityBits  = true;
-    OutputRmtConfig.CitrdsArray             = ConvertIntensityToRmtDataStream;
-
-    Rmt.Begin(OutputRmtConfig, this);
-
     HasBeenInitialized = true;
 
     // Start output
@@ -101,7 +88,18 @@ bool c_OutputGECERmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = c_OutputGECE::SetConfig (jsonConfig);
 
-    Rmt.set_pin (DataPin);
+    // DEBUG_V (String ("DataPin: ") + String (DataPin));
+
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin                 = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.pPixelDataSource        = this;
+    OutputRmtConfig.IntensityDataWidth      = GECE_PACKET_SIZE;
+    OutputRmtConfig.SendInterIntensityBits  = true;
+    OutputRmtConfig.CitrdsArray             = ConvertIntensityToRmtDataStream;
+
+    Rmt.Begin(OutputRmtConfig, this);
 
     // DEBUG_END;
     return response;

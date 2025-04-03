@@ -106,6 +106,9 @@ jobs:
           #
           - target: "esp32_octa2go"
             chip: "esp32"
+          #
+          - target: "esp32_solo2go"
+            chip: "esp32"
           # KR Lights
           - target: "esp32_kr_lights_msm"
             chip: "esp32"

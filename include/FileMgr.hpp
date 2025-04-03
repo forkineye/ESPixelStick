@@ -72,7 +72,7 @@ public:
     bool   SaveFlashFile   (const String & FileName, String & FileData);
     bool   SaveFlashFile   (const String & FileName, const char * FileData);
     bool   SaveFlashFile   (const String & FileName, JsonDocument & FileData);
-    bool   SaveFlashFile   (const String   filename, uint32_t index, uint8_t *data, uint32_t len, bool final);
+    bool   SaveFlashFile   (const String & filename, uint32_t index, uint8_t *data, uint32_t len, bool final);
 
     bool   ReadFlashFile   (const String & FileName, String & FileData);
     bool   ReadFlashFile   (const String & FileName, JsonDocument & FileData);
@@ -99,12 +99,11 @@ public:
     void     RenameSdFile     (String & OldName, String & NewName);
     void     BuildFseqList    (bool DisplayFileNames);
 
-    void     GetDriverName    (String& Name) { Name = "FileMgr"; }
+    void     GetDriverName    (String& Name) { Name = F("FileMgr"); }
     void     NetworkStateChanged (bool NewState);
-    uint64_t GetDefaultFseqFileList (uint8_t * buffer, uint64_t maxlen);
     void     FindFirstZipFile (String &FileName);
+    int      FileListFindSdFileHandle (FileId HandleToFind);
 
-const String FSEQFILELIST = "fseqfilelist.json";
 #define SD_BLOCK_SIZE 512
 
 #if defined ARDUINO_ARCH_ESP8266
@@ -120,6 +119,7 @@ private:
     void    LockSd();
     void    UnLockSd();
     bool    SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMode Mode);
+    void    BuildDefaultFseqList ();
 
 #   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(37)  // 50 MHz SPI clock
 #ifndef MaxSdTransSpeedMHz
@@ -147,6 +147,7 @@ private:
     uint64_t SdCardSizeMB = 0;
     uint32_t MaxSdSpeed = MaxSdTransSpeedMHz;
     bool     FoundZipFile = false;
+    const String FSEQFILELIST = "/fseqfilelist.json";
 
 public: struct __attribute__((__packed__, aligned(4))) CSD {
 	public: union {
@@ -238,7 +239,6 @@ public: struct __attribute__((__packed__, aligned(4))) CSD {
 #define DATABUFFERSIZE (5 * 1024)
 
     FileListEntry_t FileList[MaxOpenFiles];
-    int FileListFindSdFileHandle (FileId HandleToFind);
     void InitSdFileList ();
 
     File        FileSendDir;
@@ -256,7 +256,14 @@ protected:
 { \
     if (fh == c_FileMgr::INVALID_FILE_HANDLE) \
     { \
-        DEBUG_V("Found an invalid file handle before a request to FileMgr."); \
+        DEBUG_V(String(F("Found an invalid file handle before a request to FileMgr. File Handle: ")) + String(fh)); \
+    } \
+    else \
+    { \
+        if (-1 == FileMgr.FileListFindSdFileHandle (fh)) \
+        { \
+            DEBUG_V(String(F("Could not look up File Handle: ")) + String(fh)); \
+        } \
     } \
 }
 #else

@@ -94,6 +94,7 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
     else if (PlayingFile ())
     {
         JsonObject PlayerObjectStatus = LocalPlayerStatus[StatusType].to<JsonObject> ();
+        JsonWrite(PlayerObjectStatus, CN_count, FilePlayCount);
         pInputFPPRemotePlayItem->GetStatus (PlayerObjectStatus);
     }
 
@@ -368,7 +369,7 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
         {
             StartPlayingLocalFile (FileName);
         }
-
+        FilePlayCount++;
     } while (false);
 
     // DEBUG_END;

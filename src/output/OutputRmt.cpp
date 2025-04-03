@@ -19,6 +19,7 @@
 #include "ESPixelStick.h"
 #ifdef ARDUINO_ARCH_ESP32
 #include "output/OutputRmt.hpp"
+#include <driver/rmt.h>
 
 // forward declaration for the isr handler
 static void IRAM_ATTR   rmt_intr_handler (void* param);
@@ -42,6 +43,8 @@ void RMT_Task (void *arg)
 
     while(1)
     {
+        // Give the outputs a chance to catch up.
+        delay(1);
         // process all possible channels
         for (c_OutputRmt * pRmt : rmt_isr_ThisPtrs)
         {
@@ -150,8 +153,16 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 
     do // once
     {
+        if(HasBeenInitialized)
+        {
+            // release the old GPIO pin.
+            ResetGpio(OutputRmtConfig.DataPin);
+        }
+
+        // save the new config
         OutputRmtConfig = config;
-#if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
+
+        #if defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
         if ((nullptr == OutputRmtConfig.pPixelDataSource) && (nullptr == OutputRmtConfig.pSerialDataSource))
 #else
         if (nullptr == OutputRmtConfig.pPixelDataSource)
@@ -159,7 +170,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 
         {
             LOG_PORT.println (F("Invalid RMT configuration parameters. Rebooting"));
-            RequestReboot(100000);;
+            RequestReboot(10000);
             break;
         }
 
@@ -195,6 +206,8 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         RmtConfig.tx_config.loop_en = true;
         RmtConfig.tx_config.idle_output_en = true;
         // DEBUG_V();
+        // DEBUG_V(String("RmtChannelId: ") + String(OutputRmtConfig.RmtChannelId));
+        // DEBUG_V(String("     Datapin: ") + String(OutputRmtConfig.DataPin));
         ResetGpio(OutputRmtConfig.DataPin);
         ESP_ERROR_CHECK(rmt_config(&RmtConfig));
 
@@ -203,7 +216,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 
         if(NULL == RMT_intr_handle)
         {
-            // DEBUG_V();
+            // DEBUG_V("Allocate interrupt handler");
             // ESP_ERROR_CHECK (esp_intr_alloc (ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3 | ESP_INTR_FLAG_SHARED, rmt_intr_handler, this, &RMT_intr_handle));
             for(auto & currentThisPtr : rmt_isr_ThisPtrs)
             {
@@ -227,19 +240,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         memset((void*)&RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[0], 0x0, sizeof(RMTMEM.chan[0].data32));
 
         // DEBUG_V();
-
-        // this should be a vector.
-        if (nullptr != OutputRmtConfig.CitrdsArray)
-        {
-            // DEBUG_V();
-            const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = OutputRmtConfig.CitrdsArray;
-            while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
-            {
-                // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
-                SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
-                CurrentTranslation++;
-            }
-        }
+        UpdateBitXlatTable(OutputRmtConfig.CitrdsArray);
 
         // DEBUG_V (String ("                Intensity2Rmt[0]: 0x") + String (uint32_t (Intensity2Rmt[0].val), HEX));
         // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
@@ -253,15 +254,70 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         pParent = _pParent;
         rmt_isr_ThisPtrs[OutputRmtConfig.RmtChannelId] = this;
 
-        ResetGpio(OutputRmtConfig.DataPin);
-        rmt_set_gpio(OutputRmtConfig.RmtChannelId, RMT_MODE_TX, OutputRmtConfig.DataPin, false);
-
         HasBeenInitialized = true;
     } while (false);
 
     // DEBUG_END;
 
-} // init
+} // Begin
+
+//----------------------------------------------------------------------------
+void c_OutputRmt::UpdateBitXlatTable(const CitrdsArray_t * CitrdsArray)
+{
+    // DEBUG_START;
+
+    if (nullptr != OutputRmtConfig.CitrdsArray)
+    {
+        // DEBUG_V();
+        // this should be a vector.
+        const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = CitrdsArray;
+        while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
+        {
+            // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
+            SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
+            CurrentTranslation++;
+        }
+    }
+    else
+    {
+        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values") + CN_stars);
+    }
+    // DEBUG_END;
+} // UpdateBitXlatTable
+
+//----------------------------------------------------------------------------
+bool c_OutputRmt::ValidateBitXlatTable(const CitrdsArray_t * CitrdsArray)
+{
+    // DEBUG_START;
+    bool Response = false;
+    if (nullptr != OutputRmtConfig.CitrdsArray)
+    {
+        // DEBUG_V();
+        // this should be a vector.
+        const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = CitrdsArray;
+        while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
+        {
+            // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
+            SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
+
+            if(Intensity2Rmt[CurrentTranslation->Id].val != CurrentTranslation->Translation.val)
+            {
+                logcon(String(CN_stars) + F("ERROR: incorrect bit translation deteced. Chan: ") + String(OutputRmtConfig.RmtChannelId) +
+                        F(" Slot: ") + String(CurrentTranslation->Id) +
+                        F(" Got: 0x") + String(Intensity2Rmt[CurrentTranslation->Id].val, HEX) +
+                        F(" Expected: 0x") + String(CurrentTranslation->Translation.val));
+            }
+
+            CurrentTranslation++;
+        }
+    }
+    else
+    {
+        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values") + CN_stars);
+    }
+    // DEBUG_END;
+    return Response;
+} // ValidateBitXlatTable
 
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)

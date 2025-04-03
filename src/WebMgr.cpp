@@ -257,8 +257,6 @@ void c_WebMgr::init ()
             }
         });
 
-        webServer.on("/fseqfilelist", HTTP_GET, [](AsyncWebServerRequest *request){WebMgr.GetFseqFileListHandler(request);});
-
     	webServer.on ("/file/delete", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("/file/delete");
@@ -452,11 +450,13 @@ void c_WebMgr::init ()
             });
 
         // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",               LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/conf/config.json",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/input_config.json",  LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/conf/output_config.json", LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/conf/admininfo.json",     LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
+   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/fseqfilelist",               LittleFS, "/fseqfilelist.json");
 
         // must be last servestatic entry
     	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
@@ -651,111 +651,6 @@ void c_WebMgr::CreateAdminInfoFile ()
 
     // DEBUG_END;
 } // CreateAdminInfoFile
-
-//-----------------------------------------------------------------------------
-void c_WebMgr::GetFseqFileListHandler(AsyncWebServerRequest *request)
-{
-    // DEBUG_START;
-
-    AsyncWebServerResponse *response =
-        request->beginChunkedResponse("application/json",
-        [this](uint8_t *buffer, size_t maxlen, size_t index) -> size_t 
-        {
-            return GetFseqFileListChunk(buffer, maxlen, index);
-        });
-    request->send(response);
-
-    // DEBUG_END;
-} // GetFseqfilelistHandler
-
-//-----------------------------------------------------------------------------
-size_t c_WebMgr::GetFseqFileListChunk(uint8_t *buffer, size_t maxlen, size_t index)
-{
-    size_t response = 0;
-    // DEBUG_START;
-
-    do // once
-    {
-        if(!FileMgr.SdCardIsInstalled())
-        {
-            if(0 == index)
-            {
-                response = FileMgr.GetDefaultFseqFileList(buffer, maxlen);
-            }
-            else
-            {
-                response = 0;
-            }
-            break;
-        }
-
-        // DEBUG_V("is it a new request");
-        if (index == 0)
-        {
-            NumberOfBytesTransfered = 0;             // reset the log line index when we get a new request
-            TotalFileSizeToTransfer = 0;
-            buffer[0] = '\0';
-
-            // DEBUG_V(F("Try to open the file"));
-            if(!FileMgr.OpenSdFile(FileMgr.FSEQFILELIST, c_FileMgr::FileMode::FileRead, FileHandle, -1))
-            {
-                logcon(F("ERROR: Could not open List of Fseq files for reading"));
-                response = FileMgr.GetDefaultFseqFileList(buffer, maxlen);
-                delay(500);
-                FileMgr.BuildFseqList(false);
-
-                break;
-            }
-
-            // DEBUG_V("Get the file size");
-            TotalFileSizeToTransfer = FileMgr.GetSdFileSize(FileHandle);
-        }
-
-        // DEBUG_V(String("                  index: ") + String(index));
-        // DEBUG_V(String("TotalFileSizeToTransfer: ") + String(TotalFileSizeToTransfer));
-        // DEBUG_V(String("NumberOfBytesTransfered: ") + String(NumberOfBytesTransfered));
-
-        if (TotalFileSizeToTransfer <= index)
-        {
-            FileMgr.CloseSdFile(FileHandle);
-            FileHandle = c_FileMgr::INVALID_FILE_HANDLE;
-
-            // we close this request by sending a length of 0
-            // DEBUG_V(String("file send complete"));
-            response = 0;
-            break;
-        }
-
-        size_t BytesLeftToSend = TotalFileSizeToTransfer - NumberOfBytesTransfered;
-        size_t DataToSendThisChunk = min(BytesLeftToSend, maxlen);
-        // DEBUG_V(String("     BytesLeftToSend: ") + String(BytesLeftToSend));
-        // DEBUG_V(String(" DataToSendThisChunk: ") + String(DataToSendThisChunk));
-
-        // is there space in the buffer to hold some data?
-        if(0 == DataToSendThisChunk)
-        {
-            // DEBUG_V("No data to send this chunk");
-            response = 0;
-            break;
-        }
-
-        // DEBUG_V("Read a chunk");
-        memset(buffer, 0x0, maxlen-1);
-        DEBUG_FILE_HANDLE(FileHandle);
-        FileMgr.ReadSdFile(FileHandle,
-                           buffer,
-                           DataToSendThisChunk,
-                           NumberOfBytesTransfered);
-        NumberOfBytesTransfered += DataToSendThisChunk;
-        response = DataToSendThisChunk;
-    } while(false);
-
-    // DEBUG_V(String("            response: ") + String(response));
-
-    // DEBUG_END;
-    return response;
-
-} // GetFseqFileListChunk
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)

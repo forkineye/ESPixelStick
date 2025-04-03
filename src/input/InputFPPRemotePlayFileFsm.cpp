@@ -25,8 +25,8 @@
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Idle::Poll ()
 {
-    // xDEBUG_START;
-    // xDEBUG_V("fsm_PlayFile_state_Idle::Poll");
+    ///DEBUG_START;
+    ///DEBUG_V("fsm_PlayFile_state_Idle::Poll");
 
     // is there a new file to play?
     if(!p_Parent->FileControl[NextFile].FileName.isEmpty())
@@ -41,7 +41,7 @@ bool fsm_PlayFile_state_Idle::Poll ()
         p_Parent->fsm_PlayFile_state_Starting_imp.Init (p_Parent);
     }
 
-    // xDEBUG_END;
+    ///DEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Idle::Poll
@@ -121,7 +121,8 @@ bool fsm_PlayFile_state_Starting::Poll ()
     do // once
     {
         p_Parent->FileControl[CurrentFile] = p_Parent->FileControl[NextFile];
-        p_Parent->ClearFileInfo();
+        p_Parent->ClearControlFileInfo();
+        p_Parent->SyncControl.LastRcvdElapsedSeconds = 0.0;
 
         if (!p_Parent->ParseFseqFile ())
         {
@@ -227,8 +228,8 @@ bool fsm_PlayFile_state_Starting::Sync (String& FileName, float ElapsedSeconds)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_PlayingFile::Poll ()
 {
-    // xDEBUG_START;
-    // xDEBUG_V("fsm_PlayFile_state_PlayingFile::Poll");
+    ///DEBUG_START;
+    ///DEBUG_V("fsm_PlayFile_state_PlayingFile::Poll");
 
     bool Response = false;
 
@@ -244,7 +245,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         p_Parent->UpdateElapsedPlayTimeMS();
         uint32_t CurrentFrame = p_Parent->CalculateFrameId (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS, p_Parent->GetSyncOffsetMS ());
 
-        // xDEBUG_V (String ("LastPlayedFrameId: ") + String (CurrentFrame));
+        ///DEBUG_V (String ("LastPlayedFrameId: ") + String (CurrentFrame));
         // have we reached the end of the file?
         if (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence <= CurrentFrame)
         {
@@ -285,7 +286,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         // Do we need to do an update?
         if (CurrentFrame == p_Parent->FileControl[CurrentFile].LastPlayedFrameId)
         {
-            // xDEBUG_V (String ("keep waiting"));
+            ///DEBUG_V (String ("keep waiting"));
             break;
         }
         p_Parent->FileControl[CurrentFile].LastPlayedFrameId = CurrentFrame;
@@ -295,10 +296,10 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         uint32_t MaxBytesToRead = (p_Parent->FileControl[CurrentFile].ChannelsPerFrame > BufferSize) ? BufferSize : p_Parent->FileControl[CurrentFile].ChannelsPerFrame;
 
         uint32_t CurrentOutputBufferOffset = 0;
-        // xDEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
+        ///DEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         InputMgr.RestartBlankTimer (p_Parent->GetInputChannelId ());
-        // xDEBUG_V();
+        ///DEBUG_V();
 
         if(p_Parent->SendFppSync)
         {
@@ -316,11 +317,14 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
 
             uint32_t AdjustedFilePosition = FilePosition + CurrentSparseRange.DataOffset;
 
-            // xDEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
-            // xDEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
-            // xDEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
-            // xDEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
-            uint32_t ActualBytesRead = p_Parent->ReadFile(CurrentOutputBufferOffset, ActualBytesToRead, AdjustedFilePosition);
+            ///DEBUG_V (String ("                 FilePosition: ") + String (FilePosition));
+            ///DEBUG_V (String ("         AdjustedFilePosition: ") + String (uint32_t(AdjustedFilePosition), HEX));
+            ///DEBUG_V (String ("           CurrentDestination: ") + String (uint32_t(CurrentDestination), HEX));
+            ///DEBUG_V (String ("            ActualBytesToRead: ") + String (ActualBytesToRead));
+            // DEBUG_FILE_HANDLE(p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
+            uint32_t ActualBytesRead = p_Parent->
+            ReadFile(CurrentOutputBufferOffset, ActualBytesToRead, AdjustedFilePosition);
+            // DEBUG_FILE_HANDLE(p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
 
             MaxBytesToRead -= ActualBytesRead;
             CurrentOutputBufferOffset += ActualBytesRead;
@@ -336,7 +340,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
 
     } while (false);
 
-    // xDEBUG_END;
+    ///DEBUG_END;
     return Response;
 
 } // fsm_PlayFile_state_PlayingFile::Poll
@@ -385,7 +389,6 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 {
     // DEBUG_START;
     // DEBUG_V("fsm_PlayFile_state_PlayingFile::Stop");
-
     // DEBUG_V (String (F ("Stop Playing::  FileName: '")) + p_Parent->FileControl[CurrentFile].FileName + "'");
     // DEBUG_V (String ("           RemainingPlayCount: ") + p_Parent->FileControl[CurrentFile].RemainingPlayCount);
 
@@ -398,8 +401,8 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSeconds)
 {
-    // xDEBUG_START;
-    // xDEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
+    ///DEBUG_START;
+    ///DEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
 
     bool response = false;
 
@@ -417,16 +420,16 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 
         if (p_Parent->SyncControl.LastRcvdElapsedSeconds >= ElapsedSeconds)
         {
-            // DEBUG_V ("Duplicate or older sync msg");
+            ///DEBUG_V ("Duplicate or older sync msg");
             break;
         }
 
-        // xDEBUG_V (String ("old LastRcvdElapsedSeconds: ") + String (p_Parent->SyncControl.LastRcvdElapsedSeconds));
+        ///DEBUG_V (String ("old LastRcvdElapsedSeconds: ") + String (p_Parent->SyncControl.LastRcvdElapsedSeconds));
 
         p_Parent->SyncControl.LastRcvdElapsedSeconds = ElapsedSeconds;
 
-        // xDEBUG_V (String ("new LastRcvdElapsedSeconds: ") + String (p_Parent->SyncControl.LastRcvdElapsedSeconds));
-        // xDEBUG_V (String ("         ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
+        ///DEBUG_V (String ("new LastRcvdElapsedSeconds: ") + String (p_Parent->SyncControl.LastRcvdElapsedSeconds));
+        ///DEBUG_V (String ("         ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
 
         uint32_t TargetElapsedMS = uint32_t (ElapsedSeconds * 1000);
         uint32_t CurrentFrame = p_Parent->FileControl[CurrentFile].LastPlayedFrameId;
@@ -435,43 +438,43 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
 
         if (2 > abs (FrameDiff))
         {
-            // xDEBUG_V ("No Need to adjust the time");
+            ///DEBUG_V ("No Need to adjust the time");
             break;
         }
 
-        // xDEBUG_V ("Need to adjust the start time");
-        // xDEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
+        ///DEBUG_V ("Need to adjust the start time");
+        ///DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
 
-        // xDEBUG_V (String ("     CurrentFrame: ") + String (CurrentFrame));
-        // xDEBUG_V (String ("    TargetFrameId: ") + String (TargetFrameId));
-        // xDEBUG_V (String ("        FrameDiff: ") + String (FrameDiff));
+        ///DEBUG_V (String ("     CurrentFrame: ") + String (CurrentFrame));
+        ///DEBUG_V (String ("    TargetFrameId: ") + String (TargetFrameId));
+        ///DEBUG_V (String ("        FrameDiff: ") + String (FrameDiff));
 
         // Adjust the start of the file time to align with the master FPP
         if (20 < abs (FrameDiff))
         {
-            // xDEBUG_V ("Large Setp Adjustment");
+            ///DEBUG_V ("Large Setp Adjustment");
             p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS = TargetElapsedMS;
             p_Parent->FileControl[CurrentFile].StartingTimeMS = millis() - TargetElapsedMS;
         }
         else if(CurrentFrame > TargetFrameId)
         {
-            // xDEBUG_V("go back a frame");
+            ///DEBUG_V("go back a frame");
             p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS -= p_Parent->FileControl[CurrentFile].FrameStepTimeMS;
             p_Parent->FileControl[CurrentFile].StartingTimeMS = millis() - p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS;
         }
         else
         {
-            // xDEBUG_V("go forward a frame");
+            ///DEBUG_V("go forward a frame");
             p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS += p_Parent->FileControl[CurrentFile].FrameStepTimeMS;
             p_Parent->FileControl[CurrentFile].StartingTimeMS = millis() - p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS;
         }
 
         response = true;
-        // xDEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS));
+        ///DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS));
 
     } while (false);
 
-    // xDEBUG_END;
+    ///DEBUG_END;
     return response;
 
 } // fsm_PlayFile_state_PlayingFile::Sync
@@ -488,6 +491,7 @@ bool fsm_PlayFile_state_Stopping::Poll ()
 
     if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
     {
+        // DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
     }
     else
@@ -570,22 +574,23 @@ bool fsm_PlayFile_state_Stopping::Sync (String&, float)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_Error::Poll ()
 {
-    // xDEBUG_START;
-    // xDEBUG_V("fsm_PlayFile_state_Error::Poll");
+    ///DEBUG_START;
+    ///DEBUG_V("fsm_PlayFile_state_Error::Poll");
 
     if(c_FileMgr::INVALID_FILE_HANDLE != p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed)
     {
-        // xDEBUG_V("Unexpected file handle in Error handler.");
+        ///DEBUG_V("Unexpected file handle in Error handler.");
+        // DEBUG_FILE_HANDLE (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         FileMgr.CloseSdFile (p_Parent->FileControl[CurrentFile].FileHandleForFileBeingPlayed);
     }
     else
     {
-        // xDEBUG_V("Unexpected missing file handle");
+        ///DEBUG_V("Unexpected missing file handle");
     }
 
     p_Parent->FileControl[CurrentFile].FileName.clear();
 
-    // xDEBUG_END;
+    ///DEBUG_END;
     return false;
 
 } // fsm_PlayFile_state_Error::Poll

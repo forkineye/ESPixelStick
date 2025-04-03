@@ -189,7 +189,7 @@ void c_InputMgr::Begin (uint32_t BufferSize)
     // CreateNewConfig();
 
 #if defined ARDUINO_ARCH_ESP32
-    xTaskCreatePinnedToCore(InputMgrTask, "InputMgrTask", 4096, NULL, INPUTMGR_TASK_PRIORITY, &PollTaskHandle, 1);
+    xTaskCreatePinnedToCore(InputMgrTask, "InputMgrTask", 4096, NULL, INPUTMGR_TASK_PRIORITY, &PollTaskHandle, 0);
 #else
     MsTicker.attach_ms (uint32_t (FPP_TICKER_PERIOD_MS), &TimerPollHandler); // Add Timer Function
 #endif // ! defined ARDUINO_ARCH_ESP32
@@ -746,7 +746,7 @@ void c_InputMgr::Process ()
         if (rebootNeeded)
         {
             // DEBUG_V("Requesting Reboot");
-            RequestReboot(100000);
+            RequestReboot(10000);
         }
 
     } while (false);

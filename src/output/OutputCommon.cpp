@@ -115,9 +115,18 @@ void c_OutputCommon::WriteChannelData (uint32_t StartChannelId, uint32_t Channel
 {
     // DEBUG_START;
 
-    // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
-    // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
-    memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
+    if((StartChannelId + ChannelCount) > OutputBufferSize)
+    {
+        DEBUG_V("ERROR: Writting beyond the end of the output buffer");
+        DEBUG_V(String("StartChannelId: 0x") + String(StartChannelId, HEX));
+        DEBUG_V(String("  ChannelCount: 0x") + String(ChannelCount));
+    }
+    else
+    {
+        // DEBUG_V(String("               StartChannelId: 0x") + String(StartChannelId, HEX));
+        // DEBUG_V(String("&OutputBuffer[StartChannelId]: 0x") + String(uint(&OutputBuffer[StartChannelId]), HEX));
+        memcpy(&pOutputBuffer[StartChannelId], pSourceData, ChannelCount);
+    }
 
     // DEBUG_END;
 

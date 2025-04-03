@@ -51,20 +51,6 @@ void c_OutputSerialRmt::Begin ()
 
     c_OutputSerial::Begin ();
 
-    // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputChannelId);
-    OutputRmtConfig.DataPin                 = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-    OutputRmtConfig.pSerialDataSource       = this;
-    OutputRmtConfig.SendInterIntensityBits  = true;
-    OutputRmtConfig.SendEndOfFrameBits      = true;
-    OutputRmtConfig.NumFrameStartBits       = 1;
-    OutputRmtConfig.NumIdleBits             = 1;
-    OutputRmtConfig.DataDirection           = c_OutputRmt::OutputRmtConfig_t::DataDirection_t::LSB2MSB;
-
-    SetUpRmtBitTimes();
-    Rmt.Begin(OutputRmtConfig, this);
     HasBeenInitialized = true;
 
     // DEBUG_END;
@@ -77,10 +63,20 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     bool response = c_OutputSerial::SetConfig (jsonConfig);
+    // DEBUG_V (String ("DataPin: ") + String (DataPin));
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin                 = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.pSerialDataSource       = this;
+    OutputRmtConfig.SendInterIntensityBits  = true;
+    OutputRmtConfig.SendEndOfFrameBits      = true;
+    OutputRmtConfig.NumFrameStartBits       = 1;
+    OutputRmtConfig.NumIdleBits             = 1;
+    OutputRmtConfig.DataDirection           = c_OutputRmt::OutputRmtConfig_t::DataDirection_t::LSB2MSB;
 
+    Rmt.Begin(OutputRmtConfig, this);
     SetUpRmtBitTimes();
-
-    Rmt.set_pin (DataPin);
 
     // DEBUG_END;
     return response;

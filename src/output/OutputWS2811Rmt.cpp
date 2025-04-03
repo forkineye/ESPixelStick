@@ -34,7 +34,7 @@ static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensit
 
     {{WS2811_PIXEL_RMT_TICKS_BIT_0_HIGH, 1, WS2811_PIXEL_RMT_TICKS_BIT_0_LOW, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID},
     {{WS2811_PIXEL_RMT_TICKS_BIT_1_HIGH, 1, WS2811_PIXEL_RMT_TICKS_BIT_1_LOW, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID},
-    {{WS2811_PIXEL_RMT_TICKS_IDLE / 12,  0, WS2811_PIXEL_RMT_TICKS_IDLE / 12, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
+    {{WS2811_PIXEL_RMT_TICKS_IDLE / 2,   0, WS2811_PIXEL_RMT_TICKS_IDLE / 2,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
     {{                                2, 1,                                2, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
     {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
     {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
@@ -77,17 +77,6 @@ void c_OutputWS2811Rmt::Begin ()
     c_OutputWS2811::Begin ();
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
-    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId      = rmt_channel_t(OutputChannelId);
-    OutputRmtConfig.DataPin           = gpio_num_t(DataPin);
-    OutputRmtConfig.idle_level        = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
-    OutputRmtConfig.pPixelDataSource  = this;
-    OutputRmtConfig.NumFrameStartBits = 0;
-    OutputRmtConfig.CitrdsArray       = ConvertIntensityToRmtDataStream;
-    OutputRmtConfig.NumIdleBits       = 1;
-
-    // DEBUG_V();
-    Rmt.Begin(OutputRmtConfig, this);
 
     HasBeenInitialized = true;
 
@@ -113,9 +102,20 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     BitValue.level0    = 0;
     BitValue.duration1 = ifgTicks / 2;
     BitValue.level1    = 0;
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
-    Rmt.set_pin (DataPin);
+    c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
+    OutputRmtConfig.RmtChannelId      = rmt_channel_t(OutputChannelId);
+    OutputRmtConfig.DataPin           = gpio_num_t(DataPin);
+    OutputRmtConfig.idle_level        = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
+    OutputRmtConfig.pPixelDataSource  = this;
+    OutputRmtConfig.NumFrameStartBits = 0;
+    OutputRmtConfig.CitrdsArray       = ConvertIntensityToRmtDataStream;
+    OutputRmtConfig.NumIdleBits       = 1;
+
+    // DEBUG_V();
+    Rmt.Begin(OutputRmtConfig, this);
+    Rmt.ValidateBitXlatTable(ConvertIntensityToRmtDataStream);
+    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     // DEBUG_END;
     return response;
@@ -167,6 +167,9 @@ bool c_OutputWS2811Rmt::RmtPoll ()
         // DEBUG_V(String("get the next frame started on ") + String(DataPin));
         ReportNewFrame ();
         Response = Rmt.StartNewFrame ();
+#ifdef DEBUG_RMT_XLAT_ISSUES
+        Rmt.ValidateBitXlatTable(ConvertIntensityToRmtDataStream);
+#endif // def DEBUG_RMT_XLAT_ISSUES
 
         // DEBUG_V();
 
