@@ -155,13 +155,17 @@ bool c_OutputRelay::validate ()
     {
         if (currentRelay.Enabled && (gpio_num_t(-1) != currentRelay.GpioId))
         {
+            // DEBUG_V("Init GPIO as a generic output");
+            ResetGpio(currentRelay.GpioId);
+            pinMode (currentRelay.GpioId, OUTPUT);
             #if defined(ARDUINO_ARCH_ESP32)
-               // assign GPIO to a channel and set the pwm 12 Khz frequency, 8 bit
-               ledcAttachPin(currentRelay.GpioId, Channel);
-               ledcSetup(Channel, currentRelay.PwmFrequency, 8);
-            #else
-                ResetGpio(currentRelay.GpioId);
-                pinMode (currentRelay.GpioId, OUTPUT);
+            if(currentRelay.Pwm)
+            {
+                // DEBUG_V("Init GPIO as a PWM output");
+                // assign GPIO to a channel and set the pwm 12 Khz frequency, 8 bit
+                ledcAttachPin(currentRelay.GpioId, Channel);
+                ledcSetup(Channel, currentRelay.PwmFrequency, 8);
+            }
             #endif
         }
 
@@ -268,7 +272,6 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
                 // DEBUGV ("Revert Pin to input");
                 // The pin has changed. Let go of the old pin
                 ResetGpio(CurrentOutputChannel->GpioId);
-                pinMode (CurrentOutputChannel->GpioId, INPUT);
             }
             CurrentOutputChannel->GpioId = (gpio_num_t)temp;
 
@@ -391,10 +394,11 @@ uint32_t c_OutputRelay::Poll ()
                 // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
                 if (newOutputValue != currentRelay.previousValue)
                 {
+                    // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
                 #if defined(ARDUINO_ARCH_ESP32)
-                   ledcWrite(OutputDataIndex, newOutputValue);
+                    ledcWrite(OutputDataIndex, newOutputValue);
                 #else
-                   analogWrite(currentRelay.GpioId, newOutputValue);
+                    analogWrite(currentRelay.GpioId, newOutputValue);
                 #endif
                 }
             }
@@ -406,7 +410,9 @@ uint32_t c_OutputRelay::Poll ()
                 {
                     // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
                     // DEBUG_V("Write New Value");
-                    digitalWrite (currentRelay.GpioId, newOutputValue);
+                    // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+                    // DEBUG_V (String("         GpioId: ") + String(currentRelay.GpioId));
+                    digitalWrite (uint8_t(currentRelay.GpioId), newOutputValue);
                 }
             }
 

@@ -1038,6 +1038,7 @@ void c_FileMgr::DeleteSdFile (const String & FileName)
         ESP_SD.remove (FileName);
         UnLockSd();
     }
+    BuildFseqList(false);
 
     // DEBUG_END;
 
