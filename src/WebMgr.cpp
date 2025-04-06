@@ -208,6 +208,42 @@ void c_WebMgr::init ()
             }
         });
 
+    	webServer.on ("/relay", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
+        {
+            // DEBUG_V("relay")
+            if(HTTP_OPTIONS == request->method())
+            {
+                request->send (200);
+            }
+            else
+            {
+                // DEBUG_V ("relay");
+                // DEBUG_V(String("url: ") + request->url ());
+                String RawRelayId = request->url ().substring (String (F("/relay/")).length ());
+                // DEBUG_V(String("RawRelayId: '") + RawRelayId + "'");
+                int EndIdPos = RawRelayId.indexOf('/');
+                // DEBUG_V(String("EndIdPos: '") + String(EndIdPos) + "'");
+                if(-1 != EndIdPos)
+                {
+                    String RelayId = RawRelayId.substring(0, EndIdPos);
+                    // DEBUG_V(String("RelayId: '") + RelayId + "'");
+
+                    String RelayState = RawRelayId.substring(EndIdPos+1);
+                    // DEBUG_V(String("RelayState: '") + RelayState + "'");
+                    String Response = emptyString;
+                    OutputMgr.RelayUpdate(RelayId.toInt(), RelayState, Response);
+
+                    request->send (Response.equalsIgnoreCase("OK") ? 200 : 401, CN_textSLASHplain, Response);
+                }
+                else
+                {
+                    request->send (400, CN_textSLASHplain, F("No Relay ID Found"));
+                }
+
+                // DEBUG_V ("relay");
+            }
+        });
+
         // ping handler
     	webServer.on ("/XP", HTTP_GET | HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {

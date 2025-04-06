@@ -30,6 +30,7 @@ GNU General Public License for more details.
 #include <utility>
 #include <algorithm>
 #include <math.h>
+#include <limits>
 
 #define Relay_OUTPUT_ENABLED         true
 #define Relay_OUTPUT_DISABLED        false
@@ -50,14 +51,14 @@ GNU General Public License for more details.
 
 static const c_OutputRelay::RelayChannel_t RelayChannelDefaultSettings[] =
 {
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
-    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 0},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 1},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 2},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 3},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 4},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 5},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 6},
+    {Relay_OUTPUT_DISABLED, Relay_OUTPUT_DISABLED, Relay_OUTPUT_INVERTED, Relay_OUTPUT_NOT_PWM, Relay_DEFAULT_TRIGGER_LEVEL, Relay_DEFAULT_GPIO_ID, LOW, HIGH, HIGH RelayPwmFrequency, 7},
 };
 
 //----------------------------------------------------------------------------
@@ -91,6 +92,7 @@ c_OutputRelay::~c_OutputRelay ()
                 }
                 currentRelay.Enabled = Relay_OUTPUT_DISABLED;
                 currentRelay.GpioId = Relay_DEFAULT_GPIO_ID;
+                currentRelay.httpEnabled = Relay_OUTPUT_DISABLED;
             }
         }
     }
@@ -143,14 +145,14 @@ bool c_OutputRelay::validate ()
         for (int ChannelIndex = OM_RELAY_CHANNEL_LIMIT - 1; ChannelIndex > Num_Channels; ChannelIndex--)
         {
             logcon (String (CN_stars + String(MN_03) + String(ChannelIndex + 1) + "' " + CN_stars));
-            OutputList[ChannelIndex].Enabled = false;
+            OutputList[ChannelIndex].Enabled = Relay_OUTPUT_DISABLED;
+            OutputList[ChannelIndex].httpEnabled = Relay_OUTPUT_DISABLED;
         }
 
         response = false;
     }
 
     SetOutputBufferSize (Num_Channels);
-    uint8_t Channel = 0;
     for (RelayChannel_t & currentRelay : OutputList)
     {
         if (currentRelay.Enabled && (gpio_num_t(-1) != currentRelay.GpioId))
@@ -163,8 +165,8 @@ bool c_OutputRelay::validate ()
             {
                 // DEBUG_V("Init GPIO as a PWM output");
                 // assign GPIO to a channel and set the pwm 12 Khz frequency, 8 bit
-                ledcAttachPin(currentRelay.GpioId, Channel);
-                ledcSetup(Channel, currentRelay.PwmFrequency, 8);
+                ledcAttachPin(currentRelay.GpioId, currentRelay.ChannelIndex);
+                ledcSetup(currentRelay.ChannelIndex, currentRelay.PwmFrequency, 8);
             }
             #endif
         }
@@ -196,12 +198,6 @@ bool c_OutputRelay::validate ()
             }
         }
 
-        // DEBUGV (String ("CurrentRelayChanIndex: ") + String (CurrentRelayChanIndex++));
-        // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));
-        // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
-        // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
-        // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
-        ++Channel;
     } // for each output channel
 
     // DEBUG_END;
@@ -258,6 +254,7 @@ bool c_OutputRelay::SetConfig (ArduinoJson::JsonObject & jsonConfig)
             setFromJSON (CurrentOutputChannel->InvertOutput,      JsonChannelData, OM_RELAY_CHANNEL_INVERT_NAME);
             setFromJSON (CurrentOutputChannel->Pwm,               JsonChannelData, OM_RELAY_CHANNEL_PWM_NAME);
             setFromJSON (CurrentOutputChannel->OnOffTriggerLevel, JsonChannelData, CN_trig);
+            setFromJSON (CurrentOutputChannel->httpEnabled,       JsonChannelData, CN_enhttp);
 #if defined(ARDUINO_ARCH_ESP32)
             setFromJSON (CurrentOutputChannel->PwmFrequency,      JsonChannelData, CN_Frequency);
 #endif // defined(ARDUINO_ARCH_ESP32)
@@ -322,6 +319,7 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
         JsonWrite(JsonChannelData, OM_RELAY_CHANNEL_PWM_NAME,     currentRelay.Pwm);
         JsonWrite(JsonChannelData, CN_trig,                       currentRelay.OnOffTriggerLevel);
         JsonWrite(JsonChannelData, CN_gid,                        int(currentRelay.GpioId));
+        JsonWrite(JsonChannelData, CN_enhttp,                     currentRelay.httpEnabled);
 
 #if defined(ARDUINO_ARCH_ESP32)
         JsonWrite(JsonChannelData, CN_Frequency,                  currentRelay.PwmFrequency);
@@ -336,6 +334,8 @@ void c_OutputRelay::GetConfig (ArduinoJson::JsonObject & jsonConfig)
 
         ++ChannelId;
     }
+
+    // PrettyPrint(jsonConfig, "Get Relay Config");
 
     // DEBUG_END;
 } // GetConfig
@@ -387,43 +387,7 @@ uint32_t c_OutputRelay::Poll ()
         // DEBUG_V (String("        Enabled: ") + String(currentRelay.Enabled));
         if (currentRelay.Enabled && (gpio_num_t(-1) != currentRelay.GpioId))
         {
-            // DEBUG_V (String(" rawOutputValue: ") + String(pOutputBuffer[OutputDataIndex]));
-            if (currentRelay.Pwm)
-            {
-                newOutputValue = map (pOutputBuffer[OutputDataIndex], 0, 255, currentRelay.OffValue, currentRelay.OnValue);
-                // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
-                if (newOutputValue != currentRelay.previousValue)
-                {
-                    // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
-                #if defined(ARDUINO_ARCH_ESP32)
-                    ledcWrite(OutputDataIndex, newOutputValue);
-                #else
-                    analogWrite(currentRelay.GpioId, newOutputValue);
-                #endif
-                }
-            }
-            else
-            {
-                newOutputValue = (pOutputBuffer[OutputDataIndex] > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue;
-                // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
-                if (newOutputValue != currentRelay.previousValue)
-                {
-                    // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
-                    // DEBUG_V("Write New Value");
-                    // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
-                    // DEBUG_V (String("         GpioId: ") + String(currentRelay.GpioId));
-                    digitalWrite (uint8_t(currentRelay.GpioId), newOutputValue);
-                }
-            }
-
-            // DEBUGV (String ("OutputDataIndex: ")       + String (OutputDataIndex++));
-            // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));
-            // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
-            // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
-            // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
-            // DEBUGV (String ("newOutputValue: ")        + String (newOutputValue));
-            // DEBUGV (String ("Pwm: ")                   + String (currentRelay.Pwm));
-            currentRelay.previousValue = newOutputValue;
+            OutputValue(currentRelay, pOutputBuffer[OutputDataIndex]);
         }
         ++OutputDataIndex;
     }
@@ -432,6 +396,52 @@ uint32_t c_OutputRelay::Poll ()
     // DEBUG_END;
     return 0;
 } // render
+
+//----------------------------------------------------------------------------
+void c_OutputRelay::OutputValue(RelayChannel_t & currentRelay, uint8_t NewValue)
+{
+    // DEBUG_START;
+
+    // DEBUG_V (String(" rawOutputValue: ") + String(NewValue));
+    if (currentRelay.Pwm)
+    {
+        uint8_t newOutputValue = map (NewValue, 0, 255, currentRelay.OffValue, currentRelay.OnValue);
+        // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+        if (newOutputValue != currentRelay.previousValue)
+        {
+            // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+            #if defined(ARDUINO_ARCH_ESP32)
+            ledcWrite(currentRelay.ChannelIndex, newOutputValue);
+            #else
+            analogWrite(currentRelay.GpioId, newOutputValue);
+            #endif
+            currentRelay.previousValue = newOutputValue;
+        }
+    }
+    else
+    {
+        uint8_t newOutputValue = (NewValue > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue;
+        // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+        if (newOutputValue != currentRelay.previousValue)
+        {
+            // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
+            // DEBUG_V("Write New Value");
+            // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+            // DEBUG_V (String("         GpioId: ") + String(currentRelay.GpioId));
+            digitalWrite (uint8_t(currentRelay.GpioId), newOutputValue);
+            currentRelay.previousValue = newOutputValue;
+        }
+    }
+
+    // DEBUGV (String ("OutputDataIndex: ")       + String (OutputDataIndex++));
+    // DEBUGV (String ("currentRelay.OnValue: ")  + String (currentRelay.OnValue));
+    // DEBUGV (String ("currentRelay.OffValue: ") + String (currentRelay.OffValue));
+    // DEBUGV (String ("currentRelay.Enabled: ")  + String (currentRelay.Enabled));
+    // DEBUGV (String ("currentRelay.GpioId: ")   + String (currentRelay.GpioId));
+    // DEBUGV (String ("newOutputValue: ")        + String (newOutputValue));
+    // DEBUGV (String ("Pwm: ")                   + String (currentRelay.Pwm));
+    // DEBUG_END;
+} // OutputValue
 
 //----------------------------------------------------------------------------
 bool c_OutputRelay::ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio)
@@ -452,5 +462,74 @@ bool c_OutputRelay::ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRx
     return response;
 
 } // ValidateGpio
+
+//----------------------------------------------------------------------------
+void c_OutputRelay::RelayUpdate (uint8_t RelayId, String & NewValue, String & Response)
+{
+    // DEBUG_START;
+
+    // DEBUG_V(String(" RelayId: ") + String(RelayId));
+    // DEBUG_V(String("NewValue: ") + NewValue);
+
+    uint8_t OutputIntensityValue = 0;
+    do // once
+    {
+        // zero justify the id
+        RelayId --;
+        if(RelayId >= OM_RELAY_CHANNEL_LIMIT)
+        {
+            Response = F("Invalid relay port ID");
+            break;
+        }
+
+        if(NewValue.equalsIgnoreCase("on"))
+        {
+            // DEBUG_V("ON");
+            OutputIntensityValue = UINT8_MAX;
+        }
+        else if(NewValue.equalsIgnoreCase("off"))
+        {
+            // DEBUG_V("OFF");
+            OutputIntensityValue = uint8_t(0);
+        }
+        else
+        {
+            int32_t temp = NewValue.toInt();
+            // DEBUG_V(String("    temp: ") + String(temp));
+            // DEBUG_V(String("UINT8_MAX: ") + String(UINT8_MAX));
+
+            if(UINT8_MAX < temp)
+            {
+                Response = F("Invalid output value");
+                break;
+            }
+            OutputIntensityValue = uint8_t(temp);
+        }
+
+        // DEBUG_V(String("OutputIntensityValue: ") + String(OutputIntensityValue));
+
+        if(!OutputList[RelayId].Enabled)
+        {
+            Response = F("Relay Port is not enabled");
+            break;
+        }
+
+        if(!OutputList[RelayId].httpEnabled)
+        {
+            Response = F("HTTP Relay Port support is not enabled");
+            break;
+        }
+
+        // update the output
+        OutputValue(OutputList[RelayId], OutputIntensityValue);
+
+        Response = F("OK");
+
+    } while(false);
+
+    // DEBUG_V(String("Response: ") + Response);
+
+    // DEBUG_END;
+} // RelayUpdate
 
 #endif // def SUPPORT_OutputType_Relay

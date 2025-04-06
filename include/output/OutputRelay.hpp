@@ -39,6 +39,7 @@ public:
     struct RelayChannel_t
     {
         bool        Enabled;
+        bool        httpEnabled;
         bool        InvertOutput;
         bool        Pwm;
         uint8_t     OnOffTriggerLevel;
@@ -49,7 +50,7 @@ public:
 #if defined(ARDUINO_ARCH_ESP32)
         uint16_t    PwmFrequency;
 #endif // defined(ARDUINO_ARCH_ESP32)
-
+        uint8_t     ChannelIndex;
     };
 
     // These functions are inherited from c_OutputCommon
@@ -72,6 +73,7 @@ public:
     uint32_t    GetNumOutputBufferBytesNeeded () { return Num_Channels; }
     uint32_t    GetNumOutputBufferChannelsServiced () { return Num_Channels; }
     bool        ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio);
+    void        RelayUpdate  (uint8_t RelayId, String & NewValue, String & Response);
 
 private:
 #   define OM_RELAY_CHANNEL_LIMIT           8
@@ -81,6 +83,7 @@ private:
 #   define OM_RELAY_CHANNEL_PWM_NAME        CN_pwm
 
     bool    validate ();
+    void    OutputValue(RelayChannel_t & currentRelay, uint8_t NewValue);
 
     // config data
     RelayChannel_t  OutputList[OM_RELAY_CHANNEL_LIMIT];
