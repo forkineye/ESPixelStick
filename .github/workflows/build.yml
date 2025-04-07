@@ -121,6 +121,10 @@ jobs:
           #
           - target: "esp32_breakdancev2"
             chip: "esp32"
+          #
+          # WT 32 Foo Board
+          - target: "esp32_foo"
+            chip: "esp32"
 
     runs-on: ubuntu-latest
     steps:
