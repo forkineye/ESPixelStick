@@ -39,6 +39,7 @@ var classc___output_mgr =
     [ "Poll", "classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925", null ],
     [ "ProcessJsonConfig", "classc___output_mgr.html#a33b3e6588cc7639555d7e91b59378540", null ],
     [ "ReadChannelData", "classc___output_mgr.html#adfe7ce8655d768089bb821c55afb1ad0", null ],
+    [ "RelayUpdate", "classc___output_mgr.html#af6e6b50618e4d5cf50375ec684aa2a6b", null ],
     [ "ScheduleLoadConfig", "classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79", null ],
     [ "SetConfig", "classc___output_mgr.html#aee5d29f91c6457ce753d855ba471f315", null ],
     [ "SetConfig", "classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892", null ],

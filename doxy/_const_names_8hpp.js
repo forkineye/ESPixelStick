@@ -66,6 +66,7 @@ var _const_names_8hpp =
     [ "CN_EffectWhiteChannel", "_const_names_8hpp.html#a9fc7b5a63fac00438a9a466335ac98bc", null ],
     [ "CN_en", "_const_names_8hpp.html#a81557368f28f74d7bba2738291c1a964", null ],
     [ "CN_enabled", "_const_names_8hpp.html#a7b42d8cba1a1939f4e007f08e2b4adbc", null ],
+    [ "CN_enhttp", "_const_names_8hpp.html#a53844d284ad5fc85b9ab2957dcb00f51", null ],
     [ "CN_entry", "_const_names_8hpp.html#aea4c66b96cc703d03036ec2b13b21195", null ],
     [ "CN_errors", "_const_names_8hpp.html#ac37916961c965e38e7302bf1625c0c94", null ],
     [ "CN_ESP32", "_const_names_8hpp.html#a0447a9aff210eb8b19595e2ac6141b3e", null ],
