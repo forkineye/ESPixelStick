@@ -61,6 +61,7 @@ public:
     void      ReadChannelData   (uint32_t StartChannelId, uint32_t ChannelCount, uint8_t *pTargetData);
     void      ClearBuffer       ();
     void      TaskPoll          ();
+    void      RelayUpdate       (uint8_t RelayId, String & NewValue, String & Response);
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds

@@ -1420,6 +1420,33 @@ void c_OutputMgr::UpdateDisplayBufferReferences (void)
 } // UpdateDisplayBufferReferences
 
 //-----------------------------------------------------------------------------
+void c_OutputMgr::RelayUpdate (uint8_t RelayId, String & NewValue, String & Response)
+{
+    // DEBUG_START;
+
+    do // once
+    {
+        // DEBUG_V(String("e_OutputType::OutputType_Relay: ") + String(e_OutputType::OutputType_Relay));
+        Response = F("Relay Output Not configured");
+#ifdef SUPPORT_OutputType_Relay
+        for (DriverInfo_t & CurrentOutput : OutputChannelDrivers)
+        {
+            // DEBUG_V(String("DriverId: ") + String(CurrentOutput.DriverId));
+            // DEBUG_V(String("PortType: ") + String(CurrentOutput.pOutputChannelDriver->GetOutputType()));
+            if(e_OutputType::OutputType_Relay == CurrentOutput.pOutputChannelDriver->GetOutputType())
+            {
+                ((c_OutputRelay*)CurrentOutput.pOutputChannelDriver)->RelayUpdate(RelayId, NewValue, Response);
+                break;
+            }
+        }
+#endif // def SUPPORT_OutputType_Relay
+
+    } while(false);
+
+    // DEBUG_END;
+} // RelayUpdate
+
+//-----------------------------------------------------------------------------
 void c_OutputMgr::PauseOutputs(bool PauseTheOutput)
 {
     // DEBUG_START;
@@ -1449,10 +1476,10 @@ void c_OutputMgr::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCoun
         }
         if (((StartChannelId + ChannelCount) > UsedBufferSize) || (0 == ChannelCount))
         {
-            DEBUG_V (String("ERROR: Invalid parameters"));
-            DEBUG_V (String("StartChannelId: ") + String(StartChannelId));
-            DEBUG_V (String("  ChannelCount: ") + String(ChannelCount));
-            DEBUG_V (String("UsedBufferSize: ") + String(UsedBufferSize));
+            // DEBUG_V (String("ERROR: Invalid parameters"));
+            // DEBUG_V (String("StartChannelId: ") + String(StartChannelId));
+            // DEBUG_V (String("  ChannelCount: ") + String(ChannelCount));
+            // DEBUG_V (String("UsedBufferSize: ") + String(UsedBufferSize));
             break;
         }
 

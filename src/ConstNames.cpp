@@ -82,6 +82,7 @@ const CN_PROGMEM char CN_EffectWhiteChannel       [] = "EffectWhiteChannel";
 const CN_PROGMEM char CN_Effect                   [] = "Effect";
 const CN_PROGMEM char CN_effects                  [] = "effects";
 const CN_PROGMEM char CN_en                       [] = "en";
+const CN_PROGMEM char CN_enhttp                   [] = "enhttp";
 const CN_PROGMEM char CN_enabled                  [] = "enabled";
 const CN_PROGMEM char CN_entry                    [] = "entry";
 const CN_PROGMEM char CN_errors                   [] = "errors";

@@ -91,6 +91,7 @@ extern const CN_PROGMEM char CN_EffectWhiteChannel [];
 extern const CN_PROGMEM char CN_Effect [];
 extern const CN_PROGMEM char CN_effects [];
 extern const CN_PROGMEM char CN_en [];
+extern const CN_PROGMEM char CN_enhttp [];
 extern const CN_PROGMEM char CN_enabled [];
 extern const CN_PROGMEM char CN_entry [];
 extern const CN_PROGMEM char CN_errors [];
