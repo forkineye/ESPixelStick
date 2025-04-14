@@ -97,7 +97,7 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
     JsonWrite(ddpStatus, F("bytesreceived"),  float(stats.bytesReceived) / 1024.0);
     JsonWrite(ddpStatus, CN_errors,           stats.errors);
     JsonWrite(ddpStatus, CN_id,               InputChannelId);
-    JsonWrite(ddpStatus, F("lastError"),      lastError);
+    JsonWrite(ddpStatus, F("lasterror"),      lastError);
 
     // DEBUG_END;
 
