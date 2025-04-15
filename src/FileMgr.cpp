@@ -733,6 +733,9 @@ bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
 
     // delay(100);
     // DEBUG_V("");
+#ifdef ARDUINO_ARCH_ESP8266
+    LOG_PORT.print(' ');
+#endif // def ARDUINO_ARCH_ESP8266
 
     fs::File file = LittleFS.open(FileName.c_str(), "w");
     // DEBUG_V("");
