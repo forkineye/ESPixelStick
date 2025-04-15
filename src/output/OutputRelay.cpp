@@ -423,13 +423,16 @@ void c_OutputRelay::OutputValue(RelayChannel_t & currentRelay, uint8_t NewValue)
     else
     {
         uint8_t newOutputValue = (NewValue > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue;
-        // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+        // DEBUG_V (String(" OnOffTriggerLevel: ") + String(currentRelay.OnOffTriggerLevel));
+        // DEBUG_V (String("    newOutputValue: ") + String(newOutputValue));
         if (newOutputValue != currentRelay.previousValue)
         {
             // DEBUG_V (String("OutputDataIndex: ") + String(currentRelay.ChannelIndex));
             // DEBUG_V("Write New Value");
-            // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
-            // DEBUG_V (String("         GpioId: ") + String(currentRelay.GpioId));
+            // DEBUG_V (String("OnOffTriggerLevel: ") + String(currentRelay.OnOffTriggerLevel));
+            // DEBUG_V (String("         NewValue: ") + String(NewValue));
+            // DEBUG_V (String("   newOutputValue: ") + String(newOutputValue));
+            // DEBUG_V (String("           GpioId: ") + String(currentRelay.GpioId));
             digitalWrite (uint8_t(currentRelay.GpioId), newOutputValue);
             currentRelay.previousValue = newOutputValue;
         }
