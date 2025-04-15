@@ -2060,7 +2060,6 @@ void c_FileMgr::BuildDefaultFseqList ()
     JsonWrite(jsonDoc, "totalBytes", 0);
     JsonWrite(jsonDoc, "usedBytes", 0);
     JsonWrite(jsonDoc, "numFiles", 0);
-    JsonArray jsonDocFileList = jsonDoc["files"].to<JsonArray> ();
     SaveFlashFile(FSEQFILELIST, jsonDoc);
 
     // DEBUG_END;
