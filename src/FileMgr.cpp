@@ -701,6 +701,9 @@ bool c_FileMgr::SaveFlashFile (const String& FileName, const char * FileData)
     }
     else
     {
+#ifdef ARDUINO_ARCH_ESP8266
+        LOG_PORT.print(' ');
+#endif // def ARDUINO_ARCH_ESP8266
         file.seek (0, SeekSet);
         file.print (FileData);
         file.close ();
@@ -741,6 +744,9 @@ bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
     else
     {
         // DEBUG_V("");
+#ifdef ARDUINO_ARCH_ESP8266
+        LOG_PORT.print(' ');
+#endif // def ARDUINO_ARCH_ESP8266
         file.seek(0, SeekSet);
         // DEBUG_V("");
 
