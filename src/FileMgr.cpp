@@ -2065,7 +2065,7 @@ void c_FileMgr::BuildDefaultFseqList ()
     // DEBUG_END;
 
     return;
-} // GetDefaultFseqFileList
+} // BuildDefaultFseqList
 
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMode Mode)
