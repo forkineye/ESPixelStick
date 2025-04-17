@@ -204,6 +204,10 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
         {
             InputFPPRemote->GetFppRemotePlayStatus (MyJsonStatus);
         }
+        else
+        {
+            JsonWrite(MyJsonStatus, CN_errors, F("No SD installed"));
+        }
     }
     else
     {
