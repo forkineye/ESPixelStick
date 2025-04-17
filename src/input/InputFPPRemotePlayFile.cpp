@@ -149,12 +149,12 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 
     String temp = GetFileName ();
 
-    JsonWrite(JsonStatus, CN_current_sequence,  temp);
+    JsonWrite(JsonStatus, CN_current_sequence,  (!FileMgr.SdCardIsInstalled ()) ? F("No SD Installed") : temp);
     JsonWrite(JsonStatus, CN_playlist,          temp);
     JsonWrite(JsonStatus, CN_seconds_elapsed,   String (secs));
     JsonWrite(JsonStatus, CN_seconds_played,    String (secs));
     JsonWrite(JsonStatus, CN_seconds_remaining, String (secsRem));
-    JsonWrite(JsonStatus, CN_sequence_filename, temp);
+    JsonWrite(JsonStatus, CN_sequence_filename, (!FileMgr.SdCardIsInstalled ()) ? F("No SD Installed") : temp);
     JsonWrite(JsonStatus, F("PlayedFileCount"), PlayedFileCount);
 
     // After inserting the total seconds and total seconds remaining,
@@ -165,7 +165,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     JsonWrite(JsonStatus, CN_time_elapsed,   buf);
     ESP_ERROR_CHECK(saferSecondsToFormattedMinutesAndSecondsString(buf, secsRem));
     JsonWrite(JsonStatus, CN_time_remaining, buf);
-    JsonWrite(JsonStatus, CN_errors,         LastFailedPlayStatusMsg);
+    JsonWrite(JsonStatus, CN_errors,         (!FileMgr.SdCardIsInstalled ()) ? F("No SD Installed") : LastFailedPlayStatusMsg);
 
     // xDEBUG_END;
 
