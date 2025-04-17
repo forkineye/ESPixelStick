@@ -728,17 +728,10 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     FileMgr.GetStatus (system);
     // DEBUG_V ("");
 
-    if(WebJsonDoc.overflowed())
-    {
-        logcon(F("ERROR: Status Doc is too small"));
-        client->send (401, CN_applicationSLASHjson, F("Internal Error. Status Buffer is too small."));
-    }
-    else
-    {
-        // DEBUG_V("Send XJ response");
-        serializeJson(WebJsonDoc, XjResult);
-        client->send (200, CN_applicationSLASHjson, XjResult);
-    }
+    // DEBUG_V("Send XJ response");
+    serializeJson(WebJsonDoc, XjResult);
+    client->send (200, CN_applicationSLASHjson, XjResult);
+
     // WebJsonDoc.clear();
     // DEBUG_END;
 
