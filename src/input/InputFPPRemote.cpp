@@ -95,7 +95,10 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
     {
         JsonObject PlayerObjectStatus = LocalPlayerStatus[StatusType].to<JsonObject> ();
         JsonWrite(PlayerObjectStatus, CN_count, FilePlayCount);
-        pInputFPPRemotePlayItem->GetStatus (PlayerObjectStatus);
+        if(pInputFPPRemotePlayItem)
+        {
+            pInputFPPRemotePlayItem->GetStatus (PlayerObjectStatus);
+        }
     }
 
     else
