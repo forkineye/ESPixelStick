@@ -81,7 +81,6 @@ var classc___file_mgr =
     [ "MaxSdSpeed", "classc___file_mgr.html#a76c99df976a653b32ab68fe19979ed31", null ],
     [ "miso_pin", "classc___file_mgr.html#ad9d9c41539429dae4f18ceacda367199", null ],
     [ "mosi_pin", "classc___file_mgr.html#a7ed46a08080b395e231db4496e600c02", null ],
-    [ "SdAccessSemaphore", "classc___file_mgr.html#a84c79c18a4d64b4d29d69a6857e2451a", null ],
     [ "SdCardInstalled", "classc___file_mgr.html#ab0aca0e57b11d97db3a7341a28b1f8f5", null ],
     [ "SdCardSizeMB", "classc___file_mgr.html#a40907cdc97cfe26711ffd8191c2ed610", null ],
     [ "WelcomeString", "classc___file_mgr.html#a7a93f103051d82e6e210966cf29c5507", null ]

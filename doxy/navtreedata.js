@@ -62,13 +62,13 @@ var NAVTREEINDEX =
 "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a6935dea675e388d8e9c6fe125d36c4e6",
 "_input_d_d_p_8h.html#ad8fce9f74a6e8c99bcb25bdff26fe972",
 "_web_mgr_8cpp.html#af746297775839f25b039311b3bf9db74",
-"classc___input_artnet.html",
-"classc___input_f_p_p_remote_play_effect.html#aa0c07a9ca52644cfc33c97187d7c913d",
-"classc___output_common.html#a8f58ca24d1d37983afab81c9eebf6a85",
-"classc___web_mgr.html#aec9409c6cf95e3b810fcaceb5032817a",
-"classfsm___wi_fi__state___boot.html",
-"globals_vars_e.html",
-"structc___output_mgr_1_1_driver_info__t.html#a83e48167209c4f11f756d453a17f7b4c"
+"classc___input_artnet.html#a004bc4bc6d01597111e959dc6bb7cd02",
+"classc___input_f_p_p_remote_play_effect.html#aa23717485961fb645d938014af8bf40f",
+"classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43",
+"classc___web_mgr.html#af729e648a154b8a0228c6fe90dba70ab",
+"classfsm___wi_fi__state___boot.html#a29211bf09c3f160062c3b43244b1661e",
+"globals_vars_f.html",
+"structc___output_mgr_1_1_driver_info__t.html#a84137a376de749d21ba0f8cd38758eba"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
