@@ -245,7 +245,9 @@ public: struct __attribute__((__packed__, aligned(4))) CSD {
     uint32_t    LastFileSent = 0;
     uint32_t    expectedIndex = 0;
 
-    bool SdAccessSemaphore = false;
+#ifdef ARDUINO_ARCH_ESP32
+    SemaphoreHandle_t SdAccessSemaphore = NULL;
+#endif // def ARDUINO_ARCH_ESP32
 
 protected:
 

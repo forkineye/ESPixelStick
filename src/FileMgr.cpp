@@ -133,7 +133,10 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
 ///< Start up the driver and put it into a safe mode
 c_FileMgr::c_FileMgr ()
 {
-    SdAccessSemaphore = false;
+#ifdef ARDUINO_ARCH_ESP32
+    SdAccessSemaphore = xSemaphoreCreateBinary();
+    UnLockSd();
+#endif // def ARDUINO_ARCH_ESP32
 } // c_FileMgr
 
 //-----------------------------------------------------------------------------
@@ -345,6 +348,11 @@ void dateTime(uint16_t* date, uint16_t* time, uint8_t* ms10)
 void c_FileMgr::SetSpiIoPins ()
 {
     // DEBUG_START;
+
+#ifdef ARDUINO_ARCH_ESP8266
+    ESP.wdtDisable();
+#endif // def ARDUINO_ARCH_ESP8266
+
 #if defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
     if (SdCardInstalled)
     {
@@ -457,6 +465,9 @@ void c_FileMgr::SetSpiIoPins ()
     SdCardInstalled = false;
 #endif // defined (SUPPORT_SD) || defined(SUPPORT_SD_MMC)
 
+#ifdef ARDUINO_ARCH_ESP8266
+    ESP.wdtEnable(uint32_t(0));
+#endif // def ARDUINO_ARCH_ESP8266
     // DEBUG_END;
 
 } // SetSpiIoPins
@@ -1615,7 +1626,7 @@ uint64_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, uint6
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
         LockSd();
         FileList[FileListIndex].fsFile.seek (StartingPosition);
-        LockSd();
+        UnLockSd();
         response = WriteSdFile (FileHandle, FileData, NumBytesToWrite, true);
     }
     else
@@ -2060,13 +2071,13 @@ void c_FileMgr::BuildDefaultFseqList ()
     JsonWrite(jsonDoc, "totalBytes", 0);
     JsonWrite(jsonDoc, "usedBytes", 0);
     JsonWrite(jsonDoc, "numFiles", 0);
-    JsonArray jsonDocFileList = jsonDoc["files"].to<JsonArray> ();
+    jsonDoc["files"].to<JsonArray> ();
     SaveFlashFile(FSEQFILELIST, jsonDoc);
 
     // DEBUG_END;
 
     return;
-} // GetDefaultFseqFileList
+} // BuildDefaultFseqList
 
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMode Mode)
@@ -2079,7 +2090,6 @@ bool c_FileMgr::SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMod
 
     bool response = false;
     int FileListIndex;
-    LockSd();
     do // once
     {
         if (-1 == (FileListIndex = FileListFindSdFileHandle (FileHandle)))
@@ -2088,6 +2098,7 @@ bool c_FileMgr::SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMod
             break;
         }
 
+        LockSd();
         switch(Mode)
         {
             case SeekMode::SeekSet:
@@ -2113,8 +2124,8 @@ bool c_FileMgr::SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMod
                 break;
             }
         } // end switch mode
+        UnLockSd();
     } while(false);
-    UnLockSd();
 
     // DEBUG_END;
     return response;
@@ -2125,14 +2136,10 @@ bool c_FileMgr::SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMod
 void c_FileMgr::LockSd()
 {
     // DEBUG_START;
-    // DEBUG_V(String("SdAccessSemaphore: ") + SdAccessSemaphore);
 
-    // wait to get access to the SD card
-    while(true == SdAccessSemaphore)
-    {
-        delay(10);
-    }
-    SdAccessSemaphore = true;
+#ifdef ARDUINO_ARCH_ESP32
+    xSemaphoreTake( SdAccessSemaphore, TickType_t(-1) );
+#endif // def ARDUINO_ARCH_ESP32
 
     // DEBUG_END;
 } // LockSd
@@ -2141,9 +2148,10 @@ void c_FileMgr::LockSd()
 void c_FileMgr::UnLockSd()
 {
     // DEBUG_START;
+#ifdef ARDUINO_ARCH_ESP32
+    xSemaphoreGive( SdAccessSemaphore );
+#endif // def ARDUINO_ARCH_ESP32
 
-    // DEBUG_V(String("SdAccessSemaphore: ") + SdAccessSemaphore);
-    SdAccessSemaphore = false;
     // DEBUG_END;
 } // UnLockSd
 

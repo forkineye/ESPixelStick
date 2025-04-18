@@ -247,7 +247,7 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         if(!SendFrameTaskHandle)
         {
             // DEBUG_V("Start SendFrameTask");
-            xTaskCreatePinnedToCore(RMT_Task, "RMT_Task", 4096, NULL, 5, &SendFrameTaskHandle, 0);
+            xTaskCreatePinnedToCore(RMT_Task, "RMT_Task", 4096, NULL, 5, &SendFrameTaskHandle, 1);
             vTaskPrioritySet(SendFrameTaskHandle, 5);
         }
         // DEBUG_V("Add this instance to the running list");

@@ -2233,6 +2233,7 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
         $('#ddppacketsreceived').text(InputStatus.ddp.packetsreceived);
         $('#ddpbytesreceived').text(InputStatus.ddp.bytesreceived);
         $('#ddperrors').text(InputStatus.ddp.errors);
+        $('#ddplasterror').text(InputStatus.ddp.lasterror);
     }
     else {
         $('#ddpStatus').addClass("hidden")

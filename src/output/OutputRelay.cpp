@@ -385,7 +385,9 @@ uint32_t c_OutputRelay::Poll ()
     {
         // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
         // DEBUG_V (String("        Enabled: ") + String(currentRelay.Enabled));
-        if (currentRelay.Enabled && (gpio_num_t(-1) != currentRelay.GpioId))
+        if ((currentRelay.Enabled) &&
+            (gpio_num_t(-1) != currentRelay.GpioId) &&
+            (!currentRelay.httpEnabled))
         {
             OutputValue(currentRelay, pOutputBuffer[OutputDataIndex]);
         }
@@ -421,13 +423,16 @@ void c_OutputRelay::OutputValue(RelayChannel_t & currentRelay, uint8_t NewValue)
     else
     {
         uint8_t newOutputValue = (NewValue > currentRelay.OnOffTriggerLevel) ? currentRelay.OnValue : currentRelay.OffValue;
-        // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
+        // DEBUG_V (String(" OnOffTriggerLevel: ") + String(currentRelay.OnOffTriggerLevel));
+        // DEBUG_V (String("    newOutputValue: ") + String(newOutputValue));
         if (newOutputValue != currentRelay.previousValue)
         {
-            // DEBUG_V (String("OutputDataIndex: ") + String(OutputDataIndex));
+            // DEBUG_V (String("OutputDataIndex: ") + String(currentRelay.ChannelIndex));
             // DEBUG_V("Write New Value");
-            // DEBUG_V (String(" newOutputValue: ") + String(newOutputValue));
-            // DEBUG_V (String("         GpioId: ") + String(currentRelay.GpioId));
+            // DEBUG_V (String("OnOffTriggerLevel: ") + String(currentRelay.OnOffTriggerLevel));
+            // DEBUG_V (String("         NewValue: ") + String(NewValue));
+            // DEBUG_V (String("   newOutputValue: ") + String(newOutputValue));
+            // DEBUG_V (String("           GpioId: ") + String(currentRelay.GpioId));
             digitalWrite (uint8_t(currentRelay.GpioId), newOutputValue);
             currentRelay.previousValue = newOutputValue;
         }
