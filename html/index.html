@@ -98,7 +98,10 @@
                             </tr>
                             <tr>
                                 <td width="33%">IP</td>
-                                <td><span id="w_ip"></span></td>
+                                <td>
+                                    <span id="w_ip"></span>
+                                    <button onclick="legacyCopy('w_ip')">📋</button>
+                                </td>
                             </tr>
                             <tr>
                                 <td width="33%">SubNet</td>
@@ -106,7 +109,10 @@
                             </tr>
                             <tr>
                                 <td width="33%">MAC</td>
-                                <td><span id="w_mac"></span></td>
+                                <td>
+                                    <span id="w_mac"></span>
+                                    <button onclick="legacyCopy('w_mac')">📋</button>
+                                </td>
                             </tr>
                             <tr>
                                 <td width="33%">RSSI</td>
@@ -114,6 +120,22 @@
                             </tr>
                         </table>
                     </fieldset>
+                    
+                    <!-- Hidden input used for fallback clipboard copy -->
+                    <input type="text" id="clipboardHack" style="position:absolute; left:-9999px;">
+                    
+                    <script>
+                        function legacyCopy(id) {
+                            const span = document.getElementById(id);
+                            const tempInput = document.getElementById("clipboardHack");
+                            if (!span || !tempInput) return;
+                    
+                            tempInput.value = span.innerText.trim();
+                            tempInput.select();
+                            document.execCommand("copy");
+                            console.log(`Copied '${tempInput.value}' from '${id}'`);
+                        }
+                    </script>
                     <fieldset id="ethernet_status" class="hidden">
                         <legend class="esps-legend">Ethernet Status</legend>
                         <table class="esps-table">
