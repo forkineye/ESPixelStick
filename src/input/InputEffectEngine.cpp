@@ -27,21 +27,21 @@
 
 // List of all the supported effects and their names
 static const c_InputEffectEngine::EffectDescriptor_t ListOfEffects[] =
-{//                                                                              Mirror      AllLeds      wsTCode
-    //    name                              func                   htmlid               Color      Reverse
+{//                                                                                    Mirror      AllLeds      wsTCode
+    //    name                              func                   htmlid         Color      Reverse       white
 
-        // { "Disabled",     nullptr,                             "t_disabled",     1,    1,    1,    1,  "T0"     },
-        { "Solid",        &c_InputEffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,  "T1"     },
-        { "Blink",        &c_InputEffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,  "T2"     },
-        { "Flash",        &c_InputEffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,  "T3"     },
-        { "Rainbow",      &c_InputEffectEngine::effectRainbow,    "t_rainbow",      0,    1,    1,    1,  "T5"     },
-        { "Chase",        &c_InputEffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,  "T4"     },
-        { "Fire flicker", &c_InputEffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,  "T6"     },
-        { "Lightning",    &c_InputEffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,  "T7"     },
-        { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,  "T8"     },
-        { "Random",       &c_InputEffectEngine::effectRandom,     "t_random",       0,    0,    0,    0,  "T9"     },
-        { "Transition",   &c_InputEffectEngine::effectTransition, "t_Transition",   0,    0,    0,    0,  "T10"    },
-        { "Marquee",      &c_InputEffectEngine::effectMarquee,    "t_Marquee",      0,    0,    0,    0,  "T11"    }
+        // { "Disabled",     nullptr,                             "t_disabled",     1,    1,    1,    1,     0, "T0"     },
+        { "Solid",        &c_InputEffectEngine::effectSolidColor, "t_static",       1,    0,    0,    0,     0, "T1"     },
+        { "Blink",        &c_InputEffectEngine::effectBlink,      "t_blink",        1,    0,    0,    0,     0, "T2"     },
+        { "Flash",        &c_InputEffectEngine::effectFlash,      "t_flash",        1,    0,    0,    0,     0, "T3"     },
+        { "Rainbow",      &c_InputEffectEngine::effectRainbow,    "t_rainbow",      0,    1,    1,    1,     0, "T5"     },
+        { "Chase",        &c_InputEffectEngine::effectChase,      "t_chase",        1,    1,    1,    0,     0, "T4"     },
+        { "Fire flicker", &c_InputEffectEngine::effectFireFlicker,"t_fireflicker",  1,    0,    0,    0,     0, "T6"     },
+        { "Lightning",    &c_InputEffectEngine::effectLightning,  "t_lightning",    1,    0,    0,    0,     0, "T7"     },
+        { "Breathe",      &c_InputEffectEngine::effectBreathe,    "t_breathe",      1,    0,    0,    0,     0, "T8"     },
+        { "Random",       &c_InputEffectEngine::effectRandom,     "t_random",       0,    0,    0,    0,     0, "T9"     },
+        { "Transition",   &c_InputEffectEngine::effectTransition, "t_Transition",   0,    0,    0,    0,     0, "T10"    },
+        { "Marquee",      &c_InputEffectEngine::effectMarquee,    "t_Marquee",      0,    0,    0,    0,     0, "T11"    }
 };
 
 static std::vector<c_InputEffectEngine::dCRGB> TransitionColorTable =
