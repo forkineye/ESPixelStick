@@ -162,7 +162,7 @@ void setup()
 
     // Dump version and build information
     LOG_PORT.println ();
-    logcon (String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ")");
+    logcon (String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ") on " + BOARD_NAME);
 #ifdef ARDUINO_ARCH_ESP8266
     logcon (ESP.getFullVersion ());
 #else
