@@ -25,7 +25,9 @@
 #include "network/NetworkMgr.hpp"
 #include "output/OutputMgr.hpp"
 #include "UnzipFiles.hpp"
-
+#ifdef SUPPORT_OLED
+#include "service/DisplayOLED.h"
+#endif
 SdFs sd;
 const int8_t DISABLE_CS_PIN = -1;
 
@@ -2053,14 +2055,12 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
         FileList[FileListIndex].buffer.offset = 0;
         FileList[FileListIndex].buffer.size = min(uint32_t(OutputMgr.GetBufferSize() & ~(SD_BLOCK_SIZE - 1)), uint32_t(MAX_SD_BUFFER_SIZE));
         FileList[FileListIndex].buffer.DataBuffer = OutputMgr.GetBufferAddress();
-        // DEBUG_V(String("Buffer Size: ") + String(FileList[FileListIndex].buffer.size));
-    }
+        }
+#ifdef SUPPORT_OLED
+    OLED.ShowToast(String("Uploading ") + fsUploadFileName);
+#endif
+}
 
-    // DEBUG_END;
-
-} // handleFileUploadNewFile
-
-//-----------------------------------------------------------------------------
 void c_FileMgr::BuildDefaultFseqList ()
 {
     // DEBUG_START;

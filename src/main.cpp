@@ -18,7 +18,9 @@
 */
 
 #include <Arduino.h>
-
+#ifdef SUPPORT_OLED
+#include "service/DisplayOLED.h"
+#endif
 // Core
 #include "ESPixelStick.h"
 #include "EFUpdate.h"
@@ -137,6 +139,9 @@ void TestHeap(uint32_t Id)
 /** Arduino based setup code that is executed at startup. */
 void setup()
 {
+    #ifdef SUPPORT_OLED
+    OLED.Begin();
+    #endif
 #ifdef DEBUG_GPIO
     ResetGpio(DEBUG_GPIO);
     pinMode(DEBUG_GPIO, OUTPUT);
@@ -162,7 +167,7 @@ void setup()
 
     // Dump version and build information
     LOG_PORT.println ();
-    logcon (String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ")");
+    logcon (String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ") on " + BOARD_NAME);
 #ifdef ARDUINO_ARCH_ESP8266
     logcon (ESP.getFullVersion ());
 #else
@@ -513,7 +518,10 @@ void loop()
     }
 */
     FeedWDT ();
-
+#ifdef SUPPORT_OLED
+    OLED.Poll();
+    FeedWDT();
+#endif
     // Keep the Network Open
     NetworkMgr.Poll ();
 
@@ -543,6 +551,10 @@ void loop()
     // Reboot handler
     if (NotRebootingValue != RebootCount)
     {
+        #ifdef SUPPORT_OLED
+        OLED.isRebooting = true;
+        OLED.ShowRebootScreen();
+        #endif
         if(0 == --RebootCount)
         {
             logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));

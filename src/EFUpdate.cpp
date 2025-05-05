@@ -20,7 +20,9 @@
 #include "ESPixelStick.h"
 #include <FS.h>
 #include <LittleFS.h>
-
+#ifdef SUPPORT_OLED
+    #include "service/DisplayOLED.h"
+#endif
 #include <lwip/def.h>
 #include "EFUpdate.h"
 
@@ -51,7 +53,10 @@ void EFUpdate::begin() {
     Update.onProgress(
         [this] (size_t progress, size_t total)
         {
-            LOG_PORT.println(String("\033[Fprogress: ") + String(progress));
+        #ifdef SUPPORT_OLED
+            OLED.UpdateUploadStatus("FIRMWARE", (progress/total)*100);
+        #endif
+            LOG_PORT.println(String("\033[Fprogress: ") + String((progress/total)*100));
         }
     );
     // DEBUG_END;
@@ -90,6 +95,9 @@ bool EFUpdate::process(uint8_t *data, uint32_t len) {
                         _state = State::FAIL;
                         _error = EFUPDATE_ERROR_SIG;
                         _errorMsg = F("Invalid EFU Signature");
+                        #ifdef SUPPORT_OLED
+                            OLED.ShowToast(F("Invalid EFU Signature"));
+                        #endif
                     }
                 }
                 // DEBUG_V ();
