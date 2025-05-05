@@ -280,7 +280,7 @@ void c_OutputRmt::UpdateBitXlatTable(const CitrdsArray_t * CitrdsArray)
     }
     else
     {
-        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values") + CN_stars);
+        logcon(String(CN_stars) + F(" ERROR: Missing pointer to RMT bit translation values (1) ") + CN_stars);
     }
     // DEBUG_END;
 } // UpdateBitXlatTable
@@ -313,7 +313,7 @@ bool c_OutputRmt::ValidateBitXlatTable(const CitrdsArray_t * CitrdsArray)
     }
     else
     {
-        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values") + CN_stars);
+        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values (2)") + CN_stars);
     }
     // DEBUG_END;
     return Response;
