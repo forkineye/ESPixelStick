@@ -566,7 +566,8 @@ void c_FileMgr::DeleteFlashFile (String FileName)
 
     ConnrectFilename(FileName);
 
-    LittleFS.remove (FileName);
+    if(LittleFS.exists(FileName)) { LittleFS.remove (FileName); }
+
     if(!FileName.equals(FSEQFILELIST))
     {
         BuildFseqList(false);
