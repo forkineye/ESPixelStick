@@ -1785,14 +1785,14 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
             // DEBUG_V ("      entry.size(): " + int64String(CurrentEntry.size ()));
 
             if ((!EntryName.isEmpty ()) &&
-//                (!EntryName.equals(String (F ("System Volume Information")))) &&
                 (0 != CurrentEntry.size ())
                )
             {
+                String LowerEntryName = EntryName;
+                LowerEntryName.toLowerCase();
                 // is this a zipped file?
-                if((-1 != EntryName.indexOf(F(".zip"))) ||
-                   (-1 != EntryName.indexOf(F(".ZIP"))) ||
-                   (-1 != EntryName.indexOf(F(".xlz")))
+                if((-1 != LowerEntryName.indexOf(F(".zip"))) ||
+                   (-1 != LowerEntryName.indexOf(F(".xlz")))
                    )
                 {
                     FoundZipFile = true;
