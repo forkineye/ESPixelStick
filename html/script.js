@@ -972,9 +972,17 @@ function ProcessModeConfigurationDatafppremote(channelConfig) {
 
     // for each file in the list
     Fseq_File_List.sort();
-    Fseq_File_List.forEach(function (listEntry) {
-        // add in a new entry
-        $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
+    Fseq_File_List.forEach(function (listEntry)
+    {
+        var LowerName = listEntry.name;
+        LowerName = LowerName.toLowerCase();
+        // console.info("LowerName: " + LowerName);
+        if((-1 !== LowerName.indexOf(".fseq")) ||
+           (-1 !== LowerName.indexOf(".pl")))
+        {
+            // console.info("add in a new entry");
+            $(jqSelector).append('<option value="' + listEntry.name + '">' + listEntry.name + '</option>');
+        }
     });
 
     // set the current selector value
