@@ -135,7 +135,7 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
                 }
             }
 
-            isrFlags = (volatile uint32_t) RMT.int_st.val;
+            isrFlags = RMT.int_st.val;
             RMT.int_clr.val = uint32_t(-1);
         }
         InIsr = false;
@@ -416,7 +416,7 @@ void IRAM_ATTR c_OutputRmt::ISR_CreateIntensityData ()
     register uint32_t OneBitValue  = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID].val;
     register uint32_t ZeroBitValue = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID].val;
 
-    register uint32_t IntensityValue; // = 0;
+    uint32_t IntensityValue; // = 0;
     uint32_t NumAvailableBufferSlotsToFill = NUM_RMT_SLOTS - NumUsedEntriesInSendBuffer;
     while ((NumAvailableBufferSlotsToFill > NumRmtSlotsPerIntensityValue) && ThereIsDataToSend)
     {
@@ -629,9 +629,9 @@ void IRAM_ATTR c_OutputRmt::ISR_TransferIntensityDataToRMT (uint32_t MaxNumEntri
 #endif // def USE_RMT_DEBUG_COUNTERS
     while(NumEntriesToTransfer)
     {
-        RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[RmtBufferWriteIndex].val = SendBuffer[SendBufferReadIndex].val;
-        RmtBufferWriteIndex = (++RmtBufferWriteIndex) & (NUM_RMT_SLOTS - 1);
-        SendBufferReadIndex = (++SendBufferReadIndex) & (NUM_RMT_SLOTS - 1);
+        RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[RmtBufferWriteIndex++].val = SendBuffer[SendBufferReadIndex++].val;
+        RmtBufferWriteIndex &= uint32_t(NUM_RMT_SLOTS - 1);
+        SendBufferReadIndex &= uint32_t(NUM_RMT_SLOTS - 1);
         --NumEntriesToTransfer;
         --NumUsedEntriesInSendBuffer;
     }
@@ -648,8 +648,8 @@ inline void IRAM_ATTR c_OutputRmt::ISR_WriteToBuffer(uint32_t value)
 {
     /// DEBUG_START;
 
-    SendBuffer[SendBufferWriteIndex].val = value;
-    SendBufferWriteIndex = (++SendBufferWriteIndex) & (NUM_RMT_SLOTS - 1);
+    SendBuffer[SendBufferWriteIndex++].val = value;
+    SendBufferWriteIndex &= uint32_t(NUM_RMT_SLOTS - 1);
     ++NumUsedEntriesInSendBuffer;
 
     ///DEBUG_END;

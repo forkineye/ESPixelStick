@@ -3,7 +3,7 @@
 * WebMgr.hpp
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2024 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -74,6 +74,7 @@ private:
     void GetDeviceOptions           ();
     void GetInputOptions            ();
     void GetOutputOptions           ();
+    bool RequestReadConfigFile      (String & fileName);
 
     using WebJsonDocument = JsonDocument;
 

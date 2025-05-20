@@ -915,7 +915,10 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
             }
         } // end for each channel
 
-		Response = true;
+        // let the file manager restart FTP if it can.
+        FileMgr.UpdateFtp();
+
+        Response = true;
 
     } while (false);
 
@@ -933,6 +936,32 @@ bool c_InputMgr::ProcessJsonConfig (JsonObject & jsonConfig)
     return Response;
 
 } // ProcessJsonConfig
+
+//-----------------------------------------------------------------------------
+bool c_InputMgr::RemotePlayEnabled()
+{
+    // DEBUG_START;
+    bool response = false;
+
+#ifdef SUPPORT_FPP
+    for (auto & CurrentInput : InputChannelDrivers)
+    {
+        if(nullptr == CurrentInput.pInputChannelDriver)
+        {
+            continue;
+        }
+
+        if(e_InputType::InputType_FPP == CurrentInput.pInputChannelDriver->GetInputType ())
+        {
+            response = true;
+        }
+    }
+#endif // def SUPPORT_FPP
+
+    // DEBUG_V(String("RemotePlayEnabled: ") + response);
+    // DEBUG_END;
+    return response;
+} // RemotePlayEnabled
 
 //-----------------------------------------------------------------------------
 /* Sets the configuration for the current active ports:
