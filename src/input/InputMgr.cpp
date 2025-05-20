@@ -943,6 +943,7 @@ bool c_InputMgr::RemotePlayEnabled()
     // DEBUG_START;
     bool response = false;
 
+#ifdef SUPPORT_FPP
     for (auto & CurrentInput : InputChannelDrivers)
     {
         if(nullptr == CurrentInput.pInputChannelDriver)
@@ -955,6 +956,7 @@ bool c_InputMgr::RemotePlayEnabled()
             response = true;
         }
     }
+#endif // def SUPPORT_FPP
 
     // DEBUG_V(String("RemotePlayEnabled: ") + response);
     // DEBUG_END;
