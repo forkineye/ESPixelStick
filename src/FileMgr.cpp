@@ -24,6 +24,7 @@
 #include "FileMgr.hpp"
 #include "network/NetworkMgr.hpp"
 #include "output/OutputMgr.hpp"
+#include "input/InputMgr.hpp"
 #include "UnzipFiles.hpp"
 
 SdFs sd;
@@ -194,22 +195,37 @@ void c_FileMgr::Begin ()
 } // begin
 
 //-----------------------------------------------------------------------------
+//    Cause the FTP operation to get re-established.
+void c_FileMgr::UpdateFtp()
+{
+    // DEBUG_START;
+
+    NetworkStateChanged(NetworkMgr.IsConnected());
+
+    // DEBUG_END;
+} // UpdateFtp
+
+//-----------------------------------------------------------------------------
 void c_FileMgr::NetworkStateChanged (bool NewState)
 {
     // DEBUG_START;
 #ifdef SUPPORT_FTP
+    // DEBUG_V("Disable FTP");
     ftpSrv.end();
 
     // DEBUG_V(String("       NewState: ") + String(NewState));
     // DEBUG_V(String("SdCardInstalled: ") + String(SdCardInstalled));
     // DEBUG_V(String("     FtpEnabled: ") + String(FtpEnabled));
-    if(NewState && SdCardInstalled && FtpEnabled)
+    if(NewState && SdCardInstalled && FtpEnabled && !InputMgr.RemotePlayEnabled())
     {
-        // ftpSrv.end();
         logcon("Starting FTP server.");
         ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), WelcomeString.c_str());
         ftpSrv.setCallback(ftp_callback);
         ftpSrv.setTransferCallback(ftp_transferCallback);
+    }
+    else
+    {
+        // DEBUG_V("Not starting FTP service");
     }
 #endif // def SUPPORT_FTP
 
