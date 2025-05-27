@@ -2,6 +2,7 @@ var _file_mgr_8hpp =
 [
     [ "c_FileMgr", "classc___file_mgr.html", "classc___file_mgr" ],
     [ "c_FileMgr::FileListEntry_t", "structc___file_mgr_1_1_file_list_entry__t.html", "structc___file_mgr_1_1_file_list_entry__t" ],
+    [ "ConnrectFilename", "_file_mgr_8hpp.html#a83de164efbb2755c4e8e38e3c6631476", null ],
     [ "DATABUFFERSIZE", "_file_mgr_8hpp.html#aa00f910116b7fca294ce753f2e98c8c0", null ],
     [ "DEBUG_FILE_HANDLE", "_file_mgr_8hpp.html#a96a56d70b58875d3e79e583fbce2cd2c", null ],
     [ "ESP_SD", "_file_mgr_8hpp.html#a209cd1d1d956fc0f1215f653f7082820", null ],

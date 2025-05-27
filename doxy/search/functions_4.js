@@ -2,7 +2,7 @@ var searchData=
 [
   ['datetime_0',['dateTime',['../_file_mgr_8cpp.html#a02459ac1211c779c4fc2aee607f416d3',1,'FileMgr.cpp']]],
   ['deleteconfig_1',['DeleteConfig',['../classc___input_mgr.html#a468e07f1080b710b35059bc87b9b8729',1,'c_InputMgr::DeleteConfig()'],['../classc___output_mgr.html#a697acb245b061406959eacd968eb74d7',1,'c_OutputMgr::DeleteConfig()'],['../main_8cpp.html#ab580e28a58fa670ec1ad2166f9f18711',1,'DeleteConfig():&#160;main.cpp']]],
-  ['deleteflashfile_2',['DeleteFlashFile',['../classc___file_mgr.html#a17ce44b69df18bcc928b89b6702d766e',1,'c_FileMgr']]],
+  ['deleteflashfile_2',['DeleteFlashFile',['../classc___file_mgr.html#ade8a802526fefdce66be04cab5339668',1,'c_FileMgr']]],
   ['deletesdfile_3',['DeleteSdFile',['../classc___file_mgr.html#a3008d14fd822eaf0f4077de2c85d63a1',1,'c_FileMgr']]],
   ['describesdcardtouser_4',['DescribeSdCardToUser',['../classc___file_mgr.html#a96fc290cd73476fc1f47b0ab86031cb2',1,'c_FileMgr']]],
   ['deserializecore_5',['deserializeCore',['../main_8cpp.html#a067b67c856af5452506085e83cdb2b01',1,'deserializeCore(JsonObject &amp;json):&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#a067b67c856af5452506085e83cdb2b01',1,'deserializeCore(JsonObject &amp;json):&#160;main.cpp']]],

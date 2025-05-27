@@ -6,6 +6,7 @@ var searchData=
   ['updatedisplaybufferreferences_3',['UpdateDisplayBufferReferences',['../classc___output_mgr.html#a2af1d94181e97f732be0b66be3b944dd',1,'c_OutputMgr']]],
   ['updateeffectconfiguration_4',['UpdateEffectConfiguration',['../classc___input_m_q_t_t.html#aae66b8ba9f171ca8ef69547c127d2f1d',1,'c_InputMQTT']]],
   ['updateelapsedplaytimems_5',['UpdateElapsedPlayTimeMS',['../classc___input_f_p_p_remote_play_file.html#a68edbb2d52a03e900860bc61203bae06',1,'c_InputFPPRemotePlayFile']]],
-  ['updategammatable_6',['updateGammaTable',['../classc___output_pixel.html#ae85f097b7467cb4aeb13a6dce4902127',1,'c_OutputPixel']]],
-  ['updateisinprogress_7',['UpdateIsInProgress',['../class_e_f_update.html#a85d676640a316f0129c5275e0514bbbc',1,'EFUpdate']]]
+  ['updateftp_6',['UpdateFtp',['../classc___file_mgr.html#ad973709189a6ae71111cf897307c7cf0',1,'c_FileMgr']]],
+  ['updategammatable_7',['updateGammaTable',['../classc___output_pixel.html#ae85f097b7467cb4aeb13a6dce4902127',1,'c_OutputPixel']]],
+  ['updateisinprogress_8',['UpdateIsInProgress',['../class_e_f_update.html#a85d676640a316f0129c5275e0514bbbc',1,'EFUpdate']]]
 ];

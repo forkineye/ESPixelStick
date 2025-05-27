@@ -41,6 +41,7 @@ var classc___input_mgr =
     [ "ProcessButtonActions", "classc___input_mgr.html#a8c71582b3ef01a7a7e2187377cf7b8ac", null ],
     [ "ProcessJsonChannelConfig", "classc___input_mgr.html#ab06c887245d171d80438fb33b1dbf206", null ],
     [ "ProcessJsonConfig", "classc___input_mgr.html#a3982db8dd97b38f17ec31c73e6b4940b", null ],
+    [ "RemotePlayEnabled", "classc___input_mgr.html#a5f69ee45bb28425a665bb08ec17ce50c", null ],
     [ "RestartBlankTimer", "classc___input_mgr.html#ac50551f90f209dbaa2b476a20b524b71", null ],
     [ "ScheduleLoadConfig", "classc___input_mgr.html#a47a66106086819f5c9edf6c94df9adc5", null ],
     [ "SetBufferInfo", "classc___input_mgr.html#a795c7c292277523fefb8363d2f8285e8", null ],

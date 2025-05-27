@@ -25,6 +25,7 @@ var classc___web_mgr =
     [ "ProcessSetTimeRequest", "classc___web_mgr.html#a0d5feca56e0e864aeff5994857d67663", null ],
     [ "ProcessXJRequest", "classc___web_mgr.html#acffc5a44584e814738cfa0034a899f7e", null ],
     [ "RegisterAlexaCallback", "classc___web_mgr.html#aaad811dbabf3626c6ddb95f13f301f7f", null ],
+    [ "RequestReadConfigFile", "classc___web_mgr.html#a461cebce4ff284be5a268e7d36fffd05", null ],
     [ "ValidateConfig", "classc___web_mgr.html#a02d3fef6b783f26270959e68c8a3c787", null ],
     [ "efupdate", "classc___web_mgr.html#aeb7f891688b50a8ac2ac6865aec01006", null ],
     [ "HasBeenInitialized", "classc___web_mgr.html#aec9409c6cf95e3b810fcaceb5032817a", null ],
