@@ -285,8 +285,7 @@ int32_t UnzipFiles::SeekZipFile(void *p, int32_t position, int iType)
     SeekPosition = position;
     // DEBUG_V(String("         p: 0x") + String(uint32_t(p), HEX));
 
-    c_FileMgr::FileId FileHandle = (c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle);
-    // DEBUG_V(String("FileHandle: ") + String(FileHandle));
+    // DEBUG_V(String("FileHandle: ") + String((c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle)));
     // DEBUG_V(String("  Position: ") + String(position));
     // DEBUG_V(String("     iType: ") + String(iType));
 

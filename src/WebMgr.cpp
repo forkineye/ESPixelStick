@@ -323,27 +323,15 @@ void c_WebMgr::init ()
                 {
                     // DEBUG_V(String("           url: ") + request->url());
                     String UploadFileName = request->url().substring(6);
-                    // DEBUG_V(String("UploadFileName: ") + UploadFileName);
-                    // DEBUG_V ("Trigger a config file read");
-                    if(UploadFileName.equals(F("config.json")))
+                    if(RequestReadConfigFile(UploadFileName))
                     {
-                        extern void ScheduleLoadConfig();
-                        ScheduleLoadConfig();
-                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
-                    }
-                    else if(UploadFileName.equals(F("input_config.json")))
-                    {
-                        InputMgr.ScheduleLoadConfig();
-                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
-                    }
-                    else if(UploadFileName.equals(F("output_config.json")))
-                    {
-                        OutputMgr.ScheduleLoadConfig();
+                        FileMgr.RenameFlashFile(UploadFileName + ".tmp", UploadFileName);
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
                     else
                     {
-                        logcon(String(F("Unexpected Config File Name: ")) + UploadFileName);
+                        // delete unexpected config file.
+                        FileMgr.DeleteFlashFile(UploadFileName + ".tmp");
                         request->send (404, CN_textSLASHplain, String(F("File Not supported")));
                     }
                 }
@@ -358,13 +346,24 @@ void c_WebMgr::init ()
                 // DEBUG_V(String("  sum: ") + String(index + len));
                 // DEBUG_V(String(" file: ") + filename);
                 // DEBUG_V(String("final: ") + String(final));
+                if(0 == index)
+                {
+                    // DEBUG_V("Deleting config file.");
+                    FileMgr.DeleteFlashFile(filename);
+                }
 
-            	if(FileMgr.SaveFlashFile(filename, index, data, len, final))
+                if(FileMgr.SaveFlashFile(filename + ".tmp", index, data, len, final))
                 {
                     // DEBUG_V("Save Chunk - Success");
                 }
                 else
                 {
+                    logcon(String(F("Upload failed for: ")) + filename);
+                    // remove the incomplete file
+                    FileMgr.DeleteFlashFile(filename + ".tmp");
+                    // This will cause the defaults to be recreated.
+                    RequestReadConfigFile(filename);
+
                     // DEBUG_V("Save Chunk - Failed");
                     request->send (404, CN_textSLASHplain, String(F("Could not save data")));
                 }
@@ -383,12 +382,24 @@ void c_WebMgr::init ()
                 // DEBUG_V(String(" file: ") + UploadFileName);
                 // DEBUG_V(String("final: ") + String(total <= (index+len)));
 
-            	if(FileMgr.SaveFlashFile(UploadFileName, index, data, len, total <= (index+len)))
+                if(0 == index)
+                {
+                    // DEBUG_V("Deleting config file.");
+                    FileMgr.DeleteFlashFile(UploadFileName);
+                }
+
+            	if(FileMgr.SaveFlashFile(UploadFileName + ".tmp", index, data, len, total <= (index+len)))
                 {
                     // DEBUG_V("Save Chunk - Success");
                 }
                 else
                 {
+                    // remove the incomplete file
+                    FileMgr.DeleteFlashFile(String("/") + UploadFileName + ".tmp");
+                    logcon(String(F("Upload failed for: ")) + UploadFileName);
+                    // This will cause the defaults to be recreated.
+                    RequestReadConfigFile(UploadFileName);
+
                     // DEBUG_V("Save Chunk - Failed");
                     request->send (404, CN_textSLASHplain, String(F("Could not save data")));
                 }
@@ -749,6 +760,39 @@ void c_WebMgr::ProcessSetTimeRequest (time_t EpochTime)
 
     // DEBUG_END;
 } // ProcessSetTimeRequest
+
+//-----------------------------------------------------------------------------
+bool c_WebMgr::RequestReadConfigFile(String & FileName)
+{
+    // DEBUG_START;
+    bool response = true;
+
+    // DEBUG_V(String("FileName: ") + FileName);
+    // DEBUG_V("Scheduling config reload.");
+
+    if(FileName.equals(F("config.json")))
+    {
+        extern void ScheduleLoadConfig();
+        ScheduleLoadConfig();
+    }
+    else if(FileName.equals(F("input_config.json")))
+    {
+        InputMgr.ScheduleLoadConfig();
+    }
+    else if(FileName.equals(F("output_config.json")))
+    {
+        OutputMgr.ScheduleLoadConfig();
+    }
+    else
+    {
+        logcon(String(F("Unexpected Config File Name: ")) + FileName);
+        response = false;
+    }
+
+    // DEBUG_END;
+    return response;
+
+} // RequestReadConfigFile
 
 //-----------------------------------------------------------------------------
 void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
