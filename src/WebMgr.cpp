@@ -142,6 +142,20 @@ void c_WebMgr::init ()
         // Setup WebSockets
         using namespace std::placeholders;
 
+        // Static Handlers
+   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
+   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json.gz",  LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json.gz", LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json.gz",     LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/fseqfilelist.json.gz",       LittleFS, "/fseqfilelist.json");
+   	 	webServer.serveStatic ("/fseqfilelist.json",          LittleFS, "/fseqfilelist.json");
+   	 	webServer.serveStatic ("/fseqfilelist",               LittleFS, "/fseqfilelist.json");
+
         // Heap status handler
     	webServer.on ("/heap", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
@@ -495,15 +509,6 @@ void c_WebMgr::init ()
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
-
-        // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
-   	 	webServer.serveStatic ("/fseqfilelist",               LittleFS, "/fseqfilelist.json");
 
         // must be last servestatic entry
     	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
