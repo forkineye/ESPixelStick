@@ -151,31 +151,87 @@ void c_EthernetDriver::GetConfig (JsonObject& json)
 //-----------------------------------------------------------------------------
 void c_EthernetDriver::GetHostname (String & Name)
 {
-    Name = ETH.getHostname ();
+    // DEBUG_START;
+
+    if(IsConnected())
+    {
+        // DEBUG_V();
+        Name = ETH.getHostname ();
+    }
+    else
+    {
+        Name.clear();
+    }
+
+    // DEBUG_END;
 } // GetHostname
 
 //-----------------------------------------------------------------------------
 IPAddress c_EthernetDriver::GetIpAddress ()
 {
-    return ETH.localIP ();
+    // DEBUG_START;
+
+    IPAddress Response;
+    if(IsConnected())
+    {
+        // DEBUG_V();
+        Response = ETH.localIP ();
+    }
+
+    // DEBUG_END;
+
+    return Response;
 } // GetIpAddress
 
 //-----------------------------------------------------------------------------
 IPAddress c_EthernetDriver::GetIpGateway ()
 {
-    return ETH.gatewayIP ();
+    // DEBUG_START;
+
+    IPAddress Response;
+    if(IsConnected())
+    {
+        // DEBUG_V();
+        Response = ETH.gatewayIP ();
+    }
+
+    // DEBUG_END;
+
+    return Response;
 } // GetIpGateway
 
 //-----------------------------------------------------------------------------
 IPAddress c_EthernetDriver::GetIpSubNetMask ()
 {
-    return ETH.subnetMask ();
+    // DEBUG_START;
+
+    IPAddress Response;
+    if(IsConnected())
+    {
+        // DEBUG_V();
+        Response = ETH.subnetMask ();
+    }
+
+    // DEBUG_END;
+
+    return Response;
 } // GetIpSubNetMask
 
 //-----------------------------------------------------------------------------
 String c_EthernetDriver::GetMacAddress ()
 {
-    return ETH.macAddress ();
+    // DEBUG_START;
+
+    String Response;
+    if(IsConnected())
+    {
+        // DEBUG_V();
+        Response = ETH.macAddress ();
+    }
+
+    // DEBUG_END;
+
+    return Response;
 } // GetMacAddress
 
 //-----------------------------------------------------------------------------
