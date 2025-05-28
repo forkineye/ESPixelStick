@@ -10,7 +10,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.110";
+// target = "192.168.10.221";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -775,22 +775,42 @@ function RequestDiagData()
     }
 } // RequestDiagData
 
-async function RequestConfigFile(FileName)
+async function RequestConfigFile(FileName, retries = 10)
 {
-    // console.log("RequestConfigFile FileName: " + FileName);
+    // console.debug("RequestConfigFile FileName: " + FileName);
 
-    var url = "HTTP://" + target + "/conf/" + FileName + '?t=' + ConfigSessionId;
-    // console.debug("'GET' Config URL: '" + url + "'");
-    await $.getJSON(url, function(data)
+    // console.debug("'retries: '" + retries + "'");
+    if(retries === 0)
     {
-        // console.log("RequestConfigFile: " + JSON.stringify(data));
+        console.error("RequestConfigFile ran out of retries");
+        return false;
+    }
+    var url = "HTTP://" + target + "/conf/" + FileName + '?t=' + ConfigSessionId;
+    // console.debug("RequestConfigFile: 'GET' URL: '" + url + "'");
+    $.ajaxSetup(
+    {
+        timeout: 5000
+    });
+    await $.getJSON(url)
+    .done(function (data)
+    {
+        // console.debug("RequestConfigFile: " + JSON.stringify(data));
         ProcessReceivedJsonConfigMessage(data);
         return true;
     })
-    .fail(function()
+    .fail(function(jqXHR, textStatus, errorThrown)
     {
         console.error("Could not read config file: " + FileName);
+        console.error("Error:", textStatus, errorThrown);
+        RequestConfigFile(FileName, retries-1);
         return false;
+    })
+    .catch(function(error)
+    {
+        // Handle the error
+        console.error("Could not read config file: " + FileName);
+        console.error("Error:", error);
+        RequestConfigFile(FileName, retries-1);
     });
 
 } // RequestConfigFile
