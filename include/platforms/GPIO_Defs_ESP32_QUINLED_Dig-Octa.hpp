@@ -3,7 +3,7 @@
  * GPIO_Defs_ESP32_QUINLED_QUAD.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
- * Copyright (c) 2021 - 2022 Shelby Merrick
+ * Copyright (c) 2021 - 2025 Shelby Merrick
  * http://www.forkineye.com
  *
  *  This program is provided free for you to use in any way that you wish,
@@ -55,7 +55,7 @@
 #define DEFAULT_ETH_CLK_MODE ETH_CLOCK_GPIO17_OUT
 
 // Pin# of the enable signal for the external crystal oscillator (-1 to disable for internal APLL source)
-#define DEFAULT_ETH_POWER_PIN          gpio_num_t(-1)
+#define DEFAULT_ETH_POWER_PIN          GPIO_NUM_20
 #define DEFAULT_ETH_POWER_PIN_ACTIVE   HIGH
 
 // Type of the Ethernet PHY (LAN8720 or TLK110)
