@@ -302,7 +302,15 @@ void c_WebMgr::init ()
                 }
                 else
                 {
-                    request->send (404, CN_textSLASHplain, "");
+                    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
+                        [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t
+                        {
+                            return 0;
+                        });
+                    response->setContentLength(OutputMgr.GetBufferUsedSize ());
+                    response->setContentType(F("application/octet-stream"));
+                    response->addHeader(F("server"), F("ESPS Diag Data"));
+                    request->send(response);
                 }
             }
         });
