@@ -112,6 +112,10 @@ bool c_InputFPPRemotePlayFile::Poll ()
         Response = pCurrentFsmState->Poll ();
         // xDEBUG_V("Poll the FSM: Done");
     }
+    else
+    {
+        DEBUG_V("Input is paused.");
+    }
 
     // xDEBUG_END;
     return Response;
@@ -491,8 +495,8 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
             // DEBUG_V("Allocating local buffer.");
             if(nullptr == LocalIntensityBuffer)
             {
-                logcon(String(CN_stars) + F("Could not allocate a buffer to read SD files. Rebooting. ") + CN_stars);
-                RequestReboot(1, true);
+                String Reason = F("Could not allocate a buffer to read SD files. Rebooting. ");
+                RequestReboot(Reason, 1, true);
                 break;
             }
         }

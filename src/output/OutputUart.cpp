@@ -189,8 +189,8 @@ void c_OutputUart::Begin (OutputUartConfig_t & config )
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
 
         {
-            LOG_PORT.println (F("Invalid UART configuration parameters. Rebooting"));
-            RequestReboot(100000);
+            String Reason = (F("Invalid UART configuration parameters. Rebooting"));
+            RequestReboot(Reason, 100000);
             break;
         }
 

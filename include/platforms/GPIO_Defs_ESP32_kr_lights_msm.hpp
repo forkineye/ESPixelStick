@@ -28,13 +28,6 @@
 #define DEFAULT_RMT_3_GPIO gpio_num_t::GPIO_NUM_14
 #define DEFAULT_RMT_4_GPIO gpio_num_t::GPIO_NUM_12
 
-//Power relay output over Q1 or Q1R
-// #define DEFAULT_RELAY_GPIO gpio_num_t::GPIO_NUM_33
-
-// I2c over Q3 and Q4 (SCL is shared with LED8! Disable LED8 to enable I2C)
-// #define DEFAULT_I2C_SDA gpio_num_t::GPIO_NUM_
-// #define DEFAULT_I2C_SCL gpio_num_t::GPIO_NUM_
-
 // File Manager
 // #define SUPPORT_SD
 // used by the ethernet interface
@@ -56,5 +49,5 @@
 #define SUPPORT_OutputType_UCS8903          // UART / RMT
 // used by ethernet chip #define SUPPORT_OutputType_WS2801           // SPI
 #define SUPPORT_OutputType_WS2811           // UART / RMT
-#define SUPPORT_OutputType_Relay            // GPIO
+// #define SUPPORT_OutputType_Relay            // GPIO
 // #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)

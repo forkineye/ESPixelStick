@@ -420,8 +420,8 @@ bool c_EthernetDriver::SetConfig (JsonObject & json)
     // Eth Driver does not support config updates while it is running.
     if (ConfigChanged && HasBeenPreviouslyConfigured)
     {
-        logcon (F ("Configuration change requires system reboot."));
-        RequestReboot(100000);
+        String Reason = (F ("Ethernet Configuration change requires system reboot."));
+        RequestReboot(Reason, 100000);
     }
 
     HasBeenPreviouslyConfigured = true;

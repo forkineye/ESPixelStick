@@ -291,7 +291,7 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
 //-----------------------------------------------------------------------------
 void c_InputFPPRemote::SetOperationalState (bool ActiveFlag)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     if(pInputFPPRemotePlayItem)
     {
@@ -300,7 +300,7 @@ void c_InputFPPRemote::SetOperationalState (bool ActiveFlag)
 
     FPPDiscovery.SetOperationalState(ActiveFlag);
 
-    // DEBUG_END;
+    DEBUG_END;
 } // SetOperationalState
 
 //-----------------------------------------------------------------------------

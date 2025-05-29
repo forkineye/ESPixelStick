@@ -195,8 +195,10 @@ void c_WebMgr::init ()
             }
             else
             {
-                RequestReboot(100000);
                 request->send (200, CN_textSLASHplain, "Rebooting");
+
+                String Reason = F("Browser X6 Reboot requested.");
+                RequestReboot(Reason, 100000);
             }
         });
 
@@ -218,7 +220,8 @@ void c_WebMgr::init ()
 
                 request->send (200, CN_textSLASHplain, "Rebooting");
                 // DEBUG_V ("");
-                RequestReboot(100000);;
+                String Reason = F("Browser requested Reboot");
+                RequestReboot(Reason, 100000);;
             }
         });
 
@@ -443,8 +446,9 @@ void c_WebMgr::init ()
                 else
                 {
                     // DEBUG_V ("efupdate.hasError == false");
-                    request->send (200, CN_textSLASHplain, (String (F ("Update Success"))));
-                    RequestReboot(100000);
+                    String Reason = F("EFU Update Success");
+                    request->send (200, CN_textSLASHplain, Reason);
+                    RequestReboot(Reason, 100000);
                 }
             },
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
@@ -887,9 +891,9 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         if (final)
         {
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished"))));
-            logcon (F ("Upload Finished. Rebooting"));
+            String Reason = (F ("EFU Upload Finished. Rebooting"));
             efupdate.end ();
-            RequestReboot(100000);
+            RequestReboot(Reason, 100000);
         }
 
     } while (false);

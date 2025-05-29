@@ -51,12 +51,14 @@ void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned in
     {
         case FTP_CONNECT:
         {
+            InputMgr.SetOperationalState(false);
             LOG_PORT.println(F("FTP: Connected!"));
             break;
         }
 
         case FTP_DISCONNECT:
         {
+            InputMgr.SetOperationalState(true);
             LOG_PORT.println(F("FTP: Disconnected!"));
             break;
         }
@@ -184,8 +186,8 @@ void c_FileMgr::Begin ()
             UnzipFiles * Unzipper = new(UnzipFiles);
             Unzipper->Run();
             delete Unzipper;
-            logcon("Requesting reboot after unzipping files");
-            RequestReboot(1, true);
+            String Reason = F("Requesting reboot after unzipping files");
+            RequestReboot(Reason, 1, true);
         }
 #endif // def SUPPORT_UNZIP
 
@@ -216,12 +218,12 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
     // DEBUG_V(String("       NewState: ") + String(NewState));
     // DEBUG_V(String("SdCardInstalled: ") + String(SdCardInstalled));
     // DEBUG_V(String("     FtpEnabled: ") + String(FtpEnabled));
-    if(NewState && SdCardInstalled && FtpEnabled && !InputMgr.RemotePlayEnabled())
+    if(NewState && SdCardInstalled && FtpEnabled)
     {
         logcon("Starting FTP server.");
-        ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), WelcomeString.c_str());
         ftpSrv.setCallback(ftp_callback);
         ftpSrv.setTransferCallback(ftp_transferCallback);
+        ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), WelcomeString.c_str());
     }
     else
     {
@@ -2198,18 +2200,11 @@ void c_FileMgr::AbortSdFileUpload()
 {
     // DEBUG_START;
 
-    do // once
+    if(fsUploadFileHandle != INVALID_FILE_HANDLE)
     {
-        if(fsUploadFileHandle == INVALID_FILE_HANDLE)
-        {
-            // DEBUG_V("No File Transfer in progress");
-            break;
-        }
-
-         // DEBUG_FILE_HANDLE (fsUploadFileHandle);
+        // DEBUG_FILE_HANDLE (fsUploadFileHandle);
         CloseSdFile(fsUploadFileHandle);
-
-    } while(false);
+    }
 
     // DEBUG_END;
 } // AbortSdFileUpload

@@ -89,6 +89,7 @@ const String VERSION = "4.x-dev";
 const String ConfigFileName = "/config.json";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const uint8_t CurrentConfigVersion = 1;
+String GlobalRebootReason = emptyString;
 
 config_t config;                    // Current configuration
 static const uint32_t NotRebootingValue = uint32_t(-1);
@@ -545,7 +546,7 @@ void loop()
     {
         if(0 == --RebootCount)
         {
-            logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
+            logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested: '") + GlobalRebootReason + F("' Rebooting Now"));
             delay (REBOOT_DELAY);
             ESP.restart ();
         }
@@ -573,10 +574,10 @@ bool RebootInProgress()
     return RebootCount != NotRebootingValue;
 }
 
-void RequestReboot(uint32_t LoopDelay, bool SkipDisable /* = false */)
+void RequestReboot(String & Reason, uint32_t LoopDelay, bool SkipDisable /* = false */)
 {
+    GlobalRebootReason = Reason;
     RebootCount = LoopDelay;
-
     if(!SkipDisable)
     {
         InputMgr.SetOperationalState(false);
