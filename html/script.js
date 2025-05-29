@@ -853,49 +853,32 @@ function RequestStatusUpdate()
 
 async function RequestListOfFiles()
 {
-    // console.debug("ask for a file list from the server, starting at " + StartingFileIndex);
+    // console.debug("ask for a file list from the server");
 
-    // retrieve the file with the list of files in it
-    return await fetch("HTTP://" + target + "/fseqfilelist",
+    var url = "HTTP://" + target + "/fseqfilelist";
+    // console.debug("RequestListOfFiles: 'GET' URL: '" + url + "'");
+    $.ajaxSetup(
     {
-        method: 'GET',
-        mode: "cors", // no-cors, *cors, same-origin
-        headers: { 'Content-Type': 'application/json' },
-        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: "same-origin", // include, *same-origin, omit
-        redirect: "follow", // manual, *follow, error
-        referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    })
-    .then(async webResponse =>
-    {
-        const isJson = webResponse.headers.get('content-type')?.includes('application/json');
-        const data = isJson && await webResponse.json();
-
-        // console.debug("SendCommand:webResponse.status: " + webResponse.status);
-        // console.debug("SendCommand:webResponse.ok: " + webResponse.ok);
-        // check for error response
-        if (!webResponse.ok) {
-            // get error message from body or default to response status
-            const error = (data && data.message) || webResponse.status;
-            console.error("SendCommand: Error: " + Promise.reject(error));
-            CompletedServerTransaction = false;
-            RequestListOfFiles();
-        }
-        else
-        {
-            // console.debug("SendCommand: Transaction complete");
-            CompletedServerTransaction = true;
-            await ProcessGetFileListResponse(data);
-        }
-        return webResponse.ok ? 1 : 0;
-    })
-    .catch(error =>
-    {
-        console.error('SendCommand: Error: ', error);
-        CompletedServerTransaction = false;
-        RequestListOfFiles();
-        return -1;
+        timeout: 5000
     });
+    await $.getJSON(url)
+        .done(function (data)
+        {
+            // console.debug("RequestListOfFiles: " + JSON.stringify(data));
+            ProcessGetFileListResponse(data);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown)
+        {
+            console.error("Could not read fseqfilelist file");
+            console.error("Error:", textStatus, errorThrown);
+        })
+        .catch(function(error)
+        {
+            // Handle the error
+            console.error("Could not read RequestListOfFiles file");
+            console.error("Error:", error);
+        });
+    return true;
 
 } // RequestListOfFiles
 
