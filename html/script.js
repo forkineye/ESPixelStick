@@ -787,27 +787,28 @@ async function RequestConfigFile(FileName, retries = 5)
     // console.debug("RequestConfigFile: 'GET' URL: '" + url + "'");
     $.ajaxSetup(
     {
+        cache: false,
         timeout: 5000
     });
     await $.getJSON(url)
-    .done(function (data)
-    {
-        // console.debug("RequestConfigFile: " + JSON.stringify(data));
-        ProcessReceivedJsonConfigMessage(data);
-    })
-    .fail(function(jqXHR, textStatus, errorThrown)
-    {
-        console.error("Could not read config file: " + FileName);
-        console.error("Error:", textStatus, errorThrown);
-        RequestConfigFile(FileName, retries-1);
-    })
-    .catch(function(error)
-    {
-        // Handle the error
-        console.error("Could not read config file: " + FileName);
-        console.error("Error:", error);
-        RequestConfigFile(FileName, retries-1);
-    });
+        .done(function (data)
+        {
+            // console.debug("RequestConfigFile: " + JSON.stringify(data));
+            ProcessReceivedJsonConfigMessage(data);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown)
+        {
+            console.error("Could not read config file: " + FileName);
+            console.error("Error:", textStatus, errorThrown);
+            RequestConfigFile(FileName, retries-1);
+        })
+        .catch(function(error)
+        {
+            // Handle the error
+            console.error("Could not read config file: " + FileName);
+            console.error("Error:", error);
+            RequestConfigFile(FileName, retries-1);
+        });
 
     return true;
 
@@ -836,15 +837,27 @@ function RequestStatusUpdate()
         let FileName = "HTTP://" + target + "/XJ";
         // console.log("RequestStatusUpdate FileName: " + FileName);
 
-        $.getJSON(FileName, function(data)
+        $.ajaxSetup(
         {
-            // console.log("RequestStatusUpdate: " + JSON.stringify(data));
-            CompletedServerTransaction = true;
-            ProcessReceivedJsonStatusMessage(data);
-        }).fail(function()
-        {
-            console.error("Could not read Status file: " + FileName);
+            cache: false,
+            timeout: 5000
         });
+        $.getJSON(FileName)
+            .done(function (data)
+            {
+                // console.log("RequestStatusUpdate: " + JSON.stringify(data));
+                CompletedServerTransaction = true;
+                ProcessReceivedJsonStatusMessage(data);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown)
+            {
+                    console.error("Could not read Status file: " + FileName);
+                console.error("Error:", textStatus, errorThrown);
+            })
+            .catch(function()
+            {
+                console.error("Could not read Status file: " + FileName);
+            });
     } // end home (aka status) is visible
 
 } // RequestStatusUpdate
@@ -857,6 +870,7 @@ async function RequestListOfFiles()
     // console.debug("RequestListOfFiles: 'GET' URL: '" + url + "'");
     $.ajaxSetup(
     {
+        cache: false,
         timeout: 5000
     });
     await $.getJSON(url)
@@ -948,19 +962,20 @@ async function ProcessGetFileListResponse(JsonData) {
 
 } // ProcessGetFileListResponse
 
-function RequestFileDeletion() {
+async function RequestFileDeletion() {
 
     $('#FileManagementTable > tr').each(function (CurRowId) {
         if (true === $('#FileSelected_' + CurRowId).prop("checked")) {
             let name = $('#FileName_' + CurRowId).val().toString();
             console.log("delete file: " + name);
-            let Response = SendCommand('file/delete/' + name);
+            SendCommand('file/delete/' + name);
+            setTimeout(function()
+            {
+                RequestListOfFiles();
+            }, 5000);
             // console.debug("delete Response: " + Response);
         }
     });
-
-    RequestListOfFiles();
-
 } // RequestFileDeletion
 
 function ProcessModeConfigurationDatafppremote(channelConfig) {
