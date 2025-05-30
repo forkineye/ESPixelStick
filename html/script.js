@@ -1,6 +1,5 @@
 var StatusRequestTimer = null;
 var DiagTimer = null;
-var ConfigSessionId = new Date().getTime();
 
 // global data
 var AdminInfo = null;
@@ -785,7 +784,7 @@ async function RequestConfigFile(FileName, retries = 10)
         console.error("RequestConfigFile ran out of retries");
         return false;
     }
-    var url = "HTTP://" + target + "/conf/" + FileName + '?t=' + ConfigSessionId;
+    var url = "HTTP://" + target + "/conf/" + FileName;
     // console.debug("RequestConfigFile: 'GET' URL: '" + url + "'");
     $.ajaxSetup(
     {
@@ -2005,7 +2004,6 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    ConfigSessionId = new Date().getTime();
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", JSON.stringify({'output_config': Output_Config}));
     ServerAccess.callFunction(SendConfigFileToServer, "input_config", JSON.stringify({'input_config': Input_Config}));
     submitNetworkConfig();
@@ -2469,5 +2467,4 @@ function reboot() {
 $('#confirm-reset .btn-ok').on("click", (function () {
     showReboot();
     SendCommand('X7');
-    ConfigSessionId = new Date().getTime();
 }));
