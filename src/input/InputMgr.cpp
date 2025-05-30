@@ -1043,8 +1043,8 @@ void c_InputMgr::SetBufferInfo (uint32_t BufferSize)
 //-----------------------------------------------------------------------------
 void c_InputMgr::SetOperationalState (bool ActiveFlag)
 {
-    DEBUG_START;
-    DEBUG_V(String("ActiveFlag: ") + String(ActiveFlag));
+    // DEBUG_START;
+    // DEBUG_V(String("ActiveFlag: ") + String(ActiveFlag));
 
     PauseProcessing = !ActiveFlag;
 
