@@ -243,12 +243,12 @@ $(function () {
                 if(event.target.status === 200)
                 {
                     alert("Firmware Upload SUCCESS!");
-                    showReboot();
+                    reboot();
                 }
                 else
                 {
                     alert("Firmware Upload FAILED!\n" + event.target.response);
-                    showReboot();
+                    reboot();
                 }
             }
 
@@ -774,15 +774,14 @@ function RequestDiagData()
     }
 } // RequestDiagData
 
-async function RequestConfigFile(FileName, retries = 10)
+async function RequestConfigFile(FileName, retries = 5)
 {
     // console.debug("RequestConfigFile FileName: " + FileName);
-
     // console.debug("'retries: '" + retries + "'");
     if(retries === 0)
     {
         console.error("RequestConfigFile ran out of retries");
-        return false;
+        reboot;
     }
     var url = "HTTP://" + target + "/conf/" + FileName;
     // console.debug("RequestConfigFile: 'GET' URL: '" + url + "'");
@@ -795,14 +794,12 @@ async function RequestConfigFile(FileName, retries = 10)
     {
         // console.debug("RequestConfigFile: " + JSON.stringify(data));
         ProcessReceivedJsonConfigMessage(data);
-        return true;
     })
     .fail(function(jqXHR, textStatus, errorThrown)
     {
         console.error("Could not read config file: " + FileName);
         console.error("Error:", textStatus, errorThrown);
         RequestConfigFile(FileName, retries-1);
-        return false;
     })
     .catch(function(error)
     {
@@ -811,6 +808,8 @@ async function RequestConfigFile(FileName, retries = 10)
         console.error("Error:", error);
         RequestConfigFile(FileName, retries-1);
     });
+
+    return true;
 
 } // RequestConfigFile
 
@@ -1448,14 +1447,6 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     // by default, do not show the ECB config data
     $('#ecb').addClass("hidden");
 
-    // console.debug("compare modeControlName");
-    if('#inputmode1' === modeControlName)
-    {
-        // console.debug("Allow FTP changes");
-        $('#ftp_enable_error').addClass("hidden");
-        $('#ftp_enable').prop('disabled', false);
-    }
-
     if ("disabled" === ChannelTypeName)
     {
         // console.debug("Process Disabled");
@@ -1464,8 +1455,6 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     }
     else if ("fpp_remote" === ChannelTypeName)
     {
-        $('#ftp_enable').prop('disabled', true);
-        $('#ftp_enable_error').removeClass("hidden");
         $('#ecb').removeClass("hidden");
         if (null !== Fseq_File_List)
         {
