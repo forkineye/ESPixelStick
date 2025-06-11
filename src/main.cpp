@@ -134,6 +134,16 @@ void TestHeap(uint32_t Id)
     DEBUG_V(String(" Heap After: ") + ESP.getFreeHeap());
 }
 
+#ifdef ARDUINO_ARCH_ESP32
+void esp_alloc_failed_hook_callback(size_t requested_size, uint32_t caps, const char *function_name)
+{
+    // size_t free = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    size_t free = heap_caps_get_largest_free_block(caps);
+    LOG_PORT.printf("%s was called but failed to allocate %d bytes with 0x%x capabilities. Free = %d \n", function_name, requested_size,caps, free);
+
+} // esp_alloc_failed_hook_callback
+#endif // def ARDUINO_ARCH_ESP32
+
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
 void setup()
@@ -148,6 +158,7 @@ void setup()
 #ifdef ARDUINO_ARCH_ESP32
     // disable brownout detector
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+    heap_caps_register_failed_alloc_callback(esp_alloc_failed_hook_callback);
 #endif // def ARDUINO_ARCH_ESP32
 
     // Setup serial log port
