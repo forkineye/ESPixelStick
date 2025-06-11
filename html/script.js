@@ -1612,6 +1612,36 @@ function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId) {
 
 } // GenerateInputOutputControlLabel
 
+function loadContentSync(url, targetElement, OptionListName, DisplayedChannelId)
+{
+    $.ajax(
+    {
+        url: url,
+        async: false,
+        success: function(data)
+        {
+            // console.info("Process Received Mode Config file.");
+            $(targetElement).html(data);
+            if ("input" === OptionListName)
+            {
+                ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
+                ProcessInputConfig();
+            }
+            else if ("output" === OptionListName)
+            {
+                ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+
+                // Trigger refresh update for outputs
+                $('#fg_output_mode input').trigger('change');
+            }
+        },
+        error: function()
+        {
+            console.error('Failed to load: ' + url);
+        }
+    });
+} // loadContentSync
+
 function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId)
 {
     // console.debug("OptionListName: " + OptionListName);
@@ -1626,21 +1656,8 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId)
 
     //TODO: Detect modules that don't require configuration - DDP, Alexa, ?
     // try to load the field definition file for this channel type
-    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
-    {
-        if ("input" === OptionListName)
-        {
-            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
-            ProcessInputConfig();
-        }
-        else if ("output" === OptionListName)
-        {
-            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+    loadContentSync(HtmlLoadFileName, '#' + OptionListName + 'mode' + DisplayedChannelId, OptionListName, DisplayedChannelId);
 
-            // Trigger refresh update for outputs
-            $('#fg_output_mode input').trigger('change');
-        }
-    });
 } // LoadDeviceSetupSelectedOption
 
 function CreateOptionsFromConfig(OptionListName, Config) {
@@ -1667,7 +1684,6 @@ function CreateOptionsFromConfig(OptionListName, Config) {
             $(`#fg_${OptionListName}`).append(`<label class="control-label col-sm-2" for="${OptionListName}${ChannelId}">${GenerateInputOutputControlLabel(OptionListName, ChannelId)}</label>`);
             $(`#fg_${OptionListName}`).append(`<div class="col-sm-${col}"><select class="form-control wsopt" id="${OptionListName}${ChannelId}"></select></div>`);
             $(`#fg_${OptionListName}_mode`).append(`<fieldset id="${OptionListName}mode${ChannelId}"></fieldset>`);
-
         }
 
         let jqSelector = "#" + OptionListName + ChannelId;
