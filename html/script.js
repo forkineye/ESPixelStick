@@ -698,13 +698,13 @@ async function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#admin") {
-        RcfResponse = RequestConfigFile("config.json");
-        RcfResponse = RequestConfigFile("output_config.json");
-        RcfResponse = RequestConfigFile("input_config.json");
+        await RequestConfigFile("config.json");
+        await RequestConfigFile("output_config.json");
+        await RequestConfigFile("input_config.json");
     }
 
     else if ((NextWindow === "#pg_network") || (NextWindow === "#home")) {
-        RcfResponse = RequestConfigFile("config.json");
+        await RequestConfigFile("config.json");
     }
 
     else if (NextWindow === "#config") {
@@ -783,35 +783,35 @@ async function RequestConfigFile(FileName, retries = 5)
         console.error("RequestConfigFile ran out of retries");
         reboot;
     }
-    var url = "HTTP://" + target + "/conf/" + FileName;
-    // console.debug("RequestConfigFile: 'GET' URL: '" + url + "'");
-    $.ajaxSetup(
+    else
     {
-        cache: false,
-        timeout: 5000
-    });
-    await $.getJSON(url)
-        .done(function (data)
+        var url = "HTTP://" + target + "/conf/" + FileName;
+        console.info("RequestConfigFile: 'GET' URL: '" + url + "'");
+        $.ajaxSetup(
         {
-            // console.debug("RequestConfigFile: " + JSON.stringify(data));
-            ProcessReceivedJsonConfigMessage(data);
-        })
-        .fail(function(jqXHR, textStatus, errorThrown)
-        {
-            console.error("Could not read config file: " + FileName);
-            console.error("Error:", textStatus, errorThrown);
-            RequestConfigFile(FileName, retries-1);
-        })
-        .catch(function(error)
-        {
-            // Handle the error
-            console.error("Could not read config file: " + FileName);
-            console.error("Error:", error);
-            RequestConfigFile(FileName, retries-1);
+            cache: false,
+            timeout: 5000
         });
-
-    return true;
-
+        await $.getJSON(url)
+            .done(function (data)
+            {
+                // console.debug("RequestConfigFile: " + JSON.stringify(data));
+                ProcessReceivedJsonConfigMessage(data);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown)
+            {
+                console.error("Could not read config file: " + FileName);
+                console.error("Error:", textStatus, errorThrown);
+                RequestConfigFile(FileName, retries-1);
+            })
+            .catch(function(error)
+            {
+                // Handle the error
+                console.error("Could not read config file: " + FileName);
+                console.error("Error:", error);
+                RequestConfigFile(FileName, retries-1);
+            });
+    }
 } // RequestConfigFile
 
 function RequestStatusUpdate()
