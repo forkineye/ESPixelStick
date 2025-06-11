@@ -87,18 +87,24 @@ void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, u
         case FTP_UPLOAD_START:
         {
             LOG_PORT.println(String(F("FTP: Start Uploading '")) + name + "'");
+            // size_t free = heap_caps_get_largest_free_block(0x1800);
+            // LOG_PORT.printf("heap: 0x%x\n", free);
             break;
         }
 
         case FTP_UPLOAD:
         {
             // LOG_PORT.printf("FTP: Upload of file %s byte %u\n", name, transferredSize);
+            // size_t free = heap_caps_get_largest_free_block(0x1800);
+            // LOG_PORT.printf("heap: 0x%x\n", free);
             break;
         }
 
         case FTP_TRANSFER_STOP:
         {
             LOG_PORT.println(String(F("FTP: Done Uploading '")) + name + "'");
+            // size_t free = heap_caps_get_largest_free_block(0x1800);
+            // LOG_PORT.printf("heap: 0x%x\n", free);
             break;
         }
 
@@ -2007,7 +2013,11 @@ bool c_FileMgr::handleFileUpload (
             // DEBUG_V ("UploadWrite: " + String (len) + String (" bytes"));
             bytesWritten = WriteSdFileBuf (fsUploadFileHandle, data, len);
             // DEBUG_V (String ("Writing bytes: ") + String (index));
+#ifdef ARDUINO_ARCH_ESP32
+            LOG_PORT.println(String("\033[Fprogress: ") + String(expectedIndex) + ", heap: " + String(heap_caps_get_largest_free_block(0x1800)));
+#else
             LOG_PORT.println(String("\033[Fprogress: ") + String(expectedIndex) + ", heap: " + String(ESP.getFreeHeap ()));
+#endif // def ARDUINO_ARCH_ESP32
             LOG_PORT.flush();
         }
         // PauseSdFile(fsUploadFile);
