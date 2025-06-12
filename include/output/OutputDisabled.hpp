@@ -3,7 +3,7 @@
 * OutputDisabled.h - WS2811 driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -38,7 +38,7 @@ public:
     void         Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     bool         SetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Set a new config in the driver
     void         GetConfig (ArduinoJson::JsonObject & jsonConfig); ///< Get the current config used by the driver
-    void         GetStatus (ArduinoJson::JsonObject & jsonConfig) {}
+    void         GetStatus (ArduinoJson::JsonObject & jsonConfig);
     uint32_t     Poll ();                                          ///< Call from loop(),  renders output data
 #ifdef ARDUINO_ARCH_ESP32
     bool         RmtPoll () {return false;}

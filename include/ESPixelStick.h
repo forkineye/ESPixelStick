@@ -3,7 +3,7 @@
 * ESPixelStick.h
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2016, 2022 Shelby Merrick
+* Copyright (c) 2016, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -65,7 +65,7 @@
 #define STRINGIFY(X) #X
 #define STRING(X) STRINGIFY(X)
 
-extern void RequestReboot(uint32_t LoopDelay, bool SkipDisable = false);
+extern void RequestReboot(String & Reason, uint32_t LoopDelay, bool SkipDisable = false);
 extern bool RebootInProgress();
 
 /// Core configuration structure

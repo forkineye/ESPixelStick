@@ -1027,8 +1027,8 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
 
     if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
     {
-        logcon (F ("WiFi Requesting Reboot"));
-        RequestReboot(100000);
+        String Reason = (F ("WiFi Requesting Reboot"));
+        RequestReboot(Reason, 100000);
     }
     else
     {

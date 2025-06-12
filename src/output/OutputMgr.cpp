@@ -240,8 +240,8 @@ void c_OutputMgr::Begin ()
 
         if (0 == OutputChannelId_End)
         {
-            logcon("ERROR: No compiled output Channels defined. Rebooting");
-            RequestReboot(100000);
+            String Reason = F("ERROR: No compiled output Channels defined. Rebooting");
+            RequestReboot(Reason, 100000);
             break;
         }
 
@@ -1019,8 +1019,8 @@ void c_OutputMgr::LoadConfig ()
         }
         else
         {
-            logcon(CN_stars + String(MN_15) + CN_stars);
-            RequestReboot(100000);
+            String Reason = MN_15;
+            RequestReboot(Reason, 100000);
         }
     }
 

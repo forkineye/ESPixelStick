@@ -87,8 +87,8 @@ c_OutputSpi::~c_OutputSpi ()
     if(HasBeenInitialized)
     {
         spi_transfer_callback_enabled = false;
-        logcon(CN_stars + String(F(" SPI Interface Shutdown requires a reboot ")) + CN_stars);
-        RequestReboot(100000);
+        String Reason = F(" SPI Interface Shutdown requires a reboot ");
+        RequestReboot(Reason, 100000);
     }
     // DEBUG_END;
 

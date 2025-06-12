@@ -142,6 +142,20 @@ void c_WebMgr::init ()
         // Setup WebSockets
         using namespace std::placeholders;
 
+        // Static Handlers
+   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
+   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json.gz",  LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json.gz", LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json.gz",     LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
+   	 	webServer.serveStatic ("/fseqfilelist.json.gz",       LittleFS, "/fseqfilelist.json");
+   	 	webServer.serveStatic ("/fseqfilelist.json",          LittleFS, "/fseqfilelist.json");
+   	 	webServer.serveStatic ("/fseqfilelist",               LittleFS, "/fseqfilelist.json");
+
         // Heap status handler
     	webServer.on ("/heap", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
@@ -181,8 +195,10 @@ void c_WebMgr::init ()
             }
             else
             {
-                RequestReboot(100000);
                 request->send (200, CN_textSLASHplain, "Rebooting");
+
+                String Reason = F("Browser X6 Reboot requested.");
+                RequestReboot(Reason, 100000);
             }
         });
 
@@ -204,7 +220,8 @@ void c_WebMgr::init ()
 
                 request->send (200, CN_textSLASHplain, "Rebooting");
                 // DEBUG_V ("");
-                RequestReboot(100000);;
+                String Reason = F("Browser requested Reboot");
+                RequestReboot(Reason, 100000);;
             }
         });
 
@@ -288,7 +305,15 @@ void c_WebMgr::init ()
                 }
                 else
                 {
-                    request->send (404, CN_textSLASHplain, "");
+                    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
+                        [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t
+                        {
+                            return 0;
+                        });
+                    response->setContentLength(OutputMgr.GetBufferUsedSize ());
+                    response->setContentType(F("application/octet-stream"));
+                    response->addHeader(F("server"), F("ESPS Diag Data"));
+                    request->send(response);
                 }
             }
         });
@@ -421,8 +446,9 @@ void c_WebMgr::init ()
                 else
                 {
                     // DEBUG_V ("efupdate.hasError == false");
-                    request->send (200, CN_textSLASHplain, (String (F ("Update Success"))));
-                    RequestReboot(100000);
+                    String Reason = F("EFU Update Success");
+                    request->send (200, CN_textSLASHplain, Reason);
+                    RequestReboot(Reason, 100000);
                 }
             },
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
@@ -495,15 +521,6 @@ void c_WebMgr::init ()
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
-
-        // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
-   	 	webServer.serveStatic ("/fseqfilelist",               LittleFS, "/fseqfilelist.json");
 
         // must be last servestatic entry
     	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
@@ -874,9 +891,9 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         if (final)
         {
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished"))));
-            logcon (F ("Upload Finished. Rebooting"));
+            String Reason = (F ("EFU Upload Finished. Rebooting"));
             efupdate.end ();
-            RequestReboot(100000);
+            RequestReboot(Reason, 100000);
         }
 
     } while (false);
