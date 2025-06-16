@@ -143,18 +143,7 @@ void c_WebMgr::init ()
         using namespace std::placeholders;
 
         // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/input_config.json.gz",  LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/conf/output_config.json.gz", LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/conf/admininfo.json.gz",     LittleFS, "/admininfo.json");
-   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
-   	 	webServer.serveStatic ("/fseqfilelist.json.gz",       LittleFS, "/fseqfilelist.json");
-   	 	webServer.serveStatic ("/fseqfilelist.json",          LittleFS, "/fseqfilelist.json");
-   	 	webServer.serveStatic ("/fseqfilelist",               LittleFS, "/fseqfilelist.json");
+   	 	webServer.serveStatic ("/UpdRecipe/", LittleFS, "/UpdRecipe.json");
 
         // Heap status handler
     	webServer.on ("/heap", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
@@ -336,31 +325,65 @@ void c_WebMgr::init ()
             }
         });
 
-        // JSON Config Handler
-    	webServer.on ("/conf", HTTP_PUT | HTTP_POST | HTTP_OPTIONS,
+    	webServer.on ("/fseqfilelist", HTTP_GET,
         	[this](AsyncWebServerRequest* request)
         	{
-                if(HTTP_OPTIONS == request->method())
+                // DEBUG_V("Process: HTTP_GET");
+                request->send (LittleFS, F("/fseqfilelist.json"), CN_applicationSLASHjson);
+            }
+        );
+
+        // JSON Config Handler
+    	webServer.on ("/conf", HTTP_GET,
+        	[this](AsyncWebServerRequest* request)
+        	{
+                String RequestFileName = String("/") + request->url().substring(6);
+                // DEBUG_V(String("RequestFileName: ") + RequestFileName);
+                RequestFileName.replace("//", "/");
+                RequestFileName.replace(".gz", "");
+                // DEBUG_V(String("RequestFileName: ") + RequestFileName);
+                request->send (LittleFS, RequestFileName, CN_applicationSLASHjson);
+            }
+        );
+
+        webServer.on ("/conf", HTTP_PUT | HTTP_POST | HTTP_OPTIONS,
+        	[this](AsyncWebServerRequest* request)
+        	{
+                String RequestFileName = request->url().substring(6);
+                WebRequestMethodComposite RequestMethod = request->method();
+                DEBUG_V(String("  RequestMethod: ") + String(RequestMethod));
+                DEBUG_V(String("RequestFileName: ") + RequestFileName);
+                if(HTTP_OPTIONS == RequestMethod)
                 {
                     request->send (200);
                 }
-                else
+                else if(HTTP_GET == RequestMethod)
+                {
+                    DEBUG_V("Process: HTTP_GET");
+                    request->send (401, CN_textSLASHplain, String(F("File Not supported")));
+                }
+                else if((HTTP_POST == RequestMethod) ||
+                        (HTTP_PUT  == RequestMethod))
                 {
                     // DEBUG_V(String("           url: ") + request->url());
-                    String UploadFileName = request->url().substring(6);
-                    if(RequestReadConfigFile(UploadFileName))
+                    if(RequestReadConfigFile(RequestFileName))
                     {
-                        FileMgr.RenameFlashFile(UploadFileName + ".tmp", UploadFileName);
+                        FileMgr.RenameFlashFile(RequestFileName + ".tmp", RequestFileName);
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
                     else
                     {
                         // delete unexpected config file.
-                        FileMgr.DeleteFlashFile(UploadFileName + ".tmp");
+                        FileMgr.DeleteFlashFile(RequestFileName + ".tmp");
                         request->send (404, CN_textSLASHplain, String(F("File Not supported")));
                     }
                 }
-        	},
+                else
+                {
+                    DEBUG_V("Unsupported HTTP type");
+                    request->send (401, CN_textSLASHplain, String(F("HTTP_TYPE Not supported")));
+                }
+            },
 
         	[this](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
         	{
@@ -523,7 +546,7 @@ void c_WebMgr::init ()
             });
 
         // must be last servestatic entry
-    	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
+    	webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
         // FS Debugging Handler
         // webServer.serveStatic ("/fs", LittleFS, "/" );
@@ -590,11 +613,11 @@ void c_WebMgr::init ()
 */
     		webServer.onNotFound ([this](AsyncWebServerRequest* request)
             {
+                // DEBUG_V (String("onNotFound. URL: ") + request->url());
                 if (request->method() == HTTP_OPTIONS)
                 {
                     request->send(200);
                 }
-                // DEBUG_V (String("onNotFound. URL: ") + request->url());
                 else if (true == this->IsAlexaCallbackValid())
                 {
                     // DEBUG_V ("IsAlexaCallbackValid == true");
