@@ -298,6 +298,7 @@ void c_InputMgr::CreateNewConfig ()
     // DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
 
     JsonDocument JsonConfigDoc;
+    JsonConfigDoc.to<JsonObject>();
     // DEBUG_V("");
 
     JsonObject JsonConfig = JsonConfigDoc[(char*)CN_input_config].to<JsonObject>();

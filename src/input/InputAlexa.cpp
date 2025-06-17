@@ -167,6 +167,7 @@ void c_InputAlexa::onMessage(EspalexaDevice * pDevice)
         // DEBUG_V (String ("pDevice->getB: ") + String (pDevice->getB ()));
 
         JsonDocument JsonConfigDoc;
+        JsonConfigDoc.to<JsonObject>();
         JsonObject JsonConfig = JsonConfigDoc[(char*)CN_config].to<JsonObject> ();
 
         JsonWrite(JsonConfig, CN_EffectSpeed,      1);

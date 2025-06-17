@@ -123,6 +123,7 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
     bool response = false;
 
     JsonDocument JsonPlayListDoc;
+    JsonPlayListDoc.to<JsonObject>();
 
     do // once
     {

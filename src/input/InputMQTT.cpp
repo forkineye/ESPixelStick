@@ -745,6 +745,7 @@ void c_InputMQTT::publishState()
     // DEBUG_START;
 
     JsonDocument root;
+    root.to<JsonObject>();
     JsonObject JsonConfig = root[F ("MQTT")].to<JsonObject>();
 
     JsonWrite(JsonConfig, CN_state, String((true == stateOn) ? ON : OFF));

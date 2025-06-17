@@ -131,6 +131,7 @@ void c_WiFiDriver::Begin ()
     if (FileMgr.SdCardIsInstalled())
     {
         JsonDocument jsonConfigDoc;
+        jsonConfigDoc.to<JsonObject>();
         // DEBUG_V ("read the sdcard config");
         if (FileMgr.ReadSdFile (F("wificonfig.json"), jsonConfigDoc))
         {

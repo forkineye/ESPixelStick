@@ -698,6 +698,7 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
         }
 
         JsonDocument jsonDoc;
+        jsonDoc.to<JsonObject>();
 
         // DEBUG_V ("Convert File to JSON document");
         DeserializationError error = deserializeJson (jsonDoc, file);
@@ -729,7 +730,7 @@ bool c_FileMgr::LoadFlashFile (const String& FileName, DeserializationHandler Ha
     // DEBUG_END;
     return retval;
 
-} // LoadConfigFile
+} // LoadFlashFile
 
 //-----------------------------------------------------------------------------
 bool c_FileMgr::SaveFlashFile (const String& FileName, String& FileData)

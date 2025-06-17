@@ -130,6 +130,7 @@ void TestHeap(uint32_t Id)
     DEBUG_V(String("Heap Before: ") + ESP.getFreeHeap());
     {
         JsonDocument jsonDoc;
+        jsonDoc.to<JsonObject>();
     }
     DEBUG_V(String(" Heap After: ") + ESP.getFreeHeap());
 }
@@ -415,6 +416,7 @@ void SaveConfig()
 
     // Create buffer and root object
     JsonDocument jsonConfigDoc;
+    jsonConfigDoc.to<JsonObject>();
     JsonObject JsonConfig = jsonConfigDoc[(char*)CN_system].to<JsonObject>();
 
     GetConfig(JsonConfig);
@@ -484,6 +486,7 @@ String serializeCore(bool pretty)
 
     // Create buffer and root object
     JsonDocument jsonConfigDoc;
+    jsonConfigDoc.to<JsonObject>();
     JsonObject JsonConfig = jsonConfigDoc.add<JsonObject>();
 
     String jsonConfigString;

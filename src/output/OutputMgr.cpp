@@ -368,6 +368,7 @@ void c_OutputMgr::CreateNewConfig ()
 
     // create a place to save the config
     JsonDocument JsonConfigDoc;
+    JsonConfigDoc.to<JsonObject>();
     // DEBUG_V ();
 
     // DEBUG_V("Create a new output config structure.");
