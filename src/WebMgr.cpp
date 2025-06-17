@@ -254,7 +254,7 @@ void c_WebMgr::init ()
     	webServer.on ("/XP", HTTP_GET | HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("XP");
-            request->send (200, CN_applicationSLASHjson, "{\"pong\":true}");
+            request->send (200, CN_applicationSLASHjson, F("{\"pong\":true}"));
         });
 
     	webServer.on ("/V1", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
@@ -351,8 +351,8 @@ void c_WebMgr::init ()
         	{
                 String RequestFileName = request->url().substring(6);
                 WebRequestMethodComposite RequestMethod = request->method();
-                DEBUG_V(String("  RequestMethod: ") + String(RequestMethod));
-                DEBUG_V(String("RequestFileName: ") + RequestFileName);
+                // DEBUG_V(String("  RequestMethod: ") + String(RequestMethod));
+                // DEBUG_V(String("RequestFileName: ") + RequestFileName);
                 if(HTTP_OPTIONS == RequestMethod)
                 {
                     request->send (200);
@@ -753,6 +753,14 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     JsonWrite(system, F ("currenttime"), now ());
     JsonWrite(system, F ("SDinstalled"), FileMgr.SdCardIsInstalled ());
     JsonWrite(system, F ("DiscardedRxData"), DiscardedRxData);
+
+    JsonObject HeapDetails = system[F("HeapDetails")].to<JsonObject> ();
+    JsonWrite(HeapDetails, F ("n804_Free_Max"),  heap_caps_get_largest_free_block(0x804));
+    JsonWrite(HeapDetails, F ("n804_Free_Tot"),  heap_caps_get_free_size(0x804));
+    JsonWrite(HeapDetails, F ("n80C_Free_Max"),  heap_caps_get_largest_free_block(0x80C));
+    JsonWrite(HeapDetails, F ("n80C_Free_Tot"),  heap_caps_get_free_size(0x80C));
+    JsonWrite(HeapDetails, F ("n1800_Free_Max"), heap_caps_get_largest_free_block(0x1800));
+    JsonWrite(HeapDetails, F ("n1800_Free_Tot"), heap_caps_get_free_size(0x1800));
 
     // Ask WiFi Stats
     // DEBUG_V ("NetworkMgr.GetStatus");

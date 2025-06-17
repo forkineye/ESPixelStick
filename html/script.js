@@ -9,7 +9,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.221";
+// target = "192.168.10.216";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -2182,6 +2182,17 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
 
     // getHeap(data)
     $('#x_freeheap').text(System.freeheap);
+
+    if ({}.hasOwnProperty.call(System, 'HeapDetails'))
+    {
+        let HeapDetails = System.HeapDetails;
+        $('#n804_Free_Max').text(HeapDetails.n804_Free_Max);
+        $('#n804_Free_Tot').text(HeapDetails.n804_Free_Tot);
+        $('#n80C_Free_Max').text(HeapDetails.n80C_Free_Max);
+        $('#n80C_Free_Tot').text(HeapDetails.n80C_Free_Tot);
+        $('#n1800_Free_Max').text(HeapDetails.n1800_Free_Max);
+        $('#n1800_Free_Tot').text(HeapDetails.n1800_Free_Tot);
+    }
 
     // getUptime
     // uptime is reported in milliseconds
