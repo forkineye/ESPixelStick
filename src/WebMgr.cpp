@@ -754,6 +754,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     JsonWrite(system, F ("SDinstalled"), FileMgr.SdCardIsInstalled ());
     JsonWrite(system, F ("DiscardedRxData"), DiscardedRxData);
 
+#ifdef ARDUINO_ARCH_ESP32
     JsonObject HeapDetails = system[F("HeapDetails")].to<JsonObject> ();
     JsonWrite(HeapDetails, F ("n804_Free_Max"),  heap_caps_get_largest_free_block(0x804));
     JsonWrite(HeapDetails, F ("n804_Free_Tot"),  heap_caps_get_free_size(0x804));
@@ -761,6 +762,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     JsonWrite(HeapDetails, F ("n80C_Free_Tot"),  heap_caps_get_free_size(0x80C));
     JsonWrite(HeapDetails, F ("n1800_Free_Max"), heap_caps_get_largest_free_block(0x1800));
     JsonWrite(HeapDetails, F ("n1800_Free_Tot"), heap_caps_get_free_size(0x1800));
+#endif // def ARDUINO_ARCH_ESP32
 
     // Ask WiFi Stats
     // DEBUG_V ("NetworkMgr.GetStatus");
