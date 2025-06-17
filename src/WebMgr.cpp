@@ -713,6 +713,7 @@ void c_WebMgr::CreateAdminInfoFile ()
     // DEBUG_START;
 
     JsonDocument AdminJsonDoc;
+    AdminJsonDoc.to<JsonObject>();
     JsonObject jsonAdmin = AdminJsonDoc[F ("admin")].to<JsonObject> ();
 
     JsonWrite(jsonAdmin, CN_version, VERSION);
@@ -745,6 +746,8 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     // DEBUG_START;
 
     // WebJsonDoc.clear ();
+    JsonDocument WebJsonDoc;
+    WebJsonDoc.to<JsonObject>();
     JsonObject status = WebJsonDoc[(char*)CN_status].to<JsonObject> ();
     JsonObject system = status[(char*)CN_system].to<JsonObject> ();
 
