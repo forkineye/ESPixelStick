@@ -156,7 +156,7 @@ void c_WebMgr::init ()
             ProcessXJRequest (request);
         });
 
-    	webServer.on ("/settime", HTTP_POST | HTTP_GET | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
+    	webServer.on ("/settime", HTTP_POST | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
         {
             // DEBUG_V("/settime");
             // DEBUG_V(String("URL: ") + request->url());
@@ -167,7 +167,13 @@ void c_WebMgr::init ()
             }
             else
             {
-                String newDate = request->url ().substring (String (F("/settime/")).length ());
+                // String url = request->url ();
+                // DEBUG_V (String ("url: ") + String (url));
+                const AsyncWebParameter * pParam = request->getParam("newtime");
+                // DEBUG_V (String (" param Name: ") + String (pParam->name()));
+                // DEBUG_V (String ("param Value: ") + String (pParam->value()));
+
+                String newDate = pParam->value();
                 // DEBUG_V (String ("newDate: ") + String (newDate));
                 ProcessSetTimeRequest (time_t(newDate.toInt()));
                 request->send (200);
