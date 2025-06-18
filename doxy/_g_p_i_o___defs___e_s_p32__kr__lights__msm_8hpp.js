@@ -12,7 +12,6 @@ var _g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp =
     [ "SUPPORT_OutputType_DMX", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html#aaf891b2fa73c266aa119bed242c5ea30", null ],
     [ "SUPPORT_OutputType_GECE", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html#ad99563c913b8da40ad1a5a305bf3ed3d", null ],
     [ "SUPPORT_OutputType_GS8208", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html#a4519f799b3e11a08d0b7377dac008a4e", null ],
-    [ "SUPPORT_OutputType_Relay", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html#acd6e6f0240598bf75d38ce85c4b91d92", null ],
     [ "SUPPORT_OutputType_Renard", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html#ad1cdaf2881d19f91216c4a64f925d072", null ],
     [ "SUPPORT_OutputType_Serial", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html#a6935dea675e388d8e9c6fe125d36c4e6", null ],
     [ "SUPPORT_OutputType_TM1814", "_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html#a87e454c1f4806d5434e00260a82c6b61", null ],

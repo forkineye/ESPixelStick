@@ -4,7 +4,7 @@ var searchData=
   ['ranges_1',['ranges',['../union_f_p_p_ping_packet.html#a43c037a16b08ce365b44d3824854a9f3',1,'FPPPingPacket::ranges'],['../fseq_8h.html#a61f3ec214a6fa2bb351949c606ed87b9',1,'ranges:&#160;fseq.h']]],
   ['raw_2',['raw',['../union_e_f_update_1_1efuheader__t.html#a6a5655070f7d154ee8934af12b9d376d',1,'EFUpdate::efuheader_t::raw'],['../union_e_f_update_1_1efurecord__t.html#a3fda9334edee4d66e2ea892801afee32',1,'EFUpdate::efurecord_t::raw'],['../union_f_p_p_packet.html#a0400cdbd2ffca7fa2ce34d3228e65333',1,'FPPPacket::raw'],['../union_f_p_p_ping_packet.html#ab336b62404d8386fb2d0725d39827f5e',1,'FPPPingPacket::raw'],['../union_f_p_p_multi_sync_packet.html#a02b281a304987fe40d0b26e1becbe057',1,'FPPMultiSyncPacket::raw']]],
   ['rebootcount_3',['RebootCount',['../main_8cpp.html#a7876ec0ea2b6d345c51ff1afd96a5086',1,'main.cpp']]],
-  ['rebootneeded_4',['rebootNeeded',['../classc___input_mgr.html#a3f7851b54dc34c8a9eb6dd7767589540',1,'c_InputMgr']]],
+  ['rebootneeded_4',['RebootNeeded',['../classc___input_mgr.html#a2e0f5358c1872fd4a11b79439cadc8e8',1,'c_InputMgr']]],
   ['rebootonwififailuretoconnect_5',['RebootOnWiFiFailureToConnect',['../classc___wi_fi_driver.html#a53740734d7bafcede27e36f52b927444',1,'c_WiFiDriver']]],
   ['remainingplaycount_6',['RemainingPlayCount',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#afab732064f1162ed86a513660420385e',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
   ['reportediswificonnected_7',['ReportedIsWiFiConnected',['../classc___wi_fi_driver.html#a4d752718b07127ffc3291d7b0e360d9d',1,'c_WiFiDriver']]],
