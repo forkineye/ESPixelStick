@@ -49,7 +49,6 @@ private:
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice *       pAlexaDevice   = nullptr;
     bool                   HasBeenInitialized = false;
-    JsonDocument           WebJsonDoc;
     String                 XjResult = emptyString;
 
 #ifdef ARDUINO_ARCH_ESP32

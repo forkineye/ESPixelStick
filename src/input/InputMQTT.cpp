@@ -745,6 +745,7 @@ void c_InputMQTT::publishState()
     // DEBUG_START;
 
     JsonDocument root;
+    root.to<JsonObject>();
     JsonObject JsonConfig = root[F ("MQTT")].to<JsonObject>();
 
     JsonWrite(JsonConfig, CN_state, String((true == stateOn) ? ON : OFF));
@@ -787,8 +788,8 @@ void c_InputMQTT::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     else if (ReBootAllowed)
     {
         // handle a disconnect
-        RequestReboot(100000);
-        logcon (String (F ("Requesting reboot on loss of network connection.")));
+        String Reason = (String (F ("Requesting reboot on loss of network connection.")));
+        RequestReboot(Reason, 100000);
     }
 
     // DEBUG_END;

@@ -1,6 +1,5 @@
 var StatusRequestTimer = null;
 var DiagTimer = null;
-var ConfigSessionId = new Date().getTime();
 
 // global data
 var AdminInfo = null;
@@ -10,7 +9,7 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.110";
+// target = "192.168.10.216";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -244,12 +243,12 @@ $(function () {
                 if(event.target.status === 200)
                 {
                     alert("Firmware Upload SUCCESS!");
-                    showReboot();
+                    reboot();
                 }
                 else
                 {
                     alert("Firmware Upload FAILED!\n" + event.target.response);
-                    showReboot();
+                    reboot();
                 }
             }
 
@@ -699,13 +698,13 @@ async function ProcessWindowChange(NextWindow) {
     }
 
     else if (NextWindow === "#admin") {
-        RcfResponse = RequestConfigFile("config.json");
-        RcfResponse = RequestConfigFile("output_config.json");
-        RcfResponse = RequestConfigFile("input_config.json");
+        await RequestConfigFile("config.json");
+        await RequestConfigFile("output_config.json");
+        await RequestConfigFile("input_config.json");
     }
 
     else if ((NextWindow === "#pg_network") || (NextWindow === "#home")) {
-        RcfResponse = RequestConfigFile("config.json");
+        await RequestConfigFile("config.json");
     }
 
     else if (NextWindow === "#config") {
@@ -775,24 +774,44 @@ function RequestDiagData()
     }
 } // RequestDiagData
 
-async function RequestConfigFile(FileName)
+async function RequestConfigFile(FileName, retries = 5)
 {
-    // console.log("RequestConfigFile FileName: " + FileName);
-
-    var url = "HTTP://" + target + "/conf/" + FileName + '?t=' + ConfigSessionId;
-    // console.debug("'GET' Config URL: '" + url + "'");
-    await $.getJSON(url, function(data)
+    // console.debug("RequestConfigFile FileName: " + FileName);
+    // console.debug("'retries: '" + retries + "'");
+    if(retries === 0)
     {
-        // console.log("RequestConfigFile: " + JSON.stringify(data));
-        ProcessReceivedJsonConfigMessage(data);
-        return true;
-    })
-    .fail(function()
+        console.error("RequestConfigFile ran out of retries");
+        reboot;
+    }
+    else
     {
-        console.error("Could not read config file: " + FileName);
-        return false;
-    });
-
+        var url = "HTTP://" + target + "/conf/" + FileName;
+        console.info("RequestConfigFile: 'GET' URL: '" + url + "'");
+        $.ajaxSetup(
+        {
+            cache: false,
+            timeout: 5000
+        });
+        await $.getJSON(url)
+            .done(function (data)
+            {
+                // console.debug("RequestConfigFile: " + JSON.stringify(data));
+                ProcessReceivedJsonConfigMessage(data);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown)
+            {
+                console.error("Could not read config file: " + FileName);
+                console.error("Error:", textStatus, errorThrown);
+                RequestConfigFile(FileName, retries-1);
+            })
+            .catch(function(error)
+            {
+                // Handle the error
+                console.error("Could not read config file: " + FileName);
+                console.error("Error:", error);
+                RequestConfigFile(FileName, retries-1);
+            });
+    }
 } // RequestConfigFile
 
 function RequestStatusUpdate()
@@ -818,64 +837,60 @@ function RequestStatusUpdate()
         let FileName = "HTTP://" + target + "/XJ";
         // console.log("RequestStatusUpdate FileName: " + FileName);
 
-        $.getJSON(FileName, function(data)
+        $.ajaxSetup(
         {
-            // console.log("RequestStatusUpdate: " + JSON.stringify(data));
-            CompletedServerTransaction = true;
-            ProcessReceivedJsonStatusMessage(data);
-        }).fail(function()
-        {
-            console.error("Could not read Status file: " + FileName);
+            cache: false,
+            timeout: 5000
         });
+        $.getJSON(FileName)
+            .done(function (data)
+            {
+                // console.log("RequestStatusUpdate: " + JSON.stringify(data));
+                CompletedServerTransaction = true;
+                ProcessReceivedJsonStatusMessage(data);
+            })
+            .fail(function(jqXHR, textStatus, errorThrown)
+            {
+                    console.error("Could not read Status file: " + FileName);
+                console.error("Error:", textStatus, errorThrown);
+            })
+            .catch(function()
+            {
+                console.error("Could not read Status file: " + FileName);
+            });
     } // end home (aka status) is visible
 
 } // RequestStatusUpdate
 
 async function RequestListOfFiles()
 {
-    // console.debug("ask for a file list from the server, starting at " + StartingFileIndex);
+    // console.debug("ask for a file list from the server");
 
-    // retrieve the file with the list of files in it
-    return await fetch("HTTP://" + target + "/fseqfilelist",
+    var url = "HTTP://" + target + "/fseqfilelist";
+    // console.debug("RequestListOfFiles: 'GET' URL: '" + url + "'");
+    $.ajaxSetup(
     {
-        method: 'GET',
-        mode: "cors", // no-cors, *cors, same-origin
-        headers: { 'Content-Type': 'application/json' },
-        cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-        credentials: "same-origin", // include, *same-origin, omit
-        redirect: "follow", // manual, *follow, error
-        referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    })
-    .then(async webResponse =>
-    {
-        const isJson = webResponse.headers.get('content-type')?.includes('application/json');
-        const data = isJson && await webResponse.json();
-
-        // console.debug("SendCommand:webResponse.status: " + webResponse.status);
-        // console.debug("SendCommand:webResponse.ok: " + webResponse.ok);
-        // check for error response
-        if (!webResponse.ok) {
-            // get error message from body or default to response status
-            const error = (data && data.message) || webResponse.status;
-            console.error("SendCommand: Error: " + Promise.reject(error));
-            CompletedServerTransaction = false;
-            RequestListOfFiles();
-        }
-        else
-        {
-            // console.debug("SendCommand: Transaction complete");
-            CompletedServerTransaction = true;
-            await ProcessGetFileListResponse(data);
-        }
-        return webResponse.ok ? 1 : 0;
-    })
-    .catch(error =>
-    {
-        console.error('SendCommand: Error: ', error);
-        CompletedServerTransaction = false;
-        RequestListOfFiles();
-        return -1;
+        cache: false,
+        timeout: 5000
     });
+    await $.getJSON(url)
+        .done(function (data)
+        {
+            // console.debug("RequestListOfFiles: " + JSON.stringify(data));
+            ProcessGetFileListResponse(data);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown)
+        {
+            console.error("Could not read fseqfilelist file");
+            console.error("Error:", textStatus, errorThrown);
+        })
+        .catch(function(error)
+        {
+            // Handle the error
+            console.error("Could not read RequestListOfFiles file");
+            console.error("Error:", error);
+        });
+    return true;
 
 } // RequestListOfFiles
 
@@ -947,19 +962,20 @@ async function ProcessGetFileListResponse(JsonData) {
 
 } // ProcessGetFileListResponse
 
-function RequestFileDeletion() {
+async function RequestFileDeletion() {
 
     $('#FileManagementTable > tr').each(function (CurRowId) {
         if (true === $('#FileSelected_' + CurRowId).prop("checked")) {
             let name = $('#FileName_' + CurRowId).val().toString();
             console.log("delete file: " + name);
-            let Response = SendCommand('file/delete/' + name);
+            SendCommand('file/delete/' + name);
+            setTimeout(function()
+            {
+                RequestListOfFiles();
+            }, 5000);
             // console.debug("delete Response: " + Response);
         }
     });
-
-    RequestListOfFiles();
-
 } // RequestFileDeletion
 
 function ProcessModeConfigurationDatafppremote(channelConfig) {
@@ -1446,14 +1462,6 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     // by default, do not show the ECB config data
     $('#ecb').addClass("hidden");
 
-    // console.debug("compare modeControlName");
-    if('#inputmode1' === modeControlName)
-    {
-        // console.debug("Allow FTP changes");
-        $('#ftp_enable_error').addClass("hidden");
-        $('#ftp_enable').prop('disabled', false);
-    }
-
     if ("disabled" === ChannelTypeName)
     {
         // console.debug("Process Disabled");
@@ -1462,8 +1470,6 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     }
     else if ("fpp_remote" === ChannelTypeName)
     {
-        $('#ftp_enable').prop('disabled', true);
-        $('#ftp_enable_error').removeClass("hidden");
         $('#ecb').removeClass("hidden");
         if (null !== Fseq_File_List)
         {
@@ -1606,6 +1612,36 @@ function GenerateInputOutputControlLabel(OptionListName, DisplayedChannelId) {
 
 } // GenerateInputOutputControlLabel
 
+function loadContentSync(url, targetElement, OptionListName, DisplayedChannelId)
+{
+    $.ajax(
+    {
+        url: url,
+        async: false,
+        success: function(data)
+        {
+            // console.info("Process Received Mode Config file.");
+            $(targetElement).html(data);
+            if ("input" === OptionListName)
+            {
+                ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
+                ProcessInputConfig();
+            }
+            else if ("output" === OptionListName)
+            {
+                ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+
+                // Trigger refresh update for outputs
+                $('#fg_output_mode input').trigger('change');
+            }
+        },
+        error: function()
+        {
+            console.error('Failed to load: ' + url);
+        }
+    });
+} // loadContentSync
+
 function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId)
 {
     // console.debug("OptionListName: " + OptionListName);
@@ -1620,21 +1656,8 @@ function LoadDeviceSetupSelectedOption(OptionListName, DisplayedChannelId)
 
     //TODO: Detect modules that don't require configuration - DDP, Alexa, ?
     // try to load the field definition file for this channel type
-    $('#' + OptionListName + 'mode' + DisplayedChannelId).load(HtmlLoadFileName, function ()
-    {
-        if ("input" === OptionListName)
-        {
-            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Input_Config);
-            ProcessInputConfig();
-        }
-        else if ("output" === OptionListName)
-        {
-            ProcessModeConfigurationData(DisplayedChannelId, OptionListName, Output_Config);
+    loadContentSync(HtmlLoadFileName, '#' + OptionListName + 'mode' + DisplayedChannelId, OptionListName, DisplayedChannelId);
 
-            // Trigger refresh update for outputs
-            $('#fg_output_mode input').trigger('change');
-        }
-    });
 } // LoadDeviceSetupSelectedOption
 
 function CreateOptionsFromConfig(OptionListName, Config) {
@@ -1661,7 +1684,6 @@ function CreateOptionsFromConfig(OptionListName, Config) {
             $(`#fg_${OptionListName}`).append(`<label class="control-label col-sm-2" for="${OptionListName}${ChannelId}">${GenerateInputOutputControlLabel(OptionListName, ChannelId)}</label>`);
             $(`#fg_${OptionListName}`).append(`<div class="col-sm-${col}"><select class="form-control wsopt" id="${OptionListName}${ChannelId}"></select></div>`);
             $(`#fg_${OptionListName}_mode`).append(`<fieldset id="${OptionListName}mode${ChannelId}"></fieldset>`);
-
         }
 
         let jqSelector = "#" + OptionListName + ChannelId;
@@ -2002,7 +2024,6 @@ function submitDeviceConfig() {
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
 
-    ConfigSessionId = new Date().getTime();
     ServerAccess.callFunction(SendConfigFileToServer, "output_config", JSON.stringify({'output_config': Output_Config}));
     ServerAccess.callFunction(SendConfigFileToServer, "input_config", JSON.stringify({'input_config': Input_Config}));
     submitNetworkConfig();
@@ -2161,6 +2182,17 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
 
     // getHeap(data)
     $('#x_freeheap').text(System.freeheap);
+
+    if ({}.hasOwnProperty.call(System, 'HeapDetails'))
+    {
+        let HeapDetails = System.HeapDetails;
+        $('#n804_Free_Max').text(HeapDetails.n804_Free_Max);
+        $('#n804_Free_Tot').text(HeapDetails.n804_Free_Tot);
+        $('#n80C_Free_Max').text(HeapDetails.n80C_Free_Max);
+        $('#n80C_Free_Tot').text(HeapDetails.n80C_Free_Tot);
+        $('#n1800_Free_Max').text(HeapDetails.n1800_Free_Max);
+        $('#n1800_Free_Tot').text(HeapDetails.n1800_Free_Tot);
+    }
 
     // getUptime
     // uptime is reported in milliseconds
@@ -2466,5 +2498,4 @@ function reboot() {
 $('#confirm-reset .btn-ok').on("click", (function () {
     showReboot();
     SendCommand('X7');
-    ConfigSessionId = new Date().getTime();
 }));

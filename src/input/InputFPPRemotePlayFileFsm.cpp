@@ -333,7 +333,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
             {
                 // DEBUG_V (String ("TotalNumberOfFramesInSequence: ") + String (p_Parent->FileControl[CurrentFile].TotalNumberOfFramesInSequence));
                 // DEBUG_V (String ("                 CurrentFrame: ") + String (CurrentFrame));
-                // DEBUG_V (F ("File Playback Failed to read enough data"));
+                logcon (F ("File Playback Failed to read enough data"));
                 Stop ();
             }
         }

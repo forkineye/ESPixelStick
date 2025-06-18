@@ -295,6 +295,7 @@ void c_InputDDP::ProcessReceivedQuery ()
 
     bool haveResponse = false;
     JsonDocument JsonResponseDoc;
+    JsonResponseDoc.to<JsonObject>();
 
     DDP_packet_t & Packet = PacketBuffer.Packet;
 

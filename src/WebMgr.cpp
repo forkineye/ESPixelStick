@@ -142,6 +142,9 @@ void c_WebMgr::init ()
         // Setup WebSockets
         using namespace std::placeholders;
 
+        // Static Handlers
+   	 	webServer.serveStatic ("/UpdRecipe/", LittleFS, "/UpdRecipe.json");
+
         // Heap status handler
     	webServer.on ("/heap", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
@@ -181,8 +184,10 @@ void c_WebMgr::init ()
             }
             else
             {
-                RequestReboot(100000);
                 request->send (200, CN_textSLASHplain, "Rebooting");
+
+                String Reason = F("Browser X6 Reboot requested.");
+                RequestReboot(Reason, 100000);
             }
         });
 
@@ -204,7 +209,8 @@ void c_WebMgr::init ()
 
                 request->send (200, CN_textSLASHplain, "Rebooting");
                 // DEBUG_V ("");
-                RequestReboot(100000);;
+                String Reason = F("Browser requested Reboot");
+                RequestReboot(Reason, 100000);;
             }
         });
 
@@ -248,7 +254,7 @@ void c_WebMgr::init ()
     	webServer.on ("/XP", HTTP_GET | HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {
             // DEBUG_V("XP");
-            request->send (200, CN_applicationSLASHjson, "{\"pong\":true}");
+            request->send (200, CN_applicationSLASHjson, F("{\"pong\":true}"));
         });
 
     	webServer.on ("/V1", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
@@ -288,7 +294,15 @@ void c_WebMgr::init ()
                 }
                 else
                 {
-                    request->send (404, CN_textSLASHplain, "");
+                    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
+                        [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t
+                        {
+                            return 0;
+                        });
+                    response->setContentLength(OutputMgr.GetBufferUsedSize ());
+                    response->setContentType(F("application/octet-stream"));
+                    response->addHeader(F("server"), F("ESPS Diag Data"));
+                    request->send(response);
                 }
             }
         });
@@ -311,31 +325,65 @@ void c_WebMgr::init ()
             }
         });
 
-        // JSON Config Handler
-    	webServer.on ("/conf", HTTP_PUT | HTTP_POST | HTTP_OPTIONS,
+    	webServer.on ("/fseqfilelist", HTTP_GET,
         	[this](AsyncWebServerRequest* request)
         	{
-                if(HTTP_OPTIONS == request->method())
+                // DEBUG_V("Process: HTTP_GET");
+                request->send (LittleFS, F("/fseqfilelist.json"), CN_applicationSLASHjson);
+            }
+        );
+
+        // JSON Config Handler
+    	webServer.on ("/conf", HTTP_GET,
+        	[this](AsyncWebServerRequest* request)
+        	{
+                String RequestFileName = String("/") + request->url().substring(6);
+                // DEBUG_V(String("RequestFileName: ") + RequestFileName);
+                RequestFileName.replace("//", "/");
+                RequestFileName.replace(".gz", "");
+                // DEBUG_V(String("RequestFileName: ") + RequestFileName);
+                request->send (LittleFS, RequestFileName, CN_applicationSLASHjson);
+            }
+        );
+
+        webServer.on ("/conf", HTTP_PUT | HTTP_POST | HTTP_OPTIONS,
+        	[this](AsyncWebServerRequest* request)
+        	{
+                String RequestFileName = request->url().substring(6);
+                WebRequestMethodComposite RequestMethod = request->method();
+                // DEBUG_V(String("  RequestMethod: ") + String(RequestMethod));
+                // DEBUG_V(String("RequestFileName: ") + RequestFileName);
+                if(HTTP_OPTIONS == RequestMethod)
                 {
                     request->send (200);
                 }
-                else
+                else if(HTTP_GET == RequestMethod)
+                {
+                    DEBUG_V("Process: HTTP_GET");
+                    request->send (401, CN_textSLASHplain, String(F("File Not supported")));
+                }
+                else if((HTTP_POST == RequestMethod) ||
+                        (HTTP_PUT  == RequestMethod))
                 {
                     // DEBUG_V(String("           url: ") + request->url());
-                    String UploadFileName = request->url().substring(6);
-                    if(RequestReadConfigFile(UploadFileName))
+                    if(RequestReadConfigFile(RequestFileName))
                     {
-                        FileMgr.RenameFlashFile(UploadFileName + ".tmp", UploadFileName);
+                        FileMgr.RenameFlashFile(RequestFileName + ".tmp", RequestFileName);
                         request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
                     }
                     else
                     {
                         // delete unexpected config file.
-                        FileMgr.DeleteFlashFile(UploadFileName + ".tmp");
+                        FileMgr.DeleteFlashFile(RequestFileName + ".tmp");
                         request->send (404, CN_textSLASHplain, String(F("File Not supported")));
                     }
                 }
-        	},
+                else
+                {
+                    DEBUG_V("Unsupported HTTP type");
+                    request->send (401, CN_textSLASHplain, String(F("HTTP_TYPE Not supported")));
+                }
+            },
 
         	[this](AsyncWebServerRequest *request, String filename, uint32_t index, uint8_t *data, uint32_t len, bool final)
         	{
@@ -421,8 +469,9 @@ void c_WebMgr::init ()
                 else
                 {
                     // DEBUG_V ("efupdate.hasError == false");
-                    request->send (200, CN_textSLASHplain, (String (F ("Update Success"))));
-                    RequestReboot(100000);
+                    String Reason = F("EFU Update Success");
+                    request->send (200, CN_textSLASHplain, Reason);
+                    RequestReboot(Reason, 100000);
                 }
             },
             [](AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final)
@@ -496,17 +545,8 @@ void c_WebMgr::init ()
                 FPPDiscovery.ProcessFPPDJson(request);
             });
 
-        // Static Handlers
-   	 	webServer.serveStatic ("/UpdRecipe",                  LittleFS, "/UpdRecipe.json");
-   	 	webServer.serveStatic ("/conf/config.json",           LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/config.json.gz",        LittleFS, "/config.json");
-   	 	webServer.serveStatic ("/conf/input_config.json",     LittleFS, "/input_config.json");
-   	 	webServer.serveStatic ("/conf/output_config.json",    LittleFS, "/output_config.json");
-   	 	webServer.serveStatic ("/conf/admininfo.json",        LittleFS, "/admininfo.json");
-   	 	webServer.serveStatic ("/fseqfilelist",               LittleFS, "/fseqfilelist.json");
-
         // must be last servestatic entry
-    	webServer.serveStatic ("/",                        LittleFS, "/www/").setDefaultFile ("index.html");
+    	webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
         // FS Debugging Handler
         // webServer.serveStatic ("/fs", LittleFS, "/" );
@@ -573,11 +613,11 @@ void c_WebMgr::init ()
 */
     		webServer.onNotFound ([this](AsyncWebServerRequest* request)
             {
+                // DEBUG_V (String("onNotFound. URL: ") + request->url());
                 if (request->method() == HTTP_OPTIONS)
                 {
                     request->send(200);
                 }
-                // DEBUG_V (String("onNotFound. URL: ") + request->url());
                 else if (true == this->IsAlexaCallbackValid())
                 {
                     // DEBUG_V ("IsAlexaCallbackValid == true");
@@ -673,6 +713,7 @@ void c_WebMgr::CreateAdminInfoFile ()
     // DEBUG_START;
 
     JsonDocument AdminJsonDoc;
+    AdminJsonDoc.to<JsonObject>();
     JsonObject jsonAdmin = AdminJsonDoc[F ("admin")].to<JsonObject> ();
 
     JsonWrite(jsonAdmin, CN_version, VERSION);
@@ -705,6 +746,8 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     // DEBUG_START;
 
     // WebJsonDoc.clear ();
+    JsonDocument WebJsonDoc;
+    WebJsonDoc.to<JsonObject>();
     JsonObject status = WebJsonDoc[(char*)CN_status].to<JsonObject> ();
     JsonObject system = status[(char*)CN_system].to<JsonObject> ();
 
@@ -713,6 +756,16 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     JsonWrite(system, F ("currenttime"), now ());
     JsonWrite(system, F ("SDinstalled"), FileMgr.SdCardIsInstalled ());
     JsonWrite(system, F ("DiscardedRxData"), DiscardedRxData);
+
+#ifdef ARDUINO_ARCH_ESP32
+    JsonObject HeapDetails = system[F("HeapDetails")].to<JsonObject> ();
+    JsonWrite(HeapDetails, F ("n804_Free_Max"),  heap_caps_get_largest_free_block(0x804));
+    JsonWrite(HeapDetails, F ("n804_Free_Tot"),  heap_caps_get_free_size(0x804));
+    JsonWrite(HeapDetails, F ("n80C_Free_Max"),  heap_caps_get_largest_free_block(0x80C));
+    JsonWrite(HeapDetails, F ("n80C_Free_Tot"),  heap_caps_get_free_size(0x80C));
+    JsonWrite(HeapDetails, F ("n1800_Free_Max"), heap_caps_get_largest_free_block(0x1800));
+    JsonWrite(HeapDetails, F ("n1800_Free_Tot"), heap_caps_get_free_size(0x1800));
+#endif // def ARDUINO_ARCH_ESP32
 
     // Ask WiFi Stats
     // DEBUG_V ("NetworkMgr.GetStatus");
@@ -874,9 +927,9 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         if (final)
         {
             request->send (200, CN_textSLASHplain, (String ( F ("Update Finished"))));
-            logcon (F ("Upload Finished. Rebooting"));
+            String Reason = (F ("EFU Upload Finished. Rebooting"));
             efupdate.end ();
-            RequestReboot(100000);
+            RequestReboot(Reason, 100000);
         }
 
     } while (false);

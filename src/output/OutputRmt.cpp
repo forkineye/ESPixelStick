@@ -94,8 +94,8 @@ c_OutputRmt::~c_OutputRmt ()
 
     if (HasBeenInitialized)
     {
-        logcon(F("Shutting down an RMT channel requires a reboot"));
-        RequestReboot(100000);
+        String Reason = (F("Shutting down an RMT channel requires a reboot"));
+        RequestReboot(Reason, 100000);
 
         DisableRmtInterrupts;
         ClearRmtInterrupts;
@@ -169,8 +169,8 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
 #endif // defined(SUPPORT_OutputType_DMX) || defined(SUPPORT_OutputType_Serial) || defined(SUPPORT_OutputType_Renard)
 
         {
-            LOG_PORT.println (F("Invalid RMT configuration parameters. Rebooting"));
-            RequestReboot(10000);
+            String Reason = (F("Invalid RMT configuration parameters. Rebooting"));
+            RequestReboot(Reason, 10000);
             break;
         }
 

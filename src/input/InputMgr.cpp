@@ -298,6 +298,7 @@ void c_InputMgr::CreateNewConfig ()
     // DEBUG_V(String("Heap: ") + String(ESP.getFreeHeap()));
 
     JsonDocument JsonConfigDoc;
+    JsonConfigDoc.to<JsonObject>();
     // DEBUG_V("");
 
     JsonObject JsonConfig = JsonConfigDoc[(char*)CN_input_config].to<JsonObject>();
@@ -454,7 +455,8 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
             }
             String DriverName;
             InputChannelDrivers[ChannelIndex].pInputChannelDriver->GetDriverName (DriverName);
-            rebootNeeded |= InputChannelDrivers[ChannelIndex].pInputChannelDriver->isShutDownRebootNeeded();
+            InputRebootReason = F("Input Reboot due to channel request");
+            RebootNeeded |= InputChannelDrivers[ChannelIndex].pInputChannelDriver->isShutDownRebootNeeded();
             // DEBUG_V (String ("rebootNeeded: ") + String (rebootNeeded));
             if (!IsBooting) {
                 logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
@@ -675,8 +677,8 @@ void c_InputMgr::LoadConfig ()
         }
         else
         {
-            logcon (CN_stars + String (F (" Error loading Input Manager Config File. Rebooting ")) + CN_stars);
-            RequestReboot(100000);
+            String Reason = (CN_stars + String (F (" Error loading Input Manager Config File. Rebooting ")) + CN_stars);
+            RequestReboot(Reason, 100000);
         }
     }
 
@@ -743,10 +745,10 @@ void c_InputMgr::Process ()
             RestartBlankTimer (InputSecondaryChannelId);
         } // ALL blank timers have expired
 
-        if (rebootNeeded)
+        if (RebootNeeded)
         {
             // DEBUG_V("Requesting Reboot");
-            RequestReboot(10000);
+            RequestReboot(InputRebootReason, 10000);
         }
 
     } while (false);

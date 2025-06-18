@@ -131,6 +131,7 @@ void c_WiFiDriver::Begin ()
     if (FileMgr.SdCardIsInstalled())
     {
         JsonDocument jsonConfigDoc;
+        jsonConfigDoc.to<JsonObject>();
         // DEBUG_V ("read the sdcard config");
         if (FileMgr.ReadSdFile (F("wificonfig.json"), jsonConfigDoc))
         {
@@ -1027,8 +1028,8 @@ void fsm_WiFi_state_ConnectionFailed::Init ()
 
     if (true == pWiFiDriver->Get_RebootOnWiFiFailureToConnect())
     {
-        logcon (F ("WiFi Requesting Reboot"));
-        RequestReboot(100000);
+        String Reason = (F ("WiFi Requesting Reboot"));
+        RequestReboot(Reason, 100000);
     }
     else
     {

@@ -89,6 +89,7 @@ const String VERSION = "4.x-dev";
 const String ConfigFileName = "/config.json";
 const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
 const uint8_t CurrentConfigVersion = 1;
+String GlobalRebootReason = emptyString;
 
 config_t config;                    // Current configuration
 static const uint32_t NotRebootingValue = uint32_t(-1);
@@ -129,9 +130,20 @@ void TestHeap(uint32_t Id)
     DEBUG_V(String("Heap Before: ") + ESP.getFreeHeap());
     {
         JsonDocument jsonDoc;
+        jsonDoc.to<JsonObject>();
     }
     DEBUG_V(String(" Heap After: ") + ESP.getFreeHeap());
 }
+
+#ifdef ARDUINO_ARCH_ESP32
+void esp_alloc_failed_hook_callback(size_t requested_size, uint32_t caps, const char *function_name)
+{
+    // size_t free = heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    size_t free = heap_caps_get_largest_free_block(caps);
+    LOG_PORT.printf("%s was called but failed to allocate %d bytes with 0x%x capabilities. Free = %d \n", function_name, requested_size,caps, free);
+
+} // esp_alloc_failed_hook_callback
+#endif // def ARDUINO_ARCH_ESP32
 
 /// Arduino Setup
 /** Arduino based setup code that is executed at startup. */
@@ -147,6 +159,7 @@ void setup()
 #ifdef ARDUINO_ARCH_ESP32
     // disable brownout detector
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+    heap_caps_register_failed_alloc_callback(esp_alloc_failed_hook_callback);
 #endif // def ARDUINO_ARCH_ESP32
 
     // Setup serial log port
@@ -403,6 +416,7 @@ void SaveConfig()
 
     // Create buffer and root object
     JsonDocument jsonConfigDoc;
+    jsonConfigDoc.to<JsonObject>();
     JsonObject JsonConfig = jsonConfigDoc[(char*)CN_system].to<JsonObject>();
 
     GetConfig(JsonConfig);
@@ -472,6 +486,7 @@ String serializeCore(bool pretty)
 
     // Create buffer and root object
     JsonDocument jsonConfigDoc;
+    jsonConfigDoc.to<JsonObject>();
     JsonObject JsonConfig = jsonConfigDoc.add<JsonObject>();
 
     String jsonConfigString;
@@ -545,7 +560,7 @@ void loop()
     {
         if(0 == --RebootCount)
         {
-            logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested. Rebooting Now"));
+            logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested: '") + GlobalRebootReason + F("' Rebooting Now"));
             delay (REBOOT_DELAY);
             ESP.restart ();
         }
@@ -573,10 +588,10 @@ bool RebootInProgress()
     return RebootCount != NotRebootingValue;
 }
 
-void RequestReboot(uint32_t LoopDelay, bool SkipDisable /* = false */)
+void RequestReboot(String & Reason, uint32_t LoopDelay, bool SkipDisable /* = false */)
 {
+    GlobalRebootReason = Reason;
     RebootCount = LoopDelay;
-
     if(!SkipDisable)
     {
         InputMgr.SetOperationalState(false);

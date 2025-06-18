@@ -118,7 +118,8 @@ private:
     bool FindJsonChannelConfig       (JsonObject& jsonConfig, e_InputChannelIds ChanId, JsonObject& ChanConfig);
 
     String ConfigFileName;
-    bool   rebootNeeded = false;
+    String InputRebootReason = emptyString;
+    bool   RebootNeeded = false;
 
     FastTimer BlankEndTime[InputChannelId_End];
 
