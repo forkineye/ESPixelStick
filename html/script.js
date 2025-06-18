@@ -1,5 +1,7 @@
 var StatusRequestTimer = null;
 var DiagTimer = null;
+var MonitorTransactionRequestInProgressId = 0;
+var PreviousMonitorTransactionRequestInProgressId = 0;
 
 // global data
 var AdminInfo = null;
@@ -9,12 +11,12 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
-// target = "192.168.10.216";
+// target = "192.168.10.220";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
 var ServerTransactionTimer = null;
-var CompletedServerTransaction = true;
+var FailedToCompleteServerTransaction = 0;
 var DocumentIsHidden = false;
 
 // Drawing canvas - move to diagnostics
@@ -185,7 +187,7 @@ const ServerAccess = new Semaphore(1);
 MonitorServerConnection();
 RequestConfigFile("admininfo.json");
 RequestDiagData();
-RequestStatusUpdate();  // start self filling status loop
+StartRequestingStatusUpdate();  // start self filling status loop
 
 // jQuery doc ready
 $(function () {
@@ -483,12 +485,12 @@ $(function () {
     SetServerTime();
 });
 
-function SetServerTime()
+async function SetServerTime()
 {
     // console.debug("SetServerTime");
     let CurrentDate = Math.floor((new Date()).getTime() / 1000);
     // console.debug("CurrentDate: " + CurrentDate);
-    SendCommand('settime/' + (CurrentDate));
+    await SendCommand('settime?newtime=' + (CurrentDate));
 } // SetServerTime
 
 function ProcessConfigFromLocalFile(data)
@@ -732,6 +734,7 @@ function RequestDiagData()
         {
             if ($('#diag').is(':visible'))
             {
+                MonitorTransactionRequestInProgressId++;
                 fetch("HTTP://" + target + "/V1",
                 {
                     method: "GET", // *GET, POST, PUT, DELETE, etc.
@@ -756,17 +759,19 @@ function RequestDiagData()
                         // get error message from body or default to response status
                         const error = webResponse.status;
                         console.error("SendCommand: Error: " + Promise.reject(error));
+                        FailedToCompleteServerTransaction ++;
                     }
                     else
                     {
                         // console.debug("SendCommand: Transaction complete");
-                        CompletedServerTransaction = true;
+                        FailedToCompleteServerTransaction = 0;
                         let streamData = new Uint8Array(await data.arrayBuffer());
                         drawStream(streamData);
                     }
                 })
                 .catch(async error =>
                 {
+                    FailedToCompleteServerTransaction ++;
                     console.error('SendCommand: Error: ', error);
                 });
             }
@@ -814,23 +819,26 @@ async function RequestConfigFile(FileName, retries = 5)
     }
 } // RequestConfigFile
 
-function RequestStatusUpdate()
+async function StartRequestingStatusUpdate()
 {
-    // console.log("RequestStatusUpdate Start: ");
+    // console.log("StartRequestingStatusUpdate Start: ");
     // is the timer running?
     if (null === StatusRequestTimer)
     {
+        await RequestStatusUpdate();
         // timer runs forever
         StatusRequestTimer = setTimeout(function ()
         {
             clearTimeout(StatusRequestTimer);
             StatusRequestTimer = null;
 
-            RequestStatusUpdate();
-
+            StartRequestingStatusUpdate();
         }, 1000);
     } // end timer was not running
+}
 
+async function RequestStatusUpdate()
+{
     if ($('#home').is(':visible'))
     {
         // ask for a status update from the server
@@ -842,20 +850,23 @@ function RequestStatusUpdate()
             cache: false,
             timeout: 5000
         });
-        $.getJSON(FileName)
+        MonitorTransactionRequestInProgressId++;
+        await $.getJSON(FileName)
             .done(function (data)
             {
                 // console.log("RequestStatusUpdate: " + JSON.stringify(data));
-                CompletedServerTransaction = true;
+                FailedToCompleteServerTransaction = 0;
                 ProcessReceivedJsonStatusMessage(data);
             })
             .fail(function(jqXHR, textStatus, errorThrown)
             {
-                    console.error("Could not read Status file: " + FileName);
+                FailedToCompleteServerTransaction ++;
+                console.error("Could not read Status file: " + FileName);
                 console.error("Error:", textStatus, errorThrown);
             })
             .catch(function()
             {
+                FailedToCompleteServerTransaction ++;
                 console.error("Could not read Status file: " + FileName);
             });
     } // end home (aka status) is visible
@@ -2039,37 +2050,35 @@ function int2ip(num) {
     return d;
 } // int2ip
 
-// Ping every 4sec
-function MonitorServerConnection()
+// Ping every 4sec if there is no other traffic
+async function MonitorServerConnection()
 {
     // console.debug("MonitorServerConnection");
-    let MonitorTransactionRequestInProgress = false;
-    let MonitorTransactionPreviousResponse = -1;
-
     if(null === ServerTransactionTimer)
     {
-        // console.debug("MonitorServerConnection: Start Timer");
-        ServerTransactionTimer = setInterval(async function () 
+        // console.info("MonitorServerConnection: Expired");
+        // console.info("PreviousMonitorTransactionRequestInProgressId: " + PreviousMonitorTransactionRequestInProgressId);
+        // console.info("        MonitorTransactionRequestInProgressId: " + MonitorTransactionRequestInProgressId);
+        // console.info("            FailedToCompleteServerTransaction: " + FailedToCompleteServerTransaction);
+
+        if(PreviousMonitorTransactionRequestInProgressId === MonitorTransactionRequestInProgressId)
         {
-            // console.debug("MonitorServerConnection: Expired");
-            if(!CompletedServerTransaction && !MonitorTransactionRequestInProgress && !DocumentIsHidden)
-            {
-                MonitorTransactionRequestInProgress = true
-                let Response = await SendCommand('XP');
-                MonitorTransactionRequestInProgress = false;
-                // console.debug("MonitorServerConnection: " + Response);
-                if(MonitorTransactionPreviousResponse !== Response)
-                {
-                    MonitorTransactionPreviousResponse = Response;
-                    $('#wserror').modal((1 === Response) ? "hide" : "show");
-                }
-            }
-            CompletedServerTransaction = false;
+            await SendCommand('XP');
+        }
+        PreviousMonitorTransactionRequestInProgressId = MonitorTransactionRequestInProgressId;
+
+        $('#wserror').modal((FailedToCompleteServerTransaction > 1) ? "show" : "hide");
+
+        ServerTransactionTimer = setTimeout(function ()
+        {
+            clearTimeout(ServerTransactionTimer);
+            ServerTransactionTimer = null;
+
+            MonitorServerConnection();
         }, 4000);
     }
 } // MonitorServerConnection
 
-// Move to diagnostics
 function drawStream(streamData) {
     let cols = parseInt($('#v_columns').val());
     let size = Math.floor((canvas.width - 20) / cols);
@@ -2111,7 +2120,6 @@ function drawStream(streamData) {
     }
 } // drawStream
 
-// Move to diagnostics
 function clearStream() {
     if (typeof ctx !== 'undefined') {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -2139,7 +2147,6 @@ function ProcessReceivedJsonAdminMessage(data) {
 
 } // ProcessReceivedJsonAdminMessage
 
-// ProcessReceivedJsonStatusMessage
 function ProcessReceivedJsonStatusMessage(JsonStat) {
     // let JsonStat = JSON.parse(data);
     let Status = JsonStat.status;
@@ -2423,17 +2430,6 @@ function ConfigWaitMessageEnd(ErrorFlag)
 
 } // ConfigWaitMessageEnd
 
-/*
-// Show "save" snackbar for 3sec
-function snackSave() {
-    let x = document.getElementById('snackbar');
-    x.className = 'show';
-    setTimeout(function () {
-        x.className = x.className.replace('show', '');
-    }, 3000);
-} // snackSave
-*/
-
 // Show reboot modal
 function showReboot() {
     $("#EfuProgressBar").addClass("hidden");
@@ -2452,6 +2448,7 @@ function showReboot() {
 async function SendCommand(command)
 {
     // console.debug("SendCommand: " + command);
+    MonitorTransactionRequestInProgressId++;
     return await fetch("HTTP://" + target + "/" + command, {
             method: 'POST',
             mode: "cors", // no-cors, *cors, same-origin
@@ -2473,16 +2470,18 @@ async function SendCommand(command)
                 // get error message from body or default to response status
                 const error = (data && data.message) || webResponse.status;
                 console.error("SendCommand: Error: " + Promise.reject(error));
+                FailedToCompleteServerTransaction ++;
             }
             else
             {
                 // console.debug("SendCommand: Transaction complete");
-                CompletedServerTransaction = true;
+                FailedToCompleteServerTransaction = 0;
             }
             return webResponse.ok ? 1 : 0;
         })
         .catch(error =>
         {
+            FailedToCompleteServerTransaction ++;
             console.error('SendCommand: Error: ', error);
             return -1;
         });
