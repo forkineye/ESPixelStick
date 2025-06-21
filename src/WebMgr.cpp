@@ -596,28 +596,8 @@ void c_WebMgr::init ()
             	request->send (404, CN_textSLASHplain, "Page Not found");
         	}
     	);
-/*
-    		webServer.on ("/download", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
-            {
-                if(HTTP_OPTIONS == request->method())
-                {
-                    request->send (200);
-                }
-                else
-                {
 
-                    // DEBUG_V (String ("url: ") + String (request->url ()));
-                    String filename = request->url ().substring (String ("/download").length ());
-                    // DEBUG_V (String ("filename: ") + String (filename));
-
-                    AsyncWebServerResponse* response = new AsyncFileResponse (ESP_SDFS, filename, F("application/octet-stream"), true);
-                    request->send (response);
-
-            		// DEBUG_V ("Send File Done");
-                }
-    		});
-*/
-    		webServer.onNotFound ([this](AsyncWebServerRequest* request)
+        webServer.onNotFound ([this](AsyncWebServerRequest* request)
             {
                 // DEBUG_V (String("onNotFound. URL: ") + request->url());
                 if (request->method() == HTTP_OPTIONS)
