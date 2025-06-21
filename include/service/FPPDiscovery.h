@@ -35,6 +35,19 @@
 
 #include <ESPAsyncWebServer.h>
 
+class c_FPPSemaphore
+{
+private:
+#ifdef ARDUINO_ARCH_ESP32
+    SemaphoreHandle_t xSemaphore = NULL;
+#else
+    volatile bool ProcessingWebRequest = false;
+#endif // def ARDUINO_ARCH_ESP32
+public:
+    void Take();
+    void Give();
+};
+
 class c_FPPDiscovery
 {
 private:
@@ -57,6 +70,7 @@ private:
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
     c_InputFPPRemote * InputFPPRemote = nullptr;
     const IPAddress MulticastAddress = IPAddress (239, 70, 80, 80);
+    c_FPPSemaphore FPPSemaphore;
 
     void GetStatusJSON           (JsonObject& jsonResponse, bool advanced);
     void BuildFseqResponse       (String fname, c_FileMgr::FileId fseq, String & resp);
