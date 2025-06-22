@@ -3,7 +3,7 @@
 * ConstNames.hpp - List of strings that can be reused
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021 Shelby Merrick
+* Copyright (c) 2021 - 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -107,6 +107,7 @@ extern const CN_PROGMEM char CN_filename [];
 extern const CN_PROGMEM char CN_files [];
 extern const CN_PROGMEM char CN_FPPoverride [];
 extern const CN_PROGMEM char CN_Frequency [];
+extern const CN_PROGMEM char CN_fseqfilelist [];
 extern const CN_PROGMEM char CN_fseqfilename [];
 extern const CN_PROGMEM char CN_gateway [];
 extern const CN_PROGMEM char CN_g [];
