@@ -779,6 +779,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     // DEBUG_V ("");
 
     // DEBUG_V("Send XJ response");
+    String XjResult;
     serializeJson(WebJsonDoc, XjResult);
     client->send (200, CN_applicationSLASHjson, XjResult);
 
