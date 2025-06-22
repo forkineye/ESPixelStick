@@ -155,6 +155,8 @@ void setup()
     digitalWrite(DEBUG_GPIO, HIGH);
 #endif // def DEBUG_GPIO
 
+    strcpy_P(config.id, String(F("ESPixelStick")).c_str());
+
     config.BlankDelay = 5;
 #ifdef ARDUINO_ARCH_ESP32
     // disable brownout detector
@@ -259,9 +261,9 @@ bool validateConfig()
     bool configValid = true;
 
     // Device defaults
-    if (!config.id.length ())
+    if (0 == strlen(config.id))
     {
-        config.id = F("ESPixelStick");
+        strcpy_P(config.id, String(F("ESPixelStick")).c_str());
         configValid = false;
         // DEBUG_V ();
     }

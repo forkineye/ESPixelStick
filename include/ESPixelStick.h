@@ -72,7 +72,7 @@ extern bool RebootInProgress();
 struct config_t
 {
     // Device
-    String      id;
+    char        id[65];
     uint32_t    BlankDelay = uint32_t(5);
 };
 
