@@ -3,7 +3,7 @@
 * NetworkMgr.hpp - Input Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -58,7 +58,7 @@ private:
     c_EthernetDriver EthernetDriver;
 #endif // def SUPPORT_ETHERNET
 
-    String  hostname;
+    char    hostname[65];
     bool    HasBeenInitialized  = false;
     bool    IsWiFiConnected     = false;
     bool    IsEthernetConnected = false;

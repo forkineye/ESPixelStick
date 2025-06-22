@@ -2,7 +2,7 @@
 * NetworkMgr.cpp - Input Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -34,6 +34,7 @@
 ///< Start up the driver and put it into a safe mode
 c_NetworkMgr::c_NetworkMgr ()
 {
+    memset(hostname, 0x0, sizeof(hostname));
 } // c_NetworkMgr
 
 //-----------------------------------------------------------------------------
@@ -230,7 +231,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
     if(HostnameChanged)
     {
         // DEBUG_V(String("hostname: ") + hostname);
-        WiFiDriver.SetHostname (hostname);
+        WiFiDriver.SetHostname (String(hostname));
 #ifdef SUPPORT_ETHERNET
         EthernetDriver.SetHostname (hostname);
 #endif // def SUPPORT_ETHERNET
@@ -252,7 +253,7 @@ bool c_NetworkMgr:: Validate ()
     bool Changed = false;
 
     // DEBUG_V (String ("hostname: \"") + hostname + "\"");
-    if (0 == hostname.length ())
+    if (0 == strlen(hostname))
     {
 #ifdef ARDUINO_ARCH_ESP8266
         String chipId = String (ESP.getChipId (), HEX);
@@ -260,7 +261,7 @@ bool c_NetworkMgr:: Validate ()
         String chipId = int64String (ESP.getEfuseMac (), HEX);
 #endif
         // DEBUG_V ("Setting Hostname default");
-        hostname = "esps-" + String (chipId);
+        strcpy(hostname, (String(F("esps-")) + String (chipId)).c_str());
         Changed = true;
     }
     // DEBUG_V (String ("hostname: \"") + hostname + "\"");
