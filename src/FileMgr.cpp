@@ -229,7 +229,7 @@ void c_FileMgr::NetworkStateChanged (bool NewState)
         logcon("Starting FTP server.");
         ftpSrv.setCallback(ftp_callback);
         ftpSrv.setTransferCallback(ftp_transferCallback);
-        ftpSrv.begin(FtpUserName.c_str(), FtpPassword.c_str(), WelcomeString.c_str());
+        ftpSrv.begin(FtpUserName, FtpPassword, WelcomeString);
     }
     else
     {
@@ -592,7 +592,7 @@ void c_FileMgr::DeleteFlashFile (String FileName)
 
     if(LittleFS.exists(FileName)) { LittleFS.remove (FileName); }
 
-    if(!FileName.equals(FSEQFILELIST))
+    if(!FileName.equals(CN_fseqfilelist))
     {
         BuildFseqList(false);
     }
@@ -1310,10 +1310,10 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
         if (-1 != FileListIndex)
         {
             // DEBUG_V(String("Valid FileListIndex: ") + String(FileListIndex));
-            FileList[FileListIndex].Filename = FileName;
+            strncpy(FileList[FileListIndex].Filename, FileName.c_str(), FileName.length());
             // DEBUG_V(String("Got file handle: ") + String(FileHandle));
             LockSd();
-            FileList[FileListIndex].IsOpen = FileList[FileListIndex].fsFile.open(FileList[FileListIndex].Filename.c_str(), XlateFileMode[Mode]);
+            FileList[FileListIndex].IsOpen = FileList[FileListIndex].fsFile.open(FileList[FileListIndex].Filename, XlateFileMode[Mode]);
             UnLockSd();
 
             // DEBUG_V(String("ReadWrite: ") + String(XlateFileMode[Mode]));
@@ -1872,7 +1872,7 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
         JsonWrite(jsonDoc, "numFiles", numFiles);
         JsonWrite(jsonDoc, "SdCardPresent", true);
         // PrettyPrint (jsonDoc, String ("FSEQ File List"));
-        SaveFlashFile(FSEQFILELIST, jsonDoc);
+        SaveFlashFile(CN_fseqfilelist, jsonDoc);
     } while(false);
 
     // String Temp;
@@ -1997,7 +1997,7 @@ bool c_FileMgr::handleFileUpload (
                 delay(100);
                 BuildFseqList(false);
                 expectedIndex = 0;
-                fsUploadFileName = emptyString;
+                fsUploadFileName[0] = '\0';
             }
             break;
         }
@@ -2030,7 +2030,7 @@ bool c_FileMgr::handleFileUpload (
             CloseSdFile(fsUploadFileHandle);
             DeleteSdFile (fsUploadFileName);
             expectedIndex = 0;
-            fsUploadFileName = emptyString;
+            fsUploadFileName[0] = '\0';
             break;
         }
         response = true;
@@ -2060,7 +2060,7 @@ bool c_FileMgr::handleFileUpload (
         // DEBUG_V(String("Expected: ") + String(totalLen));
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
 
-        fsUploadFileName = "";
+        fsUploadFileName[0] = '\0';
     }
 
     // DEBUG_END;
@@ -2076,16 +2076,16 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
     fsUploadStartTime = millis();
 
     // are we terminating the previous download?
-    if (0 != fsUploadFileName.length ())
+    if (0 != strlen(fsUploadFileName))
     {
         logcon (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
          // DEBUG_FILE_HANDLE (fsUploadFileHandle);
         CloseSdFile (fsUploadFileHandle);
-        fsUploadFileName = "";
+        fsUploadFileName[0] = '\0';
     }
 
     // Set up to receive a file
-    fsUploadFileName = filename;
+    strncpy(fsUploadFileName, filename.c_str(), filename.length());
 
     logcon (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Started")));
 
@@ -2123,7 +2123,7 @@ void c_FileMgr::BuildDefaultFseqList ()
     JsonWrite(jsonDoc, "usedBytes", 0);
     JsonWrite(jsonDoc, "numFiles", 0);
     jsonDoc["files"].to<JsonArray> ();
-    SaveFlashFile(FSEQFILELIST, jsonDoc);
+    SaveFlashFile(CN_fseqfilelist, jsonDoc);
 
     // DEBUG_END;
 
