@@ -1872,7 +1872,7 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
         JsonWrite(jsonDoc, "numFiles", numFiles);
         JsonWrite(jsonDoc, "SdCardPresent", true);
         // PrettyPrint (jsonDoc, String ("FSEQ File List"));
-        SaveFlashFile(CN_fseqfilelist, jsonDoc);
+        SaveFlashFile(String(CN_fseqfilelist) + F(".json"), jsonDoc);
     } while(false);
 
     // String Temp;
