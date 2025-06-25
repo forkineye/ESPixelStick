@@ -263,7 +263,7 @@ bool validateConfig()
     // Device defaults
     if (0 == strlen(config.id))
     {
-        strcpy_P(config.id, String(F("ESPixelStick")).c_str());
+        strcpy(config.id, String(F("ESPixelStick")).c_str());
         configValid = false;
         // DEBUG_V ();
     }
@@ -440,8 +440,7 @@ void LoadConfig()
 
     String temp;
     // DEBUG_V ("");
-    FileMgr.LoadFlashFile (ConfigFileName, &deserializeCoreHandler);
-
+    ConfigSaveNeeded |= !FileMgr.LoadFlashFile (ConfigFileName, &deserializeCoreHandler);
     ConfigSaveNeeded |= !validateConfig ();
 
     // DEBUG_END;
@@ -510,6 +509,19 @@ String serializeCore(bool pretty)
 
     return jsonConfigString;
 } // serializeCore
+
+void DelayReboot(uint32_t MinDelay)
+{
+    // DEBUG_START;
+
+    if (NotRebootingValue != RebootCount)
+    {
+        // DEBUG_V("Recalc delay");
+        RebootCount = (RebootCount < MinDelay) ? MinDelay: RebootCount;
+    }
+
+    // DEBUG_END;
+} // DelayReboot
 
 /////////////////////////////////////////////////////////
 //

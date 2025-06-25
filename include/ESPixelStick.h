@@ -67,6 +67,7 @@
 
 extern void RequestReboot(String & Reason, uint32_t LoopDelay, bool SkipDisable = false);
 extern bool RebootInProgress();
+extern void DelayReboot(uint32_t MinDelay);
 
 /// Core configuration structure
 struct config_t
