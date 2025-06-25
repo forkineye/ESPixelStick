@@ -893,18 +893,10 @@ function RequestListOfFiles()
         referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
         success: function (webResponse)
         {
-            if("" === webResponse)
-            {
-                // console.debug("RequestListOfFiles: Empty webResponse");
-            }
-            else if(webResponse.headers)
+            if ({}.hasOwnProperty.call(webResponse, "SdCardPresent"))
             {
                 // console.debug("RequestListOfFiles: " + JSON.stringify(webResponse));
                 ProcessGetFileListResponse(webResponse);
-            }
-            else
-            {
-                // console.debug("RequestListOfFiles: No headers in webResponse");
             }
         },
         error: function (jqXHR, textStatus, errorThrown)
