@@ -1968,6 +1968,9 @@ bool c_FileMgr::handleFileUpload (
     // DEBUG_START;
     bool response = false;
 
+    // try to keep a reboot from causing a corrupted file
+    DelayReboot(10000);
+
     // DEBUG_V (String ("filename: ") + filename);
     // DEBUG_V (String ("   index: ") + String (index));
     // DEBUG_V (String ("     len: ") + String (len));
@@ -2059,7 +2062,15 @@ bool c_FileMgr::handleFileUpload (
 
         // DEBUG_V(String("Expected: ") + String(totalLen));
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
-
+    #ifdef SUPPORT_UNZIP
+        String temp = String(fsUploadFileName);
+        temp.toLowerCase();
+        if(temp.indexOf(".xlz"))
+        {
+            String reason = F("Reboot after receiving a compressed file");
+            RequestReboot(reason, 10000);
+        }
+    #endif // def SUPPORT_UNZIP
         fsUploadFileName[0] = '\0';
     }
 
