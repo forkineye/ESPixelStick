@@ -1310,7 +1310,8 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
         if (-1 != FileListIndex)
         {
             // DEBUG_V(String("Valid FileListIndex: ") + String(FileListIndex));
-            strncpy(FileList[FileListIndex].Filename, FileName.c_str(), FileName.length());
+            memset(FileList[FileListIndex].Filename, 0x0, sizeof(FileList[FileListIndex].Filename));
+            strncpy(FileList[FileListIndex].Filename, FileName.c_str(), min((sizeof(FileList[FileListIndex].Filename) - 1), FileName.length()));
             // DEBUG_V(String("Got file handle: ") + String(FileHandle));
             LockSd();
             FileList[FileListIndex].IsOpen = FileList[FileListIndex].fsFile.open(FileList[FileListIndex].Filename, XlateFileMode[Mode]);
@@ -1985,7 +1986,7 @@ bool c_FileMgr::handleFileUpload (
             // DEBUG_V("New File");
             handleFileUploadNewFile (filename);
             expectedIndex = 0;
-            LOG_PORT.println(".");
+            // LOG_PORT.println(".");
         }
 
         if (index != expectedIndex)
@@ -1994,13 +1995,15 @@ bool c_FileMgr::handleFileUpload (
             {
                 logcon (String(F("ERROR: Expected index: ")) + String(expectedIndex) + F(" does not match actual index: ") + String(index));
 
-                 // DEBUG_FILE_HANDLE (fsUploadFileHandle);
+                // DEBUG_FILE_HANDLE (fsUploadFileHandle);
+                // DEBUG_V(String("fsUploadFileName: ") + String(fsUploadFileName));
                 CloseSdFile (fsUploadFileHandle);
+                // DEBUG_V(String("fsUploadFileName: ") + String(fsUploadFileName));
                 DeleteSdFile (fsUploadFileName);
                 delay(100);
                 BuildFseqList(false);
                 expectedIndex = 0;
-                fsUploadFileName[0] = '\0';
+                memset(fsUploadFileName, 0x0, sizeof(fsUploadFileName));
             }
             break;
         }
@@ -2041,6 +2044,7 @@ bool c_FileMgr::handleFileUpload (
 
     if ((true == final) && (fsUploadFileHandle != INVALID_FILE_HANDLE))
     {
+        // DEBUG_V(String("fsUploadFileName: ") + String(fsUploadFileName));
         // cause the remainder in the buffer to be written.
         WriteSdFileBuf (fsUploadFileHandle, data, 0);
         uint32_t uploadTime = (uint32_t)(millis() - fsUploadStartTime) / 1000;
@@ -2068,10 +2072,10 @@ bool c_FileMgr::handleFileUpload (
         if(temp.indexOf(".xlz"))
         {
             String reason = F("Reboot after receiving a compressed file");
-            RequestReboot(reason, 10000);
+            RequestReboot(reason, 100000);
         }
     #endif // def SUPPORT_UNZIP
-        fsUploadFileName[0] = '\0';
+        memset(fsUploadFileName, 0x0, sizeof(fsUploadFileName));
     }
 
     // DEBUG_END;
@@ -2085,6 +2089,7 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
     // DEBUG_V ("UploadStart: " + filename);
 
     fsUploadStartTime = millis();
+    // DEBUG_V(String("filename: ") + String(filename));
 
     // are we terminating the previous download?
     if (0 != strlen(fsUploadFileName))
@@ -2092,17 +2097,18 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
         logcon (String (F ("Aborting Previous File Upload For: '")) + fsUploadFileName + String (F ("'")));
          // DEBUG_FILE_HANDLE (fsUploadFileHandle);
         CloseSdFile (fsUploadFileHandle);
-        fsUploadFileName[0] = '\0';
     }
 
     // Set up to receive a file
-    strncpy(fsUploadFileName, filename.c_str(), filename.length());
+    memset(fsUploadFileName, 0x0, sizeof(fsUploadFileName));
+    strncpy(fsUploadFileName, filename.c_str(), min((sizeof(fsUploadFileName) - 1), filename.length()));
 
     logcon (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Started")));
 
     DeleteSdFile (fsUploadFileName);
 
     // Open the file for writing
+    // DEBUG_V(String("fsUploadFileName: ") + String(fsUploadFileName));
     OpenSdFile (fsUploadFileName, FileMode::FileWrite, fsUploadFileHandle, -1 /*first access*/);
     int FileListIndex;
     if (-1 == (FileListIndex = FileListFindSdFileHandle (fsUploadFileHandle)))
