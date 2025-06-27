@@ -1040,7 +1040,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, F ("HostDescription"), config.id);
     JsonWrite(jsonResponse, CN_Platform,           String(CN_ESPixelStick));
     JsonWrite(jsonResponse, F ("Variant"),         FPP_VARIANT_NAME);
-    JsonWrite(jsonResponse, F ("Mode"),            String((true == AllowedToPlayRemoteFile()) ? CN_remote : CN_bridge));
+    JsonWrite(jsonResponse, F ("Mode"),            String((FileMgr.SdCardIsInstalled ()) ? CN_remote : CN_bridge));
     JsonWrite(jsonResponse, CN_Version,            VERSION);
 
     const char* version = VERSION.c_str ();
@@ -1103,7 +1103,7 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
         JsonWrite(JsonData, CN_status,             0);
         JsonWrite(JsonData, CN_status_name,        F ("idle"));
 
-        if (IsEnabled)
+        if (FileMgr.SdCardIsInstalled ())
         {
             JsonWrite(JsonData, CN_mode,      8);
             JsonWrite(JsonData, CN_mode_name, String(CN_remote));
