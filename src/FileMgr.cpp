@@ -185,17 +185,34 @@ void c_FileMgr::Begin ()
 
         SetSpiIoPins ();
 
-#ifdef SUPPORT_UNZIP
         if(FoundZipFile)
         {
             FeedWDT();
+        #ifdef SUPPORT_UNZIP
             UnzipFiles * Unzipper = new(UnzipFiles);
             Unzipper->Run();
             delete Unzipper;
             String Reason = F("Requesting reboot after unzipping files");
             RequestReboot(Reason, 1, true);
+        #else
+            String FileName = emptyString;
+            do
+            {
+                FeedWDT();
+                FileName = emptyString;
+                FileMgr.FindFirstZipFile(FileName);
+                if(FileName.isEmpty())
+                {
+                    break;
+                }
+                String NewName = FileName;
+                NewName.replace(".xlz", ".fseq");
+                RenameSdFile(FileName, NewName);
+
+            } while(true);
+            BuildFseqList(false);
+        #endif // def SUPPORT_UNZIP
         }
-#endif // def SUPPORT_UNZIP
 
     } while (false);
 
@@ -2066,7 +2083,6 @@ bool c_FileMgr::handleFileUpload (
 
         // DEBUG_V(String("Expected: ") + String(totalLen));
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
-    #ifdef SUPPORT_UNZIP
         String temp = String(fsUploadFileName);
         temp.toLowerCase();
         if(temp.indexOf(".xlz"))
@@ -2074,7 +2090,7 @@ bool c_FileMgr::handleFileUpload (
             String reason = F("Reboot after receiving a compressed file");
             RequestReboot(reason, 100000);
         }
-    #endif // def SUPPORT_UNZIP
+
         memset(fsUploadFileName, 0x0, sizeof(fsUploadFileName));
     }
 
