@@ -1,36 +1,30 @@
 <map id="c_OutputMgr::Begin" name="c_OutputMgr::Begin">
-<area shape="rect" id="Node000001" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,201,141,227"/>
-<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968" title=" " alt="" coords="676,63,839,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,198,140,179,188,161,313,128,441,105,560,91,660,84,660,89,561,97,442,110,314,133,189,166,143,184,102,203"/>
-<area shape="rect" id="Node000006" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="189,176,356,202"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="141,203,173,199,174,204,141,208"/>
-<area shape="rect" id="Node000013" href="$main_8cpp.html#a23252221d60de2259fe00859f716c72e" title=" " alt="" coords="450,227,561,252"/>
-<area shape="poly" id="edge17_Node000001_Node000013" title=" " alt="" coords="141,215,436,233,435,238,141,221"/>
-<area shape="rect" id="Node000016" href="$_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a" title=" " alt="" coords="231,277,314,303"/>
-<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="110,225,223,269,221,274,108,230"/>
-<area shape="rect" id="Node000003" href="$classc___output_common.html#a23ef97415464d74fe780256b6680bfb1" title="set up the operating environment based on the current config (or defaults)" alt="" coords="936,5,1102,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="831,60,907,40,937,32,939,38,908,45,832,65"/>
-<area shape="rect" id="Node000004" href="$classc___output_common.html#a23228420b2471f0f041c0df0865cc60e" title="get the name for the instantiated driver" alt="" coords="908,55,1130,80"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="839,76,892,73,893,78,840,81"/>
-<area shape="rect" id="Node000005" href="$classc___output_common.html#ad7170942775d16bd0d84c5baf589b51d" title="Have the instance report its type." alt="" coords="909,104,1129,130"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="840,91,898,99,898,104,839,97"/>
-<area shape="rect" id="Node000007" href="$classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="404,128,607,154"/>
-<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="338,173,424,155,425,160,339,178"/>
-<area shape="rect" id="Node000012" href="$classc___file_mgr.html#a56a3ece591539d6b844ac99ecb2162bc" title=" " alt="" coords="422,177,589,203"/>
-<area shape="poly" id="edge13_Node000006_Node000012" title=" " alt="" coords="356,187,407,187,407,192,356,192"/>
-<area shape="poly" id="edge14_Node000006_Node000013" title=" " alt="" coords="335,200,436,222,435,227,334,205"/>
-<area shape="poly" id="edge8_Node000007_Node000002" title=" " alt="" coords="565,125,660,103,662,108,566,130"/>
-<area shape="rect" id="Node000008" href="$classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d" title=" " alt="" coords="655,128,860,154"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="608,138,640,138,640,144,608,144"/>
-<area shape="rect" id="Node000009" href="$classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="678,177,837,203"/>
-<area shape="poly" id="edge9_Node000007_Node000009" title=" " alt="" coords="576,152,674,171,673,176,575,157"/>
-<area shape="rect" id="Node000010" href="$classc___file_mgr.html#a91d8ba978954c06f5448afb5c75f34b4" title=" " alt="" coords="935,177,1102,203"/>
-<area shape="poly" id="edge10_Node000009_Node000010" title=" " alt="" coords="837,188,919,188,919,193,837,193"/>
-<area shape="rect" id="Node000011" href="$classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79" title=" " alt="" coords="926,227,1112,268"/>
-<area shape="poly" id="edge12_Node000009_Node000011" title=" " alt="" coords="820,201,912,221,911,227,819,206"/>
-<area shape="poly" id="edge11_Node000010_Node000010" title=" " alt="" coords="976,179,967,169,972,159,990,153,1019,151,1051,153,1067,161,1065,165,1050,159,1019,156,991,158,976,163,973,168,980,175"/>
-<area shape="rect" id="Node000014" href="$classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="665,227,850,252"/>
-<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="561,237,649,237,649,242,561,242"/>
-<area shape="rect" id="Node000015" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="668,276,847,317"/>
-<area shape="poly" id="edge16_Node000013_Node000015" title=" " alt="" coords="562,249,654,271,652,276,560,255"/>
+<area shape="rect" id="Node000001" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,144,141,169"/>
+<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968" title=" " alt="" coords="676,5,839,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="99,141,140,121,188,103,313,70,441,47,560,33,660,26,660,32,561,39,442,52,314,75,189,108,143,126,102,145"/>
+<area shape="rect" id="Node000003" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="189,118,356,144"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="141,145,173,141,174,146,141,150"/>
+<area shape="rect" id="Node000010" href="$main_8cpp.html#a23252221d60de2259fe00859f716c72e" title=" " alt="" coords="450,169,561,194"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="141,158,436,175,435,180,141,163"/>
+<area shape="rect" id="Node000013" href="$_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a" title=" " alt="" coords="231,220,314,245"/>
+<area shape="poly" id="edge15_Node000001_Node000013" title=" " alt="" coords="110,167,223,211,221,216,108,172"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="404,70,607,96"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="338,115,424,97,425,102,339,120"/>
+<area shape="rect" id="Node000009" href="$classc___file_mgr.html#a56a3ece591539d6b844ac99ecb2162bc" title=" " alt="" coords="422,120,589,145"/>
+<area shape="poly" id="edge10_Node000003_Node000009" title=" " alt="" coords="356,129,407,129,407,134,356,134"/>
+<area shape="poly" id="edge11_Node000003_Node000010" title=" " alt="" coords="335,142,436,164,435,169,334,147"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="565,67,660,45,662,50,566,72"/>
+<area shape="rect" id="Node000005" href="$classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d" title=" " alt="" coords="655,70,860,96"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="608,80,640,80,640,86,608,86"/>
+<area shape="rect" id="Node000006" href="$classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="678,120,837,145"/>
+<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="576,94,674,113,673,119,575,99"/>
+<area shape="rect" id="Node000007" href="$classc___file_mgr.html#a91d8ba978954c06f5448afb5c75f34b4" title=" " alt="" coords="917,92,1084,117"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="836,121,901,113,902,118,837,126"/>
+<area shape="rect" id="Node000008" href="$classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79" title=" " alt="" coords="908,141,1093,182"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="837,139,893,146,892,151,836,145"/>
+<area shape="poly" id="edge8_Node000007_Node000007" title=" " alt="" coords="960,93,952,83,957,73,973,67,1000,65,1031,68,1045,75,1043,80,1029,73,1000,70,975,72,961,77,958,82,964,89"/>
+<area shape="rect" id="Node000011" href="$classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="665,169,850,194"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="561,179,649,179,649,184,561,184"/>
+<area shape="rect" id="Node000012" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="668,219,847,259"/>
+<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="562,192,654,213,652,218,560,197"/>
 </map>

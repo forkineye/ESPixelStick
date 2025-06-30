@@ -31,6 +31,7 @@ var classc___output_mgr =
     [ "GetConfig", "classc___output_mgr.html#a520a6f7c6d810b254b71f3712d6f9710", null ],
     [ "GetConfig", "classc___output_mgr.html#a19d05a4eb3324331a50f31797639654f", null ],
     [ "GetDriverName", "classc___output_mgr.html#a17aadd243f3259a99b320652ab624d07", null ],
+    [ "GetDriverSize", "classc___output_mgr.html#a9ada6e65bb85cf170a0edd014b7046be", null ],
     [ "GetPortCounts", "classc___output_mgr.html#a37df24ad4fc6541891e76e7906255b2d", null ],
     [ "GetStatus", "classc___output_mgr.html#a56f81964a988693f278fd65cf43277c6", null ],
     [ "InstantiateNewOutputChannel", "classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968", null ],

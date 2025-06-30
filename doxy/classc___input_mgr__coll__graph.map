@@ -2,13 +2,11 @@
 <area shape="rect" id="Node000001" title="forward declaration to the pure virtual Input class that will be defined later." alt="" coords="182,183,268,208"/>
 <area shape="rect" id="Node000002" href="$structc___input_mgr_1_1_driver_info__t.html" title=" " alt="" coords="5,94,165,120"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="82,135,84,147,88,157,102,166,126,175,182,186,181,191,124,180,100,171,84,160,78,148,77,135"/>
-<area shape="rect" id="Node000003" href="$classc___input_common.html" title=" " alt="" coords="27,5,143,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="88,47,88,94,82,94,82,47"/>
-<area shape="rect" id="Node000004" href="$classc___external_input.html" title=" " alt="" coords="336,94,447,120"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="356,130,250,184,247,180,354,125"/>
-<area shape="rect" id="Node000005" href="$class_fast_timer.html" title=" " alt="" coords="196,5,276,31"/>
-<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="237,47,228,182,223,182,231,46"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="259,40,296,68,350,91,347,96,293,72,256,44"/>
-<area shape="rect" id="Node000006" href="$classfsm___external_input__state.html" title=" " alt="" coords="311,5,472,31"/>
-<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="394,47,394,94,389,94,389,47"/>
+<area shape="rect" id="Node000003" href="$classc___external_input.html" title=" " alt="" coords="336,94,447,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="356,130,250,184,247,180,354,125"/>
+<area shape="rect" id="Node000004" href="$class_fast_timer.html" title=" " alt="" coords="196,5,276,31"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="237,47,228,182,223,182,231,46"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="259,40,296,68,350,91,347,96,293,72,256,44"/>
+<area shape="rect" id="Node000005" href="$classfsm___external_input__state.html" title=" " alt="" coords="311,5,472,31"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="394,47,394,94,389,94,389,47"/>
 </map>

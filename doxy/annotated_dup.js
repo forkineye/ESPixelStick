@@ -3,6 +3,7 @@ var annotated_dup =
     [ "c_ExternalInput", "classc___external_input.html", "classc___external_input" ],
     [ "c_FileMgr", "classc___file_mgr.html", "classc___file_mgr" ],
     [ "c_FPPDiscovery", "classc___f_p_p_discovery.html", "classc___f_p_p_discovery" ],
+    [ "c_FPPSemaphore", "classc___f_p_p_semaphore.html", "classc___f_p_p_semaphore" ],
     [ "c_InputAlexa", "classc___input_alexa.html", "classc___input_alexa" ],
     [ "c_InputArtnet", "classc___input_artnet.html", "classc___input_artnet" ],
     [ "c_InputCommon", "classc___input_common.html", "classc___input_common" ],

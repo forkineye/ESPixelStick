@@ -103,24 +103,15 @@ $(function(){initNavTree('structc___input_mgr_1_1_driver_info__t.html',''); init
   <div class="headertitle"><div class="title">c_InputMgr::DriverInfo_t Struct Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="dynheader">
-Collaboration diagram for c_InputMgr::DriverInfo_t:</div>
-<div class="dyncontent">
-<div class="center"><img src="structc___input_mgr_1_1_driver_info__t__coll__graph.png" border="0" usemap="#ac___input_mgr_1_1_driver_info__t_coll__map" alt="Collaboration graph"/></div>
-<map name="ac___input_mgr_1_1_driver_info__t_coll__map" id="ac___input_mgr_1_1_driver_info__t_coll__map">
-<area shape="rect" title=" " alt="" coords="5,94,165,120"/>
-<area shape="rect" href="classc___input_common.html" title=" " alt="" coords="27,5,143,31"/>
-<area shape="poly" title=" " alt="" coords="88,47,88,94,82,94,82,47"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
+<tr class="memitem:ace830ab5862d1107ed42d1c934caa1a4" id="r_ace830ab5862d1107ed42d1c934caa1a4"><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace830ab5862d1107ed42d1c934caa1a4">InputDriver</a> [<a class="el" href="_input_mgr_8hpp.html#a6c141d490167a9da11d3e4d98f1f995f">InputDriverMemorySize</a>]</td></tr>
+<tr class="separator:ace830ab5862d1107ed42d1c934caa1a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f45a367b0aa71fbebe813c0121e75f0" id="r_a1f45a367b0aa71fbebe813c0121e75f0"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1f45a367b0aa71fbebe813c0121e75f0">DriverId</a> = 0</td></tr>
 <tr class="separator:a1f45a367b0aa71fbebe813c0121e75f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78483bca479c805191d9f365dfc0552b" id="r_a78483bca479c805191d9f365dfc0552b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___input_common.html">c_InputCommon</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a78483bca479c805191d9f365dfc0552b">pInputChannelDriver</a> = nullptr</td></tr>
-<tr class="memdesc:a78483bca479c805191d9f365dfc0552b"><td class="mdescLeft">&#160;</td><td class="mdescRight">pointer(s) to the current active Input driver  <br /></td></tr>
-<tr class="separator:a78483bca479c805191d9f365dfc0552b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14765d7fa7e8464a52291058a491f45a" id="r_a14765d7fa7e8464a52291058a491f45a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a14765d7fa7e8464a52291058a491f45a">DriverInUse</a> = false</td></tr>
+<tr class="separator:a14765d7fa7e8464a52291058a491f45a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="a1f45a367b0aa71fbebe813c0121e75f0" name="a1f45a367b0aa71fbebe813c0121e75f0"></a>
@@ -137,19 +128,31 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a78483bca479c805191d9f365dfc0552b" name="a78483bca479c805191d9f365dfc0552b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a78483bca479c805191d9f365dfc0552b">&#9670;&#160;</a></span>pInputChannelDriver</h2>
+<a id="a14765d7fa7e8464a52291058a491f45a" name="a14765d7fa7e8464a52291058a491f45a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a14765d7fa7e8464a52291058a491f45a">&#9670;&#160;</a></span>DriverInUse</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classc___input_common.html">c_InputCommon</a>* c_InputMgr::DriverInfo_t::pInputChannelDriver = nullptr</td>
+          <td class="memname">bool c_InputMgr::DriverInfo_t::DriverInUse = false</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>pointer(s) to the current active Input driver </p>
+</div>
+</div>
+<a id="ace830ab5862d1107ed42d1c934caa1a4" name="ace830ab5862d1107ed42d1c934caa1a4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace830ab5862d1107ed42d1c934caa1a4">&#9670;&#160;</a></span>InputDriver</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">byte c_InputMgr::DriverInfo_t::InputDriver[<a class="el" href="_input_mgr_8hpp.html#a6c141d490167a9da11d3e4d98f1f995f">InputDriverMemorySize</a>]</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>

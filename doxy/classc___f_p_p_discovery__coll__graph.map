@@ -1,15 +1,17 @@
 <map id="c_FPPDiscovery" name="c_FPPDiscovery">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1068,83,1187,108"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1068,104,1187,130"/>
 <area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html" title=" " alt="" coords="735,25,870,51"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,46,1045,73,1075,79,1073,85,1044,78,885,52"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,44,964,57,1045,77,1102,101,1100,106,1043,82,963,62,885,50"/>
 <area shape="rect" id="Node000003" href="$classc___input_common.html" title=" " alt="" coords="340,5,456,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="472,19,735,32,734,38,472,24"/>
 <area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="305,55,491,80"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="506,60,676,49,734,43,735,49,676,54,507,65"/>
 <area shape="rect" id="Node000005" href="$structc___input_f_p_p_remote_play_item_1_1_file_control__t.html" title=" " alt="" coords="5,47,192,88"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="207,65,304,65,304,70,207,70"/>
-<area shape="rect" id="Node000006" href="$structc___f_p_p_discovery_1_1_multi_sync_stats__t.html" title=" " alt="" coords="712,75,893,116"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="909,93,1068,93,1068,98,909,98"/>
-<area shape="rect" id="Node000007" href="$structc___f_p_p_discovery_1_1_system_debug_stats__t.html" title=" " alt="" coords="700,140,905,181"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="920,138,1044,113,1073,106,1074,112,1045,118,921,143"/>
+<area shape="rect" id="Node000006" href="$classc___f_p_p_semaphore.html" title=" " alt="" coords="739,75,866,100"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="882,92,1068,109,1068,114,882,97"/>
+<area shape="rect" id="Node000007" href="$structc___f_p_p_discovery_1_1_multi_sync_stats__t.html" title=" " alt="" coords="712,124,893,165"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="909,139,1044,129,1067,126,1068,131,1045,134,909,145"/>
+<area shape="rect" id="Node000008" href="$structc___f_p_p_discovery_1_1_system_debug_stats__t.html" title=" " alt="" coords="700,190,905,230"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="920,191,982,177,1043,159,1076,144,1104,128,1107,133,1078,149,1045,164,984,182,921,196"/>
 </map>

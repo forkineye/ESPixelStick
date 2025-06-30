@@ -30,6 +30,5 @@ var classc___web_mgr =
     [ "efupdate", "classc___web_mgr.html#aeb7f891688b50a8ac2ac6865aec01006", null ],
     [ "HasBeenInitialized", "classc___web_mgr.html#aec9409c6cf95e3b810fcaceb5032817a", null ],
     [ "pAlexaCallback", "classc___web_mgr.html#a3782b2eb5d97f8a003422e69bb8d19d9", null ],
-    [ "pAlexaDevice", "classc___web_mgr.html#a29f8f2bc3fffe8b65384a145ab654b33", null ],
-    [ "XjResult", "classc___web_mgr.html#a4a945e5573c038df73c6cc9e4af0faff", null ]
+    [ "pAlexaDevice", "classc___web_mgr.html#a29f8f2bc3fffe8b65384a145ab654b33", null ]
 ];

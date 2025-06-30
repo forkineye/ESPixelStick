@@ -8,7 +8,8 @@ var structc___output_mgr_1_1_driver_info__t =
     [ "OutputChannelEndOffset", "structc___output_mgr_1_1_driver_info__t.html#a563337a7c50e422b422a0756d98e7242", null ],
     [ "OutputChannelSize", "structc___output_mgr_1_1_driver_info__t.html#a40297b034c878f233ff995625fa7f8cd", null ],
     [ "OutputChannelStartingOffset", "structc___output_mgr_1_1_driver_info__t.html#af098b2ead9c2acf4a1194912e3af7ae0", null ],
+    [ "OutputDriver", "structc___output_mgr_1_1_driver_info__t.html#a4b21705043e7d51afe95a36f9ef4a022", null ],
+    [ "OutputDriverInUse", "structc___output_mgr_1_1_driver_info__t.html#a251187961b59f4c13b9ddc4b98e066e6", null ],
     [ "PortId", "structc___output_mgr_1_1_driver_info__t.html#a9831548b4d2f5ed8c4bf65108296894d", null ],
-    [ "PortType", "structc___output_mgr_1_1_driver_info__t.html#a3423c032a40c53f3d2f42344066ad601", null ],
-    [ "pOutputChannelDriver", "structc___output_mgr_1_1_driver_info__t.html#a30189f8b01f9abdc8e62f2268e5fe631", null ]
+    [ "PortType", "structc___output_mgr_1_1_driver_info__t.html#a3423c032a40c53f3d2f42344066ad601", null ]
 ];

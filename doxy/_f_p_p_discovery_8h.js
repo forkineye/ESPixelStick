@@ -1,5 +1,6 @@
 var _f_p_p_discovery_8h =
 [
+    [ "c_FPPSemaphore", "classc___f_p_p_semaphore.html", "classc___f_p_p_semaphore" ],
     [ "c_FPPDiscovery", "classc___f_p_p_discovery.html", "classc___f_p_p_discovery" ],
     [ "c_FPPDiscovery::MultiSyncStats_t", "structc___f_p_p_discovery_1_1_multi_sync_stats__t.html", "structc___f_p_p_discovery_1_1_multi_sync_stats__t" ],
     [ "c_FPPDiscovery::SystemDebugStats_t", "structc___f_p_p_discovery_1_1_system_debug_stats__t.html", "structc___f_p_p_discovery_1_1_system_debug_stats__t" ],

@@ -2,6 +2,7 @@ var main_8cpp =
 [
     [ "NO_CONFIG_NEEDED", "main_8cpp.html#a45b6758583c33d0a16c97e1389e8f155", null ],
     [ "_logcon", "main_8cpp.html#a1af7f3c5a2d6b297590babbefc5c6fe8", null ],
+    [ "DelayReboot", "main_8cpp.html#a2d941111e6837719d2ab46924313aca1", null ],
     [ "DeleteConfig", "main_8cpp.html#ab580e28a58fa670ec1ad2166f9f18711", null ],
     [ "deserializeCore", "main_8cpp.html#a067b67c856af5452506085e83cdb2b01", null ],
     [ "deserializeCoreHandler", "main_8cpp.html#a23e7afe154bda4f1d2e44818ed09843e", null ],

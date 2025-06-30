@@ -81,6 +81,7 @@ var _const_names_8hpp =
     [ "CN_files", "_const_names_8hpp.html#a5f175aa16046f697b7a6abd99f519af7", null ],
     [ "CN_FPPoverride", "_const_names_8hpp.html#a3ec2c678e86b846eefd5589569cbc79e", null ],
     [ "CN_Frequency", "_const_names_8hpp.html#a85c67ac3ba2acabbbdf446d44b469d24", null ],
+    [ "CN_fseqfilelist", "_const_names_8hpp.html#a7c288156caff740701cc52eeb43d7d30", null ],
     [ "CN_fseqfilename", "_const_names_8hpp.html#a28f1ea5bb496c43c725613dc053bf61c", null ],
     [ "CN_g", "_const_names_8hpp.html#ad8c96414252b34ecc87cca920cffb8d3", null ],
     [ "CN_gamma", "_const_names_8hpp.html#a44250958468d72bcb139c73446b3581a", null ],

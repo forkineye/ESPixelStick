@@ -70,14 +70,13 @@ var classc___file_mgr =
     [ "FileList", "classc___file_mgr.html#a590f024974133356d8f2d6da48266ffa", null ],
     [ "FileSendDir", "classc___file_mgr.html#a2cee9bd729f2622f518889c3794f544f", null ],
     [ "FoundZipFile", "classc___file_mgr.html#a0ad989fab99631270433bfbf6acdcb00", null ],
-    [ "FSEQFILELIST", "classc___file_mgr.html#a7171ef438b95aa846a011148e7d0dd10", null ],
     [ "fsUploadFileHandle", "classc___file_mgr.html#a95ce91ea55ac222562d83f87aca429bb", null ],
-    [ "fsUploadFileName", "classc___file_mgr.html#a1cb372ace094d52c26f6c6d98e006cbd", null ],
+    [ "fsUploadFileName", "classc___file_mgr.html#a3b4bed0da3f46d1dd7772e353e70fb5a", null ],
     [ "fsUploadFileSavedIsEnabled", "classc___file_mgr.html#ad02883207cdebd5dae72ae7851127d39", null ],
     [ "fsUploadStartTime", "classc___file_mgr.html#aaba83240f519b443944a15cf6fd03963", null ],
     [ "FtpEnabled", "classc___file_mgr.html#a85fbd6a2a2766f0130fdfb9207da777f", null ],
-    [ "FtpPassword", "classc___file_mgr.html#a781ccd364e81015b67d9f4bd294ba62a", null ],
-    [ "FtpUserName", "classc___file_mgr.html#a7ddd9e26547f6b8daccd6077dae1112e", null ],
+    [ "FtpPassword", "classc___file_mgr.html#af671a65c5556bf8a1f3da52191c0f218", null ],
+    [ "FtpUserName", "classc___file_mgr.html#a62ccdae39fe86250ba3c8b741f0d87ca", null ],
     [ "INVALID_FILE_HANDLE", "classc___file_mgr.html#a23e47890d813af44463cd85ba098b43d", null ],
     [ "LastFileSent", "classc___file_mgr.html#a3cdf1bed23c1ce53830376a204b282c8", null ],
     [ "MaxSdSpeed", "classc___file_mgr.html#a76c99df976a653b32ab68fe19979ed31", null ],
@@ -85,5 +84,5 @@ var classc___file_mgr =
     [ "mosi_pin", "classc___file_mgr.html#a7ed46a08080b395e231db4496e600c02", null ],
     [ "SdCardInstalled", "classc___file_mgr.html#ab0aca0e57b11d97db3a7341a28b1f8f5", null ],
     [ "SdCardSizeMB", "classc___file_mgr.html#a40907cdc97cfe26711ffd8191c2ed610", null ],
-    [ "WelcomeString", "classc___file_mgr.html#a7a93f103051d82e6e210966cf29c5507", null ]
+    [ "WelcomeString", "classc___file_mgr.html#a936ea9cdbe993f9fcdd7bbc58fb184ae", null ]
 ];

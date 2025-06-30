@@ -105,7 +105,7 @@ $(function(){initNavTree('_output_serial_8hpp_source.html',''); initResizable(tr
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="comment">* OutputSerial.h - Pixel driver code for ESPixelStick</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">*</span></div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">* Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver</span></div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">* Copyright (c) 2015, 2022 Shelby Merrick</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">* Copyright (c) 2015, 2025 Shelby Merrick</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">* http://www.forkineye.com</span></div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">*</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">*  This program is provided free for you to use in any way that you wish,</span></div>
@@ -191,11 +191,11 @@ $(function(){initNavTree('_output_serial_8hpp_source.html',''); initResizable(tr
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordtype">float</span>         IntensityBitTimeInUs = 0.0;</div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    uint32_t      NumBitsPerIntensity = 1 + 8 + 2;   <span class="comment">// Start. 8 Data, Stop</span></div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    String        GenericSerialHeader;</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keywordtype">char</span>          GenericSerialHeader[65];</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    uint32_t      SerialHeaderSize  = 0;</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    uint32_t      SerialHeaderIndex = 0;</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    String        GenericSerialFooter;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keywordtype">char</span>          GenericSerialFooter[65];</div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    uint32_t      SerialFooterSize  = 0;</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    uint32_t      SerialFooterIndex = 0;</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>

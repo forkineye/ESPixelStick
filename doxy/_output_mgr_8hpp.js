@@ -7,5 +7,6 @@ var _output_mgr_8hpp =
     [ "OM_IS_RMT", "_output_mgr_8hpp.html#a4aa294a2f6c841a2ab5aa2f541e8b0df", null ],
     [ "OM_IS_UART", "_output_mgr_8hpp.html#a5f8e57be85acf1580548dcbec0019a18", null ],
     [ "OM_MAX_NUM_CHANNELS", "_output_mgr_8hpp.html#a2950110c970b04d476d45273635a5d85", null ],
+    [ "OutputDriverMemorySize", "_output_mgr_8hpp.html#ac176102c67f7402335f2fd02d68d334d", null ],
     [ "OutputMgr", "_output_mgr_8hpp.html#af6b50c745df05adfe6f502280127db1f", null ]
 ];

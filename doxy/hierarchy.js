@@ -3,6 +3,7 @@ var hierarchy =
     [ "c_ExternalInput", "classc___external_input.html", null ],
     [ "c_FileMgr", "classc___file_mgr.html", null ],
     [ "c_FPPDiscovery", "classc___f_p_p_discovery.html", null ],
+    [ "c_FPPSemaphore", "classc___f_p_p_semaphore.html", null ],
     [ "c_InputCommon", "classc___input_common.html", [
       [ "c_InputAlexa", "classc___input_alexa.html", null ],
       [ "c_InputArtnet", "classc___input_artnet.html", null ],

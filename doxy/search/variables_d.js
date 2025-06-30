@@ -16,9 +16,11 @@ var searchData=
   ['outputchannelidtogpioandport_13',['OutputChannelIdToGpioAndPort',['../_output_mgr_8cpp.html#af623aa57357bf7d40d2b234379f26d06',1,'OutputMgr.cpp']]],
   ['outputchannelsize_14',['OutputChannelSize',['../structc___output_mgr_1_1_driver_info__t.html#a40297b034c878f233ff995625fa7f8cd',1,'c_OutputMgr::DriverInfo_t']]],
   ['outputchannelstartingoffset_15',['OutputChannelStartingOffset',['../structc___output_mgr_1_1_driver_info__t.html#af098b2ead9c2acf4a1194912e3af7ae0',1,'c_OutputMgr::DriverInfo_t']]],
-  ['outputispaused_16',['OutputIsPaused',['../classc___output_mgr.html#affde0fc6a806f815ee874e5cb3d24a03',1,'c_OutputMgr::OutputIsPaused'],['../classc___output_uart.html#a6105c8cbc70466ad6e2152f6020a210e',1,'c_OutputUart::OutputIsPaused']]],
-  ['outputmgr_17',['OutputMgr',['../_output_mgr_8cpp.html#af6b50c745df05adfe6f502280127db1f',1,'OutputMgr:&#160;OutputMgr.cpp'],['../_output_mgr_8hpp.html#af6b50c745df05adfe6f502280127db1f',1,'OutputMgr:&#160;OutputMgr.cpp']]],
-  ['outputtype_18',['OutputType',['../classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43',1,'c_OutputCommon']]],
-  ['outputtypexlatemap_19',['OutputTypeXlateMap',['../_output_mgr_8cpp.html#a5ed825bf1fd2b0279f9009fb1dc0c4f3',1,'OutputMgr.cpp']]],
-  ['outputuartconfig_20',['OutputUartConfig',['../classc___output_uart.html#a2a4d8b90bc76bc72b69a1fc9fc1fa969',1,'c_OutputUart']]]
+  ['outputdriver_16',['OutputDriver',['../structc___output_mgr_1_1_driver_info__t.html#a4b21705043e7d51afe95a36f9ef4a022',1,'c_OutputMgr::DriverInfo_t']]],
+  ['outputdriverinuse_17',['OutputDriverInUse',['../structc___output_mgr_1_1_driver_info__t.html#a251187961b59f4c13b9ddc4b98e066e6',1,'c_OutputMgr::DriverInfo_t']]],
+  ['outputispaused_18',['OutputIsPaused',['../classc___output_mgr.html#affde0fc6a806f815ee874e5cb3d24a03',1,'c_OutputMgr::OutputIsPaused'],['../classc___output_uart.html#a6105c8cbc70466ad6e2152f6020a210e',1,'c_OutputUart::OutputIsPaused']]],
+  ['outputmgr_19',['OutputMgr',['../_output_mgr_8cpp.html#af6b50c745df05adfe6f502280127db1f',1,'OutputMgr:&#160;OutputMgr.cpp'],['../_output_mgr_8hpp.html#af6b50c745df05adfe6f502280127db1f',1,'OutputMgr:&#160;OutputMgr.cpp']]],
+  ['outputtype_20',['OutputType',['../classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43',1,'c_OutputCommon']]],
+  ['outputtypexlatemap_21',['OutputTypeXlateMap',['../_output_mgr_8cpp.html#a5ed825bf1fd2b0279f9009fb1dc0c4f3',1,'OutputMgr.cpp']]],
+  ['outputuartconfig_22',['OutputUartConfig',['../classc___output_uart.html#a2a4d8b90bc76bc72b69a1fc9fc1fa969',1,'c_OutputUart']]]
 ];

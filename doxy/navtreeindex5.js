@@ -1,5 +1,9 @@
 var NAVTREEINDEX5 =
 {
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#acc122895244f0017684c45d0360b4d54":[1,0,0,3,22,16],
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#acd6e6f0240598bf75d38ce85c4b91d92":[1,0,0,3,22,30],
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#ad1cdaf2881d19f91216c4a64f925d072":[1,0,0,3,22,31],
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#ad5e649aa028bd3be75964322c1cc6ed0":[1,0,0,3,22,21],
 "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#ad828b40b5ce0c37516acd57858300a64":[1,0,0,3,22,15],
 "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#ad99563c913b8da40ad1a5a305bf3ed3d":[1,0,0,3,22,28],
 "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#addcbe236b0fb85814beced384e8d77f4":[1,0,0,3,22,7],
@@ -245,9 +249,5 @@ var NAVTREEINDEX5 =
 "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a319d1c078a4ace47775ecd6615a796a7":[1,0,0,3,32,1],
 "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a3caa63f16e3dcb8b7b137a99d926439a":[1,0,0,3,32,29],
 "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a3e89ca4ee0a6efe86f854e9f51d8c8e7":[1,0,0,3,32,14],
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a419a07f4a387bd427a992490035fe6b1":[1,0,0,3,32,0],
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a431c0875ff18625d3bf72627e60643de":[1,0,0,3,32,8],
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a4372cae3244b7798703bf70bef4dc2a9":[1,0,0,3,32,36],
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a4519f799b3e11a08d0b7377dac008a4e":[1,0,0,3,32,32],
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a50758db888f1119b61ed89d80fd38499":[1,0,0,3,32,18]
+"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a419a07f4a387bd427a992490035fe6b1":[1,0,0,3,32,0]
 };
