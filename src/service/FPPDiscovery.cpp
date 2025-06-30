@@ -39,6 +39,38 @@ static const String ulrCommand  = "command";
 static const String ulrPath     = "path";
 
 //-----------------------------------------------------------------------------
+void c_FPPSemaphore::Take ()
+{
+#ifdef ARDUINO_ARCH_ESP32
+    if(NULL == xSemaphore)
+    {
+        vSemaphoreCreateBinary( xSemaphore );
+    }
+    // wait for the semaphore to become available
+    xSemaphoreTake( xSemaphore, TickType_t(-1) );
+#else
+    while (ProcessingWebRequest)
+    {
+        // DEBUG_V("Previous Operation In Progress. Ignore this request");
+        // LOG_PORT.print("1");
+        delay(10);
+    }
+    ProcessingWebRequest = true;
+#endif // def ARDUINO_ARCH_ESP32
+} // c_FPPSemaphore
+
+//-----------------------------------------------------------------------------
+void c_FPPSemaphore::Give ()
+{
+#ifdef ARDUINO_ARCH_ESP32
+    xSemaphoreGive( xSemaphore );
+#else
+    delay(5);
+    ProcessingWebRequest = false;
+#endif // def foo
+} // c_FPPSemaphore
+
+//-----------------------------------------------------------------------------
 c_FPPDiscovery::c_FPPDiscovery ()
 {
     // DEBUG_START;
@@ -221,6 +253,9 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
 {
     // DEBUG_START;
+
+    FPPSemaphore.Take();
+
     do // once
     {
         // We're in an upload, can't be bothered
@@ -356,6 +391,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             }
         } // switch (fppPacket->packet_type)
     } while (false);
+
+    FPPSemaphore.Give();
 
     // DEBUG_END;
 } // ProcessReceivedUdpPacket
@@ -529,7 +566,7 @@ static void printReq (AsyncWebServerRequest* request, bool post)
     // DEBUG_START;
 
     int params = request->params ();
-    // DEBUG_V (String ("   Num Params: ") + String (params));
+    LOG_PORT.printf_P(PSTR ("Num Params: %d"), params);
 
     for (int i = 0; i < params; i++)
     {
@@ -697,11 +734,15 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseqFile
 void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 {
     // DEBUG_START;
+
+    FPPSemaphore.Take();
+
     printReq(request, false);
 
     do // once
     {
         String path = request->url();
+        // DEBUG_V (String ("url: ") + path);
         if (path.startsWith(F("/fpp/")))
         {
             path = path.substring(4);
@@ -719,9 +760,10 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
             // DEBUG_V (emptyString);
 
             String seq = path.substring (14);
+            // DEBUG_V (String ("seq: ") + seq);
             if (seq.endsWith (F ("/meta")))
             {
-                // DEBUG_V (emptyString);
+                // DEBUG_V ("/meta");
                 seq = seq.substring (0, seq.length () - 5);
                 // DEBUG_V("Stop Input");
                 StopPlaying ();
@@ -750,10 +792,12 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         else if (path.startsWith (F ("/api/system/status")))
         {
             String Response;
-            JsonDocument JsonDoc;
-            JsonObject JsonData = JsonDoc.to<JsonObject> ();
-            GetStatusJSON(JsonData, true);
-            serializeJson (JsonDoc, Response);
+            {
+	            JsonDocument JsonDoc;
+	            JsonObject JsonData = JsonDoc.to<JsonObject> ();
+	            GetStatusJSON(JsonData, true);
+	            serializeJson (JsonDoc, Response);
+			}
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
             break;
@@ -761,10 +805,12 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         else if (path.startsWith (F ("/api/system/info")))
         {
             String Response;
-            JsonDocument JsonDoc;
-            JsonObject JsonData = JsonDoc.to<JsonObject> ();
-            GetSysInfoJSON(JsonData);
-            serializeJson (JsonDoc, Response);
+            {
+	            JsonDocument JsonDoc;
+	            JsonObject JsonData = JsonDoc.to<JsonObject> ();
+	            GetSysInfoJSON(JsonData);
+	            serializeJson (JsonDoc, Response);
+			}
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
             break;
@@ -774,6 +820,8 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
     } while (false); // do once
 
+    FPPSemaphore.Give();
+
     // DEBUG_END;
 
 } // ProcessGET
@@ -782,6 +830,9 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 {
     // DEBUG_START;
+
+    FPPSemaphore.Take();
+
     printReq(request, true);
 
     do // once
@@ -816,6 +867,8 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
         request->send (200, CN_applicationSLASHjson, resp);
 
     } while (false);
+
+    FPPSemaphore.Give();
 
     // DEBUG_END;
 } // ProcessPOST
@@ -987,7 +1040,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, F ("HostDescription"), config.id);
     JsonWrite(jsonResponse, CN_Platform,           String(CN_ESPixelStick));
     JsonWrite(jsonResponse, F ("Variant"),         FPP_VARIANT_NAME);
-    JsonWrite(jsonResponse, F ("Mode"),            String((true == AllowedToPlayRemoteFile()) ? CN_remote : CN_bridge));
+    JsonWrite(jsonResponse, F ("Mode"),            String((FileMgr.SdCardIsInstalled ()) ? CN_remote : CN_bridge));
     JsonWrite(jsonResponse, CN_Version,            VERSION);
 
     const char* version = VERSION.c_str ();
@@ -1050,7 +1103,7 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
         JsonWrite(JsonData, CN_status,             0);
         JsonWrite(JsonData, CN_status_name,        F ("idle"));
 
-        if (IsEnabled)
+        if (FileMgr.SdCardIsInstalled ())
         {
             JsonWrite(JsonData, CN_mode,      8);
             JsonWrite(JsonData, CN_mode_name, String(CN_remote));
@@ -1091,6 +1144,9 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
 void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 {
     // DEBUG_START;
+
+    FPPSemaphore.Take();
+
     printReq(request, false);
 
     SystemDebugStats.ProcessFPPJson++;
@@ -1185,6 +1241,8 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
     } while (false);
 
+    FPPSemaphore.Give();
+
     // DEBUG_END;
 
 } // ProcessFPPJson
@@ -1193,17 +1251,67 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 void c_FPPDiscovery::ProcessFPPDJson (AsyncWebServerRequest* request)
 {
     // DEBUG_START;
+
+    FPPSemaphore.Take();
+
     printReq(request, false);
 
     SystemDebugStats.ProcessFPPDJson++;
 
     do // once
     {
+        const String & url = request->url();
+        // DEBUG_V (String ("url: ") + url);
+
         if (!request->hasParam (ulrCommand))
         {
-            request->send (404);
             // DEBUG_V (String ("Missing Param: 'command' "));
+        }
+        else
+        {
+            // DEBUG_V (String ("Unsupported command: ") + ulrCommand);
+        }
 
+        if(-1 != url.indexOf("channelOutputsJSON"))
+        {
+            // DEBUG_V("Send output config to FPP");
+            SystemDebugStats.CmdGetConfig++;
+            request->send (LittleFS, "/output_config.json", CN_applicationSLASHjson);
+            break;
+        }
+
+        if(-1 != url.indexOf("multiSyncSystems"))
+        {
+            logcon("Unsupported request 'multiSyncSystems'");
+            request->send (404);
+            break;
+        }
+
+        if(-1 != url.indexOf("channel/output/co-pixelStrings"))
+        {
+            logcon("Unsupported request 'channel/output/co-pixelStrings'");
+            request->send (404);
+            break;
+        }
+
+        if(-1 != url.indexOf("channel/output/co-pixelStrings"))
+        {
+            logcon("Unsupported request 'channel/output/co-pixelStrings'");
+            request->send (404);
+            break;
+        }
+
+        if(-1 != url.indexOf("channel/output/co-other"))
+        {
+            logcon("Unsupported request 'channel/output/co-other'");
+            request->send (404);
+            break;
+        }
+
+        if(-1 != url.indexOf("playlists"))
+        {
+            logcon("Unsupported request 'playlists'");
+            request->send (404);
             break;
         }
 
@@ -1212,6 +1320,8 @@ void c_FPPDiscovery::ProcessFPPDJson (AsyncWebServerRequest* request)
         SystemDebugStats.CmdNotFound++;
 
     } while (false);
+
+    FPPSemaphore.Give();
 
     // DEBUG_END;
 

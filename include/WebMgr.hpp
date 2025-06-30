@@ -49,7 +49,6 @@ private:
     DeviceCallbackFunction pAlexaCallback = nullptr;
     EspalexaDevice *       pAlexaDevice   = nullptr;
     bool                   HasBeenInitialized = false;
-    String                 XjResult = emptyString;
 
 #ifdef ARDUINO_ARCH_ESP32
 #   define     STATUS_DOC_SIZE 4000

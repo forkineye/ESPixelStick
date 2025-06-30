@@ -155,6 +155,8 @@ void setup()
     digitalWrite(DEBUG_GPIO, HIGH);
 #endif // def DEBUG_GPIO
 
+    strcpy_P(config.id, String(F("ESPixelStick")).c_str());
+
     config.BlankDelay = 5;
 #ifdef ARDUINO_ARCH_ESP32
     // disable brownout detector
@@ -259,9 +261,9 @@ bool validateConfig()
     bool configValid = true;
 
     // Device defaults
-    if (!config.id.length ())
+    if (0 == strlen(config.id))
     {
-        config.id = F("ESPixelStick");
+        strcpy(config.id, String(F("ESPixelStick")).c_str());
         configValid = false;
         // DEBUG_V ();
     }
@@ -438,8 +440,7 @@ void LoadConfig()
 
     String temp;
     // DEBUG_V ("");
-    FileMgr.LoadFlashFile (ConfigFileName, &deserializeCoreHandler);
-
+    ConfigSaveNeeded |= !FileMgr.LoadFlashFile (ConfigFileName, &deserializeCoreHandler);
     ConfigSaveNeeded |= !validateConfig ();
 
     // DEBUG_END;
@@ -508,6 +509,19 @@ String serializeCore(bool pretty)
 
     return jsonConfigString;
 } // serializeCore
+
+void DelayReboot(uint32_t MinDelay)
+{
+    // DEBUG_START;
+
+    if (NotRebootingValue != RebootCount)
+    {
+        // DEBUG_V("Recalc delay");
+        RebootCount = (RebootCount < MinDelay) ? MinDelay: RebootCount;
+    }
+
+    // DEBUG_END;
+} // DelayReboot
 
 /////////////////////////////////////////////////////////
 //

@@ -3,7 +3,7 @@
 * OutputSerial.h - Pixel driver code for ESPixelStick
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -89,11 +89,11 @@ private:
     float         IntensityBitTimeInUs = 0.0;
     uint32_t      NumBitsPerIntensity = 1 + 8 + 2;   // Start. 8 Data, Stop
 
-    String        GenericSerialHeader;
+    char          GenericSerialHeader[65];
     uint32_t      SerialHeaderSize  = 0;
     uint32_t      SerialHeaderIndex = 0;
 
-    String        GenericSerialFooter;
+    char          GenericSerialFooter[65];
     uint32_t      SerialFooterSize  = 0;
     uint32_t      SerialFooterIndex = 0;
 

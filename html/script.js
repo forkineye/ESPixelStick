@@ -1,5 +1,7 @@
 var StatusRequestTimer = null;
 var DiagTimer = null;
+var MonitorTransactionRequestInProgressId = 0;
+var PreviousMonitorTransactionRequestInProgressId = 0;
 
 // global data
 var AdminInfo = null;
@@ -9,12 +11,13 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var target = document.location.host;
+var ajaxQueue = $({}); // Create an empty jQuery object to act as a queue
 // target = "192.168.10.216";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
 var ServerTransactionTimer = null;
-var CompletedServerTransaction = true;
+var FailedToCompleteServerTransaction = 0;
 var DocumentIsHidden = false;
 
 // Drawing canvas - move to diagnostics
@@ -132,65 +135,33 @@ const rssiToPercent =
 $.fn.modal.Constructor.DEFAULTS.backdrop = 'static';
 $.fn.modal.Constructor.DEFAULTS.keyboard = false;
 
-class Semaphore {
-    /**
-     * Creates a semaphore that limits the number of concurrent Promises being handled
-     * @param {*} maxConcurrentRequests max number of concurrent promises being handled at any time
-     */
-    constructor(maxConcurrentRequests = 1) {
-        this.currentRequests = [];
-        this.runningRequests = 0;
-        this.maxConcurrentRequests = maxConcurrentRequests;
-    }
-
-    /**
-     * Returns a Promise that will eventually return the result of the function passed in
-     * Use this to limit the number of concurrent function executions
-     * @param {*} fnToCall function that has a cap on the number of concurrent executions
-     * @param  {...any} args any arguments to be passed to fnToCall
-     * @returns Promise that will resolve with the resolved value as if the function passed in was directly called
-     */
-    callFunction(fnToCall, ...args) {
-        return new Promise((resolve, reject) => {
-            this.currentRequests.push({
-                resolve,
-                reject,
-                fnToCall,
-                args,
-            });
-            this.tryNext();
-        });
-    }
-
-    tryNext() {
-        if (!this.currentRequests.length) {
-            return;
-        } else if (this.runningRequests < this.maxConcurrentRequests) {
-            let { resolve, reject, fnToCall, args } = this.currentRequests.shift();
-            this.runningRequests++;
-            let req = fnToCall(...args);
-            req.then((res) => resolve(res))
-                .catch((err) => reject(err))
-                .finally(() => {
-                    this.runningRequests--;
-                    this.tryNext();
-                });
-        }
-    }
-} // callFunction
-
-const ServerAccess = new Semaphore(1);
-
-// lets get started
-MonitorServerConnection();
-RequestConfigFile("admininfo.json");
-RequestDiagData();
-RequestStatusUpdate();  // start self filling status loop
-
 // jQuery doc ready
-$(function () {
+$(function ()
+{
+    $.ajaxQueue = function(ajaxOpts)
+    {
+        // hold the original complete function
+        var oldComplete = ajaxOpts.complete;
+
+        // queue our ajax request
+        ajaxQueue.queue(function(next)
+        {
+            // create a complete callback to fire the next event in the queue
+            ajaxOpts.complete = function()
+            {
+                // fire the original complete if it was there
+                if (oldComplete) oldComplete.apply(this, arguments);
+                next(); // run the next query in the queue
+            };
+
+            // run the query
+            $.ajax(ajaxOpts);
+        });
+    };
+
     // Menu navigation for single page layout
-    $('ul.navbar-nav li a').on("click", (function () {
+    $('ul.navbar-nav li a').on("click", (function ()
+    {
         // Highlight proper navbar item
         $('.nav li').removeClass('active');
         $(this).parent().addClass('active');
@@ -206,7 +177,8 @@ $(function () {
         $('.navbar-toggle').attr('aria-expanded', 'false');
 
         // Firmware selection and upload
-        $('#efu').on("change" ,function () {
+        $('#efu').on("change" ,function ()
+        {
             let file = _('efu').files[0];
             let formdata = new FormData();
             formdata.append("file", file);
@@ -480,7 +452,13 @@ $(function () {
         }
     });
 
+// lets get started
+    RequestConfigFile("admininfo.json");
+    RequestConfigFile("config.json");
     SetServerTime();
+    RequestDiagData();
+    StartRequestingStatusUpdate();  // start self filling status loop
+    MonitorServerConnection();
 });
 
 function SetServerTime()
@@ -488,7 +466,7 @@ function SetServerTime()
     // console.debug("SetServerTime");
     let CurrentDate = Math.floor((new Date()).getTime() / 1000);
     // console.debug("CurrentDate: " + CurrentDate);
-    SendCommand('settime/' + (CurrentDate));
+    SendCommand('settime?newtime=' + (CurrentDate));
 } // SetServerTime
 
 function ProcessConfigFromLocalFile(data)
@@ -523,7 +501,7 @@ function MergeConfig(SourceData, TargetData, FileName, SectionName)
     MergeConfigTree(FinalSourceData, FinalTargetData, FinalTargetData, "");
 
     // let DataString = '{"' + SectionName + '":' + JSON.stringify(TargetData) + "}";
-    ServerAccess.callFunction(SendConfigFileToServer, FileName, JSON.stringify(FinalTargetData));
+    SendConfigFileToServer(FileName, JSON.stringify(FinalTargetData));
 
 } // MergeConfig
 
@@ -662,60 +640,83 @@ function UpdateChannelCounts() {
     }
 } // UpdateChannelCounts
 
-async function SendConfigFileToServer(FileName = "", DataString = "")
+function SendAllConfigFilesToServer()
 {
-    // console.debug("FileName: " + FileName);
-    // console.debug("Data: " + JSON.stringify(Data));
+    // console.debug("SendAllConfigFilesToServer");
 
-    let ConfigXfer = new XMLHttpRequest();
-    ConfigWaitMessageStart();
-    ConfigXfer.addEventListener("loadend", function()
+    ConfigWaitMessageStart(3);
+    SendConfigFileToServer("config", JSON.stringify({'system': System_Config}));
+    SendConfigFileToServer("output_config", JSON.stringify({'output_config': Output_Config}));
+    SendConfigFileToServer("input_config", JSON.stringify({'input_config': Input_Config}));
+
+} // SendAllConfigFilesToServer
+
+function SendConfigFileToServer(FileName, DataString)
+{
+    // console.debug("SendConfigFileToServer: FileName: " + FileName);
+    // console.debug("SendConfigFileToServer: Data: " + JSON.stringify(DataString));
+    let url = "http://" + target + "/conf/" + FileName + ".json";
+
+    $.ajaxQueue(
     {
-        // console.debug("SendConfigFileToServer: Success");
-        ConfigWaitMessageEnd(0);
-        return 1;
-    }, false);
-    ConfigXfer.addEventListener("error", function () {
-        console.error("SendConfigFileToServer: Error");
-        ConfigWaitMessageEnd(1);
-        return 0;
-    }, false);
-    ConfigXfer.addEventListener("abort", function() {
-        console.error("SendConfigFileToServer: abort");
-        ConfigWaitMessageEnd(1);
-        return -1;
-    }, false);
-    ConfigXfer.open("PUT", "http://" + target + "/conf/" + FileName + ".json");
-    ConfigXfer.send(DataString);
-    // console.debug("DataString: " + DataString);
-    // ConfigXfer.send(JSON.stringify(Data));
+        type: "PUT",
+        url: url,
+        data: DataString,
+        contentType: "application/json",
+        mode: "cors", // no-cors, *cors, same-origin
+        dataType: "json",
+        timeout: 20000,
+        async: false,
+        headers: { 'Content-Type': 'application/json' },
+        cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        success: function(response)
+        {
+            // console.debug("SendConfigFileToServer: " + JSON.stringify(response));
+            ConfigWaitMessageEnd(0);
+        },
+        error: function()
+        {
+            console.error("SendConfigFileToServer: AJAX request failed for: " + url);
+            ConfigWaitMessageEnd(1);
+        }
+    });
+    // console.debug("SendConfigFileToServer: Done: FileName: " + FileName);
 
 } // SendConfigFileToServer
 
-async function ProcessWindowChange(NextWindow) {
+function ProcessWindowChange(NextWindow) {
 
     if (NextWindow === "#diag") {
     }
 
-    else if (NextWindow === "#admin") {
-        await RequestConfigFile("config.json");
-        await RequestConfigFile("output_config.json");
-        await RequestConfigFile("input_config.json");
+    else if (NextWindow === "#admin")
+    {
+        RequestConfigFile("admininfo.json");
+        RequestConfigFile("config.json");
+        RequestConfigFile("output_config.json");
+        RequestConfigFile("input_config.json");
     }
 
-    else if ((NextWindow === "#pg_network") || (NextWindow === "#home")) {
-        await RequestConfigFile("config.json");
+    else if ((NextWindow === "#pg_network") || (NextWindow === "#home"))
+    {
+        RequestConfigFile("admininfo.json");
+        RequestConfigFile("config.json");
     }
 
-    else if (NextWindow === "#config") {
-        await RequestListOfFiles();
-        await RequestConfigFile("config.json");
-        await RequestConfigFile("output_config.json");
-        await RequestConfigFile("input_config.json");
+    else if (NextWindow === "#config")
+    {
+        RequestListOfFiles();
+        RequestConfigFile("admininfo.json");
+        RequestConfigFile("config.json");
+        RequestConfigFile("output_config.json");
+        RequestConfigFile("input_config.json");
     }
 
     else if (NextWindow === "#filemanagement") {
-        await RequestListOfFiles();
+        RequestListOfFiles();
     }
 
     UpdateAdvancedOptionsMode();
@@ -732,16 +733,17 @@ function RequestDiagData()
         {
             if ($('#diag').is(':visible'))
             {
+                MonitorTransactionRequestInProgressId++;
                 fetch("HTTP://" + target + "/V1",
                 {
                     method: "GET", // *GET, POST, PUT, DELETE, etc.
                     mode: "cors", // no-cors, *cors, same-origin
-                    cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                    dataType: "json",
+                    timeout: 20000,
+                    async: false,
+                    headers: { 'Content-Type': 'application/json' },
+                    cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
                     credentials: "same-origin", // include, *same-origin, omit
-                    headers:
-                    {
-                        "Content-Type": "application/json",
-                    },
                     redirect: "follow", // manual, *follow, error
                     referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
                 })
@@ -756,17 +758,19 @@ function RequestDiagData()
                         // get error message from body or default to response status
                         const error = webResponse.status;
                         console.error("SendCommand: Error: " + Promise.reject(error));
+                        FailedToCompleteServerTransaction ++;
                     }
                     else
                     {
                         // console.debug("SendCommand: Transaction complete");
-                        CompletedServerTransaction = true;
+                        FailedToCompleteServerTransaction = 0;
                         let streamData = new Uint8Array(await data.arrayBuffer());
                         drawStream(streamData);
                     }
                 })
                 .catch(async error =>
                 {
+                    FailedToCompleteServerTransaction ++;
                     console.error('SendCommand: Error: ', error);
                 });
             }
@@ -774,123 +778,134 @@ function RequestDiagData()
     }
 } // RequestDiagData
 
-async function RequestConfigFile(FileName, retries = 5)
+function RequestConfigFile(FileName)
 {
     // console.debug("RequestConfigFile FileName: " + FileName);
-    // console.debug("'retries: '" + retries + "'");
-    if(retries === 0)
+    var url = "HTTP://" + target + "/conf/" + FileName;
+    console.info("RequestConfigFile: 'GET' URL: '" + url + "'");
+
+    $.ajaxQueue(
     {
-        console.error("RequestConfigFile ran out of retries");
-        reboot;
-    }
-    else
-    {
-        var url = "HTTP://" + target + "/conf/" + FileName;
-        console.info("RequestConfigFile: 'GET' URL: '" + url + "'");
-        $.ajaxSetup(
+        type: "GET",
+        url: url,
+        mode: "cors", // no-cors, *cors, same-origin
+        dataType: "json",
+        timeout: 20000,
+        async: false,
+        headers: { 'Content-Type': 'application/json' },
+        cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        success: function(response)
         {
-            cache: false,
-            timeout: 5000
-        });
-        await $.getJSON(url)
-            .done(function (data)
-            {
-                // console.debug("RequestConfigFile: " + JSON.stringify(data));
-                ProcessReceivedJsonConfigMessage(data);
-            })
-            .fail(function(jqXHR, textStatus, errorThrown)
-            {
-                console.error("Could not read config file: " + FileName);
-                console.error("Error:", textStatus, errorThrown);
-                RequestConfigFile(FileName, retries-1);
-            })
-            .catch(function(error)
-            {
-                // Handle the error
-                console.error("Could not read config file: " + FileName);
-                console.error("Error:", error);
-                RequestConfigFile(FileName, retries-1);
-            });
-    }
+            // console.debug("RequestConfigFile: " + JSON.stringify(response));
+            ProcessReceivedJsonConfigMessage(response);
+        },
+        error: function()
+        {
+            console.error("RequestConfigFile: AJAX request failed for: " + url);
+        }
+    });
+
+    // console.debug("RequestConfigFile - done. FileName: " + FileName);
+
 } // RequestConfigFile
 
-function RequestStatusUpdate()
+async function StartRequestingStatusUpdate()
 {
-    // console.log("RequestStatusUpdate Start: ");
+    // console.log("StartRequestingStatusUpdate Start: ");
     // is the timer running?
     if (null === StatusRequestTimer)
     {
+        RequestStatusUpdate();
         // timer runs forever
         StatusRequestTimer = setTimeout(function ()
         {
             clearTimeout(StatusRequestTimer);
             StatusRequestTimer = null;
 
-            RequestStatusUpdate();
-
+            StartRequestingStatusUpdate();
         }, 1000);
     } // end timer was not running
+}
 
+function RequestStatusUpdate()
+{
     if ($('#home').is(':visible'))
     {
         // ask for a status update from the server
         let FileName = "HTTP://" + target + "/XJ";
-        // console.log("RequestStatusUpdate FileName: " + FileName);
+        console.log("RequestStatusUpdate FileName: " + FileName);
 
-        $.ajaxSetup(
+        MonitorTransactionRequestInProgressId++;
+
+        $.ajaxQueue(
         {
-            cache: false,
-            timeout: 5000
-        });
-        $.getJSON(FileName)
-            .done(function (data)
+            type: "GET",
+            url: FileName,
+            mode: "cors", // no-cors, *cors, same-origin
+            dataType: "json",
+            timeout: 20000,
+            async: false,
+            headers: { 'Content-Type': 'application/json' },
+            cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: "same-origin", // include, *same-origin, omit
+            redirect: "follow", // manual, *follow, error
+            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            success: function(response)
             {
-                // console.log("RequestStatusUpdate: " + JSON.stringify(data));
-                CompletedServerTransaction = true;
-                ProcessReceivedJsonStatusMessage(data);
-            })
-            .fail(function(jqXHR, textStatus, errorThrown)
+                console.log("RequestStatusUpdate: " + JSON.stringify(response));
+                FailedToCompleteServerTransaction = 0;
+                ProcessReceivedJsonStatusMessage(response);
+            },
+            error: function(textStatus)
             {
-                    console.error("Could not read Status file: " + FileName);
-                console.error("Error:", textStatus, errorThrown);
-            })
-            .catch(function()
-            {
+                FailedToCompleteServerTransaction ++;
                 console.error("Could not read Status file: " + FileName);
-            });
+                console.error("Error:", textStatus);
+            }
+        });
     } // end home (aka status) is visible
 
 } // RequestStatusUpdate
 
-async function RequestListOfFiles()
+function RequestListOfFiles()
 {
     // console.debug("ask for a file list from the server");
 
     var url = "HTTP://" + target + "/fseqfilelist";
     // console.debug("RequestListOfFiles: 'GET' URL: '" + url + "'");
-    $.ajaxSetup(
+
+    MonitorTransactionRequestInProgressId++;
+    $.ajaxQueue(
     {
-        cache: false,
-        timeout: 5000
+        url: url,
+        method: 'GET',
+        mode: "cors", // no-cors, *cors, same-origin
+        dataType: "json",
+        timeout: 20000,
+        async: false,
+        headers: { 'Content-Type': 'application/json' },
+        cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        success: function (webResponse)
+        {
+            if ({}.hasOwnProperty.call(webResponse, "SdCardPresent"))
+            {
+                // console.debug("RequestListOfFiles: " + JSON.stringify(webResponse));
+                ProcessGetFileListResponse(webResponse);
+            }
+        },
+        error: function (jqXHR, textStatus, errorThrown)
+        {
+            FailedToCompleteServerTransaction ++;
+            console.error('RequestListOfFiles: Error: ', textStatus);
+            console.error('RequestListOfFiles: errorThrown: ', errorThrown);
+        }
     });
-    await $.getJSON(url)
-        .done(function (data)
-        {
-            // console.debug("RequestListOfFiles: " + JSON.stringify(data));
-            ProcessGetFileListResponse(data);
-        })
-        .fail(function(jqXHR, textStatus, errorThrown)
-        {
-            console.error("Could not read fseqfilelist file");
-            console.error("Error:", textStatus, errorThrown);
-        })
-        .catch(function(error)
-        {
-            // Handle the error
-            console.error("Could not read RequestListOfFiles file");
-            console.error("Error:", error);
-        });
-    return true;
 
 } // RequestListOfFiles
 
@@ -1508,14 +1523,16 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
     // console.debug("ProcessReceivedJsonConfigMessage: Start");
 
     // is this an output config?
-    if ({}.hasOwnProperty.call(JsonConfigData, "output_config")) {
+    if ({}.hasOwnProperty.call(JsonConfigData, "output_config"))
+    {
         // save the config for later use.
         Output_Config = JsonConfigData.output_config;
         CreateOptionsFromConfig("output", Output_Config);
     }
 
     // is this an input config?
-    else if ({}.hasOwnProperty.call(JsonConfigData, "input_config")) {
+    else if ({}.hasOwnProperty.call(JsonConfigData, "input_config"))
+    {
         // save the config for later use.
         Input_Config = JsonConfigData.input_config;
         CreateOptionsFromConfig("input", Input_Config);
@@ -1784,8 +1801,7 @@ function submitNetworkConfig() {
 
     ExtractNetworkConfigFromHtmlPage();
 
-    ServerAccess.callFunction(SendConfigFileToServer,"config", JSON.stringify({'system': System_Config}));
-
+    SendAllConfigFilesToServer();
 } // submitNetworkConfig
 
 function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
@@ -2010,7 +2026,8 @@ function ValidateConfigFields(ElementList) {
 } // ValidateConfigFields
 
 // Build dynamic JSON config submission for "Device" tab
-function submitDeviceConfig() {
+function submitDeviceConfig()
+{
     ExtractChannelConfigFromHtmlPage(Input_Config.channels, "input");
 
     Input_Config.ecb.enabled = $('#ecb_enable').is(':checked');
@@ -2023,9 +2040,6 @@ function submitDeviceConfig() {
     }
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
-
-    ServerAccess.callFunction(SendConfigFileToServer, "output_config", JSON.stringify({'output_config': Output_Config}));
-    ServerAccess.callFunction(SendConfigFileToServer, "input_config", JSON.stringify({'input_config': Input_Config}));
     submitNetworkConfig();
 
 } // submitDeviceConfig
@@ -2039,37 +2053,35 @@ function int2ip(num) {
     return d;
 } // int2ip
 
-// Ping every 4sec
+// Ping every 4sec if there is no other traffic
 function MonitorServerConnection()
 {
     // console.debug("MonitorServerConnection");
-    let MonitorTransactionRequestInProgress = false;
-    let MonitorTransactionPreviousResponse = -1;
-
     if(null === ServerTransactionTimer)
     {
-        // console.debug("MonitorServerConnection: Start Timer");
-        ServerTransactionTimer = setInterval(async function () 
+        // console.info("MonitorServerConnection: Expired");
+        // console.info("PreviousMonitorTransactionRequestInProgressId: " + PreviousMonitorTransactionRequestInProgressId);
+        // console.info("        MonitorTransactionRequestInProgressId: " + MonitorTransactionRequestInProgressId);
+        // console.info("            FailedToCompleteServerTransaction: " + FailedToCompleteServerTransaction);
+
+        if(PreviousMonitorTransactionRequestInProgressId === MonitorTransactionRequestInProgressId)
         {
-            // console.debug("MonitorServerConnection: Expired");
-            if(!CompletedServerTransaction && !MonitorTransactionRequestInProgress && !DocumentIsHidden)
-            {
-                MonitorTransactionRequestInProgress = true
-                let Response = await SendCommand('XP');
-                MonitorTransactionRequestInProgress = false;
-                // console.debug("MonitorServerConnection: " + Response);
-                if(MonitorTransactionPreviousResponse !== Response)
-                {
-                    MonitorTransactionPreviousResponse = Response;
-                    $('#wserror').modal((1 === Response) ? "hide" : "show");
-                }
-            }
-            CompletedServerTransaction = false;
+            SendCommand('XP');
+        }
+        PreviousMonitorTransactionRequestInProgressId = MonitorTransactionRequestInProgressId;
+
+        $('#wserror').modal((FailedToCompleteServerTransaction > 1) ? "show" : "hide");
+
+        ServerTransactionTimer = setTimeout(function ()
+        {
+            clearTimeout(ServerTransactionTimer);
+            ServerTransactionTimer = null;
+
+            MonitorServerConnection();
         }, 4000);
     }
 } // MonitorServerConnection
 
-// Move to diagnostics
 function drawStream(streamData) {
     let cols = parseInt($('#v_columns').val());
     let size = Math.floor((canvas.width - 20) / cols);
@@ -2111,14 +2123,15 @@ function drawStream(streamData) {
     }
 } // drawStream
 
-// Move to diagnostics
 function clearStream() {
     if (typeof ctx !== 'undefined') {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 } // clearStream
 
-function ProcessReceivedJsonAdminMessage(data) {
+function ProcessReceivedJsonAdminMessage(data)
+{
+    // console.debug("ProcessReceivedJsonAdminMessage");
     // let ParsedJsonAdmin = JSON.parse(data);
     AdminInfo = data.admin;
 
@@ -2139,7 +2152,6 @@ function ProcessReceivedJsonAdminMessage(data) {
 
 } // ProcessReceivedJsonAdminMessage
 
-// ProcessReceivedJsonStatusMessage
 function ProcessReceivedJsonStatusMessage(JsonStat) {
     // let JsonStat = JSON.parse(data);
     let Status = JsonStat.status;
@@ -2385,18 +2397,20 @@ function ProcessReceivedJsonStatusMessage(JsonStat) {
 let MsgXferCount = 0;
 let AggregateErrorFlag = 0;
 
-function ConfigWaitMessageStart()
+function ConfigWaitMessageStart(NumEntries = 1)
 {
     // console.debug("ConfigWaitMessageStart");
     // console.debug("MsgXferCount " + MsgXferCount);
+    // console.debug("NumEntries " + NumEntries);
 
     $('#snackbar').modal();
 
-    MsgXferCount ++;
     if(1 === MsgXferCount)
     {
         AggregateErrorFlag = 0;
     }
+    MsgXferCount += NumEntries;
+
 } // ConfigWaitMessageStart
 
 function ConfigWaitMessageEnd(ErrorFlag)
@@ -2423,17 +2437,6 @@ function ConfigWaitMessageEnd(ErrorFlag)
 
 } // ConfigWaitMessageEnd
 
-/*
-// Show "save" snackbar for 3sec
-function snackSave() {
-    let x = document.getElementById('snackbar');
-    x.className = 'show';
-    setTimeout(function () {
-        x.className = x.className.replace('show', '');
-    }, 3000);
-} // snackSave
-*/
-
 // Show reboot modal
 function showReboot() {
     $("#EfuProgressBar").addClass("hidden");
@@ -2449,43 +2452,65 @@ function showReboot() {
     }, 5000);
 } // showReboot
 
-async function SendCommand(command)
+function SendCommand(command)
 {
     // console.debug("SendCommand: " + command);
-    return await fetch("HTTP://" + target + "/" + command, {
-            method: 'POST',
-            mode: "cors", // no-cors, *cors, same-origin
-            headers: { 'Content-Type': 'application/json' },
-            cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "same-origin", // include, *same-origin, omit
-            redirect: "follow", // manual, *follow, error
-            referrerPolicy: "no-referrer" // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        })
-        .then(async webResponse =>
+    MonitorTransactionRequestInProgressId++;
+    $.ajaxQueue(
+    {
+        url: "HTTP://" + target + "/" + command,
+        method: 'POST',
+        mode: "cors", // no-cors, *cors, same-origin
+        dataType: "json",
+        timeout: 20000,
+        async: false,
+        headers: { 'Content-Type': 'application/json' },
+        cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        success: function (webResponse)
         {
-            const isJson = webResponse.headers.get('content-type')?.includes('application/json');
-            const data = isJson && await webResponse.json();
+            if("" === webResponse)
+            {
+                // console.debug("SendCommand: Empty webResponse");
+                FailedToCompleteServerTransaction = 0;
+            }
+            else if(webResponse.headers)
+            {
+                const isJson = webResponse.headers.get('content-type')?.includes('application/json');
+                const data = isJson && webResponse.json();
 
-            // console.debug("SendCommand:webResponse.status: " + webResponse.status);
-            // console.debug("SendCommand:webResponse.ok: " + webResponse.ok);
-            // check for error response
-            if (!webResponse.ok) {
-                // get error message from body or default to response status
-                const error = (data && data.message) || webResponse.status;
-                console.error("SendCommand: Error: " + Promise.reject(error));
+                // console.debug("SendCommand:webResponse.status: " + webResponse.status);
+                // console.debug("SendCommand:webResponse.ok: " + webResponse.ok);
+                // check for error response
+                if (!webResponse.ok)
+                {
+                    // get error message from body or default to response status
+                    const error = (data && data.message) || webResponse.status;
+                    console.error("SendCommand: Error: " + Promise.reject(error));
+                    FailedToCompleteServerTransaction ++;
+                }
+                else
+                {
+                    // console.debug("SendCommand: Transaction complete");
+                    FailedToCompleteServerTransaction = 0;
+                }
             }
             else
             {
-                // console.debug("SendCommand: Transaction complete");
-                CompletedServerTransaction = true;
+                // console.debug("SendCommand: No headers in webResponse");
+                FailedToCompleteServerTransaction = 0;
             }
-            return webResponse.ok ? 1 : 0;
-        })
-        .catch(error =>
+        },
+        error: function (jqXHR, textStatus, errorThrown)
         {
-            console.error('SendCommand: Error: ', error);
-            return -1;
-        });
+            FailedToCompleteServerTransaction ++;
+            console.error('SendCommand: Error: ', textStatus);
+            console.error('SendCommand: errorThrown: ', errorThrown);
+        }
+    });
+    // console.debug("End SendCommand: " + command);
 } // SendCommand
 
 // Queue reboot

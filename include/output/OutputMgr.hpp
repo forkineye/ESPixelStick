@@ -207,9 +207,13 @@ public:
         Undefined
     };
 
+    // must be 16 byte aligned. Determined by upshifting the max size of all drivers
+    #define OutputDriverMemorySize 1200
+    uint32_t GetDriverSize() {return OutputDriverMemorySize;}
 private:
     struct DriverInfo_t
     {
+        alignas(16) byte    OutputDriver[OutputDriverMemorySize];
         uint32_t            OutputBufferStartingOffset  = 0;
         uint32_t            OutputBufferDataSize        = 0;
         uint32_t            OutputBufferEndOffset       = 0;
@@ -222,7 +226,7 @@ private:
         OM_PortType_t       PortType                    = OM_PortType_t::Undefined;
         uart_port_t         PortId                      = uart_port_t(-1);
         e_OutputChannelIds  DriverId                    = e_OutputChannelIds(-1);
-        c_OutputCommon      *pOutputChannelDriver       = nullptr;
+        bool                OutputDriverInUse           = false;
     };
 
     // pointer(s) to the current active output drivers
@@ -250,6 +254,7 @@ private:
     uint32_t   UsedBufferSize = 0;
     gpio_num_t ConsoleTxGpio  = gpio_num_t::GPIO_NUM_1;
     gpio_num_t ConsoleRxGpio  = gpio_num_t::GPIO_NUM_3;
+
 #if defined(ARDUINO_ARCH_ESP32)
     TaskHandle_t myTaskHandle = NULL;
     // uint32_t PollCount = 0;

@@ -156,7 +156,7 @@ void c_WebMgr::init ()
             ProcessXJRequest (request);
         });
 
-    	webServer.on ("/settime", HTTP_POST | HTTP_GET | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
+    	webServer.on ("/settime", HTTP_POST | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
         {
             // DEBUG_V("/settime");
             // DEBUG_V(String("URL: ") + request->url());
@@ -167,10 +167,16 @@ void c_WebMgr::init ()
             }
             else
             {
-                String newDate = request->url ().substring (String (F("/settime/")).length ());
+                // String url = request->url ();
+                // DEBUG_V (String ("url: ") + String (url));
+                const AsyncWebParameter * pParam = request->getParam("newtime");
+                // DEBUG_V (String (" param Name: ") + String (pParam->name()));
+                // DEBUG_V (String ("param Value: ") + String (pParam->value()));
+
+                String newDate = pParam->value();
                 // DEBUG_V (String ("newDate: ") + String (newDate));
                 ProcessSetTimeRequest (time_t(newDate.toInt()));
-                request->send (200);
+                request->send (200, CN_applicationSLASHjson, F("{\"status\":\"OK\"}"));
             }
         });
 
@@ -184,7 +190,7 @@ void c_WebMgr::init ()
             }
             else
             {
-                request->send (200, CN_textSLASHplain, "Rebooting");
+                request->send (200, CN_applicationSLASHjson, F("{\"status\":\"Rebooting\"}"));
 
                 String Reason = F("Browser X6 Reboot requested.");
                 RequestReboot(Reason, 100000);
@@ -207,7 +213,7 @@ void c_WebMgr::init ()
                 OutputMgr.DeleteConfig ();
                 DeleteConfig ();
 
-                request->send (200, CN_textSLASHplain, "Rebooting");
+                request->send (200, CN_applicationSLASHjson, F("{\"status\":\"Rebooting\"}"));
                 // DEBUG_V ("");
                 String Reason = F("Browser requested Reboot");
                 RequestReboot(Reason, 100000);;
@@ -243,7 +249,7 @@ void c_WebMgr::init ()
                 }
                 else
                 {
-                    request->send (400, CN_textSLASHplain, F("No Relay ID Found"));
+                    request->send (200, CN_applicationSLASHjson, F("{\"status\":\"No Relay ID Found\"}"));
                 }
 
                 // DEBUG_V ("relay");
@@ -321,14 +327,14 @@ void c_WebMgr::init ()
                 String filename = request->url ().substring (String (F("/file/delete")).length ());
                 // DEBUG_V (String ("filename: ") + String (filename));
                 FileMgr.DeleteSdFile(filename);
-                request->send (200);
+                    request->send (200, CN_applicationSLASHjson, F("{\"status\":\"Deleted\"}"));
             }
         });
 
     	webServer.on ("/fseqfilelist", HTTP_GET,
         	[this](AsyncWebServerRequest* request)
         	{
-                // DEBUG_V("Process: HTTP_GET");
+                // DEBUG_V("Process: HTTP_GET /fseqfilelist");
                 request->send (LittleFS, F("/fseqfilelist.json"), CN_applicationSLASHjson);
             }
         );
@@ -359,29 +365,30 @@ void c_WebMgr::init ()
                 }
                 else if(HTTP_GET == RequestMethod)
                 {
-                    DEBUG_V("Process: HTTP_GET");
-                    request->send (401, CN_textSLASHplain, String(F("File Not supported")));
+                    // DEBUG_V("Process: HTTP_GET");
+                    request->send (401, CN_applicationSLASHjson, F("{\"status\":\"File Not supported\"}"));
                 }
                 else if((HTTP_POST == RequestMethod) ||
                         (HTTP_PUT  == RequestMethod))
                 {
                     // DEBUG_V(String("           url: ") + request->url());
+                    FileMgr.RenameFlashFile(RequestFileName + ".tmp", RequestFileName);
                     if(RequestReadConfigFile(RequestFileName))
                     {
-                        FileMgr.RenameFlashFile(RequestFileName + ".tmp", RequestFileName);
-                        request->send (200, CN_textSLASHplain, String(F("XFER Complete")));
+                        request->send (200, CN_applicationSLASHjson, F("{\"status\":\"XFER Complete\"}"));
+                        DelayReboot(10000);
                     }
                     else
                     {
                         // delete unexpected config file.
                         FileMgr.DeleteFlashFile(RequestFileName + ".tmp");
-                        request->send (404, CN_textSLASHplain, String(F("File Not supported")));
+                        request->send (404, CN_applicationSLASHjson, F("{\"status\":\"File Not supported\"}"));
                     }
                 }
                 else
                 {
-                    DEBUG_V("Unsupported HTTP type");
-                    request->send (401, CN_textSLASHplain, String(F("HTTP_TYPE Not supported")));
+                    // DEBUG_V("Unsupported HTTP type");
+                    request->send (401, CN_applicationSLASHjson, F("{\"status\":\"HTTP_TYPE Not supported\"}"));
                 }
             },
 
@@ -394,6 +401,7 @@ void c_WebMgr::init ()
                 // DEBUG_V(String("  sum: ") + String(index + len));
                 // DEBUG_V(String(" file: ") + filename);
                 // DEBUG_V(String("final: ") + String(final));
+                DelayReboot(10000);
                 if(0 == index)
                 {
                     // DEBUG_V("Deleting config file.");
@@ -413,7 +421,7 @@ void c_WebMgr::init ()
                     RequestReadConfigFile(filename);
 
                     // DEBUG_V("Save Chunk - Failed");
-                    request->send (404, CN_textSLASHplain, String(F("Could not save data")));
+                    request->send (404, CN_applicationSLASHjson, F("{\"status\":\"Could not save data\"}"));
                 }
         	},
 
@@ -421,6 +429,7 @@ void c_WebMgr::init ()
             {
                 // DEBUG_V("Save Data Chunk - Start");
                 String UploadFileName = request->url().substring(5);
+                DelayReboot(10000);
 
                 // DEBUG_V(String("  url: ") + request->url());
                 // DEBUG_V(String("  len: ") + String(len));
@@ -449,7 +458,7 @@ void c_WebMgr::init ()
                     RequestReadConfigFile(UploadFileName);
 
                     // DEBUG_V("Save Chunk - Failed");
-                    request->send (404, CN_textSLASHplain, String(F("Could not save data")));
+                    request->send (404, CN_applicationSLASHjson, F("{\"status\":\"Could not save data\"}"));
                 }
             }
         );
@@ -464,13 +473,13 @@ void c_WebMgr::init ()
                     // DEBUG_V ("efupdate.hasError, ignoring reboot request");
                     String ErrorMsg;
                     WebMgr.efupdate.getError (ErrorMsg);
-                    request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
+                    request->send (500, CN_applicationSLASHjson, String(F("{\"status\":\"Update Error: ")) + ErrorMsg + F(" \"}"));
                 }
                 else
                 {
                     // DEBUG_V ("efupdate.hasError == false");
                     String Reason = F("EFU Update Success");
-                    request->send (200, CN_textSLASHplain, Reason);
+                    request->send (200, CN_applicationSLASHjson, F("{\"status\":\"EFU Update Success\"}"));
                     RequestReboot(Reason, 100000);
                 }
             },
@@ -565,11 +574,11 @@ void c_WebMgr::init ()
                     if (true == FileMgr.SdCardIsInstalled())
                     {
                         // Send status 200 (OK) to tell the client we are ready to receive
-                    	request->send (200);
+                        request->send (200, CN_applicationSLASHjson, F("{\"status\":\"OK\"}"));
                     }
                     else
                     {
-                    	request->send (404, CN_textSLASHplain, "Page Not found");
+                        request->send (404, CN_applicationSLASHjson, F("{\"status\":\"Page Not found\"}"));
                     }
                 }
             },
@@ -587,31 +596,11 @@ void c_WebMgr::init ()
                 // DEBUG_V (String ("Got process Body request: index: ") + String (index));
                 // DEBUG_V (String ("Got process Body request: len:   ") + String (len));
                 // DEBUG_V (String ("Got process Body request: total: ") + String (total));
-            	request->send (404, CN_textSLASHplain, "Page Not found");
+                request->send (404, CN_applicationSLASHjson, F("{\"status\":\"Page Not found\"}"));
         	}
     	);
-/*
-    		webServer.on ("/download", HTTP_GET | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
-            {
-                if(HTTP_OPTIONS == request->method())
-                {
-                    request->send (200);
-                }
-                else
-                {
 
-                    // DEBUG_V (String ("url: ") + String (request->url ()));
-                    String filename = request->url ().substring (String ("/download").length ());
-                    // DEBUG_V (String ("filename: ") + String (filename));
-
-                    AsyncWebServerResponse* response = new AsyncFileResponse (ESP_SDFS, filename, F("application/octet-stream"), true);
-                    request->send (response);
-
-            		// DEBUG_V ("Send File Done");
-                }
-    		});
-*/
-    		webServer.onNotFound ([this](AsyncWebServerRequest* request)
+        webServer.onNotFound ([this](AsyncWebServerRequest* request)
             {
                 // DEBUG_V (String("onNotFound. URL: ") + request->url());
                 if (request->method() == HTTP_OPTIONS)
@@ -624,13 +613,13 @@ void c_WebMgr::init ()
                     if (!espalexa.handleAlexaApiCall (request)) //if you don't know the URI, ask espalexa whether it is an Alexa control request
                     {
                         // DEBUG_V ("Alexa Callback could not resolve the request");
-                        request->send (404, CN_textSLASHplain, "Page Not found");
+                        request->send (404, CN_applicationSLASHjson, F("{\"status\":\"Page Not found\"}"));
                     }
                 }
                 else
                 {
                     // DEBUG_V ("IsAlexaCallbackValid == false");
-                    request->send (404, CN_textSLASHplain, "Page Not found");
+                    request->send (404, CN_applicationSLASHjson, F("{\"status\":\"Page Not found\"}"));
         		}
             });
 
@@ -757,14 +746,17 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     JsonWrite(system, F ("SDinstalled"), FileMgr.SdCardIsInstalled ());
     JsonWrite(system, F ("DiscardedRxData"), DiscardedRxData);
 
-#ifdef ARDUINO_ARCH_ESP32
     JsonObject HeapDetails = system[F("HeapDetails")].to<JsonObject> ();
+#ifdef ARDUINO_ARCH_ESP32
     JsonWrite(HeapDetails, F ("n804_Free_Max"),  heap_caps_get_largest_free_block(0x804));
     JsonWrite(HeapDetails, F ("n804_Free_Tot"),  heap_caps_get_free_size(0x804));
     JsonWrite(HeapDetails, F ("n80C_Free_Max"),  heap_caps_get_largest_free_block(0x80C));
     JsonWrite(HeapDetails, F ("n80C_Free_Tot"),  heap_caps_get_free_size(0x80C));
     JsonWrite(HeapDetails, F ("n1800_Free_Max"), heap_caps_get_largest_free_block(0x1800));
     JsonWrite(HeapDetails, F ("n1800_Free_Tot"), heap_caps_get_free_size(0x1800));
+#else
+    JsonWrite(HeapDetails, F ("n804_Free_Max"),  ESP.getMaxFreeBlockSize());
+    JsonWrite(HeapDetails, F ("n804_Free_Tot"),  ESP.getFreeHeap());
 #endif // def ARDUINO_ARCH_ESP32
 
     // Ask WiFi Stats
@@ -793,6 +785,7 @@ void c_WebMgr::ProcessXJRequest (AsyncWebServerRequest* client)
     // DEBUG_V ("");
 
     // DEBUG_V("Send XJ response");
+    String XjResult;
     serializeJson(WebJsonDoc, XjResult);
     client->send (200, CN_applicationSLASHjson, XjResult);
 
@@ -870,7 +863,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             // DEBUG_V ("efupdate.hasError");
             String ErrorMsg;
             WebMgr.efupdate.getError (ErrorMsg);
-            request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
+            request->send (500, CN_applicationSLASHjson, String(F("{\"status\":\"Update Error: ")) + ErrorMsg + F("\"}"));
             break;
         }
 
@@ -879,9 +872,9 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
         {
             if(efupdate.UpdateIsInProgress())
             {
-                logcon("An update is already in progress");
+                logcon(F("An update is already in progress"));
                 // send back an error response
-                request->send (429, CN_textSLASHplain, F ("Update Error: Too many requests."));
+                request->send (429, CN_applicationSLASHjson, String(F("{\"status\":\"Update Error: Too many requests\"}")));
                 break;
             }
 
@@ -903,7 +896,7 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
                 // DEBUG_V ("efupdate.hasError");
                 String ErrorMsg;
                 WebMgr.efupdate.getError (ErrorMsg);
-                request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
+                request->send (500, CN_applicationSLASHjson, String(F("{\"status\":\"Update Error: ")) + ErrorMsg + F("\"}"));
                 break;
             }
         }
@@ -919,14 +912,14 @@ void c_WebMgr::FirmwareUpload (AsyncWebServerRequest* request,
             // DEBUG_V ("efupdate.hasError");
             String ErrorMsg;
             WebMgr.efupdate.getError (ErrorMsg);
-            request->send (500, CN_textSLASHplain, (String (F ("Update Error: ")) + ErrorMsg.c_str()));
+            request->send (500, CN_applicationSLASHjson, String(F("{\"status\":\"Update Error: ")) + ErrorMsg + F("\"}"));
             break;
         }
         // DEBUG_V ("No EFUpdate Error");
 
         if (final)
         {
-            request->send (200, CN_textSLASHplain, (String ( F ("Update Finished"))));
+            request->send (200, CN_applicationSLASHjson, F("{\"status\":\"Update Finished\""));
             String Reason = (F ("EFU Upload Finished. Rebooting"));
             efupdate.end ();
             RequestReboot(Reason, 100000);

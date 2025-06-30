@@ -2,7 +2,7 @@
 * OutputSerial.cpp - Pixel driver code for ESPixelStick UART
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2022 Shelby Merrick
+* Copyright (c) 2015, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -31,6 +31,9 @@ c_OutputSerial::c_OutputSerial (c_OutputMgr::e_OutputChannelIds OutputChannelId,
     c_OutputCommon (OutputChannelId, outputGpio, uart, outputType)
 {
     // DEBUG_START;
+    memset(GenericSerialHeader, 0x0, sizeof(GenericSerialHeader));
+    memset(GenericSerialFooter, 0x0, sizeof(GenericSerialFooter));
+
 #if defined(SUPPORT_OutputType_DMX)
     if (outputType == c_OutputMgr::e_OutputType::OutputType_DMX)
     {
@@ -189,8 +192,8 @@ bool c_OutputSerial::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     c_OutputCommon::SetConfig(jsonConfig);
     bool response = validate();
 
-    SerialHeaderSize = GenericSerialHeader.length();
-    SerialFooterSize = GenericSerialFooter.length();
+    SerialHeaderSize = strlen(GenericSerialHeader);
+    SerialFooterSize = strlen(GenericSerialFooter);
     SetFrameDurration();
 
     // Update the config fields in case the validator changed them
@@ -229,16 +232,16 @@ bool c_OutputSerial::validate ()
     }
 #endif // defined(SUPPORT_OutputType_DMX)
 
-    if (GenericSerialHeader.length() > MAX_HDR_SIZE)
+    if (strlen(GenericSerialHeader) > MAX_HDR_SIZE)
     {
         logcon(CN_stars + String(F(" Requested header is too long. Setting to Default ")) + CN_stars);
-        GenericSerialHeader = "";
+        memset(GenericSerialHeader, 0x0, sizeof(GenericSerialHeader));
     }
 
-    if (GenericSerialFooter.length() > MAX_FOOTER_SIZE)
+    if (strlen(GenericSerialFooter) > MAX_FOOTER_SIZE)
     {
         logcon(CN_stars + String(F(" Requested footer is too long. Setting to Default ")) + CN_stars);
-        GenericSerialFooter = "";
+        memset(GenericSerialFooter, 0x0, sizeof(GenericSerialFooter));
     }
 
     // DEBUG_END;

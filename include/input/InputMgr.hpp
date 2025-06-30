@@ -86,13 +86,15 @@ public:
     };
 
 private:
+    #define InputDriverMemorySize 1660
 
     void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
     struct DriverInfo_t
     {
-        uint32_t DriverId = 0;
-        c_InputCommon * pInputChannelDriver = nullptr; ///< pointer(s) to the current active Input driver
+        alignas(16) byte    InputDriver[InputDriverMemorySize];
+        uint32_t            DriverId = 0;
+        bool                DriverInUse = false;
     };
 
     #define NO_CONFIG_NEEDED time_t(-1)

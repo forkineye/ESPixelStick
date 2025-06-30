@@ -147,17 +147,16 @@ private:
     uint8_t  clk_pin  = SD_CARD_CLK_PIN;
     uint8_t  cs_pin   = SD_CARD_CS_PIN;
     FileId   fsUploadFileHandle;
-    String   fsUploadFileName;
+    char     fsUploadFileName[65];
     bool     fsUploadFileSavedIsEnabled = false;
     uint32_t fsUploadStartTime;
-    String   FtpUserName = "esps";
-    String   FtpPassword = "esps";
-    String   WelcomeString = "ESPS V4 FTP";
+    char     FtpUserName[65] = "esps";
+    char     FtpPassword[65] = "esps";
+    char     WelcomeString[65] = "ESPS V4 FTP";
     bool     FtpEnabled = true;
     uint64_t SdCardSizeMB = 0;
     uint32_t MaxSdSpeed = MaxSdTransSpeedMHz;
     bool     FoundZipFile = false;
-    const String FSEQFILELIST = "/fseqfilelist.json";
 
 public: struct __attribute__((__packed__, aligned(4))) CSD {
 	public: union {
@@ -236,7 +235,7 @@ public: struct __attribute__((__packed__, aligned(4))) CSD {
         FsFile      fsFile;
         uint64_t    size = 0;
         int         entryId = -1;
-        String      Filename = emptyString;
+        char        Filename[65];
         FileMode    mode = FileMode::FileRead;
         bool        IsOpen = false;
         struct

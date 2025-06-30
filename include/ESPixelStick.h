@@ -67,12 +67,13 @@
 
 extern void RequestReboot(String & Reason, uint32_t LoopDelay, bool SkipDisable = false);
 extern bool RebootInProgress();
+extern void DelayReboot(uint32_t MinDelay);
 
 /// Core configuration structure
 struct config_t
 {
     // Device
-    String      id;
+    char        id[65];
     uint32_t    BlankDelay = uint32_t(5);
 };
 
@@ -103,6 +104,30 @@ bool setFromJSON (T& OutValue, JsonObject & Json, N Name)
         if (temp != OutValue)
         {
             OutValue = temp;
+            HasBeenModified = true;
+        }
+    }
+    else
+    {
+        DEBUG_V(String("Could not find field '") + Name + "' in the json record");
+        PrettyPrint (Json, Name);
+    }
+
+    return HasBeenModified;
+};
+
+template <typename N>
+bool setFromJSON (char * OutValue, JsonObject & Json, N Name)
+{
+    bool HasBeenModified = false;
+
+    if (Json[(char*)Name].template is<String>())
+    {
+        char temp[65];
+        strncpy(temp, Json[(char*)Name], 64);
+        if (strcmp(temp, OutValue))
+        {
+            strncpy(OutValue, temp, 65);
             HasBeenModified = true;
         }
     }
