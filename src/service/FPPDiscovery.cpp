@@ -1051,7 +1051,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 #ifdef SUPPORT_UNZIP
     JsonWrite(jsonResponse, F ("zip"),          true);
 #else
-    JsonWrite(jsonResponse, F ("zip"),          false);
+    // JsonWrite(jsonResponse, F ("zip"),          false);
 #endif // def SUPPORT_UNZIP
 
     JsonObject jsonResponseUtilization = jsonResponse[F ("Utilization")].to<JsonObject> ();
