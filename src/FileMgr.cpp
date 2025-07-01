@@ -194,23 +194,6 @@ void c_FileMgr::Begin ()
             delete Unzipper;
             String Reason = F("Requesting reboot after unzipping files");
             RequestReboot(Reason, 1, true);
-        #else
-            String FileName = emptyString;
-            do
-            {
-                FeedWDT();
-                FileName = emptyString;
-                FileMgr.FindFirstZipFile(FileName);
-                if(FileName.isEmpty())
-                {
-                    break;
-                }
-                String NewName = FileName;
-                NewName.replace(".xlz", ".fseq");
-                RenameSdFile(FileName, NewName);
-
-            } while(true);
-            BuildFseqList(false);
         #endif // def SUPPORT_UNZIP
         }
 
