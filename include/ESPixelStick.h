@@ -83,9 +83,13 @@ bool    deserializeCore        (JsonObject & json);
 bool    dsDevice               (JsonObject & json);
 bool    dsNetwork              (JsonObject & json);
 
+extern const char VERSION[65];
+extern const char BUILD_DATE[65];
+extern const char ConfigFileName[65];
+extern const uint8_t CurrentConfigVersion;
+
 extern  bool IsBooting;
 extern  bool ResetWiFi;
-extern  const String ConfigFileName;
 extern  void FeedWDT ();
 extern  uint32_t DiscardedRxData;
 

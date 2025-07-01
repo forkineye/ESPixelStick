@@ -81,13 +81,12 @@ static void _u0_putc(char c){
 /////////////////////////////////////////////////////////
 
 #ifdef ESPS_VERSION
-const String VERSION = STRING(ESPS_VERSION);
+    const char VERSION[65] = ESPS_VERSION "\0";
 #else
-const String VERSION = "4.x-dev";
+    const char VERSION[65] = "4.x-dev\0";
 #endif
-
-const String ConfigFileName = "/config.json";
-const String BUILD_DATE = String(__DATE__) + " - " + String(__TIME__);
+const char BUILD_DATE[65] = "" __DATE__ " - " __TIME__ "\0";
+const char ConfigFileName[65] = "/config.json\0";
 const uint8_t CurrentConfigVersion = 1;
 String GlobalRebootReason = emptyString;
 
@@ -125,14 +124,14 @@ RF_PRE_INIT() {
 
 void TestHeap(uint32_t Id)
 {
-    DEBUG_V(String("Test ID: ") + String(Id));
-    DEBUG_V(String("Allocate JSON document. Size = ") + String(20 * 1024));
-    DEBUG_V(String("Heap Before: ") + ESP.getFreeHeap());
+    LOG_PORT.println(String("Test ID: ") + String(Id));
+    LOG_PORT.println(String("Allocate JSON document. Size = ") + String(20 * 1024));
+    LOG_PORT.println(String("Heap Before: ") + ESP.getFreeHeap());
     {
         JsonDocument jsonDoc;
         jsonDoc.to<JsonObject>();
     }
-    DEBUG_V(String(" Heap After: ") + ESP.getFreeHeap());
+    LOG_PORT.println(String(" Heap After: ") + ESP.getFreeHeap());
 }
 
 #ifdef ARDUINO_ARCH_ESP32
