@@ -81,7 +81,7 @@ static void _u0_putc(char c){
 /////////////////////////////////////////////////////////
 
 #ifdef ESPS_VERSION
-    const char VERSION[65] = ESPS_VERSION "\0";
+    const char VERSION[65] = ESPS_VERSION;
 #else
     const char VERSION[65] = "4.x-dev\0";
 #endif
