@@ -80,11 +80,7 @@ static void _u0_putc(char c){
 //
 /////////////////////////////////////////////////////////
 
-#ifdef ESPS_VERSION
-    const char VERSION[65] = ESPS_VERSION;
-#else
-    const char VERSION[65] = "4.x-dev\0";
-#endif
+const char VERSION[65] = ESPS_VERSION;
 const char BUILD_DATE[65] = "" __DATE__ " - " __TIME__ "\0";
 const char ConfigFileName[65] = "/config.json\0";
 const uint8_t CurrentConfigVersion = 1;

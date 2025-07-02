@@ -83,6 +83,10 @@ bool    deserializeCore        (JsonObject & json);
 bool    dsDevice               (JsonObject & json);
 bool    dsNetwork              (JsonObject & json);
 
+#ifndef ESPS_VERSION
+    #define ESPS_VERSION "4.x-dev"
+#endif
+
 extern const char VERSION[65];
 extern const char BUILD_DATE[65];
 extern const char ConfigFileName[65];
