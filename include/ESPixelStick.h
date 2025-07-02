@@ -87,9 +87,9 @@ bool    dsNetwork              (JsonObject & json);
     #define ESPS_VERSION "4.x-dev"
 #endif
 
-extern const char VERSION[65];
-extern const char BUILD_DATE[65];
-extern const char ConfigFileName[65];
+extern const char VERSION[];
+extern const char BUILD_DATE[];
+extern const char ConfigFileName[];
 extern const uint8_t CurrentConfigVersion;
 
 extern  bool IsBooting;

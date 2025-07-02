@@ -80,9 +80,9 @@ static void _u0_putc(char c){
 //
 /////////////////////////////////////////////////////////
 
-const char VERSION[65] = ESPS_VERSION;
-const char BUILD_DATE[65] = "" __DATE__ " - " __TIME__ "\0";
-const char ConfigFileName[65] = "/config.json\0";
+const char VERSION[] = ESPS_VERSION;
+const char BUILD_DATE[] = "" __DATE__ " - " __TIME__ "\0";
+const char ConfigFileName[] = "/config.json\0";
 const uint8_t CurrentConfigVersion = 1;
 String GlobalRebootReason = emptyString;
 
