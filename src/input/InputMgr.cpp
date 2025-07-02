@@ -308,7 +308,7 @@ void c_InputMgr::CreateNewConfig ()
     JsonObject JsonConfig = JsonConfigDoc[(char*)CN_input_config].to<JsonObject>();
     // DEBUG_V("");
 
-    JsonWrite(JsonConfig, CN_cfgver, CurrentConfigVersion);
+    JsonWrite(JsonConfig, CN_cfgver, ConstConfig.CurrentConfigVersion);
 
     // DEBUG_V ("for each Input type");
     for (int InputTypeId = int (InputType_Start);
@@ -800,10 +800,10 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
         setFromJSON (TempVersion, InputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
-        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (ConstConfig.CurrentConfigVersion));
         // PrettyPrint (InputChannelMgrData, "Output Config");
 
-        if (TempVersion != CurrentConfigVersion)
+        if (TempVersion != ConstConfig.CurrentConfigVersion)
         {
             logcon (String (F ("Incorrect Version found. Using existing/default config.")));
             // break;

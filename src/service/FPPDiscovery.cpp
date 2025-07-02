@@ -535,9 +535,9 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     packet.ping_subtype = 0x0;
     packet.ping_hardware = FPP_TYPE_ID;
 
-    uint16_t v = (uint16_t)atoi (VERSION);
+    uint16_t v = (uint16_t)atoi (ConstConfig.Version);
     packet.versionMajor = (v >> 8) + ((v & 0xFF) << 8);
-    v = (uint16_t)atoi (&VERSION[2]);
+    v = (uint16_t)atoi (&ConstConfig.Version[2]);
     packet.versionMinor = (v >> 8) + ((v & 0xFF) << 8);
 
     packet.operatingMode = (FileMgr.SdCardIsInstalled ()) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
@@ -547,7 +547,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     String Hostname;
     NetworkMgr.GetHostname (Hostname);
     strcpy (packet.hostName, Hostname.c_str ());
-    strcpy (packet.version, VERSION);
+    strcpy (packet.version, ConstConfig.Version);
     strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
     packet.ranges[0] = 0;
 
@@ -1040,10 +1040,10 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, CN_Platform,           String(CN_ESPixelStick));
     JsonWrite(jsonResponse, F ("Variant"),         FPP_VARIANT_NAME);
     JsonWrite(jsonResponse, F ("Mode"),            String((FileMgr.SdCardIsInstalled ()) ? CN_remote : CN_bridge));
-    JsonWrite(jsonResponse, CN_Version,            VERSION);
+    JsonWrite(jsonResponse, CN_Version,            ConstConfig.Version);
 
-    JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (VERSION));
-    JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&VERSION[2]));
+    JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (ConstConfig.Version));
+    JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&ConstConfig.Version[2]));
     JsonWrite(jsonResponse, F ("typeId"),       FPP_TYPE_ID);
 #ifdef SUPPORT_UNZIP
     JsonWrite(jsonResponse, F ("zip"),          true);

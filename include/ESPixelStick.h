@@ -87,10 +87,16 @@ bool    dsNetwork              (JsonObject & json);
     #define ESPS_VERSION "4.x-dev"
 #endif
 
-extern const char VERSION[];
-extern const char BUILD_DATE[];
-extern const char ConfigFileName[];
-extern const uint8_t CurrentConfigVersion;
+struct ConstConfig_t
+{
+    const char key[65];
+    const char Version[65];
+    const char BuildDate[65];
+    const char ConfigFileName[65];
+    const uint8_t CurrentConfigVersion;
+};
+
+extern ConstConfig_t ConstConfig;
 
 extern  bool IsBooting;
 extern  bool ResetWiFi;
@@ -205,7 +211,6 @@ extern bool ConsoleUartIsActive;
 extern config_t config;
 extern bool ConfigSaveNeeded;
 
-extern const uint8_t CurrentConfigVersion;
 #define LOAD_CONFIG_DELAY 4
 // #define DEBUG_GPIO gpio_num_t::GPIO_NUM_25
 // #define DEBUG_GPIO1 gpio_num_t::GPIO_NUM_14

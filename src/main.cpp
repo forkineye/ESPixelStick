@@ -80,10 +80,15 @@ static void _u0_putc(char c){
 //
 /////////////////////////////////////////////////////////
 
-const char VERSION[] = ESPS_VERSION;
-const char BUILD_DATE[] = "" __DATE__ " - " __TIME__ "\0";
-const char ConfigFileName[] = "/config.json\0";
-const uint8_t CurrentConfigVersion = 1;
+ConstConfig_t ConstConfig =
+{
+    "configFoundHere",
+    ESPS_VERSION,
+    __DATE__ " - " __TIME__ "\0",
+    "/config.json",
+    1
+};
+
 String GlobalRebootReason = emptyString;
 
 config_t config;                    // Current configuration
@@ -172,7 +177,7 @@ void setup()
 
     // Dump version and build information
     LOG_PORT.println ();
-    logcon (String(CN_ESPixelStick) + " v" + VERSION + " (" + BUILD_DATE + ") on " + BOARD_NAME);
+    logcon (String(CN_ESPixelStick) + " v" + ConstConfig.Version + " (" + ConstConfig.BuildDate + ") on " + BOARD_NAME);
 #ifdef ARDUINO_ARCH_ESP8266
     logcon (ESP.getFullVersion ());
 #else
@@ -304,7 +309,7 @@ void SetConfig (const char * DataString)
 //      of the data. Chance for 3rd party software to muck up the configuraton
 //      if they send bad json data.
 
-    FileMgr.SaveFlashFile (ConfigFileName, DataString);
+    FileMgr.SaveFlashFile (ConstConfig.ConfigFileName, DataString);
     ScheduleLoadConfig();
 
     // DEBUG_END;
@@ -357,7 +362,7 @@ bool deserializeCore (JsonObject & json)
             logcon(String(F("Missing Config Version ID")));
             // break; // ignoring this error for now.
         }
-        else if (TempVersion != CurrentConfigVersion)
+        else if (TempVersion != ConstConfig.CurrentConfigVersion)
         {
             // TODO: Add configuration update handler
             logcon(String(F("Incorrect Config Version ID")));
@@ -418,7 +423,7 @@ void SaveConfig()
 
     GetConfig(JsonConfig);
 
-    FileMgr.SaveFlashFile(ConfigFileName, jsonConfigDoc);
+    FileMgr.SaveFlashFile(ConstConfig.ConfigFileName, jsonConfigDoc);
 
     // DEBUG_END;
 } // SaveConfig
@@ -435,7 +440,7 @@ void LoadConfig()
 
     String temp;
     // DEBUG_V ("");
-    ConfigSaveNeeded |= !FileMgr.LoadFlashFile (ConfigFileName, &deserializeCoreHandler);
+    ConfigSaveNeeded |= !FileMgr.LoadFlashFile (ConstConfig.ConfigFileName, &deserializeCoreHandler);
     ConfigSaveNeeded |= !validateConfig ();
 
     // DEBUG_END;
@@ -444,7 +449,7 @@ void LoadConfig()
 void DeleteConfig ()
 {
     // DEBUG_START;
-    FileMgr.DeleteFlashFile (ConfigFileName);
+    FileMgr.DeleteFlashFile (ConstConfig.ConfigFileName);
 
     // DEBUG_END;
 
@@ -455,7 +460,7 @@ void GetConfig (JsonObject & json)
     // DEBUG_START;
 
     // Config Version
-    json[(char*)CN_cfgver] = CurrentConfigVersion;
+    json[(char*)CN_cfgver] = ConstConfig.CurrentConfigVersion;
 
     // Device
     JsonObject device = json[(char*)CN_device].to<JsonObject>();

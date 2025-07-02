@@ -705,8 +705,8 @@ void c_WebMgr::CreateAdminInfoFile ()
     AdminJsonDoc.to<JsonObject>();
     JsonObject jsonAdmin = AdminJsonDoc[F ("admin")].to<JsonObject> ();
 
-    JsonWrite(jsonAdmin, CN_version, VERSION);
-    JsonWrite(jsonAdmin, "built", BUILD_DATE);
+    JsonWrite(jsonAdmin, CN_version, ConstConfig.Version);
+    JsonWrite(jsonAdmin, "built", ConstConfig.BuildDate);
     JsonWrite(jsonAdmin, "realflashsize", String (ESP.getFlashChipSize ()));
     JsonWrite(jsonAdmin, "BoardName", String(BOARD_NAME));
 #ifdef ARDUINO_ARCH_ESP8266

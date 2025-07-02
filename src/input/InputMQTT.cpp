@@ -721,7 +721,7 @@ void c_InputMQTT::publishHA()
         JsonWrite(device, F ("manufacturer"), F ("Forkineye"));
         JsonWrite(device, F ("model"),        String(CN_ESPixelStick));
         JsonWrite(device, CN_name,            config.id);
-        JsonWrite(device, F ("sw_version"),   String (CN_ESPixelStick) + " v" + VERSION);
+        JsonWrite(device, F ("sw_version"),   String (CN_ESPixelStick) + " v" + String(ConstConfig.Version));
 
         String HaJsonConfig;
         serializeJson(JsonConfig, HaJsonConfig);

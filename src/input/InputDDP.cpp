@@ -321,7 +321,7 @@ void c_InputDDP::ProcessReceivedQuery ()
             JsonObject JsonStatus = JsonResponseDoc[(char*)CN_status].to<JsonObject> ();
             JsonWrite(JsonStatus, F("man"), "ESPixelStick");
             JsonWrite(JsonStatus, F("mod"), "V4");
-            JsonWrite(JsonStatus, F("ver"), VERSION);
+            JsonWrite(JsonStatus, F("ver"), ConstConfig.Version);
 
             FPPDiscovery.GetSysInfoJSON(JsonStatus);
             break;

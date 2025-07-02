@@ -385,7 +385,7 @@ void c_OutputMgr::CreateNewConfig ()
     JsonObject JsonConfig = JsonConfigDoc[(char*)CN_output_config].to<JsonObject> ();
     // DEBUG_V ();
 
-    JsonWrite(JsonConfig, CN_cfgver,      CurrentConfigVersion);
+    JsonWrite(JsonConfig, CN_cfgver,      ConstConfig.CurrentConfigVersion);
     JsonWrite(JsonConfig, CN_MaxChannels, sizeof(OutputBuffer));
 
     // DEBUG_V("Collect the all ports disabled config first");
@@ -1066,13 +1066,13 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
         }
         // DEBUG_V ();
 
-        uint8_t TempVersion = !CurrentConfigVersion;
+        uint8_t TempVersion = !ConstConfig.CurrentConfigVersion;
         setFromJSON (TempVersion, OutputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
-        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (ConstConfig.CurrentConfigVersion));
         // PrettyPrint (OutputChannelMgrData, "Output Config");
-        if (TempVersion != CurrentConfigVersion)
+        if (TempVersion != ConstConfig.CurrentConfigVersion)
         {
             logcon (MN_17);
             // break;
