@@ -75,6 +75,9 @@ c_FPPDiscovery::c_FPPDiscovery ()
 {
     // DEBUG_START;
     memset ((void*)&MultiSyncStats, 0x00, sizeof (MultiSyncStats));
+    memset (ConfiguredFileToPlay, 0x00, sizeof (ConfiguredFileToPlay));
+    memset (UploadFileName, 0x00, sizeof (UploadFileName));
+
     // DEBUG_END;
 } // c_FPPDiscovery
 
@@ -921,11 +924,11 @@ void c_FPPDiscovery::ProcessFile (
             // DEBUG_V("Stop Input");
             StopPlaying();
             inFileUpload = true;
-            UploadFileName = filename;
+            strcpy(UploadFileName, filename.c_str());
             InputMgr.SetOperationalState(false);
             OutputMgr.PauseOutputs(true);
         }
-        else if(!UploadFileName.equals(filename))
+        else if(!String(UploadFileName).equals(filename))
         {
             if(0 != index)
             {
@@ -934,9 +937,9 @@ void c_FPPDiscovery::ProcessFile (
                 break;
             }
 
-            // DEBUG_V("New file starting. Aborting: '" + UploadFileName + "' and starting '" + filename + "'");
+            // DEBUG_V("New file starting. Aborting: '" + String(UploadFileName) + "' and starting '" + filename + "'");
             FileMgr.AbortSdFileUpload();
-            UploadFileName = filename;
+            strcpy(UploadFileName, filename.c_str());
         }
 
         // DEBUG_V("Write the file block");
@@ -952,7 +955,7 @@ void c_FPPDiscovery::ProcessFile (
         if (final || writeFailed)
         {
             inFileUpload = false;
-            UploadFileName = emptyString;
+            memset(UploadFileName, 0x0, sizeof(UploadFileName));
             writeFailed = false;
             OutputMgr.ClearBuffer();
             InputMgr.SetOperationalState(true);
@@ -961,7 +964,8 @@ void c_FPPDiscovery::ProcessFile (
             delay(1000);
             FeedWDT();
             // DEBUG_V("Allow file to play");
-            StartPlaying(UploadFileName, 0.0);
+            String temp = String(UploadFileName);
+            StartPlaying(temp, 0.0);
         }
 
     } while (false);
@@ -1008,7 +1012,7 @@ void c_FPPDiscovery::ProcessBody (
                     request->send (404);
                     break;
                 }
-                UploadFileName = String (request->getParam (CN_filename)->value ());
+                strcpy(UploadFileName, request->getParam (CN_filename)->value ().c_str());
                 // DEBUG_V (emptyString);
             }
 

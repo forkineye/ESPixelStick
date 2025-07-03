@@ -119,7 +119,7 @@ void TimerPollHandler()
 ///< Start up the driver and put it into a safe mode
 c_InputMgr::c_InputMgr ()
 {
-    ConfigFileName = String (F ("/")) + String (CN_input_config) + F (".json");
+    strcpy(ConfigFileName, (String (F ("/")) + String (CN_input_config) + F (".json")).c_str());
 
     // this gets called pre-setup so there is nothing we can do here.
     int InputChannelDriversIndex = 0;

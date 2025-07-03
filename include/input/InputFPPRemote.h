@@ -57,7 +57,7 @@ protected:
     int32_t GetSyncOffsetMS () { return SyncOffsetMS; }
     bool    GetSendFppSync ()  { return SendFppSync; }
 
-    String StatusType;
+    char StatusType[65];
 
 private:
 
@@ -76,8 +76,8 @@ private:
 
     int32_t  SyncOffsetMS = 0;
     bool     SendFppSync = false;
-    String   FileBeingPlayed = CN_No_LocalFileToPlay;
-    String   ConfiguredFileToPlay = CN_No_LocalFileToPlay;
+    char     FileBeingPlayed[65];
+    char     ConfiguredFileToPlay[65];
     bool     Stopping = false;
     bool     FppSyncOverride = false;
     uint32_t FilePlayCount = 0;

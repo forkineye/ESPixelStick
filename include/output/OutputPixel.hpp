@@ -137,7 +137,7 @@ private:
     uint32_t    GECEBrightness      = 255;
 
     // JSON configuration parameters
-    String      color_order = "rgb"; ///< Pixel color order
+    char      color_order[10]; // = "rgb"; ///< Pixel color order
 
     // Internal variables
 

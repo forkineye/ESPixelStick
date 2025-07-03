@@ -33,6 +33,14 @@ c_InputFPPRemote::c_InputFPPRemote (c_InputMgr::e_InputChannelIds NewInputChanne
 {
     // DEBUG_START;
 
+    memset(FileBeingPlayed, 0x0, sizeof(FileBeingPlayed));
+    strcpy(FileBeingPlayed, CN_No_LocalFileToPlay);
+
+    memset(ConfiguredFileToPlay, 0x0, sizeof(ConfiguredFileToPlay));
+    strcpy(ConfiguredFileToPlay, CN_No_LocalFileToPlay);
+
+    memset(StatusType, 0x0, sizeof(StatusType));
+
 //     WebMgr.RegisterFPPRemoteCallback ([this](EspFPPRemoteDevice* pDevice) {this->onMessage (pDevice); });
 
     // DEBUG_END;
@@ -208,7 +216,8 @@ void c_InputFPPRemote::Process ()
         if (pInputFPPRemotePlayItem->IsIdle ())
         {
             // DEBUG_V ("Idle Processing");
-            StartPlaying (FileBeingPlayed);
+            String temp = String(FileBeingPlayed);
+            StartPlaying (temp);
         }
     }
     // DEBUG_END;
@@ -269,7 +278,7 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
     setFromJSON (SyncOffsetMS,    jsonConfig, CN_SyncOffset);
     setFromJSON (SendFppSync,     jsonConfig, CN_SendFppSync);
     setFromJSON (FppSyncOverride, jsonConfig, CN_FPPoverride);
-    ConfiguredFileToPlay = FileToPlay;
+    strcpy(ConfiguredFileToPlay, FileToPlay.c_str());
 
     if (PlayingFile())
     {
@@ -404,7 +413,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             // DEBUG_V ("Start a new Local File");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
-            StatusType = F ("PlayList");
+            strcpy(StatusType, String(F("PlayList")).c_str());
         }
         else
         {
@@ -413,8 +422,8 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             if (String(CN_Dotfseq) != Last_fseq_Text)
             {
                 logcon(String(F("File Name does not end with a valid .fseq or .pl extension: '")) + FileName + "'");
-                StatusType = F("Invalid File Name");
-                FileBeingPlayed.clear();
+                strcpy(StatusType, String(F("Invalid File Name")).c_str());
+                memset(FileBeingPlayed, 0x0, sizeof(FileBeingPlayed));
                 break;
             }
 
@@ -427,7 +436,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             }
             // DEBUG_V ("Start Local FSEQ file player");
             pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
-            StatusType = CN_File;
+            strcpy(StatusType, CN_File);
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
 
@@ -436,7 +445,7 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         pInputFPPRemotePlayItem->Start (FileName, 0, 1);
-        FileBeingPlayed = FileName;
+        strcpy(FileBeingPlayed, FileName.c_str());
 
     } while (false);
 
@@ -477,8 +486,8 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
 
         SetBackgroundFile();
 
-        StatusType = CN_File;
-        FileBeingPlayed = FileName;
+        strcpy(StatusType, CN_File);
+        strcpy(FileBeingPlayed, FileName.c_str());
 
         FPPDiscovery.SetInputFPPRemotePlayFile (this);
         FPPDiscovery.Enable ();
@@ -517,7 +526,7 @@ bool c_InputFPPRemote::PlayingRemoteFile ()
             break;
         }
 
-        if (!FppSyncOverride && !FileBeingPlayed.equals(CN_No_LocalFileToPlay))
+        if (!FppSyncOverride && !String(FileBeingPlayed).equals(CN_No_LocalFileToPlay))
         {
             break;
         }
@@ -622,7 +631,7 @@ bool c_InputFPPRemote::AllowedToPlayRemoteFile()
     bool Response = false;
 
     if (pInputFPPRemotePlayItem &&
-        (ConfiguredFileToPlay.equals(CN_No_LocalFileToPlay) || FppSyncOverride))
+        (String(ConfiguredFileToPlay).equals(CN_No_LocalFileToPlay) || FppSyncOverride))
     {
         // DEBUG_V ("FPP Is allowed to control playing files");
         Response = true;
@@ -639,7 +648,7 @@ void c_InputFPPRemote::SetBackgroundFile ()
 
     if(FppSyncOverride)
     {
-        String Background = ConfiguredFileToPlay.equals(CN_No_LocalFileToPlay) ? emptyString : ConfiguredFileToPlay;
+        String Background = String(ConfiguredFileToPlay).equals(CN_No_LocalFileToPlay) ? emptyString : String(ConfiguredFileToPlay);
         pInputFPPRemotePlayItem->SetBackgroundFileName(Background);
         // DEBUG_V(String("Background: ") + Background);
     }

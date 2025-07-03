@@ -41,7 +41,8 @@ fsm_ExternalInput_wait_for_off_state  fsm_ExternalInput_wait_for_off_state_imp;
 c_ExternalInput::c_ExternalInput(void)
 {
 	// DEBUG_START;
-	fsm_ExternalInput_boot_imp.Init(*this); // currently redundant, but might Init() might do more ... so important to leave this
+    memset(name, 0x0, sizeof(name));
+    fsm_ExternalInput_boot_imp.Init(*this); // currently redundant, but might Init() might do more ... so important to leave this
 	// DEBUG_END;
 
 } // c_ExternalInput
@@ -53,7 +54,7 @@ void c_ExternalInput::Init(uint32_t iInputId, uint32_t iPinId, Polarity_t Polari
 
 	// Remember the pin number for future calls
 	GpioId   = iPinId;
-	name     = sName;
+	strcpy(name, sName.c_str());
 	polarity = Polarity;
 
 	// set the pin direction to input
@@ -102,13 +103,15 @@ void c_ExternalInput::ProcessConfig (JsonObject JsonData)
 	String Polarity = (ActiveHigh == polarity) ? CN_ActiveHigh : CN_ActiveLow;
 
 	uint32_t oldInputId = GpioId;
-	
+
+    String temp;
 	setFromJSON (Enabled,         JsonData, CN_enabled);
-	setFromJSON (name,            JsonData, CN_name);
+	setFromJSON (temp,            JsonData, CN_name);
 	setFromJSON (GpioId,          JsonData, CN_id);
 	setFromJSON (Polarity,        JsonData, CN_polarity);
 	setFromJSON (TriggerChannel,  JsonData, CN_channels);
 	setFromJSON (LongPushDelayMS, JsonData, CN_long);
+    strcpy(name, temp.c_str());
 
 	polarity = (String(CN_ActiveHigh) == Polarity) ? ActiveHigh : ActiveLow;
 

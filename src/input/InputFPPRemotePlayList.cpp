@@ -138,7 +138,8 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
         {
             logcon (String (F ("Could not read Playlist file: '")) + FileControl[CurrentFile].FileName + "'");
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (FileControl[CurrentFile].FileName, PauseDelayTimer.GetTimeRemaining() / 1000, 1);
+            String temp = String(FileControl[CurrentFile].FileName);
+            pCurrentFsmState->Start (temp, PauseDelayTimer.GetTimeRemaining() / 1000, 1);
             break;
         }
         // DEBUG_V ("");
@@ -153,7 +154,8 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
             logcon (CfgFileMessagePrefix + String (F ("Deserialzation Error. Error code = ")) + error.c_str ());
             logcon (String (F ("++++")) + FileData + String (F ("----")));
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (FileControl[CurrentFile].FileName, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
+            String temp = String(FileControl[CurrentFile].FileName);
+            pCurrentFsmState->Start (temp, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
             break;
         }
 
@@ -179,7 +181,8 @@ bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 
             PauseDelayTimer.StartTimer(1000, false);
             fsm_PlayList_state_Paused_imp.Init (this);
-            pCurrentFsmState->Start (FileControl[CurrentFile].FileName, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
+            String temp = String(FileControl[CurrentFile].FileName);
+            pCurrentFsmState->Start (temp, PauseDelayTimer.GetTimeRemaining() / 1000, PlayCount);
             break;
         }
 

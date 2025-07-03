@@ -29,6 +29,11 @@ c_InputFPPRemotePlayItem::c_InputFPPRemotePlayItem (c_InputMgr::e_InputChannelId
     // DEBUG_START;
 
     InputChannelId = _InputChannelId;
+    memset(BackgroundFileName, 0x0, sizeof(BackgroundFileName));
+    for(auto currentFileControl : FileControl)
+    {
+        memset(currentFileControl.FileName, 0x0, sizeof(currentFileControl.FileName));
+    }
 
     // DEBUG_END;
 } // c_InputFPPRemotePlayItem
@@ -44,8 +49,8 @@ void c_InputFPPRemotePlayItem::ClearFileNames()
 {
     // DEBUG_START;
 
-    BackgroundFileName = emptyString;
-    FileControl[NextFile].FileName = emptyString;
+    memset(BackgroundFileName, 0x0, sizeof(BackgroundFileName));
+    memset(FileControl[NextFile].FileName, 0x0, sizeof(FileControl[NextFile].FileName));
 
     // DEBUG_END;
 } // ClearFileNames

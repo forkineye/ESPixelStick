@@ -254,7 +254,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
             FileMgr.CloseSdFile(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
         }
 
-        if(FileControl[CurrentFile].FileName.isEmpty() ||
+        if(String(FileControl[CurrentFile].FileName).isEmpty() ||
            LastFailedFilename.equals(FileControl[CurrentFile].FileName))
         {
             // just go away. Not a valid filename
@@ -453,7 +453,7 @@ bool c_InputFPPRemotePlayFile::ParseFseqFile ()
 void c_InputFPPRemotePlayFile::ClearControlFileInfo()
 {
     // DEBUG_START;
-    FileControl[NextFile].FileName                      = emptyString;
+    memset(FileControl[NextFile].FileName, 0x0, sizeof(FileControl[NextFile].FileName));
     FileControl[NextFile].FileHandleForFileBeingPlayed  = c_FileMgr::INVALID_FILE_HANDLE;
     FileControl[NextFile].RemainingPlayCount            = 0;
     FileControl[NextFile].ElapsedPlayTimeMS             = 0;
@@ -512,7 +512,13 @@ uint64_t c_InputFPPRemotePlayFile::ReadFile(uint64_t DestinationIntensityId, uin
             DEBUG_FILE_HANDLE(FileControl[CurrentFile].FileHandleForFileBeingPlayed);
             if(0 == NumBytesReadThisPass)
             {
-                DEBUG_V(F("Ran out of data to read"));
+                logcon(F("Could not read FSEQ file header"));
+                // DEBUG_V(String (" n804_Free_Tot: ") + String(heap_caps_get_free_size(0x804)));
+                // DEBUG_V(String (" n804_Free_Max: ") + String(heap_caps_get_largest_free_block(0x804)));
+                // DEBUG_V(String (" n80C_Free_Tot: ") + String(heap_caps_get_free_size(0x80c)));
+                // DEBUG_V(String (" n80C_Free_Max: ") + String(heap_caps_get_largest_free_block(0x80c)));
+                // DEBUG_V(String ("n1800_Free_Tot: ") + String(heap_caps_get_free_size(0x1800)));
+                // DEBUG_V(String ("n1800_Free_Max: ") + String(heap_caps_get_largest_free_block(0x1800)));
                 break;
             }
             // xDEBUG_V();

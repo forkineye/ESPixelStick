@@ -101,10 +101,10 @@ private:
     uint32_t    PollInterval = 1000;
     bool        ReportedIsWiFiConnected = false;
 
-    String      ssid;
-    String      passphrase;
-    String      ap_ssid;
-    String      ap_passphrase;
+    char        ssid[65];
+    char        passphrase[65];
+    char        ap_ssid[65];
+    char        ap_passphrase[65];
     IPAddress   ip = INADDR_NONE;
     IPAddress   netmask = INADDR_NONE;
     IPAddress   gateway = INADDR_NONE;

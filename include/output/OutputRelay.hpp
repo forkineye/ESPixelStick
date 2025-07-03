@@ -90,7 +90,6 @@ private:
     uint16_t        UpdateInterval = 0;
 
     // non config data
-    String      OutputName;
     uint16_t    Num_Channels = OM_RELAY_CHANNEL_LIMIT;
 
 }; // c_OutputRelay

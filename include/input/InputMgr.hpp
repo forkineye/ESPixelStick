@@ -119,8 +119,8 @@ private:
     bool InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId);
     bool FindJsonChannelConfig       (JsonObject& jsonConfig, e_InputChannelIds ChanId, JsonObject& ChanConfig);
 
-    String ConfigFileName;
-    String InputRebootReason = emptyString;
+    char   ConfigFileName[65];
+    String InputRebootReason;
     bool   RebootNeeded = false;
 
     FastTimer BlankEndTime[InputChannelId_End];

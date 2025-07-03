@@ -88,7 +88,6 @@ private:
     float                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
 
     // non config data
-    String      OutputName;
     uint16_t    Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;
 
 }; // c_OutputServoPCA9685
