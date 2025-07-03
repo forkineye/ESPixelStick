@@ -87,7 +87,7 @@ bool    dsNetwork              (JsonObject & json);
     #define ESPS_VERSION "4.x-dev"
 #endif
 
-struct ConstConfig_t
+struct __attribute__((packed)) ConstConfig_t
 {
     const char key[32];
     const char Version[32];
