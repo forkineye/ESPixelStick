@@ -89,12 +89,13 @@ void InputMgrTask (void *arg)
         if (DeltaTime < MinPollTimeMs)
         {
             PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
-            vTaskDelay(PollTime);
         }
         else
         {
             // DEBUG_V(String("handle time wrap and long frames. DeltaTime:") + String(DeltaTime));
+            PollTime = pdMS_TO_TICKS(MinPollTimeMs);
         }
+        vTaskDelay(PollTime);
         FeedWDT();
 
         PollStartTime = millis();
@@ -711,6 +712,7 @@ void c_InputMgr::Process ()
             if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
             {
                 // DEBUG_V ("Reload the config");
+                FeedWDT();
                 LoadConfig ();
                 // DEBUG_V ("End Save Config");
             }
@@ -724,6 +726,7 @@ void c_InputMgr::Process ()
         bool aBlankTimerIsRunning = false;
         for (auto & CurrentInput : InputChannelDrivers)
         {
+            FeedWDT();
             if(!CurrentInput.DriverInUse || aBlankTimerIsRunning)
             {
                 continue;
