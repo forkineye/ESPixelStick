@@ -89,10 +89,10 @@ bool    dsNetwork              (JsonObject & json);
 
 struct ConstConfig_t
 {
-    const char key[65];
-    const char Version[65];
-    const char BuildDate[65];
-    const char ConfigFileName[65];
+    const char key[32];
+    const char Version[32];
+    const char BuildDate[32];
+    const char ConfigFileName[32];
     const uint8_t CurrentConfigVersion;
 };
 
