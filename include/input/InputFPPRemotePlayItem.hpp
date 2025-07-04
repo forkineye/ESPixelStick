@@ -68,7 +68,7 @@ public:
     virtual void     Sync           (String & FileName, float SecondsElapsed) = 0;
     virtual void     GetStatus      (JsonObject & jsonStatus) = 0;
     virtual bool     IsIdle         () = 0;
-            String   GetFileName    () { return FileControl[CurrentFile].FileName; }
+            String   GetFileName    () { return String(FileControl[CurrentFile].FileName); }
             uint32_t GetRepeatCount () { return FileControl[CurrentFile].RemainingPlayCount; }
             void     SetDuration    (time_t value) { PlayDurationSec = value; }
             void     GetDriverName  (String& Name) { Name = "InputMgr"; }

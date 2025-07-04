@@ -83,8 +83,8 @@ private:
     bool        ParseFseqFile ();
     uint64_t    ReadFile(uint64_t DestinationIntensityId, uint64_t NumBytesToRead, uint64_t FileOffset);
 
-    String      LastFailedPlayStatusMsg = emptyString;
-    String      LastFailedFilename = emptyString;
+    char      LastFailedPlayStatusMsg[128];
+    char      LastFailedFilename[65];
 
 #ifdef ARDUINO_ARCH_ESP32
     TaskHandle_t TimerPollTaskHandle = NULL;

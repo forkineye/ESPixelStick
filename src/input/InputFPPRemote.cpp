@@ -51,7 +51,7 @@ c_InputFPPRemote::~c_InputFPPRemote ()
 {
     if (HasBeenInitialized)
     {
-        // DEBUG_V();
+        // DEBUG_V("StopPlaying");
         StopPlaying ();
         FPPDiscovery.ForgetInputFPPRemotePlayFile ();
         FPPDiscovery.Disable();
@@ -183,7 +183,7 @@ void c_InputFPPRemote::PlayNextFile ()
             }
 
             // DEBUG_V(String("Succes - we have found a new file to play: '") + *CurrentFileInList + "'");
-            StopPlaying();
+            // StopPlaying();
             StartPlaying(*CurrentFileInList);
             break;
         } while (FileIterator != CurrentFileInList);
@@ -198,28 +198,43 @@ void c_InputFPPRemote::PlayNextFile ()
 void c_InputFPPRemote::Process ()
 {
     // DEBUG_START;
-
-    if (!IsInputChannelActive)
+    do // once
     {
-        // DEBUG_V ("dont do anything if the channel is not active");
-    }
-    else if (PlayingRemoteFile ())
-    {
-        // DEBUG_V ("Remote File Play");
-        while(Poll ()) {}
-    }
-    else if (PlayingFile ())
-    {
-        // DEBUG_V ("Local File Play");
-        while(Poll ()) {}
-
-        if (pInputFPPRemotePlayItem->IsIdle ())
+        if (!IsInputChannelActive || IsBooting)
         {
-            // DEBUG_V ("Idle Processing");
-            String temp = String(FileBeingPlayed);
-            StartPlaying (temp);
+            // DEBUG_V ("dont do anything if the channel is not active");
+            break;
         }
-    }
+
+        if (PlayingRemoteFile ())
+        {
+            // DEBUG_V ("Remote File Play");
+            while(Poll ()) {}
+            break;
+        }
+
+        if (PlayingFile ())
+        {
+            // DEBUG_V ("Local File Play");
+            while(Poll ()) {}
+
+            if (pInputFPPRemotePlayItem->IsIdle ())
+            {
+                // DEBUG_V ("Idle Processing");
+                String temp = String(FileBeingPlayed);
+                StartPlaying (temp);
+                // DEBUG_V("StartPlaying Done");
+            }
+            break;
+        }
+
+        // DEBUG_V("not playing anything. Start Playing");
+        String temp = String(ConfiguredFileToPlay);
+        StartPlaying(temp);
+        // DEBUG_V("StartPlaying Done");
+
+    } while(false);
+
     // DEBUG_END;
 
 } // process
@@ -285,12 +300,15 @@ bool c_InputFPPRemote::SetConfig (JsonObject& jsonConfig)
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
         SetBackgroundFile();
+        if(!FileToPlay.equals(pInputFPPRemotePlayItem->GetFileName()))
+        {
+            // DEBUG_V("New File to Play");
+            StartPlaying(FileToPlay);
+        }
     }
 
-    // DEBUG_V ("Config Processing");
     // Clear outbuffer on config change
     OutputMgr.ClearBuffer();
-    StartPlaying (FileToPlay);
 
     // DEBUG_END;
 
@@ -343,6 +361,10 @@ void c_InputFPPRemote::StopPlaying ()
             pInputFPPRemotePlayItem = nullptr;
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
+        else
+        {
+            // DEBUG_V("Not playing a file");
+        }
 
         Stopping = false;
 
@@ -359,7 +381,7 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
 
     do // once
     {
-        if(!IsInputChannelActive)
+        if(!IsInputChannelActive || IsBooting)
         {
             break;
         }
@@ -375,10 +397,12 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
 
         if (FppSyncOverride || FileName.equals(CN_No_LocalFileToPlay))
         {
+            // DEBUG_V("StartPlayingRemoteFile");
             StartPlayingRemoteFile (FileName);
         }
         else
         {
+            // DEBUG_V("StartPlayingLocalFile");
             StartPlayingLocalFile (FileName);
         }
         FilePlayCount++;
@@ -392,9 +416,27 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
 void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
 {
     // DEBUG_START;
+    // DEBUG_V(String("FileName: ") + FileName);
 
     do // once
     {
+        // are we playing anything?
+        if(pInputFPPRemotePlayItem)
+        {
+            // DEBUG_V(String("Playing FileName: ") + pInputFPPRemotePlayItem->GetFileName());
+            // are we playing this file already?
+            if(FileName.equals(pInputFPPRemotePlayItem->GetFileName()))
+            {
+                // DEBUG_V("dont change anything.");
+                if(pInputFPPRemotePlayItem->IsIdle())
+                {
+                    // DEBUG_V("Restart the idle channel");
+                    pInputFPPRemotePlayItem->Start(FileName, 0, 1);
+                }
+                break;
+            }
+        }
+
         // DEBUG_V("make sure we are stopped (clears pInputFPPRemotePlayItem)");
         StopPlaying();
 
@@ -466,7 +508,7 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
             break;
         }
 
-        // DEBUG_V();
+        // DEBUG_V("StopPlaying");
         StopPlaying ();
 
         // DEBUG_V ("Instantiate a new FSEQ file player");
