@@ -81,4 +81,13 @@ private:
     bool     Stopping = false;
     bool     FppSyncOverride = false;
     uint32_t FilePlayCount = 0;
+
+    #define PlayerMemorySize 700
+    struct PlayerInfo_t
+    {
+        alignas(16) byte    Player[PlayerMemorySize];
+        uint32_t            Id = 0;
+        bool                InUse = false;
+    };
+    PlayerInfo_t PlayerInfo;
 };
