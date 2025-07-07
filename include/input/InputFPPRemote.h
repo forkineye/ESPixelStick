@@ -82,7 +82,7 @@ private:
     bool     FppSyncOverride = false;
     uint32_t FilePlayCount = 0;
 
-    #define PlayerMemorySize 700
+    #define PlayerMemorySize 1076
     struct PlayerInfo_t
     {
         alignas(16) byte    Player[PlayerMemorySize];

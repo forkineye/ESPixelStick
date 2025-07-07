@@ -22,6 +22,8 @@
 #include "ESPixelStick.h"
 #include "InputFPPRemotePlayItem.hpp"
 #include "InputFPPRemotePlayListFsm.hpp"
+#include "InputFPPRemotePlayFile.hpp"
+#include "InputFPPRemotePlayEffect.hpp"
 #include "FileMgr.hpp"
 
 /*****************************************************************************/
@@ -57,6 +59,8 @@ protected:
     fsm_PlayList_state * pCurrentFsmState = nullptr;
 
     c_InputFPPRemotePlayItem * pInputFPPRemotePlayItem = nullptr;
+    char InputFPPRemotePlayItem[sizeof(c_InputFPPRemotePlayEffect)];
+    // char InputFPPRemotePlayItem[sizeof(c_InputFPPRemotePlayFile)];
 
     uint32_t PlayListEntryId     = 0;
 
