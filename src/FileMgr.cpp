@@ -189,7 +189,7 @@ void c_FileMgr::Begin ()
         {
             FeedWDT();
         #ifdef SUPPORT_UNZIP
-            UnzipFiles * Unzipper = new(UnzipFiles);
+            UnzipFiles * Unzipper = new UnzipFiles();
             Unzipper->Run();
             delete Unzipper;
             String Reason = F("Requesting reboot after unzipping files");
