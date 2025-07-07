@@ -86,7 +86,7 @@ public:
     };
 
 private:
-    #define InputDriverMemorySize 1660
+    #define InputDriverMemorySize 2476
 
     void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
