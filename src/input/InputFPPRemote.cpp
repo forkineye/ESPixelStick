@@ -26,6 +26,7 @@
 
 #define AllocatePlayer(ClassType, ChannelID) \
 { \
+    static_assert(sizeof(PlayerInfo.Player) >= sizeof(ClassType)); \
     new(PlayerInfo.Player) ClassType(ChannelID); \
     PlayerInfo.InUse = true; \
     pInputFPPRemotePlayItem = (c_InputFPPRemotePlayItem*) (&PlayerInfo.Player[0]); \
