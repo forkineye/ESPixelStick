@@ -58,6 +58,7 @@
 
 #define AllocatePort(ClassType, Output, DriverId, GpioId, PortId, OutputType) \
 { \
+    static_assert(sizeof(Output.OutputDriver) >= sizeof(ClassType)); \
     new(&Output.OutputDriver) ClassType(DriverId, GpioId, PortId, OutputType); \
     Output.OutputDriverInUse = true; \
 }
