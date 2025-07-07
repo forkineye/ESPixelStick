@@ -372,9 +372,6 @@ void c_InputFPPRemote::StopPlaying ()
 
             // DEBUG_V("Delete current playing file");
             DeAllocatePlayer();
-            // delete pInputFPPRemotePlayItem;
-            // pInputFPPRemotePlayItem = nullptr;
-            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
         else
         {
@@ -464,13 +461,9 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             {
                 // DEBUG_V ("Delete existing play item");
                 DeAllocatePlayer();
-                // delete pInputFPPRemotePlayItem;
-                // pInputFPPRemotePlayItem = nullptr;
-                // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             }
             // DEBUG_V ("Start a new Local File");
             AllocatePlayer(c_InputFPPRemotePlayList, GetInputChannelId ());
-            // pInputFPPRemotePlayItem = new c_InputFPPRemotePlayList (GetInputChannelId ());
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             strcpy(StatusType, String(F("PlayList")).c_str());
         }
@@ -490,13 +483,11 @@ void c_InputFPPRemote::StartPlayingLocalFile (String& FileName)
             {
                 // DEBUG_V ("Delete existing item");
                 DeAllocatePlayer();
-                // delete pInputFPPRemotePlayItem;
                 // pInputFPPRemotePlayItem = nullptr;
                 // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
             }
             // DEBUG_V ("Start Local FSEQ file player");
             AllocatePlayer(c_InputFPPRemotePlayFile, GetInputChannelId ());
-            // pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
             strcpy(StatusType, CN_File);
             // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
@@ -535,14 +526,9 @@ void c_InputFPPRemote::StartPlayingRemoteFile (String& FileName)
         {
             // DEBUG_V ("Delete existing play item");
             DeAllocatePlayer();
-            // c_InputFPPRemotePlayItem * temp = pInputFPPRemotePlayItem;
-            // pInputFPPRemotePlayItem = nullptr;
-            // delete temp;
-            // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         }
         // DEBUG_V ("Start Local FSEQ file player");
         AllocatePlayer(c_InputFPPRemotePlayFile, GetInputChannelId ());
-        // pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (GetInputChannelId ());
         // DEBUG_V(String("pInputFPPRemotePlayItem: 0x") + String(uint32_t(pInputFPPRemotePlayItem), HEX));
         pInputFPPRemotePlayItem->SetSyncOffsetMS (SyncOffsetMS);
         pInputFPPRemotePlayItem->SetSendFppSync (SendFppSync);
