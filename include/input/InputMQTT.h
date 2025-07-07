@@ -81,8 +81,8 @@ private:
             pPlayFileEngine = nullptr; \
         } \
     }
-    char PlayFileEngine[sizeof(c_InputFPPRemotePlayFile)];
-    // char PlayFileEngine[sizeof(c_InputFPPRemotePlayList)]; smaller structure.
+    // char PlayFileEngine[sizeof(c_InputFPPRemotePlayFile)];
+    char PlayFileEngine[sizeof(c_InputFPPRemotePlayList)];
 
     #define deleteEffectsEngine() \
     { \
