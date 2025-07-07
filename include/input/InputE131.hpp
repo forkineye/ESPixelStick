@@ -51,6 +51,7 @@ class c_InputE131 : public c_InputCommon
       uint32_t   SequenceErrorCounter;
     };
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
+    ESPAsyncE131 _ESPAsyncE131;
 
     void validateConfiguration ();
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions

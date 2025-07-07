@@ -20,6 +20,7 @@
 
 #include "InputCommon.hpp"
 #include "WebMgr.hpp"
+#include "InputEffectEngine.hpp"
 
 class c_InputAlexa : public c_InputCommon
 {
@@ -44,7 +45,6 @@ class c_InputAlexa : public c_InputCommon
 private:
 
     Ticker           mqttTicker;     // Ticker to handle MQTT
-    c_InputCommon  * pEffectsEngine = nullptr;
 
     void validateConfiguration ();
     void onMessage (EspalexaDevice* pDevice);
@@ -56,5 +56,7 @@ private:
     const char* OFF = "OFF";
 
     bool stateOn = false;
+    char InputEffectEngine[sizeof(c_InputEffectEngine)];
+    c_InputEffectEngine * pEffectsEngine = nullptr;
 
 };

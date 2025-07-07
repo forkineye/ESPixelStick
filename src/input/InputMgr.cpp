@@ -38,8 +38,20 @@
 
 #define AllocateInput(ClassType, Input, ChannelIndex, InputType, InputDataBufferSize) \
 { \
+    static_assert(InputDriverMemorySize >= sizeof(ClassType)); \
+    memset(Input[ChannelIndex].InputDriver, 0x0, sizeof(Input[ChannelIndex].InputDriver)); \
     new(&Input[ChannelIndex].InputDriver) ClassType(ChannelIndex, InputType, InputDataBufferSize); \
     Input[ChannelIndex].DriverInUse = true; \
+}
+
+#define DeAllocateInput(ChannelIndex) \
+{ \
+    if (InputChannelDrivers[ChannelIndex].DriverInUse) \
+    { \
+        InputChannelDrivers[ChannelIndex].DriverInUse = false; \
+        ((c_InputCommon*)(InputChannelDrivers[ChannelIndex].InputDriver))->~c_InputCommon(); \
+        memset(InputChannelDrivers[ChannelIndex].InputDriver, 0x0, sizeof(InputChannelDrivers[ChannelIndex].InputDriver)); \
+    } \
 }
 
 //-----------------------------------------------------------------------------
@@ -154,11 +166,7 @@ c_InputMgr::~c_InputMgr ()
     // delete pInputInstances;
     for (auto & CurrentInput : InputChannelDrivers)
     {
-        if (CurrentInput.DriverInUse)
-        {
-            ((c_InputCommon*)(CurrentInput.InputDriver))->~c_InputCommon();
-            CurrentInput.DriverInUse = false;
-        }
+        DeAllocateInput(CurrentInput.DriverId);
     }
     // DEBUG_END;
 
@@ -468,9 +476,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
             }
 
-            ((c_InputCommon*)(InputChannelDrivers[ChannelIndex].InputDriver))->~c_InputCommon();
-            // DEBUG_V ();
-            InputChannelDrivers[ChannelIndex].DriverInUse = false;
+            DeAllocateInput(ChannelIndex);
 
             // DEBUG_V ("");
         } // end there is an existing driver

@@ -18,12 +18,13 @@
 *
 */
 
-
 #include "InputCommon.hpp"
 #include "InputEffectEngine.hpp"
 #include "InputFPPRemotePlayItem.hpp"
 #include <Arduino.h>
 #include <AsyncMqttClient.h>
+#include "input/InputFPPRemotePlayFile.hpp"
+#include "input/InputFPPRemotePlayList.hpp"
 
 class c_InputMQTT : public c_InputCommon
 {
@@ -49,10 +50,10 @@ class c_InputMQTT : public c_InputCommon
 private:
 #define MQTT_PORT       1883    ///< Default MQTT port
 
-    AsyncMqttClient mqtt;           // MQTT object
-    Ticker          mqttTicker;     // Ticker to handle MQTT
-    c_InputCommon * pEffectsEngine = nullptr;
-    c_InputFPPRemotePlayItem* pPlayFileEngine = nullptr;
+    AsyncMqttClient            mqtt;           // MQTT object
+    Ticker                     mqttTicker;     // Ticker to handle MQTT
+    c_InputEffectEngine      * pEffectsEngine = nullptr;
+    c_InputFPPRemotePlayItem * pPlayFileEngine = nullptr;
 
     // Keep track of last known effect configuration state
     c_InputEffectEngine::MQTTConfiguration_t effectConfig;
@@ -70,6 +71,29 @@ private:
     String      haprefix = "homeassistant";
     bool        hadisco = true;
     String      lwtTopic;
+
+    #define deletePlayFileEngine() \
+    { \
+        if (nullptr != pPlayFileEngine) \
+        { \
+            pPlayFileEngine->~c_InputFPPRemotePlayItem(); \
+            memset(PlayFileEngine, 0x0, sizeof(PlayFileEngine)); \
+            pPlayFileEngine = nullptr; \
+        } \
+    }
+    char PlayFileEngine[sizeof(c_InputFPPRemotePlayFile)];
+    // char PlayFileEngine[sizeof(c_InputFPPRemotePlayList)]; smaller structure.
+
+    #define deleteEffectsEngine() \
+    { \
+        if (nullptr != pEffectsEngine) \
+        { \
+            pEffectsEngine->~c_InputEffectEngine(); \
+            memset(EffectsEngine, 0x0, sizeof(EffectsEngine)); \
+            pEffectsEngine = nullptr; \
+        } \
+    }
+    char EffectsEngine[sizeof(c_InputEffectEngine)];
 
     const char* ON = "ON";
     const char* OFF = "OFF";

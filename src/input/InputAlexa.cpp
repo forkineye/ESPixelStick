@@ -51,7 +51,7 @@ c_InputAlexa::~c_InputAlexa ()
 
         if (pEffectsEngine)
         {
-            delete pEffectsEngine;
+            pEffectsEngine->~c_InputEffectEngine();
             pEffectsEngine = nullptr;
         }
     }
@@ -70,7 +70,8 @@ void c_InputAlexa::Begin()
     }
     HasBeenInitialized = true;
 
-    pEffectsEngine = new c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBufferSize);
+    static_assert(sizeof(InputEffectEngine) >= sizeof(c_InputEffectEngine));
+    pEffectsEngine = new(InputEffectEngine) c_InputEffectEngine (c_InputMgr::e_InputChannelIds::InputSecondaryChannelId, c_InputMgr::e_InputType::InputType_Effects, InputDataBufferSize);
     pEffectsEngine->SetOperationalState (false);
 
     WebMgr.RegisterAlexaCallback ([this](EspalexaDevice* pDevice) {this->onMessage (pDevice); });

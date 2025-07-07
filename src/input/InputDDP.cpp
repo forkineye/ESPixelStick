@@ -50,7 +50,7 @@ c_InputDDP::~c_InputDDP ()
     // DEBUG_START;
 
     // OutputMgr.PauseOutput (false);
-    // udp->stop ();
+    Udp.close ();
 
     // DEBUG_END;
 } // ~c_InputDDP
@@ -65,7 +65,6 @@ void c_InputDDP::Begin ()
     memset (&stats, 0x00, sizeof (stats));
 
     // DEBUG_V("");
-    udp = new AsyncUDP ();
 
     NetworkStateChanged (NetworkMgr.IsConnected ());
 
@@ -135,9 +134,9 @@ void c_InputDDP::NetworkStateChanged (bool IsConnected)
     {
         // DEBUG_V ();
 
-        if (udp->listen (DDP_PORT))
+        if (Udp.listen (DDP_PORT))
         {
-            udp->onPacket (std::bind (&c_InputDDP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
+            Udp.onPacket (std::bind (&c_InputDDP::ProcessReceivedUdpPacket, this, std::placeholders::_1));
         }
 
         HasBeenInitialized = true;
@@ -366,7 +365,7 @@ void c_InputDDP::ProcessReceivedQuery ()
         memcpy (&DDPresponse.data, JsonResponse.c_str (), JsonResponse.length ());
         DDPresponse.header.dataLen = htons (JsonResponse.length ());
         UDPresponse.write ((const uint8_t*)&DDPresponse, uint32_t (sizeof (DDPresponse.header) + JsonResponse.length ()));
-        udp->sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
+        Udp.sendTo (UDPresponse, PacketBuffer.ResponseAddress, PacketBuffer.ResponsePort);
     }
     // DEBUG_END;
 

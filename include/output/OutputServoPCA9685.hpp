@@ -40,8 +40,8 @@ private:
         bool        Is16Bit         = false;
         bool        IsScaled        = true;
         uint8_t     HomeValue       = 0;
-
     };
+    Adafruit_PWMServoDriver pwm;
 
 public:
 
@@ -84,7 +84,6 @@ private:
 
     // config data
     ServoPCA9685Channel_t     OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];
-    Adafruit_PWMServoDriver * pwm = nullptr;
     float                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
 
     // non config data

@@ -41,6 +41,7 @@
 const uint8_t HTTP_PORT = 80;      ///< Default web server port
 
 static Espalexa         espalexa;
+static EspalexaDevice   AlexaDevice;
 static EFUpdate         efupdate; /// EFU Update Handler
 static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
 
@@ -628,7 +629,7 @@ void c_WebMgr::init ()
 
         // webServer.begin ();
 
-    	pAlexaDevice = new EspalexaDevice (String (F ("ESP")), [this](EspalexaDevice* pDevice)
+        pAlexaDevice = new((char*)&AlexaDevice) EspalexaDevice (String (F ("ESP")), [this](EspalexaDevice* pDevice)
         {
             this->onAlexaMessage (pDevice);
 

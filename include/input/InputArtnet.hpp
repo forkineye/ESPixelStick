@@ -55,6 +55,7 @@ class c_InputArtnet : public c_InputCommon
 
     };
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
+    Artnet _Artnet;
 
     void SetUpArtnet ();
     void validateConfiguration ();
