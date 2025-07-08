@@ -51,7 +51,7 @@ class c_InputE131 : public c_InputCommon
       uint32_t   SequenceErrorCounter;
     };
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
-    ESPAsyncE131 _ESPAsyncE131;
+    char  _ESPAsyncE131[sizeof(ESPAsyncE131)];
 
     void validateConfiguration ();
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
@@ -61,7 +61,7 @@ class c_InputE131 : public c_InputCommon
 
     c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                  c_InputMgr::e_InputType       NewChannelType,
-                 uint32_t                        BufferSize);
+                 uint32_t                      BufferSize);
     virtual ~c_InputE131();
 
     // functions to be provided by the derived class

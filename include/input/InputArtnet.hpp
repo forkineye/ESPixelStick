@@ -28,6 +28,7 @@ class c_InputArtnet : public c_InputCommon
     static const char       ConfigFileName[];
     static const uint8_t    MAX_NUM_UNIVERSES = (OM_MAX_NUM_CHANNELS / UNIVERSE_MAX) + 1;
 
+    char     _Artnet[sizeof(Artnet)];
     Artnet * pArtnet = nullptr;
 
     /// JSON configuration parameters
@@ -55,7 +56,6 @@ class c_InputArtnet : public c_InputCommon
 
     };
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
-    Artnet _Artnet;
 
     void SetUpArtnet ();
     void validateConfiguration ();

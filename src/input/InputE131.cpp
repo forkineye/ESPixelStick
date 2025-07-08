@@ -29,7 +29,7 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
 {
     // DEBUG_START;
     // DEBUG_V ("BufferSize: " + String (BufferSize));
-    e131 = new((char*)&_ESPAsyncE131) ESPAsyncE131 (0);
+    e131 = new(_ESPAsyncE131) ESPAsyncE131 (0);
 
     memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
 

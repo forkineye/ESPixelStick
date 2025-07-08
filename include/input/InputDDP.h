@@ -123,7 +123,7 @@ private:
     } ;
 
     PacketBuffer_t PacketBuffer;
-    AsyncUDP Udp;
+    char _udp[sizeof(AsyncUDP)];
 
 public:
 

@@ -269,7 +269,7 @@ void c_InputArtnet::SetUpArtnet ()
     if (nullptr == pArtnet)
     {
         // DEBUG_V ();
-        pArtnet = new((char*)&_Artnet) Artnet ();
+        pArtnet = new(_Artnet) Artnet ();
         pArtnet->begin ();
 
         byte broadcast[] = { 10, 0, 1, 255 };
