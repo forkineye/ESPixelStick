@@ -1311,7 +1311,7 @@ bool c_FileMgr::OpenSdFile (const String & FileName, FileMode Mode, FileId & Fil
         {
             // DEBUG_V(String("Valid FileListIndex: ") + String(FileListIndex));
             memset(FileList[FileListIndex].Filename, 0x0, sizeof(FileList[FileListIndex].Filename));
-            strncpy(FileList[FileListIndex].Filename, FileName.c_str(), min((sizeof(FileList[FileListIndex].Filename) - 1), FileName.length()));
+            strncpy(FileList[FileListIndex].Filename, FileName.c_str(), min(uint(sizeof(FileList[FileListIndex].Filename) - 1), FileName.length()));
             // DEBUG_V(String("Got file handle: ") + String(FileHandle));
             LockSd();
             FileList[FileListIndex].IsOpen = FileList[FileListIndex].fsFile.open(FileList[FileListIndex].Filename, XlateFileMode[Mode]);
@@ -2100,7 +2100,7 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
 
     // Set up to receive a file
     memset(fsUploadFileName, 0x0, sizeof(fsUploadFileName));
-    strncpy(fsUploadFileName, filename.c_str(), min((sizeof(fsUploadFileName) - 1), filename.length()));
+    strncpy(fsUploadFileName, filename.c_str(), min(uint(sizeof(fsUploadFileName) - 1), filename.length()));
 
     logcon (String (F ("Upload File: '")) + fsUploadFileName + String (F ("' Started")));
 
