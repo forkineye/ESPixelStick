@@ -332,7 +332,7 @@ void c_OutputUart::GetStatus(ArduinoJson::JsonObject &jsonStatus)
 //----------------------------------------------------------------------------
 void c_OutputUart::InitializeUart()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -437,7 +437,7 @@ void c_OutputUart::InitializeUart()
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // init
 
@@ -859,7 +859,7 @@ void c_OutputUart::PauseOutput(bool PauseOutput)
 //-----------------------------------------------------------------------------
 bool c_OutputUart::RegisterUartIsrHandler()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     bool ret = true;
     DisableUartInterrupts();
@@ -881,7 +881,7 @@ bool c_OutputUart::RegisterUartIsrHandler()
                                     &IsrHandle));
     // UART_EXIT_CRITICAL(&(uart_context[uart_num].spinlock));
 #endif
-    DEBUG_END;
+    // DEBUG_END;
 
     return ret;
 } // RegisterUartIsrHandler
@@ -889,7 +889,7 @@ bool c_OutputUart::RegisterUartIsrHandler()
 //----------------------------------------------------------------------------
 bool c_OutputUart::SetConfig(JsonObject &jsonConfig)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     uint8_t tempDataPin = uint8_t(OutputUartConfig.DataPin);
 
@@ -899,12 +899,12 @@ bool c_OutputUart::SetConfig(JsonObject &jsonConfig)
 
     OutputUartConfig.DataPin = gpio_num_t(tempDataPin);
 
-    DEBUG_V(String(" DataPin: ") + String(OutputUartConfig.DataPin));
-    DEBUG_V(String("Baudrate: ") + String(OutputUartConfig.Baudrate));
+    // DEBUG_V(String(" DataPin: ") + String(OutputUartConfig.DataPin));
+    // DEBUG_V(String("Baudrate: ") + String(OutputUartConfig.Baudrate));
 
     StartUart();
 
-    DEBUG_END;
+    // DEBUG_END;
 
     return response;
 
@@ -1102,7 +1102,7 @@ void c_OutputUart::StartNewFrame()
 //----------------------------------------------------------------------------
 void c_OutputUart::StartUart()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     do // once
     {
@@ -1124,7 +1124,7 @@ void c_OutputUart::StartUart()
         enqueueUartData(0xff);
 
 #ifdef ARDUINO_ARCH_ESP8266
-        DEBUG_V("start processing the timer interrupts");
+        // DEBUG_V("start processing the timer interrupts");
         if (IsUartTimerInUse())
         {
             OutputTimerArray[OutputUartConfig.ChannelId] = this;
@@ -1133,13 +1133,13 @@ void c_OutputUart::StartUart()
 
     } while (false);
 
-    DEBUG_END;
+    // DEBUG_END;
 } // StartUart
 
 //----------------------------------------------------------------------------
 void c_OutputUart::TerminateSerialPortOperation()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     DisableUartInterrupts();
 
@@ -1147,14 +1147,14 @@ void c_OutputUart::TerminateSerialPortOperation()
     {
         case UART_NUM_0:
         {
-            DEBUG_V ("UART_NUM_0");
+            // DEBUG_V ("UART_NUM_0");
             Serial.end();
             break;
         }
 
         case UART_NUM_1:
         {
-            DEBUG_V ("UART_NUM_1");
+            // DEBUG_V ("UART_NUM_1");
             Serial1.end();
             break;
         }
@@ -1170,7 +1170,7 @@ void c_OutputUart::TerminateSerialPortOperation()
 
         default:
         {
-            DEBUG_V ("default");
+            // DEBUG_V ("default");
             break;
         }
     } // end switch (UartId)
@@ -1184,7 +1184,7 @@ void c_OutputUart::TerminateSerialPortOperation()
     // uart_driver_delete(OutputUartConfig.UartId);
 #endif // def ARDUINO_ARCH_ESP32
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // TerminateSerialPortOperation
 
