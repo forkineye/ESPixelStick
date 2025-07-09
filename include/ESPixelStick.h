@@ -130,18 +130,17 @@ bool setFromJSON (T& OutValue, JsonObject & Json, N Name)
     return HasBeenModified;
 };
 
-template <typename N>
-bool setFromJSON (char * OutValue, JsonObject & Json, N Name)
+template <typename N, size_t S>
+bool setFromJSON (char (&OutValue)[S], JsonObject & Json, N Name)
 {
     bool HasBeenModified = false;
 
     if (Json[(char*)Name].template is<String>())
     {
-        char temp[65];
-        strncpy(temp, Json[(char*)Name], 64);
-        if (strcmp(temp, OutValue))
+        String temp = Json[(char*)Name];
+        if (!temp.equals(String(OutValue)))
         {
-            strncpy(OutValue, temp, 65);
+            strncpy(OutValue, temp.c_str(), S);
             HasBeenModified = true;
         }
     }
