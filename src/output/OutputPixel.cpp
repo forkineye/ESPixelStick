@@ -35,7 +35,7 @@ c_OutputPixel::c_OutputPixel (c_OutputMgr::e_OutputChannelIds OutputChannelId,
 
     FrameStateFuncPtr = &c_OutputPixel::FrameDone;
 
-    strcpy(color_order, String(F("RGB")).c_str());
+    strcpy(color_order, String(F("rgb")).c_str());
 
     // DEBUG_END;
 } // c_OutputPixel
