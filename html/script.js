@@ -1525,6 +1525,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
     {
         // save the config for later use.
         Output_Config = JsonConfigData.output_config;
+        // console.debug("Got Output Config: " + JSON.stringify(Output_Config) );
         CreateOptionsFromConfig("output", Output_Config);
     }
 
