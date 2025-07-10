@@ -157,7 +157,7 @@ void c_WebMgr::init ()
             ProcessXJRequest (request);
         });
 
-    	webServer.on ("/settime", HTTP_POST | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
+    	webServer.on ("/settime", HTTP_POST | HTTP_GET | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
         {
             // DEBUG_V("/settime");
             // DEBUG_V(String("URL: ") + request->url());
