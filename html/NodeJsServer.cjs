@@ -12,8 +12,10 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
 });
 
-app.post("/XP",        (req, res) => {res.redirect(espsIp + "XP")});
-app.get("/XJ",         (req, res) => {res.redirect(espsIp + "XJ")});
-app.put("/conf/:file", (req, res) => {res.redirect(espsIp + "conf/" + req.params.file);});
-app.get("/conf/:file", (req, res) => {res.redirect(espsIp + "conf/" + req.params.file);});
-app.post("/settime",   (req, res) => {res.redirect(espsIp + "settime?newtime=" + req.query.newtime);});
+
+app.post("/XP",          (req, res) => {res.redirect(espsIp + "XP")});
+app.get("/XJ",           (req, res) => {res.redirect(espsIp + "XJ")});
+app.put("/conf/:file",   (req, res) => {res.redirect(espsIp + "conf/" + req.params.file);});
+app.get("/conf/:file",   (req, res) => {res.redirect(espsIp + "conf/" + req.params.file);});
+app.post("/settime",     (req, res) => {res.redirect(espsIp + "settime?newtime=" + req.query.newtime);});
+app.get("/fseqfilelist", (req, res) => {res.redirect(espsIp + "fseqfilelist");});
