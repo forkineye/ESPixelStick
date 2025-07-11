@@ -453,6 +453,8 @@ $(function ()
 // lets get started
     RequestConfigFile("admininfo.json");
     RequestConfigFile("config.json");
+    RequestConfigFile("output_config.json");
+    RequestConfigFile("input_config.json");
     SetServerTime();
     RequestDiagData();
     StartRequestingStatusUpdate();  // start self filling status loop
@@ -499,7 +501,7 @@ function MergeConfig(SourceData, TargetData, FileName, SectionName)
     MergeConfigTree(FinalSourceData, FinalTargetData, FinalTargetData, "");
 
     // let DataString = '{"' + SectionName + '":' + JSON.stringify(TargetData) + "}";
-    SendConfigFileToServer(FileName, SectionName, FinalTargetData);
+    SendConfigFileToServer(FileName, JSON.stringify(FinalTargetData));
 
 } // MergeConfig
 
@@ -642,55 +644,45 @@ function SendAllConfigFilesToServer()
 {
     // console.debug("SendAllConfigFilesToServer");
 
-    SendConfigFileToServer("config",        'system',        System_Config);
-    SendConfigFileToServer("output_config", 'output_config', Output_Config);
-    SendConfigFileToServer("input_config",  'input_config',  Input_Config);
+    ConfigWaitMessageStart(3);
+    SendConfigFileToServer("config", JSON.stringify({'system': System_Config}));
+    SendConfigFileToServer("output_config", JSON.stringify({'output_config': Output_Config}));
+    SendConfigFileToServer("input_config", JSON.stringify({'input_config': Input_Config}));
 
 } // SendAllConfigFilesToServer
 
-function SendConfigFileToServer(FileName, sectionName, configData)
+function SendConfigFileToServer(FileName, DataString)
 {
     // console.debug("SendConfigFileToServer: FileName: " + FileName);
-    // console.debug("SendConfigFileToServer: sectionName: " + JSON.stringify(sectionName));
-    // console.debug("SendConfigFileToServer: Data: " + JSON.stringify(configData));
-    if(configData !== null)
-    {
-        ConfigWaitMessageStart(1);
-        let url = "conf/" + FileName + ".json";
-        let DataString = JSON.stringify({sectionName: configData});
-        console.debug("SendConfigFileToServer: DataString: " + DataString);
+    // console.debug("SendConfigFileToServer: Data: " + JSON.stringify(DataString));
+    let url = "conf/" + FileName + ".json";
 
-        $.ajaxQueue(
-        {
-            type: "PUT",
-            url: url,
-            data: DataString,
-            contentType: "application/json",
-            mode: "cors", // no-cors, *cors, same-origin
-            dataType: "json",
-            timeout: 20000,
-            async: false,
-            headers: { 'Content-Type': 'application/json' },
-            cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "same-origin", // include, *same-origin, omit
-            redirect: "follow", // manual, *follow, error
-            referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-            success: function(response)
-            {
-                // console.debug("SendConfigFileToServer: " + JSON.stringify(response));
-                ConfigWaitMessageEnd(0);
-            },
-            error: function()
-            {
-                console.error("SendConfigFileToServer: AJAX request failed for: " + url);
-                ConfigWaitMessageEnd(1);
-            }
-        });
-    }
-    else
+    $.ajaxQueue(
     {
-        console.error("No config data for '" +FileName + "'" );
-    }
+        type: "PUT",
+        url: url,
+        data: DataString,
+        contentType: "application/json",
+        mode: "cors", // no-cors, *cors, same-origin
+        dataType: "json",
+        timeout: 20000,
+        async: false,
+        headers: { 'Content-Type': 'application/json' },
+        cache: "reload", // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: "same-origin", // include, *same-origin, omit
+        redirect: "follow", // manual, *follow, error
+        referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        success: function(response)
+        {
+            // console.debug("SendConfigFileToServer: " + JSON.stringify(response));
+            ConfigWaitMessageEnd(0);
+        },
+        error: function()
+        {
+            console.error("SendConfigFileToServer: AJAX request failed for: " + url);
+            ConfigWaitMessageEnd(1);
+        }
+    });
     // console.debug("SendConfigFileToServer: Done: FileName: " + FileName);
 
 } // SendConfigFileToServer
