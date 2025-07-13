@@ -26,18 +26,32 @@
 
 #define AllocatePlayer(ClassType, ChannelID) \
 { \
-    static_assert(sizeof(PlayerInfo.Player) >= sizeof(ClassType)); \
-    new(PlayerInfo.Player) ClassType(ChannelID); \
-    PlayerInfo.InUse = true; \
-    pInputFPPRemotePlayItem = (c_InputFPPRemotePlayItem*) (&PlayerInfo.Player[0]); \
+    if(!PlayerInfo.InUse) \
+    { \
+        static_assert(sizeof(PlayerInfo.Player) >= sizeof(ClassType)); \
+        new(PlayerInfo.Player) ClassType(ChannelID); \
+        PlayerInfo.InUse = true; \
+        pInputFPPRemotePlayItem = (c_InputFPPRemotePlayItem*)(&PlayerInfo.Player[0]); \
+    } \
+    else \
+    { \
+        logcon("ERROR: Trying to start the player when it is already running"); \
+    } \
 }
 
 #define DeAllocatePlayer() \
 { \
-    pInputFPPRemotePlayItem = nullptr; \
-    PlayerInfo.InUse = false; \
-    pInputFPPRemotePlayItem->~c_InputFPPRemotePlayItem(); \
-    memset(PlayerInfo.Player, 0x0, sizeof(PlayerInfo.Player)); \
+    if(PlayerInfo.InUse) \
+    { \
+        pInputFPPRemotePlayItem = nullptr; \
+        PlayerInfo.InUse = false; \
+        ((c_InputFPPRemotePlayItem*)(&PlayerInfo.Player[0]))->~c_InputFPPRemotePlayItem(); \
+        memset(PlayerInfo.Player, 0x0, sizeof(PlayerInfo.Player)); \
+    } \
+    else \
+    { \
+        logcon(F("ERROR: Trying to stop player when no player is running")); \
+    } \
 }
 
 //-----------------------------------------------------------------------------
