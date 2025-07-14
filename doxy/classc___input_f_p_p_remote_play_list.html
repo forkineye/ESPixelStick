@@ -223,6 +223,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a8ba2e8284cf59318621a342d0670a98d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ad02abbaeda448cf0f5759772f3188f" id="r_a5ad02abbaeda448cf0f5759772f3188f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___input_f_p_p_remote_play_item.html">c_InputFPPRemotePlayItem</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5ad02abbaeda448cf0f5759772f3188f">pInputFPPRemotePlayItem</a> = nullptr</td></tr>
 <tr class="separator:a5ad02abbaeda448cf0f5759772f3188f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4e49e01416022ea09589ea874754e1b" id="r_ad4e49e01416022ea09589ea874754e1b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad4e49e01416022ea09589ea874754e1b">InputFPPRemotePlayItem</a> [sizeof(<a class="el" href="classc___input_f_p_p_remote_play_effect.html">c_InputFPPRemotePlayEffect</a>)]</td></tr>
+<tr class="separator:ad4e49e01416022ea09589ea874754e1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3439ee16ebd573b1aa04c533a6dd154d" id="r_a3439ee16ebd573b1aa04c533a6dd154d"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3439ee16ebd573b1aa04c533a6dd154d">PlayListEntryId</a> = 0</td></tr>
 <tr class="separator:a3439ee16ebd573b1aa04c533a6dd154d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1b6b2d50ae1fd2ac80c9b91d8f2226dc" id="r_a1b6b2d50ae1fd2ac80c9b91d8f2226dc"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_fast_timer.html">FastTimer</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1b6b2d50ae1fd2ac80c9b91d8f2226dc">PauseDelayTimer</a></td></tr>
@@ -234,8 +236,8 @@ Protected Attributes</h2></td></tr>
 <tr class="separator:a8327a95abc807e625a2b82fef912e3fc inherit pro_attribs_classc___input_f_p_p_remote_play_item"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0bf2dd0492e17cd4f7b7f536f51fffc2 inherit pro_attribs_classc___input_f_p_p_remote_play_item" id="r_a0bf2dd0492e17cd4f7b7f536f51fffc2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote_play_item.html#a0bf2dd0492e17cd4f7b7f536f51fffc2">SendFppSync</a> = false</td></tr>
 <tr class="separator:a0bf2dd0492e17cd4f7b7f536f51fffc2 inherit pro_attribs_classc___input_f_p_p_remote_play_item"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4b6f30efc50df3148d07bb679b7efc8a inherit pro_attribs_classc___input_f_p_p_remote_play_item" id="r_a4b6f30efc50df3148d07bb679b7efc8a"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote_play_item.html#a4b6f30efc50df3148d07bb679b7efc8a">BackgroundFileName</a> = emptyString</td></tr>
-<tr class="separator:a4b6f30efc50df3148d07bb679b7efc8a inherit pro_attribs_classc___input_f_p_p_remote_play_item"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b712ee75ae3d2f67748d878a20b3405 inherit pro_attribs_classc___input_f_p_p_remote_play_item" id="r_a8b712ee75ae3d2f67748d878a20b3405"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote_play_item.html#a8b712ee75ae3d2f67748d878a20b3405">BackgroundFileName</a> [65]</td></tr>
+<tr class="separator:a8b712ee75ae3d2f67748d878a20b3405 inherit pro_attribs_classc___input_f_p_p_remote_play_item"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae300601fbf334419059577166ff8e54f inherit pro_attribs_classc___input_f_p_p_remote_play_item" id="r_ae300601fbf334419059577166ff8e54f"><td class="memItemLeft" align="right" valign="top">const uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___input_f_p_p_remote_play_item.html#ae300601fbf334419059577166ff8e54f">LocalIntensityBufferSize</a> = 2048</td></tr>
 <tr class="separator:ae300601fbf334419059577166ff8e54f inherit pro_attribs_classc___input_f_p_p_remote_play_item"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -884,6 +886,28 @@ Here is the call graph for this function:</div>
       <table class="memname">
         <tr>
           <td class="memname"><a class="el" href="classfsm___play_list__state___wait_for_start.html">fsm_PlayList_state_WaitForStart</a> c_InputFPPRemotePlayList::fsm_PlayList_state_WaitForStart_imp</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad4e49e01416022ea09589ea874754e1b" name="ad4e49e01416022ea09589ea874754e1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad4e49e01416022ea09589ea874754e1b">&#9670;&#160;</a></span>InputFPPRemotePlayItem</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">char c_InputFPPRemotePlayList::InputFPPRemotePlayItem[sizeof(<a class="el" href="classc___input_f_p_p_remote_play_effect.html">c_InputFPPRemotePlayEffect</a>)]</td>
         </tr>
       </table>
   </td>

@@ -1,9 +1,20 @@
 <map id="c_InputMQTT::publishHA" name="c_InputMQTT::publishHA">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,173,60"/>
-<area shape="rect" id="Node000002" href="$classc___input_m_q_t_t.html#a155372c00c48e65bc4ce1c2433f55d38" title=" " alt="" coords="221,35,404,60"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,45,205,45,205,50,173,50"/>
-<area shape="rect" id="Node000003" href="$classc___input_common.html#ab048d5e7494a1f0f2b56ac04d1fab490" title="set up the operating environment based on the current config (or defaults)" alt="" coords="478,5,634,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="404,34,462,27,463,32,405,39"/>
-<area shape="rect" id="Node000004" href="$classc___input_common.html#a1649cd7444c3219b37fd8627754e2e56" title=" " alt="" coords="452,55,660,96"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="405,55,437,59,436,64,404,61"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,136,173,161"/>
+<area shape="rect" id="Node000002" href="$classc___input_m_q_t_t.html#a155372c00c48e65bc4ce1c2433f55d38" title=" " alt="" coords="221,136,404,161"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="173,146,205,146,205,151,173,151"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#a2ebc1a0fb53a9bf1fda61f25f770ef4f" title="set up the operating environment based on the current config (or defaults)" alt="" coords="488,63,624,103"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="362,132,472,103,474,108,364,138"/>
+<area shape="rect" id="Node000008" href="$classc___input_effect_engine.html#acb87ac54f56ff9db9ece09ca563eaf2e" title="Get the current config used by the driver." alt="" coords="488,128,624,169"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="404,146,473,146,473,151,404,151"/>
+<area shape="rect" id="Node000009" href="$classc___input_common.html#a1649cd7444c3219b37fd8627754e2e56" title=" " alt="" coords="452,193,660,234"/>
+<area shape="poly" id="edge9_Node000002_Node000009" title=" " alt="" coords="364,159,463,186,462,191,362,164"/>
+<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#abcbf05e7ca16985fa97382121a08867b" title=" " alt="" coords="708,63,856,103"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="624,80,693,80,693,86,624,86"/>
+<area shape="rect" id="Node000005" href="$classc___input_effect_engine.html#a80416202be606d8a4c68312aecb69c1c" title=" " alt="" coords="904,5,1040,46"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="851,60,888,48,890,53,852,65"/>
+<area shape="rect" id="Node000006" href="$classc___input_effect_engine.html#a8fa707bf9c7e9c79bfeae6d98adfc30c" title=" " alt="" coords="1088,92,1224,133"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="856,86,1073,103,1072,108,856,91"/>
+<area shape="rect" id="Node000007" href="$classc___input_effect_engine.html#a3628411bc599079aa0e45dd3df1682fc" title=" " alt="" coords="904,120,1040,161"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="852,101,890,113,888,118,851,106"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="1040,127,1072,122,1073,128,1041,133"/>
 </map>

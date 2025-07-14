@@ -43,7 +43,7 @@ var classc___output_pixel =
     [ "BlockDelayUs", "classc___output_pixel.html#a408993473c26291ecb94e5c86afadf10", null ],
     [ "BlockSize", "classc___output_pixel.html#aef29226779bfa3f654170b97aa9682dc", null ],
     [ "brightness", "classc___output_pixel.html#ab5a378d1b7705f29a458e9d8e6366d1e", null ],
-    [ "color_order", "classc___output_pixel.html#afed66443c13ce57f3584c57935140e17", null ],
+    [ "color_order", "classc___output_pixel.html#a4d4d11f628b1293030f007596aa16953", null ],
     [ "ColorOffsets", "classc___output_pixel.html#a2c2d6f2f2c326f9496c174b4e341de29", null ],
     [ "FrameAppendDataCurrentIndex", "classc___output_pixel.html#a8bf3a48e20aafeaabd5fd2d453e8dda7", null ],
     [ "FrameAppendDataSize", "classc___output_pixel.html#a2bc3add348369373601544b31549aeae", null ],

@@ -30,7 +30,7 @@ var classc___external_input =
     [ "InputDebounceCount", "classc___external_input.html#ab876eda22ea25a0c154d16570532fef2", null ],
     [ "InputHoldTimer", "classc___external_input.html#a839043f5d427e6170ff613f39efa5867", null ],
     [ "LongPushDelayMS", "classc___external_input.html#a0c419cf3875e22e561ffef8a4a00aa39", null ],
-    [ "name", "classc___external_input.html#a33f0e5609a4059c422f2b075ab21d16c", null ],
+    [ "name", "classc___external_input.html#a30ba07c4940b03f0e40e3bdb768514a6", null ],
     [ "polarity", "classc___external_input.html#a8120c90883e6d79c503274cb9892ed1b", null ],
     [ "TriggerChannel", "classc___external_input.html#aaef4c91e753fa7cd799024e656f68344", null ]
 ];

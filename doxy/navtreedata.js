@@ -55,20 +55,20 @@ var NAVTREEINDEX =
 [
 "_const_names_8cpp.html",
 "_const_names_8hpp.html#a0a93c30ec2a6fafe061f9abefaf5025b",
-"_e_f_update_8h_source.html",
-"_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#aa311e557e883f45ac54c03833e8edd53",
-"_g_p_i_o___defs___e_s_p32___m5_stack___atom_8hpp_source.html",
-"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#acc122895244f0017684c45d0360b4d54",
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a431c0875ff18625d3bf72627e60643de",
-"_input_d_d_p_8h.html#ab3f8f4f5f480353042b10c6e75ef40b6",
-"_web_mgr_8cpp.html#a1566cbab7ed3269dd88fd34a6385824e",
-"classc___input_alexa.html#a514052a254b938befb3a4c933efe15c4",
-"classc___input_f_p_p_remote_play_effect.html",
-"classc___output_common.html#a462f6a012ba9e655caadd26949813386",
-"classc___web_mgr.html#a6dc6bd3709c346249b066f2d64ec39c4",
-"classfsm___play_list__state___wait_for_start.html#a58bffe37db9134887f431eb6979e7198",
-"globals_n.html",
-"structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#a7635820108a17543eca827c742032ed4"
+"_e_s_pixel_stick_8h.html#a067b67c856af5452506085e83cdb2b01",
+"_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#aac8484c1f4cc7cb788c03e1c3c1faade",
+"_g_p_i_o___defs___e_s_p32___m_h___e_t___l_i_v_e___mini_kit_8hpp.html#a14f66e174569445ed297c0d2948c56c3",
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#ad1cdaf2881d19f91216c4a64f925d072",
+"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a4519f799b3e11a08d0b7377dac008a4e",
+"_input_d_d_p_8h.html#abba4e66dd408809819f6c486964d605c",
+"_unzip_files_8cpp.html",
+"classc___input_alexa.html#a00ff050d19b35c8ce8b8d383d346ec6a",
+"classc___input_f_p_p_remote.html#ac20d33080cef27922cc6350fcf25d8b6",
+"classc___network_mgr.html#aed8669649b1aad20da87b3c4bb176926",
+"classc___web_mgr.html#a02d3fef6b783f26270959e68c8a3c787",
+"classfsm___play_list__state___playing_file.html#a1d2db02507e7474ec6bf8c395e387b0f",
+"globals_defs_r.html",
+"structc___input_f_p_p_remote_1_1_player_info__t.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

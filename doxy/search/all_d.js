@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['name_0',['name',['../struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd',1,'InputTypeXlateMap_t::name'],['../struct_output_type_xlate_map__t.html#ab057221cbf20eb7f3effc1a61aa8ac29',1,'OutputTypeXlateMap_t::name'],['../classc___external_input.html#a33f0e5609a4059c422f2b075ab21d16c',1,'c_ExternalInput::name'],['../structc___input_effect_engine_1_1_effect_descriptor__t.html#a9a8d67997524fb9abf29128795386d2e',1,'c_InputEffectEngine::EffectDescriptor_t::name']]],
+  ['name_0',['name',['../struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd',1,'InputTypeXlateMap_t::name'],['../struct_output_type_xlate_map__t.html#ab057221cbf20eb7f3effc1a61aa8ac29',1,'OutputTypeXlateMap_t::name'],['../classc___external_input.html#a30ba07c4940b03f0e40e3bdb768514a6',1,'c_ExternalInput::name'],['../structc___input_effect_engine_1_1_effect_descriptor__t.html#a9a8d67997524fb9abf29128795386d2e',1,'c_InputEffectEngine::EffectDescriptor_t::name']]],
   ['nanosecondsinamicrosecond_1',['NanoSecondsInAMicroSecond',['../_e_s_pixel_stick_8h.html#adc742cd4c34a5cf8027ad01f623d218e',1,'ESPixelStick.h']]],
   ['nanosecondsinamillisecond_2',['NanoSecondsInAMilliSecond',['../_e_s_pixel_stick_8h.html#a2bae0e6b7c8b96bd7e9c2a326e7d8333',1,'ESPixelStick.h']]],
   ['nanosecondsinasecond_3',['NanoSecondsInASecond',['../_e_s_pixel_stick_8h.html#ab73f925aed9ed21d9f3da5037e690023',1,'ESPixelStick.h']]],

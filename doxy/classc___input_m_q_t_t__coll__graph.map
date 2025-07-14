@@ -1,14 +1,28 @@
 <map id="c_InputMQTT" name="c_InputMQTT">
-<area shape="rect" id="Node000001" title=" " alt="" coords="125,213,226,238"/>
-<area shape="rect" id="Node000002" href="$classc___input_common.html" title=" " alt="" coords="5,116,122,142"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,156,79,172,89,187,107,200,127,210,125,214,104,205,86,191,74,175,67,158"/>
-<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="83,153,115,187,151,210,149,214,111,191,79,156"/>
-<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="146,116,333,142"/>
-<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="229,157,210,190,190,214,185,211,205,187,225,155"/>
-<area shape="rect" id="Node000004" href="$structc___input_f_p_p_remote_play_item_1_1_file_control__t.html" title=" " alt="" coords="146,5,333,46"/>
-<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="242,61,242,116,237,116,237,61"/>
-<area shape="rect" id="Node000005" href="$structc___input_effect_engine_1_1_m_q_t_t_configuration__t.html" title=" " alt="" coords="356,109,507,150"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="386,160,318,191,227,217,226,212,316,186,383,155"/>
-<area shape="rect" id="Node000006" href="$structc___input_effect_engine_1_1_c_r_g_b.html" title=" " alt="" coords="363,5,500,46"/>
-<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="434,62,434,109,429,109,429,62"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="910,220,1012,246"/>
+<area shape="rect" id="Node000002" href="$classc___input_common.html" title=" " alt="" coords="300,5,416,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="432,25,494,36,558,52,672,92,781,139,937,217,934,222,778,144,670,97,556,57,493,41,431,30"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html" title=" " alt="" coords="606,188,742,214"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="429,33,452,41,507,62,559,91,619,141,663,186,659,189,616,145,555,95,505,66,450,46,427,38"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="758,207,910,225,909,230,757,213"/>
+<area shape="rect" id="Node000004" href="$structc___input_effect_engine_1_1_c_r_g_b.html" title=" " alt="" coords="290,248,426,289"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="441,254,556,232,630,212,631,217,558,237,442,259"/>
+<area shape="rect" id="Node000012" href="$structc___input_effect_engine_1_1_m_q_t_t_configuration__t.html" title=" " alt="" coords="599,248,749,289"/>
+<area shape="poly" id="edge14_Node000012_Node000004" title=" " alt="" coords="442,275,475,277,557,277,599,274,599,280,557,282,475,282,441,280"/>
+<area shape="rect" id="Node000005" href="$class_fast_timer.html" title=" " alt="" coords="33,167,114,192"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="129,179,265,185,606,196,606,202,265,190,129,185"/>
+<area shape="rect" id="Node000009" href="$structc___input_effect_engine_1_1_flash_info__t.html" title=" " alt="" coords="290,55,426,96"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="124,158,264,106,298,94,300,99,266,111,126,163"/>
+<area shape="rect" id="Node000006" href="$structc___input_effect_engine_1_1_effect_descriptor__t.html" title=" " alt="" coords="290,120,426,161"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="442,154,606,185,605,191,441,159"/>
+<area shape="rect" id="Node000007" href="$structc___input_effect_engine_1_1_transition__t.html" title=" " alt="" coords="290,314,426,354"/>
+<area shape="poly" id="edge7_Node000003_Node000007" title=" " alt="" coords="441,336,501,326,530,315,555,299,565,285,567,270,569,253,579,235,596,222,616,212,618,217,599,226,583,239,574,254,572,270,570,287,559,303,532,320,503,331,442,341"/>
+<area shape="rect" id="Node000008" href="$structc___input_effect_engine_1_1d_c_r_g_b.html" title=" " alt="" coords="5,314,142,354"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="157,332,289,332,289,337,157,337"/>
+<area shape="poly" id="edge9_Node000003_Node000009" title=" " alt="" coords="442,98,558,141,649,185,647,190,556,146,440,103"/>
+<area shape="rect" id="Node000010" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="581,355,767,380"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="724,346,800,314,885,275,938,244,941,248,888,280,803,319,726,351"/>
+<area shape="rect" id="Node000011" href="$structc___input_f_p_p_remote_play_item_1_1_file_control__t.html" title=" " alt="" coords="265,379,451,420"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="466,386,580,374,581,380,467,391"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="765,257,886,243,910,239,910,244,887,248,765,263"/>
 </map>

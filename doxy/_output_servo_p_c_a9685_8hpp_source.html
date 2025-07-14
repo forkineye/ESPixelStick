@@ -142,8 +142,8 @@ $(function(){initNavTree('_output_servo_p_c_a9685_8hpp_source.html',''); initRes
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordtype">bool</span>        Is16Bit         = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordtype">bool</span>        IsScaled        = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        uint8_t     HomeValue       = 0;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    };</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    };</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    Adafruit_PWMServoDriver pwm;</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
@@ -186,16 +186,14 @@ $(function(){initNavTree('_output_servo_p_c_a9685_8hpp_source.html',''); initRes
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="comment">// config data</span></div>
 <div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    ServoPCA9685Channel_t     OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    Adafruit_PWMServoDriver * pwm = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keywordtype">float</span>                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="comment">// non config data</span></div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    String      OutputName;</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    uint16_t    Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">float</span>                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">// non config data</span></div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    uint16_t    Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}; <span class="comment">// c_OutputServoPCA9685</span></div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>}; <span class="comment">// c_OutputServoPCA9685</span></div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="preprocessor">#endif </span><span class="comment">// def SUPPORT_OutputType_Servo_PCA9685</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif </span><span class="comment">// def SUPPORT_OutputType_Servo_PCA9685</span></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_output_common_8hpp_html"><div class="ttname"><a href="_output_common_8hpp.html">OutputCommon.hpp</a></div></div>
 <div class="ttc" id="aclassc___output_common_html"><div class="ttname"><a href="classc___output_common.html">c_OutputCommon</a></div><div class="ttdef"><b>Definition</b> OutputCommon.hpp:31</div></div>

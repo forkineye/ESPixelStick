@@ -1,5 +1,6 @@
 var classc___input_f_p_p_remote =
 [
+    [ "PlayerInfo_t", "structc___input_f_p_p_remote_1_1_player_info__t.html", "structc___input_f_p_p_remote_1_1_player_info__t" ],
     [ "c_InputFPPRemote", "classc___input_f_p_p_remote.html#aa21e7e5554a485a8483050a403dab519", null ],
     [ "~c_InputFPPRemote", "classc___input_f_p_p_remote.html#a53f59cf53b918b6ac45432aee251f808", null ],
     [ "AllowedToPlayRemoteFile", "classc___input_f_p_p_remote.html#a49952f48c45c1d31ffb14a18a030a853", null ],
@@ -31,13 +32,14 @@ var classc___input_f_p_p_remote =
     [ "StartPlayingRemoteFile", "classc___input_f_p_p_remote.html#a8148ddeeaff99c8f343c66e7e3a08a5d", null ],
     [ "StopPlaying", "classc___input_f_p_p_remote.html#a7b84b8b1119182f7a2c6a72c00d1d1da", null ],
     [ "validateConfiguration", "classc___input_f_p_p_remote.html#a53758f81562b012890b568958891b58a", null ],
-    [ "ConfiguredFileToPlay", "classc___input_f_p_p_remote.html#a2a8d114c79feeebbbbbf2c78edd0c985", null ],
-    [ "FileBeingPlayed", "classc___input_f_p_p_remote.html#ae0661236c6c8f91e0f9162d941b9f2de", null ],
+    [ "ConfiguredFileToPlay", "classc___input_f_p_p_remote.html#afa20c9b2949da55d1bcc79735fcb32c5", null ],
+    [ "FileBeingPlayed", "classc___input_f_p_p_remote.html#a6ed3176da06e02c7d08fdad2aaf709fd", null ],
     [ "FilePlayCount", "classc___input_f_p_p_remote.html#a75c9d55b344cdace8541985539450771", null ],
     [ "FppSyncOverride", "classc___input_f_p_p_remote.html#a1026fa25a114a817ca6a47a3df45d047", null ],
     [ "pInputFPPRemotePlayItem", "classc___input_f_p_p_remote.html#a408bb6bee77015240dce30c447684eb5", null ],
+    [ "PlayerInfo", "classc___input_f_p_p_remote.html#ad0ff0485d3361b4a32631109d1c696d3", null ],
     [ "SendFppSync", "classc___input_f_p_p_remote.html#a5b0598cd573c49535959ed9eb66b0880", null ],
-    [ "StatusType", "classc___input_f_p_p_remote.html#ac4e408789e2c39cea4df6df3dd2ade59", null ],
+    [ "StatusType", "classc___input_f_p_p_remote.html#a0f3f8cea62b2f99668f3f78890b8927b", null ],
     [ "Stopping", "classc___input_f_p_p_remote.html#a51a3c74d18d957f2d3778717f6097022", null ],
     [ "SyncOffsetMS", "classc___input_f_p_p_remote.html#ac7febe8236ae28590cb80983cb4da490", null ]
 ];

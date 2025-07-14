@@ -33,7 +33,7 @@ var searchData=
   ['effectreverse_30',['EffectReverse',['../classc___input_effect_engine.html#a9075c058d67bc123a7e531a40269b701',1,'c_InputEffectEngine']]],
   ['effects_5ftask_5fpriority_31',['EFFECTS_TASK_PRIORITY',['../_input_effect_engine_8hpp.html#aeb892f8a099b6b835d7c59c14e144c97',1,'InputEffectEngine.hpp']]],
   ['effectschannel_32',['EffectsChannel',['../classc___input_mgr.html#ae9616c847456a5027ce3185523fc1360a4994a79e40be2d6e001d09baf7b42f15',1,'c_InputMgr']]],
-  ['effectsengine_33',['EffectsEngine',['../classc___input_f_p_p_remote_play_effect.html#a0496b63aaeec8535476483dab2a9e562',1,'c_InputFPPRemotePlayEffect']]],
+  ['effectsengine_33',['EffectsEngine',['../classc___input_f_p_p_remote_play_effect.html#a0496b63aaeec8535476483dab2a9e562',1,'c_InputFPPRemotePlayEffect::EffectsEngine'],['../classc___input_m_q_t_t.html#af9315981c22a8930e2f24b1eeb62cf06',1,'c_InputMQTT::EffectsEngine']]],
   ['effectsolidcolor_34',['effectSolidColor',['../classc___input_effect_engine.html#acdb74858432f745ac97391b24751bf68',1,'c_InputEffectEngine']]],
   ['effectspeed_35',['EffectSpeed',['../classc___input_effect_engine.html#a4628699da38047684fb88ffce258487e',1,'c_InputEffectEngine']]],
   ['effectstep_36',['EffectStep',['../classc___input_effect_engine.html#a64802e5baf334d240801715f00cefa66',1,'c_InputEffectEngine']]],

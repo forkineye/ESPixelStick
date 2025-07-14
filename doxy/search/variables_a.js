@@ -2,8 +2,8 @@ var searchData=
 [
   ['lastdata_0',['lastData',['../classc___input_artnet.html#aea8088f99572c09cecd383e4b1f33115',1,'c_InputArtnet']]],
   ['lasterror_1',['lastError',['../classc___input_d_d_p.html#aed399b48186577d414acad0dd219dd1c',1,'c_InputDDP']]],
-  ['lastfailedfilename_2',['LastFailedFilename',['../classc___input_f_p_p_remote_play_file.html#a7a01c53f9c37864eabc31b1416701e94',1,'c_InputFPPRemotePlayFile']]],
-  ['lastfailedplaystatusmsg_3',['LastFailedPlayStatusMsg',['../classc___input_f_p_p_remote_play_file.html#a6722f6e014b6f0c8ba2f61ec4901a311',1,'c_InputFPPRemotePlayFile']]],
+  ['lastfailedfilename_2',['LastFailedFilename',['../classc___input_f_p_p_remote_play_file.html#a840cfe33a9ba494d5962d9f59d0a55ee',1,'c_InputFPPRemotePlayFile']]],
+  ['lastfailedplaystatusmsg_3',['LastFailedPlayStatusMsg',['../classc___input_f_p_p_remote_play_file.html#a4f6faaac8129be24da260c3421e40515',1,'c_InputFPPRemotePlayFile']]],
   ['lastfilesent_4',['LastFileSent',['../classc___file_mgr.html#a3cdf1bed23c1ce53830376a204b282c8',1,'c_FileMgr']]],
   ['lastplayedframeid_5',['LastPlayedFrameId',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#a4ad53f8a4bf2ef70476ac1d4ff6e649b',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
   ['lastpolltimems_6',['LastPollTimeMS',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#af00fce7294575f3321f4a2e6956c49cb',1,'c_InputFPPRemotePlayItem::FileControl_t']]],

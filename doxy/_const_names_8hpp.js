@@ -1,7 +1,6 @@
 var _const_names_8hpp =
 [
     [ "CN_PROGMEM", "_const_names_8hpp.html#a922e04bb23c00518770835f35c9c12b2", null ],
-    [ "BUILD_DATE", "_const_names_8hpp.html#a0e2463c67702bd0a35c61f2e684dc284", null ],
     [ "CN_active", "_const_names_8hpp.html#abc2eed441c2939deb17eaf60e147cb91", null ],
     [ "CN_activedelay", "_const_names_8hpp.html#ab46a70f1d66111400cb924417821d169", null ],
     [ "CN_ActiveHigh", "_const_names_8hpp.html#acc072ade0e55c49094725ec3560d53ee", null ],
@@ -243,6 +242,5 @@ var _const_names_8hpp =
     [ "MN_2", "_const_names_8hpp.html#ab5328f1bfd15f63ca20f03821ba8ee9c", null ],
     [ "MN_20", "_const_names_8hpp.html#a5cadbb6fdb449e2ca6b2fbf1ccde1331", null ],
     [ "MN_21", "_const_names_8hpp.html#a4ee8d6c5a297a27722ec3f71e416e54c", null ],
-    [ "MN_22", "_const_names_8hpp.html#a9921711811ad762494d28dcdf802f96d", null ],
-    [ "VERSION", "_const_names_8hpp.html#a56e71553f6adb2a4fa284f5154f4c926", null ]
+    [ "MN_22", "_const_names_8hpp.html#a9921711811ad762494d28dcdf802f96d", null ]
 ];

@@ -16,6 +16,7 @@ var classc___input_e131 =
     [ "SetBufferTranslation", "classc___input_e131.html#a8e56c6414777712a050c2f79cd378beb", null ],
     [ "SetConfig", "classc___input_e131.html#ae77e361a9e510852cd0b7d0cf6721ec6", null ],
     [ "validateConfiguration", "classc___input_e131.html#a15895b3f2f8627744022fe5466278491", null ],
+    [ "_ESPAsyncE131", "classc___input_e131.html#a0d44f5282aed1ba9d8b0c5ab6493f628", null ],
     [ "channel_count", "classc___input_e131.html#a80b20934b5e5ac22dd3a019cf51a4267", null ],
     [ "ChannelsPerUniverse", "classc___input_e131.html#a694114aaade169546c0159e38893ff82", null ],
     [ "ConfigFileName", "classc___input_e131.html#a2e1497abda0077f3f214bccf82e5bbf8", null ],

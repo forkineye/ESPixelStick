@@ -1,13 +1,23 @@
 <map id="c_InputEffectEngine::setEffect" name="c_InputEffectEngine::setEffect">
-<area shape="rect" id="Node000001" title=" " alt="" coords="395,71,531,111"/>
-<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#ad8d24a5492296d0018c7eafd7191fdef" title=" " alt="" coords="211,5,347,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="389,68,337,49,339,44,391,63"/>
-<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="211,71,347,111"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="380,94,348,94,348,88,380,88"/>
-<area shape="rect" id="Node000006" href="$classc___input_effect_engine.html#a004324fb32979c06ade422ec513741ef" title="Set a new config in the driver." alt="" coords="211,136,347,177"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="391,119,339,138,337,133,389,114"/>
-<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#ad33270be32be7f55c35813779f459448" title=" " alt="" coords="5,5,163,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="195,28,163,28,163,23,195,23"/>
-<area shape="rect" id="Node000005" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="12,71,156,111"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="195,94,157,94,157,88,195,88"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="844,81,980,122"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#ad8d24a5492296d0018c7eafd7191fdef" title=" " alt="" coords="659,11,796,51"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="842,78,782,54,784,49,844,73"/>
+<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="659,81,796,122"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="828,104,796,104,796,99,828,99"/>
+<area shape="rect" id="Node000008" href="$classc___input_effect_engine.html#a004324fb32979c06ade422ec513741ef" title="Set a new config in the driver." alt="" coords="659,157,796,198"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="847,131,780,159,778,154,845,126"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#ad33270be32be7f55c35813779f459448" title=" " alt="" coords="448,5,605,46"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="644,31,606,30,606,25,644,26"/>
+<area shape="rect" id="Node000005" href="$classc___input_alexa.html#adf1dcecdbc97eb955ad2ca3954678c80" title=" " alt="" coords="442,70,611,96"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="644,97,612,94,612,88,644,91"/>
+<area shape="rect" id="Node000007" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="454,120,599,161"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="645,120,600,129,599,124,644,115"/>
+<area shape="rect" id="Node000006" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="226,70,362,96"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="427,86,362,86,362,80,427,80"/>
+<area shape="rect" id="Node000009" href="$classc___input_m_q_t_t.html#a3868e04d5b087dc00ec90f0e52fce304" title=" " alt="" coords="444,185,609,210"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="644,189,610,192,610,187,644,183"/>
+<area shape="rect" id="Node000010" href="$classc___input_m_q_t_t.html#a18091bce67a4c82c95692bcd9366872f" title=" " alt="" coords="194,185,394,210"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="428,200,394,200,394,195,428,195"/>
+<area shape="rect" id="Node000011" href="$classc___input_m_q_t_t.html#a00dad1347b7fbe42eb3f3b444f219254" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,185,146,210"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="179,200,146,200,146,195,179,195"/>
 </map>

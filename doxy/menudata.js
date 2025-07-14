@@ -121,7 +121,6 @@ var menudata={children:[
 {text:"All",url:"globals.html",children:[
 {text:"_",url:"globals.html#index__5F"},
 {text:"a",url:"globals_a.html#index_a"},
-{text:"b",url:"globals_b.html#index_b"},
 {text:"c",url:"globals_c.html#index_c"},
 {text:"d",url:"globals_d.html#index_d"},
 {text:"e",url:"globals_e.html#index_e"},
@@ -157,7 +156,7 @@ var menudata={children:[
 {text:"w",url:"globals_func.html#index_w"}]},
 {text:"Variables",url:"globals_vars.html",children:[
 {text:"_",url:"globals_vars.html#index__5F"},
-{text:"b",url:"globals_vars_b.html#index_b"},
+{text:"a",url:"globals_vars_a.html#index_a"},
 {text:"c",url:"globals_vars_c.html#index_c"},
 {text:"d",url:"globals_vars_d.html#index_d"},
 {text:"e",url:"globals_vars_e.html#index_e"},

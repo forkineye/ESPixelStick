@@ -97,6 +97,7 @@ var hierarchy =
     [ "OutputTypeXlateMap_t", "struct_output_type_xlate_map__t.html", null ],
     [ "c_OutputUart::OutputUartConfig_t", "structc___output_uart_1_1_output_uart_config__t.html", null ],
     [ "c_InputDDP::PacketBuffer_t", "structc___input_d_d_p_1_1_packet_buffer__t.html", null ],
+    [ "c_InputFPPRemote::PlayerInfo_t", "structc___input_f_p_p_remote_1_1_player_info__t.html", null ],
     [ "fsm_PlayFile_state_PlayingFile::SparseRange", "structfsm___play_file__state___playing_file_1_1_sparse_range.html", null ],
     [ "c_InputFPPRemotePlayFile::SyncControl_t", "structc___input_f_p_p_remote_play_file_1_1_sync_control__t.html", null ],
     [ "c_FPPDiscovery::SystemDebugStats_t", "structc___f_p_p_discovery_1_1_system_debug_stats__t.html", null ],

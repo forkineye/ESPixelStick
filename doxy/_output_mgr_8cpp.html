@@ -312,6 +312,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">{ \</div>
+<div class="line">    static_assert(<span class="keyword">sizeof</span>(Output.OutputDriver) &gt;= <span class="keyword">sizeof</span>(ClassType)); \</div>
 <div class="line">    new(&amp;Output.OutputDriver) ClassType(DriverId, GpioId, PortId, OutputType); \</div>
 <div class="line">    Output.OutputDriverInUse = true; \</div>
 <div class="line">}</div>

@@ -13,9 +13,10 @@ var classc___input_alexa =
     [ "SetBufferInfo", "classc___input_alexa.html#a45a1d6a01d06af0d4f4b2e6f778d03e7", null ],
     [ "SetConfig", "classc___input_alexa.html#a514052a254b938befb3a4c933efe15c4", null ],
     [ "validateConfiguration", "classc___input_alexa.html#af1edb325efda96cd2f759f54864018ce", null ],
+    [ "InputEffectEngine", "classc___input_alexa.html#aa9411f645f03f60c62efb3a01eba4d66", null ],
     [ "mqttTicker", "classc___input_alexa.html#a0801055d6d18e87835a6e91a0483497c", null ],
     [ "OFF", "classc___input_alexa.html#a952005642b4f9f5ac4910e5015e884fa", null ],
     [ "ON", "classc___input_alexa.html#a5c49720ac0879ae33f32bbbae9a3d3b7", null ],
-    [ "pEffectsEngine", "classc___input_alexa.html#a6451a847ca387b822955da8a1232e443", null ],
+    [ "pEffectsEngine", "classc___input_alexa.html#ad270dcf8c576ad08f142061be1ce39f9", null ],
     [ "stateOn", "classc___input_alexa.html#af7e02b8a85f9cfdcf08aa30a0898b485", null ]
 ];

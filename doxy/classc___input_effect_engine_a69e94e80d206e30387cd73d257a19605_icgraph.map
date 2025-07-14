@@ -1,15 +1,30 @@
 <map id="c_InputEffectEngine::SetBufferInfo" name="c_InputEffectEngine::SetBufferInfo">
-<area shape="rect" id="Node000001" title=" " alt="" coords="390,136,526,177"/>
-<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#a50de6fdb56648338c95c3b675f3ac3bf" title=" " alt="" coords="199,5,341,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="423,127,385,94,341,61,319,49,321,44,343,57,388,90,427,123"/>
-<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#a61dc0e2f64570d9a7f7b534027a24863" title=" " alt="" coords="199,71,341,111"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="382,133,330,114,331,109,384,128"/>
-<area shape="rect" id="Node000004" href="$classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="198,136,342,177"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="375,159,342,159,342,154,375,154"/>
-<area shape="rect" id="Node000005" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="202,201,338,242"/>
-<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="384,185,331,203,330,198,382,180"/>
-<area shape="rect" id="Node000007" href="$classc___input_effect_engine.html#a004324fb32979c06ade422ec513741ef" title="Set a new config in the driver." alt="" coords="202,267,338,307"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="427,189,388,223,343,256,321,268,319,264,341,251,385,219,423,185"/>
-<area shape="rect" id="Node000006" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="5,201,150,242"/>
-<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="186,224,150,224,150,219,186,219"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="891,215,1027,255"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#a50de6fdb56648338c95c3b675f3ac3bf" title=" " alt="" coords="680,5,822,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="941,202,902,131,874,94,841,61,821,49,824,44,844,57,878,90,906,128,946,200"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#a61dc0e2f64570d9a7f7b534027a24863" title=" " alt="" coords="680,71,822,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="927,205,888,168,841,132,808,114,811,110,844,127,891,164,930,201"/>
+<area shape="rect" id="Node000004" href="$classc___input_m_q_t_t.html#a3868e04d5b087dc00ec90f0e52fce304" title=" " alt="" coords="444,236,609,261"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="914,209,880,190,842,176,791,165,751,161,711,165,660,176,627,188,595,204,546,237,543,233,593,200,625,183,659,171,710,159,751,156,792,160,843,171,882,185,917,204"/>
+<area shape="rect" id="Node000007" href="$classfsm___play_effect__state___playing_effect.html#a0bd06217392513ebcc5d436896e73550" title=" " alt="" coords="679,185,823,226"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="875,226,823,218,824,213,876,221"/>
+<area shape="rect" id="Node000008" href="$classc___input_alexa.html#a45a1d6a01d06af0d4f4b2e6f778d03e7" title=" " alt="" coords="662,250,840,276"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="876,249,841,254,840,248,875,244"/>
+<area shape="rect" id="Node000009" href="$classc___input_m_q_t_t.html#a74cc28c42ca7dbd319208e1a97026b51" title=" " alt="" coords="659,300,843,325"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="905,265,844,291,810,301,808,296,842,286,903,260"/>
+<area shape="rect" id="Node000010" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="683,415,819,455"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="944,270,905,337,877,373,844,404,821,418,818,413,841,400,873,369,900,334,940,268"/>
+<area shape="rect" id="Node000014" href="$classc___input_effect_engine.html#a004324fb32979c06ade422ec513741ef" title="Set a new config in the driver." alt="" coords="683,349,819,390"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="930,269,891,305,844,340,821,351,819,347,841,335,888,301,927,265"/>
+<area shape="rect" id="Node000005" href="$classc___input_m_q_t_t.html#a18091bce67a4c82c95692bcd9366872f" title=" " alt="" coords="194,236,394,261"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="428,251,394,251,394,246,428,246"/>
+<area shape="rect" id="Node000006" href="$classc___input_m_q_t_t.html#a00dad1347b7fbe42eb3f3b444f219254" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,236,146,261"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="179,251,146,251,146,246,179,246"/>
+<area shape="rect" id="Node000011" href="$classc___input_alexa.html#adf1dcecdbc97eb955ad2ca3954678c80" title=" " alt="" coords="442,385,611,410"/>
+<area shape="poly" id="edge10_Node000010_Node000011" title=" " alt="" coords="667,424,608,414,609,409,668,419"/>
+<area shape="rect" id="Node000013" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="454,435,599,475"/>
+<area shape="poly" id="edge12_Node000010_Node000013" title=" " alt="" coords="668,445,599,451,599,446,667,440"/>
+<area shape="rect" id="Node000012" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="226,385,362,410"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="427,400,362,400,362,395,427,395"/>
+<area shape="poly" id="edge14_Node000014_Node000004" title=" " alt="" coords="669,345,658,340,593,301,543,264,546,260,596,296,661,335,671,340"/>
 </map>

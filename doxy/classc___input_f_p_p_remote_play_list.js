@@ -20,6 +20,7 @@ var classc___input_f_p_p_remote_play_list =
     [ "fsm_PlayList_state_PlayingEffect_imp", "classc___input_f_p_p_remote_play_list.html#a45054a00fcb843f2870f77c050558059", null ],
     [ "fsm_PlayList_state_PlayingFile_imp", "classc___input_f_p_p_remote_play_list.html#a2806628192904c96e26b00d16cab42c8", null ],
     [ "fsm_PlayList_state_WaitForStart_imp", "classc___input_f_p_p_remote_play_list.html#a6e99d74834b52898f1440a9318ed8a73", null ],
+    [ "InputFPPRemotePlayItem", "classc___input_f_p_p_remote_play_list.html#ad4e49e01416022ea09589ea874754e1b", null ],
     [ "PauseDelayTimer", "classc___input_f_p_p_remote_play_list.html#a1b6b2d50ae1fd2ac80c9b91d8f2226dc", null ],
     [ "pCurrentFsmState", "classc___input_f_p_p_remote_play_list.html#a8ba2e8284cf59318621a342d0670a98d", null ],
     [ "pInputFPPRemotePlayItem", "classc___input_f_p_p_remote_play_list.html#a5ad02abbaeda448cf0f5759772f3188f", null ],

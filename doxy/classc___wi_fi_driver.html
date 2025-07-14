@@ -148,7 +148,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a9b1a0a5468f5c39b65b98067c9ef745b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae06fa2c4762015c1b92e626d08217482" id="r_ae06fa2c4762015c1b92e626d08217482"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae06fa2c4762015c1b92e626d08217482">setIpSubNetMask</a> (IPAddress NewAddress)</td></tr>
 <tr class="separator:ae06fa2c4762015c1b92e626d08217482"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4957b3cc3db8f59af3909ccd9d9f45bd" id="r_a4957b3cc3db8f59af3909ccd9d9f45bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4957b3cc3db8f59af3909ccd9d9f45bd">connectWifi</a> (const String &amp;<a class="el" href="#a5920e9b750965b79b124ea50c62ba0d1">ssid</a>, const String &amp;<a class="el" href="#aa441324efc6471c93923841725b5c0ae">passphrase</a>)</td></tr>
+<tr class="memitem:a4957b3cc3db8f59af3909ccd9d9f45bd" id="r_a4957b3cc3db8f59af3909ccd9d9f45bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4957b3cc3db8f59af3909ccd9d9f45bd">connectWifi</a> (const String &amp;<a class="el" href="#a388490570a8fc470b83649cde6ddfa8b">ssid</a>, const String &amp;<a class="el" href="#a40273c5b3f846a71ffda36b4bbc938ab">passphrase</a>)</td></tr>
 <tr class="separator:a4957b3cc3db8f59af3909ccd9d9f45bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a73ac32c8db2b76fe03893dde2a2ad134" id="r_a73ac32c8db2b76fe03893dde2a2ad134"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a73ac32c8db2b76fe03893dde2a2ad134">reset</a> ()</td></tr>
 <tr class="separator:a73ac32c8db2b76fe03893dde2a2ad134"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,14 +226,14 @@ Private Attributes</h2></td></tr>
 <tr class="separator:a24f3592bcc1b8a2b54679093d52561e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d752718b07127ffc3291d7b0e360d9d" id="r_a4d752718b07127ffc3291d7b0e360d9d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d752718b07127ffc3291d7b0e360d9d">ReportedIsWiFiConnected</a> = false</td></tr>
 <tr class="separator:a4d752718b07127ffc3291d7b0e360d9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5920e9b750965b79b124ea50c62ba0d1" id="r_a5920e9b750965b79b124ea50c62ba0d1"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5920e9b750965b79b124ea50c62ba0d1">ssid</a></td></tr>
-<tr class="separator:a5920e9b750965b79b124ea50c62ba0d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa441324efc6471c93923841725b5c0ae" id="r_aa441324efc6471c93923841725b5c0ae"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa441324efc6471c93923841725b5c0ae">passphrase</a></td></tr>
-<tr class="separator:aa441324efc6471c93923841725b5c0ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad83f04b765ae0c0838dcea46f034c171" id="r_ad83f04b765ae0c0838dcea46f034c171"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad83f04b765ae0c0838dcea46f034c171">ap_ssid</a></td></tr>
-<tr class="separator:ad83f04b765ae0c0838dcea46f034c171"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3957ed89b5702c78e29e8381fa07b3bd" id="r_a3957ed89b5702c78e29e8381fa07b3bd"><td class="memItemLeft" align="right" valign="top">String&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3957ed89b5702c78e29e8381fa07b3bd">ap_passphrase</a></td></tr>
-<tr class="separator:a3957ed89b5702c78e29e8381fa07b3bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a388490570a8fc470b83649cde6ddfa8b" id="r_a388490570a8fc470b83649cde6ddfa8b"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a388490570a8fc470b83649cde6ddfa8b">ssid</a> [65]</td></tr>
+<tr class="separator:a388490570a8fc470b83649cde6ddfa8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40273c5b3f846a71ffda36b4bbc938ab" id="r_a40273c5b3f846a71ffda36b4bbc938ab"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a40273c5b3f846a71ffda36b4bbc938ab">passphrase</a> [65]</td></tr>
+<tr class="separator:a40273c5b3f846a71ffda36b4bbc938ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a17db7497fdfa6670badda943e337dcb7" id="r_a17db7497fdfa6670badda943e337dcb7"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a17db7497fdfa6670badda943e337dcb7">ap_ssid</a> [65]</td></tr>
+<tr class="separator:a17db7497fdfa6670badda943e337dcb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a512598e863601e9955351c2afd4dac7a" id="r_a512598e863601e9955351c2afd4dac7a"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a512598e863601e9955351c2afd4dac7a">ap_passphrase</a> [65]</td></tr>
+<tr class="separator:a512598e863601e9955351c2afd4dac7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af25168ef143ef96aa25fcfa1cee6d93f" id="r_af25168ef143ef96aa25fcfa1cee6d93f"><td class="memItemLeft" align="right" valign="top">IPAddress&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af25168ef143ef96aa25fcfa1cee6d93f">ip</a> = INADDR_NONE</td></tr>
 <tr class="separator:af25168ef143ef96aa25fcfa1cee6d93f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7d4783006ac9faab3dfd5d23d5a3dbc2" id="r_a7d4783006ac9faab3dfd5d23d5a3dbc2"><td class="memItemLeft" align="right" valign="top">IPAddress&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7d4783006ac9faab3dfd5d23d5a3dbc2">netmask</a> = INADDR_NONE</td></tr>
@@ -2880,8 +2880,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="a3957ed89b5702c78e29e8381fa07b3bd" name="a3957ed89b5702c78e29e8381fa07b3bd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3957ed89b5702c78e29e8381fa07b3bd">&#9670;&#160;</a></span>ap_passphrase</h2>
+<a id="a512598e863601e9955351c2afd4dac7a" name="a512598e863601e9955351c2afd4dac7a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a512598e863601e9955351c2afd4dac7a">&#9670;&#160;</a></span>ap_passphrase</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2890,7 +2890,7 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">String c_WiFiDriver::ap_passphrase</td>
+          <td class="memname">char c_WiFiDriver::ap_passphrase[65]</td>
         </tr>
       </table>
   </td>
@@ -2902,8 +2902,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="ad83f04b765ae0c0838dcea46f034c171" name="ad83f04b765ae0c0838dcea46f034c171"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad83f04b765ae0c0838dcea46f034c171">&#9670;&#160;</a></span>ap_ssid</h2>
+<a id="a17db7497fdfa6670badda943e337dcb7" name="a17db7497fdfa6670badda943e337dcb7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17db7497fdfa6670badda943e337dcb7">&#9670;&#160;</a></span>ap_ssid</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2912,7 +2912,7 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">String c_WiFiDriver::ap_ssid</td>
+          <td class="memname">char c_WiFiDriver::ap_ssid[65]</td>
         </tr>
       </table>
   </td>
@@ -3102,8 +3102,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="aa441324efc6471c93923841725b5c0ae" name="aa441324efc6471c93923841725b5c0ae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa441324efc6471c93923841725b5c0ae">&#9670;&#160;</a></span>passphrase</h2>
+<a id="a40273c5b3f846a71ffda36b4bbc938ab" name="a40273c5b3f846a71ffda36b4bbc938ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a40273c5b3f846a71ffda36b4bbc938ab">&#9670;&#160;</a></span>passphrase</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3112,7 +3112,7 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">String c_WiFiDriver::passphrase</td>
+          <td class="memname">char c_WiFiDriver::passphrase[65]</td>
         </tr>
       </table>
   </td>
@@ -3256,8 +3256,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="a5920e9b750965b79b124ea50c62ba0d1" name="a5920e9b750965b79b124ea50c62ba0d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5920e9b750965b79b124ea50c62ba0d1">&#9670;&#160;</a></span>ssid</h2>
+<a id="a388490570a8fc470b83649cde6ddfa8b" name="a388490570a8fc470b83649cde6ddfa8b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a388490570a8fc470b83649cde6ddfa8b">&#9670;&#160;</a></span>ssid</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -3266,7 +3266,7 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">String c_WiFiDriver::ssid</td>
+          <td class="memname">char c_WiFiDriver::ssid[65]</td>
         </tr>
       </table>
   </td>

@@ -1,7 +1,11 @@
 <map id="c_InputEffectEngine::setColor" name="c_InputEffectEngine::setColor">
-<area shape="rect" id="Node000001" title=" " alt="" coords="382,5,518,46"/>
-<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="198,5,334,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="367,28,335,28,335,23,367,23"/>
-<area shape="rect" id="Node000003" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="5,5,150,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="182,28,150,28,150,23,182,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="590,27,727,68"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#acf078d65ad2078ad5f32afe6867284a2" title="Set a new config in the driver." alt="" coords="406,27,542,68"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="575,50,543,50,543,45,575,45"/>
+<area shape="rect" id="Node000003" href="$classc___input_alexa.html#adf1dcecdbc97eb955ad2ca3954678c80" title=" " alt="" coords="189,5,358,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="390,38,358,33,359,28,391,33"/>
+<area shape="rect" id="Node000005" href="$classfsm___play_effect__state___idle.html#ada2b3107cabbc50be21d6907e25f417c" title=" " alt="" coords="201,55,346,96"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="391,62,346,68,346,63,390,56"/>
+<area shape="rect" id="Node000004" href="$classc___input_alexa.html#a8e260d42f46f4fa70cbca61ea001dda6" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,5,141,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="173,21,141,21,141,16,173,16"/>
 </map>

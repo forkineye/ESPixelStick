@@ -22,7 +22,7 @@ var classc___input_f_p_p_remote_play_item =
     [ "Start", "classc___input_f_p_p_remote_play_item.html#ab4fbba6f096e8ee67717bd06da01fc33", null ],
     [ "Stop", "classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0", null ],
     [ "Sync", "classc___input_f_p_p_remote_play_item.html#a4c43ece2ad02ef70f28c60f2515a737f", null ],
-    [ "BackgroundFileName", "classc___input_f_p_p_remote_play_item.html#a4b6f30efc50df3148d07bb679b7efc8a", null ],
+    [ "BackgroundFileName", "classc___input_f_p_p_remote_play_item.html#a8b712ee75ae3d2f67748d878a20b3405", null ],
     [ "FileControl", "classc___input_f_p_p_remote_play_item.html#aa6c1aa7c11896832ec79c0569942fdb0", null ],
     [ "InputChannelId", "classc___input_f_p_p_remote_play_item.html#aa343859257656b16467ea49ca913c651", null ],
     [ "InputPaused", "classc___input_f_p_p_remote_play_item.html#a9afea78793d9a822a3c8c6ef6f4ffc1c", null ],

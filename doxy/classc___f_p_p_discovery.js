@@ -36,7 +36,7 @@ var classc___f_p_p_discovery =
     [ "StartPlaying", "classc___f_p_p_discovery.html#a43c069118ce152afe8425d7db1b157a1", null ],
     [ "StopPlaying", "classc___f_p_p_discovery.html#afe5417d09724c27eb2e1ca5ea09906af", null ],
     [ "BlankOnStop", "classc___f_p_p_discovery.html#ae914fc22cddc9550a2f2b45d4a01958a", null ],
-    [ "ConfiguredFileToPlay", "classc___f_p_p_discovery.html#ab9ab294a6f822fc80168d8acc49a8809", null ],
+    [ "ConfiguredFileToPlay", "classc___f_p_p_discovery.html#a0c1fe67e236c00643f28af013dd717cb", null ],
     [ "FppRemoteIp", "classc___f_p_p_discovery.html#a1194ce246f35cffcbb1b9329aa1dbe2e", null ],
     [ "FPPSemaphore", "classc___f_p_p_discovery.html#ada133c13a843e62f9d4d255a509a4bfd", null ],
     [ "FppSyncOverride", "classc___f_p_p_discovery.html#a5e5aeedf5f096803cf2ab766290ed9ac", null ],
@@ -49,6 +49,6 @@ var classc___f_p_p_discovery =
     [ "StopInProgress", "classc___f_p_p_discovery.html#a22bb6cca72bcb497cf4fc7c11a0ba778", null ],
     [ "SystemDebugStats", "classc___f_p_p_discovery.html#a38be0cf367311632769fff3c0eeb2a41", null ],
     [ "udp", "classc___f_p_p_discovery.html#a39129a05c7f60b4e9e2a96fce7dc6465", null ],
-    [ "UploadFileName", "classc___f_p_p_discovery.html#ad049dc0d0f6cfc9d3430be8d19f90932", null ],
+    [ "UploadFileName", "classc___f_p_p_discovery.html#ae140f6d6f54d71b86cf627f8dad3ab4e", null ],
     [ "writeFailed", "classc___f_p_p_discovery.html#aec4afca829e622d2e50fb9d1caa43ceb", null ]
 ];

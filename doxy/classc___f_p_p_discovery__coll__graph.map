@@ -1,17 +1,19 @@
 <map id="c_FPPDiscovery" name="c_FPPDiscovery">
-<area shape="rect" id="Node000001" title=" " alt="" coords="1068,104,1187,130"/>
-<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html" title=" " alt="" coords="735,25,870,51"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,44,964,57,1045,77,1102,101,1100,106,1043,82,963,62,885,50"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="1068,133,1187,159"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html" title=" " alt="" coords="735,55,870,80"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="886,74,964,86,1045,106,1102,130,1100,135,1043,111,963,92,885,79"/>
 <area shape="rect" id="Node000003" href="$classc___input_common.html" title=" " alt="" coords="340,5,456,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="472,19,735,32,734,38,472,24"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="472,22,676,45,735,54,734,59,676,50,471,27"/>
 <area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_item.html" title=" " alt="" coords="305,55,491,80"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="506,60,676,49,734,43,735,49,676,54,507,65"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="507,65,735,65,735,70,507,70"/>
 <area shape="rect" id="Node000005" href="$structc___input_f_p_p_remote_play_item_1_1_file_control__t.html" title=" " alt="" coords="5,47,192,88"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="207,65,304,65,304,70,207,70"/>
-<area shape="rect" id="Node000006" href="$classc___f_p_p_semaphore.html" title=" " alt="" coords="739,75,866,100"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="882,92,1068,109,1068,114,882,97"/>
-<area shape="rect" id="Node000007" href="$structc___f_p_p_discovery_1_1_multi_sync_stats__t.html" title=" " alt="" coords="712,124,893,165"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="909,139,1044,129,1067,126,1068,131,1045,134,909,145"/>
-<area shape="rect" id="Node000008" href="$structc___f_p_p_discovery_1_1_system_debug_stats__t.html" title=" " alt="" coords="700,190,905,230"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="920,191,982,177,1043,159,1076,144,1104,128,1107,133,1078,149,1045,164,984,182,921,196"/>
+<area shape="rect" id="Node000006" href="$structc___input_f_p_p_remote_1_1_player_info__t.html" title=" " alt="" coords="309,104,486,145"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="502,109,676,85,734,76,735,81,676,90,503,114"/>
+<area shape="rect" id="Node000007" href="$classc___f_p_p_semaphore.html" title=" " alt="" coords="739,104,866,130"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="882,121,1068,138,1068,144,882,127"/>
+<area shape="rect" id="Node000008" href="$structc___f_p_p_discovery_1_1_multi_sync_stats__t.html" title=" " alt="" coords="712,154,893,194"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="909,169,1044,159,1067,155,1068,160,1045,164,909,174"/>
+<area shape="rect" id="Node000009" href="$structc___f_p_p_discovery_1_1_system_debug_stats__t.html" title=" " alt="" coords="700,219,905,260"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="920,220,982,207,1043,188,1076,173,1104,157,1107,162,1078,178,1045,193,984,212,921,225"/>
 </map>
