@@ -38,8 +38,20 @@
 
 #define AllocateInput(ClassType, Input, ChannelIndex, InputType, InputDataBufferSize) \
 { \
+    static_assert(InputDriverMemorySize >= sizeof(ClassType)); \
+    memset(Input[ChannelIndex].InputDriver, 0x0, sizeof(Input[ChannelIndex].InputDriver)); \
     new(&Input[ChannelIndex].InputDriver) ClassType(ChannelIndex, InputType, InputDataBufferSize); \
     Input[ChannelIndex].DriverInUse = true; \
+}
+
+#define DeAllocateInput(ChannelIndex) \
+{ \
+    if (InputChannelDrivers[ChannelIndex].DriverInUse) \
+    { \
+        InputChannelDrivers[ChannelIndex].DriverInUse = false; \
+        ((c_InputCommon*)(InputChannelDrivers[ChannelIndex].InputDriver))->~c_InputCommon(); \
+        memset(InputChannelDrivers[ChannelIndex].InputDriver, 0x0, sizeof(InputChannelDrivers[ChannelIndex].InputDriver)); \
+    } \
 }
 
 //-----------------------------------------------------------------------------
@@ -89,12 +101,13 @@ void InputMgrTask (void *arg)
         if (DeltaTime < MinPollTimeMs)
         {
             PollTime = pdMS_TO_TICKS(MinPollTimeMs - DeltaTime);
-            vTaskDelay(PollTime);
         }
         else
         {
             // DEBUG_V(String("handle time wrap and long frames. DeltaTime:") + String(DeltaTime));
+            PollTime = pdMS_TO_TICKS(MinPollTimeMs);
         }
+        vTaskDelay(PollTime);
         FeedWDT();
 
         PollStartTime = millis();
@@ -119,7 +132,7 @@ void TimerPollHandler()
 ///< Start up the driver and put it into a safe mode
 c_InputMgr::c_InputMgr ()
 {
-    ConfigFileName = String (F ("/")) + String (CN_input_config) + F (".json");
+    strcpy(ConfigFileName, (String (F ("/")) + String (CN_input_config) + F (".json")).c_str());
 
     // this gets called pre-setup so there is nothing we can do here.
     int InputChannelDriversIndex = 0;
@@ -153,11 +166,7 @@ c_InputMgr::~c_InputMgr ()
     // delete pInputInstances;
     for (auto & CurrentInput : InputChannelDrivers)
     {
-        if (CurrentInput.DriverInUse)
-        {
-            ((c_InputCommon*)(CurrentInput.InputDriver))->~c_InputCommon();
-            CurrentInput.DriverInUse = false;
-        }
+        DeAllocateInput(CurrentInput.DriverId);
     }
     // DEBUG_END;
 
@@ -308,7 +317,7 @@ void c_InputMgr::CreateNewConfig ()
     JsonObject JsonConfig = JsonConfigDoc[(char*)CN_input_config].to<JsonObject>();
     // DEBUG_V("");
 
-    JsonWrite(JsonConfig, CN_cfgver, CurrentConfigVersion);
+    JsonWrite(JsonConfig, CN_cfgver, ConstConfig.CurrentConfigVersion);
 
     // DEBUG_V ("for each Input type");
     for (int InputTypeId = int (InputType_Start);
@@ -467,9 +476,7 @@ void c_InputMgr::InstantiateNewInputChannel (e_InputChannelIds ChannelIndex, e_I
                 logcon (String(F("Shutting Down '")) + DriverName + String(F("' on Input: ")) + String(ChannelIndex));
             }
 
-            ((c_InputCommon*)(InputChannelDrivers[ChannelIndex].InputDriver))->~c_InputCommon();
-            // DEBUG_V ();
-            InputChannelDrivers[ChannelIndex].DriverInUse = false;
+            DeAllocateInput(ChannelIndex);
 
             // DEBUG_V ("");
         } // end there is an existing driver
@@ -711,6 +718,7 @@ void c_InputMgr::Process ()
             if(abs(now() - ConfigLoadNeeded) > LOAD_CONFIG_DELAY)
             {
                 // DEBUG_V ("Reload the config");
+                FeedWDT();
                 LoadConfig ();
                 // DEBUG_V ("End Save Config");
             }
@@ -724,6 +732,7 @@ void c_InputMgr::Process ()
         bool aBlankTimerIsRunning = false;
         for (auto & CurrentInput : InputChannelDrivers)
         {
+            FeedWDT();
             if(!CurrentInput.DriverInUse || aBlankTimerIsRunning)
             {
                 continue;
@@ -800,10 +809,10 @@ bool c_InputMgr::FindJsonChannelConfig (JsonObject& jsonConfig,
         setFromJSON (TempVersion, InputChannelMgrData, CN_cfgver);
 
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
-        // DEBUG_V (String ("CurrentConfigVersion: ") + String (CurrentConfigVersion));
+        // DEBUG_V (String ("CurrentConfigVersion: ") + String (ConstConfig.CurrentConfigVersion));
         // PrettyPrint (InputChannelMgrData, "Output Config");
 
-        if (TempVersion != CurrentConfigVersion)
+        if (TempVersion != ConstConfig.CurrentConfigVersion)
         {
             logcon (String (F ("Incorrect Version found. Using existing/default config.")));
             // break;

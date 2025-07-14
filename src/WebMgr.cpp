@@ -41,6 +41,7 @@
 const uint8_t HTTP_PORT = 80;      ///< Default web server port
 
 static Espalexa         espalexa;
+static EspalexaDevice   AlexaDevice;
 static EFUpdate         efupdate; /// EFU Update Handler
 static AsyncWebServer   webServer (HTTP_PORT);  // Web Server
 
@@ -156,7 +157,7 @@ void c_WebMgr::init ()
             ProcessXJRequest (request);
         });
 
-    	webServer.on ("/settime", HTTP_POST | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
+    	webServer.on ("/settime", HTTP_POST | HTTP_GET | HTTP_OPTIONS, [this](AsyncWebServerRequest* request)
         {
             // DEBUG_V("/settime");
             // DEBUG_V(String("URL: ") + request->url());
@@ -628,7 +629,7 @@ void c_WebMgr::init ()
 
         // webServer.begin ();
 
-    	pAlexaDevice = new EspalexaDevice (String (F ("ESP")), [this](EspalexaDevice* pDevice)
+        pAlexaDevice = new((char*)&AlexaDevice) EspalexaDevice (String (F ("ESP")), [this](EspalexaDevice* pDevice)
         {
             this->onAlexaMessage (pDevice);
 
@@ -705,8 +706,8 @@ void c_WebMgr::CreateAdminInfoFile ()
     AdminJsonDoc.to<JsonObject>();
     JsonObject jsonAdmin = AdminJsonDoc[F ("admin")].to<JsonObject> ();
 
-    JsonWrite(jsonAdmin, CN_version, VERSION);
-    JsonWrite(jsonAdmin, "built", BUILD_DATE);
+    JsonWrite(jsonAdmin, CN_version, ConstConfig.Version);
+    JsonWrite(jsonAdmin, "built", ConstConfig.BuildDate);
     JsonWrite(jsonAdmin, "realflashsize", String (ESP.getFlashChipSize ()));
     JsonWrite(jsonAdmin, "BoardName", String(BOARD_NAME));
 #ifdef ARDUINO_ARCH_ESP8266

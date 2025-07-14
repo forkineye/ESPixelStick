@@ -71,12 +71,12 @@ void c_OutputSerialUart::Begin ()
 //----------------------------------------------------------------------------
 bool c_OutputSerialUart::SetConfig (ArduinoJson::JsonObject & jsonConfig)
 {
-    // DEBUG_START;
+    DEBUG_START;
 
     bool response = c_OutputSerial::SetConfig(jsonConfig);
     response |= Uart.SetConfig(jsonConfig);
 
-    // DEBUG_END;
+    DEBUG_END;
     return response;
 
 } // SetConfig

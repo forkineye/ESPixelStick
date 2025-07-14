@@ -65,8 +65,8 @@ private:
     bool BlankOnStop = false;
     bool StopInProgress = false;
     bool FppSyncOverride = false;
-    String  ConfiguredFileToPlay;
-    String UploadFileName;
+    char ConfiguredFileToPlay[65];
+    char UploadFileName[65];
     IPAddress FppRemoteIp = IPAddress (uint32_t(0));
     c_InputFPPRemote * InputFPPRemote = nullptr;
     const IPAddress MulticastAddress = IPAddress (239, 70, 80, 80);

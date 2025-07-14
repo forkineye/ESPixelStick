@@ -86,7 +86,7 @@ public:
     };
 
 private:
-    #define InputDriverMemorySize 1660
+    #define InputDriverMemorySize 2476
 
     void InstantiateNewInputChannel (e_InputChannelIds InputChannelId, e_InputType NewChannelType, bool StartDriver = true);
     void CreateNewConfig ();
@@ -119,8 +119,8 @@ private:
     bool InputTypeIsAllowedOnChannel (e_InputType type, e_InputChannelIds ChannelId);
     bool FindJsonChannelConfig       (JsonObject& jsonConfig, e_InputChannelIds ChanId, JsonObject& ChanConfig);
 
-    String ConfigFileName;
-    String InputRebootReason = emptyString;
+    char   ConfigFileName[65];
+    String InputRebootReason;
     bool   RebootNeeded = false;
 
     FastTimer BlankEndTime[InputChannelId_End];

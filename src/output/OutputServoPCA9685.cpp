@@ -52,11 +52,6 @@ c_OutputServoPCA9685::~c_OutputServoPCA9685 ()
 {
     // DEBUG_START;
 
-    if(nullptr != pwm)
-    {
-        // DEBUG_V();
-        delete pwm;
-    }
 
     // DEBUG_END;
 } // ~c_OutputServoPCA9685
@@ -69,12 +64,11 @@ void c_OutputServoPCA9685::Begin ()
     if(!HasBeenInitialized)
     {
         // DEBUG_V("Allocate PWM");
-        pwm = new Adafruit_PWMServoDriver();
 
         SetOutputBufferSize(Num_Channels);
 
-        pwm->begin();
-        pwm->setPWMFreq(UpdateFrequency);
+        pwm.begin();
+        pwm.setPWMFreq(UpdateFrequency);
 
         validate();
 
@@ -158,7 +152,7 @@ bool c_OutputServoPCA9685::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     {
         // PrettyPrint (jsonConfig, String("c_OutputServoPCA9685::SetConfig"));
         setFromJSON (UpdateFrequency, jsonConfig, OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME);
-        pwm->setPWMFreq (UpdateFrequency);
+        pwm.setPWMFreq (UpdateFrequency);
 
         // do we have a channel configuration array?
         JsonArray JsonChannelList = jsonConfig[(char*)OM_SERVO_PCA9685_CHANNELS_NAME];
@@ -321,7 +315,7 @@ uint32_t c_OutputServoPCA9685::Poll ()
                     // DEBUG_V (String ("pulse_width: ") + String (pulse_width));
                     // DEBUG_V (String ("Final_value: ") + String (Final_value));
                 }
-                pwm->setPWM (OutputDataIndex, 0, Final_value);
+                pwm.setPWM (OutputDataIndex, 0, Final_value);
             }
         }
         ++OutputDataIndex;

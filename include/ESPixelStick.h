@@ -83,9 +83,23 @@ bool    deserializeCore        (JsonObject & json);
 bool    dsDevice               (JsonObject & json);
 bool    dsNetwork              (JsonObject & json);
 
+#ifndef ESPS_VERSION
+    #define ESPS_VERSION "4.x-dev"
+#endif
+
+struct __attribute__((packed)) ConstConfig_t
+{
+    const char key[32];
+    const char Version[32];
+    const char BuildDate[32];
+    const char ConfigFileName[32];
+    const uint8_t CurrentConfigVersion;
+};
+
+extern ConstConfig_t ConstConfig;
+
 extern  bool IsBooting;
 extern  bool ResetWiFi;
-extern  const String ConfigFileName;
 extern  void FeedWDT ();
 extern  uint32_t DiscardedRxData;
 
@@ -116,18 +130,17 @@ bool setFromJSON (T& OutValue, JsonObject & Json, N Name)
     return HasBeenModified;
 };
 
-template <typename N>
-bool setFromJSON (char * OutValue, JsonObject & Json, N Name)
+template <typename N, size_t S>
+bool setFromJSON (char (&OutValue)[S], JsonObject & Json, N Name)
 {
     bool HasBeenModified = false;
 
     if (Json[(char*)Name].template is<String>())
     {
-        char temp[65];
-        strncpy(temp, Json[(char*)Name], 64);
-        if (strcmp(temp, OutValue))
+        String temp = Json[(char*)Name];
+        if (!temp.equals(String(OutValue)))
         {
-            strncpy(OutValue, temp, 65);
+            strncpy(OutValue, temp.c_str(), S);
             HasBeenModified = true;
         }
     }
@@ -197,7 +210,6 @@ extern bool ConsoleUartIsActive;
 extern config_t config;
 extern bool ConfigSaveNeeded;
 
-extern const uint8_t CurrentConfigVersion;
 #define LOAD_CONFIG_DELAY 4
 // #define DEBUG_GPIO gpio_num_t::GPIO_NUM_25
 // #define DEBUG_GPIO1 gpio_num_t::GPIO_NUM_14

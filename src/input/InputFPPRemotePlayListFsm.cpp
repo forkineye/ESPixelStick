@@ -56,7 +56,7 @@ void fsm_PlayList_state_WaitForStart::Start (String & FileName, float, uint32_t)
 
     do // once
     {
-        pInputFPPRemotePlayList->FileControl[CurrentFile].FileName = FileName;
+        strcpy(pInputFPPRemotePlayList->FileControl[CurrentFile].FileName, FileName.c_str());
         pInputFPPRemotePlayList->PlayListEntryId = 0;
 
         // DEBUG_V (String ("PlayItemName: '") + pInputFPPRemotePlayList->PlayItemName + "'");
@@ -176,7 +176,8 @@ void fsm_PlayList_state_PlayingFile::Init (c_InputFPPRemotePlayList* Parent)
 {
     // DEBUG_START;
 
-    Parent->pInputFPPRemotePlayItem = new c_InputFPPRemotePlayFile (Parent->GetInputChannelId ());
+    static_assert(sizeof(Parent->InputFPPRemotePlayItem) >= sizeof(c_InputFPPRemotePlayFile)); \
+    Parent->pInputFPPRemotePlayItem = new(Parent->InputFPPRemotePlayItem) c_InputFPPRemotePlayFile (Parent->GetInputChannelId ());
 
     pInputFPPRemotePlayList = Parent;
     pInputFPPRemotePlayList->pCurrentFsmState = &(Parent->fsm_PlayList_state_PlayingFile_imp);
@@ -254,7 +255,8 @@ void fsm_PlayList_state_PlayingEffect::Init (c_InputFPPRemotePlayList* Parent)
     // DEBUG_START;
 
     pInputFPPRemotePlayList = Parent;
-    Parent->pInputFPPRemotePlayItem = new c_InputFPPRemotePlayEffect (Parent->GetInputChannelId ());
+    static_assert(sizeof(Parent->InputFPPRemotePlayItem) >= sizeof(c_InputFPPRemotePlayEffect));
+    Parent->pInputFPPRemotePlayItem = new(Parent->InputFPPRemotePlayItem) c_InputFPPRemotePlayEffect (Parent->GetInputChannelId ());
 
     Parent->pCurrentFsmState = &(Parent->fsm_PlayList_state_PlayingEffect_imp);
 
@@ -272,7 +274,7 @@ void fsm_PlayList_state_PlayingEffect::Start (String & FileName, float SecondsEl
 
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->SetDuration (SecondsElapsed);
     pInputFPPRemotePlayList->pInputFPPRemotePlayItem->Start (FileName, 0.0, PlayCount);
-    
+
     // DEBUG_END;
 
 } // fsm_PlayList_state_PlayingEffect::Start
@@ -289,7 +291,8 @@ void fsm_PlayList_state_PlayingEffect::Stop (void)
     // DEBUG_V ("");
 
     pInputFPPRemotePlayItemTemp->Stop ();
-    delete pInputFPPRemotePlayItemTemp;
+    pInputFPPRemotePlayList->pInputFPPRemotePlayItem = nullptr;
+    pInputFPPRemotePlayItemTemp->~c_InputFPPRemotePlayItem();
 
     // DEBUG_END;
 

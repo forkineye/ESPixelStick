@@ -50,7 +50,10 @@ c_InputDDP::~c_InputDDP ()
     // DEBUG_START;
 
     // OutputMgr.PauseOutput (false);
-    // udp->stop ();
+    if(udp)
+    {
+        udp->close ();
+    }
 
     // DEBUG_END;
 } // ~c_InputDDP
@@ -63,9 +66,9 @@ void c_InputDDP::Begin ()
     suspend = false;
 
     memset (&stats, 0x00, sizeof (stats));
+    udp = new(_udp) AsyncUDP();
 
     // DEBUG_V("");
-    udp = new AsyncUDP ();
 
     NetworkStateChanged (NetworkMgr.IsConnected ());
 
@@ -321,7 +324,7 @@ void c_InputDDP::ProcessReceivedQuery ()
             JsonObject JsonStatus = JsonResponseDoc[(char*)CN_status].to<JsonObject> ();
             JsonWrite(JsonStatus, F("man"), "ESPixelStick");
             JsonWrite(JsonStatus, F("mod"), "V4");
-            JsonWrite(JsonStatus, F("ver"), VERSION);
+            JsonWrite(JsonStatus, F("ver"), ConstConfig.Version);
 
             FPPDiscovery.GetSysInfoJSON(JsonStatus);
             break;

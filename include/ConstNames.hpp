@@ -25,9 +25,6 @@
 #   define CN_PROGMEM PROGMEM
 #endif // !def ARDUINO_ARCH_ESP8266
 
-extern const String VERSION;
-extern const String BUILD_DATE;
-
 extern const CN_PROGMEM char CN_active [];
 extern const CN_PROGMEM char CN_ActiveHigh [];
 extern const CN_PROGMEM char CN_activedelay [];

@@ -1124,7 +1124,7 @@ void c_OutputUart::StartUart()
         enqueueUartData(0xff);
 
 #ifdef ARDUINO_ARCH_ESP8266
-        // start processing the timer interrupts
+        // DEBUG_V("start processing the timer interrupts");
         if (IsUartTimerInUse())
         {
             OutputTimerArray[OutputUartConfig.ChannelId] = this;

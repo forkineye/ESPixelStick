@@ -123,12 +123,13 @@ private:
     } ;
 
     PacketBuffer_t PacketBuffer;
+    char _udp[sizeof(AsyncUDP)];
 
 public:
 
     c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
                 c_InputMgr::e_InputType       NewChannelType,
-                uint32_t                        BufferSize);
+                uint32_t                      BufferSize);
 
     virtual ~c_InputDDP ();
 

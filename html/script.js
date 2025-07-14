@@ -10,9 +10,7 @@ var Input_Config = null; // Input Manager configuration record
 var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
-var target = document.location.host;
 var ajaxQueue = $({}); // Create an empty jQuery object to act as a queue
-// target = "192.168.10.216";
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -188,7 +186,7 @@ $(function ()
             FileXfer.addEventListener("load", completeHandler, false);
             FileXfer.addEventListener("error", errorHandler, false);
             FileXfer.addEventListener("abort", abortHandler, false);
-            FileXfer.open("POST", "http://" + target + "/updatefw");
+            FileXfer.open("POST", "updatefw");
             FileXfer.send(formdata);
             $("#EfuProgressBar").removeClass("hidden");
 
@@ -332,7 +330,7 @@ $(function ()
         $('#AdvancedOptions').prop("checked", $.cookie('advancedMode') === "false" ? false : true);
     }
 
-    let finalUrl = "http://" + target + "/upload";
+    let finalUrl = "upload";
     // console.log(finalUrl);
     const uploader = new Dropzone('#filemanagementupload',
         {
@@ -455,6 +453,8 @@ $(function ()
 // lets get started
     RequestConfigFile("admininfo.json");
     RequestConfigFile("config.json");
+    RequestConfigFile("output_config.json");
+    RequestConfigFile("input_config.json");
     SetServerTime();
     RequestDiagData();
     StartRequestingStatusUpdate();  // start self filling status loop
@@ -548,7 +548,7 @@ function JsonObjectAccess(obj, Path, value, Action)
         console.error(err);
         return obj;
     }
-}
+} // JsonObjectAccess
 
 function MergeConfigTree(SourceTree, TargetTree, CurrentTarget, FullSelector)
 {
@@ -655,7 +655,7 @@ function SendConfigFileToServer(FileName, DataString)
 {
     // console.debug("SendConfigFileToServer: FileName: " + FileName);
     // console.debug("SendConfigFileToServer: Data: " + JSON.stringify(DataString));
-    let url = "http://" + target + "/conf/" + FileName + ".json";
+    let url = "conf/" + FileName + ".json";
 
     $.ajaxQueue(
     {
@@ -734,7 +734,7 @@ function RequestDiagData()
             if ($('#diag').is(':visible'))
             {
                 MonitorTransactionRequestInProgressId++;
-                fetch("HTTP://" + target + "/V1",
+                fetch("V1",
                 {
                     method: "GET", // *GET, POST, PUT, DELETE, etc.
                     mode: "cors", // no-cors, *cors, same-origin
@@ -781,7 +781,7 @@ function RequestDiagData()
 function RequestConfigFile(FileName)
 {
     // console.debug("RequestConfigFile FileName: " + FileName);
-    var url = "HTTP://" + target + "/conf/" + FileName;
+    var url = "conf/" + FileName;
     console.info("RequestConfigFile: 'GET' URL: '" + url + "'");
 
     $.ajaxQueue(
@@ -828,14 +828,14 @@ async function StartRequestingStatusUpdate()
             StartRequestingStatusUpdate();
         }, 1000);
     } // end timer was not running
-}
+} // StartRequestingStatusUpdate
 
 function RequestStatusUpdate()
 {
     if ($('#home').is(':visible'))
     {
         // ask for a status update from the server
-        let FileName = "HTTP://" + target + "/XJ";
+        let FileName = "XJ";
         console.log("RequestStatusUpdate FileName: " + FileName);
 
         MonitorTransactionRequestInProgressId++;
@@ -874,7 +874,7 @@ function RequestListOfFiles()
 {
     // console.debug("ask for a file list from the server");
 
-    var url = "HTTP://" + target + "/fseqfilelist";
+    var url = "fseqfilelist";
     // console.debug("RequestListOfFiles: 'GET' URL: '" + url + "'");
 
     MonitorTransactionRequestInProgressId++;
@@ -1527,6 +1527,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
     {
         // save the config for later use.
         Output_Config = JsonConfigData.output_config;
+        // console.debug("Got Output Config: " + JSON.stringify(Output_Config) );
         CreateOptionsFromConfig("output", Output_Config);
     }
 
@@ -2458,7 +2459,7 @@ function SendCommand(command)
     MonitorTransactionRequestInProgressId++;
     $.ajaxQueue(
     {
-        url: "HTTP://" + target + "/" + command,
+        url: command,
         method: 'POST',
         mode: "cors", // no-cors, *cors, same-origin
         dataType: "json",

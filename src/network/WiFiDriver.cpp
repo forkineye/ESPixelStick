@@ -157,11 +157,11 @@ void c_WiFiDriver::Begin ()
     // Disable persistant credential storage and configure SDK params
     WiFi.persistent (false);
 
-    if(ap_ssid.equals(emptyString))
+    if(String(ap_ssid).isEmpty())
     {
         String Hostname;
         NetworkMgr.GetHostname (Hostname);
-        ap_ssid = "ESPixelStick-AP-" + String (Hostname);
+        strcpy(ap_ssid, (String(F("ESPixelStick-AP-")) + Hostname).c_str());
     }
 
 #ifdef ARDUINO_ARCH_ESP8266
@@ -511,17 +511,17 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     // String StateName;
     // pCurrentFsmState->GetStateName(StateName);
     // DEBUG_V(String("       CurrState: ") + StateName);
-    
+
     ip.fromString (sIp);
     gateway.fromString (sGateway);
     netmask.fromString (sNetmask);
     primaryDns.fromString (sdnsp);
     secondaryDns.fromString (sdnss);
 
-    if((passphrase.length() < 8) && (passphrase.length() > 0))
+    if((String(passphrase).length() < 8) && (String(passphrase).length() > 0))
     {
         logcon (String (F ("WiFi Passphrase is too short. Using Empty String")));
-        passphrase = emptyString;
+        memset(passphrase, 0x0, sizeof(passphrase));
     }
 
     if(ConfigChanged)
@@ -626,16 +626,14 @@ int c_WiFiDriver::ValidateConfig ()
 
     int response = 0;
 
-    if (0 == ssid.length ())
+    if (0 == strlen(ssid))
     {
-        ssid = ssid;
         // DEBUG_V ();
         response++;
     }
 
-    if (0 == passphrase.length ())
+    if (0 == strlen(passphrase))
     {
-        passphrase = passphrase;
         // DEBUG_V ();
         response++;
     }
@@ -854,19 +852,19 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
     {
         WiFi.enableSTA(false);
         WiFi.enableAP(true);
-        if(pWiFiDriver->ap_ssid.equals(emptyString))
+        if(String(pWiFiDriver->ap_ssid).isEmpty())
         {
             String Hostname;
             NetworkMgr.GetHostname (Hostname);
-            pWiFiDriver->ap_ssid = "ESPixelStick-" + String (Hostname);
+            strcpy(pWiFiDriver->ap_ssid, (String(F("ESPixelStick-")) + Hostname).c_str());
         }
         // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
-        WiFi.softAP (pWiFiDriver->ap_ssid.c_str (), pWiFiDriver->ap_passphrase.c_str (), int(pWiFiDriver->ap_channelNumber));
+        WiFi.softAP (pWiFiDriver->ap_ssid, pWiFiDriver->ap_passphrase, int(pWiFiDriver->ap_channelNumber));
 
         pWiFiDriver->setIpAddress (WiFi.localIP ());
         pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());
 
-        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + pWiFiDriver->ap_ssid);
+        logcon (String (F ("WiFi SOFTAP:       ssid: '")) + String(pWiFiDriver->ap_ssid));
         logcon (String (F ("WiFi SOFTAP: IP Address: '")) + pWiFiDriver->getIpAddress ().toString ());
     }
     else

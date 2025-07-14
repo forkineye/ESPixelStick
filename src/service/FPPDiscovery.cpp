@@ -75,6 +75,9 @@ c_FPPDiscovery::c_FPPDiscovery ()
 {
     // DEBUG_START;
     memset ((void*)&MultiSyncStats, 0x00, sizeof (MultiSyncStats));
+    memset (ConfiguredFileToPlay, 0x00, sizeof (ConfiguredFileToPlay));
+    memset (UploadFileName, 0x00, sizeof (UploadFileName));
+
     // DEBUG_END;
 } // c_FPPDiscovery
 
@@ -535,10 +538,9 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     packet.ping_subtype = 0x0;
     packet.ping_hardware = FPP_TYPE_ID;
 
-    const char* version = VERSION.c_str ();
-    uint16_t v = (uint16_t)atoi (version);
+    uint16_t v = (uint16_t)atoi (ConstConfig.Version);
     packet.versionMajor = (v >> 8) + ((v & 0xFF) << 8);
-    v = (uint16_t)atoi (&version[2]);
+    v = (uint16_t)atoi (&ConstConfig.Version[2]);
     packet.versionMinor = (v >> 8) + ((v & 0xFF) << 8);
 
     packet.operatingMode = (FileMgr.SdCardIsInstalled ()) ? 0x08 : 0x01; // Support remote mode : Bridge Mode
@@ -548,7 +550,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     String Hostname;
     NetworkMgr.GetHostname (Hostname);
     strcpy (packet.hostName, Hostname.c_str ());
-    strcpy (packet.version, VERSION.c_str());
+    strcpy (packet.version, ConstConfig.Version);
     strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
     packet.ranges[0] = 0;
 
@@ -922,11 +924,11 @@ void c_FPPDiscovery::ProcessFile (
             // DEBUG_V("Stop Input");
             StopPlaying();
             inFileUpload = true;
-            UploadFileName = filename;
+            strcpy(UploadFileName, filename.c_str());
             InputMgr.SetOperationalState(false);
             OutputMgr.PauseOutputs(true);
         }
-        else if(!UploadFileName.equals(filename))
+        else if(!String(UploadFileName).equals(filename))
         {
             if(0 != index)
             {
@@ -935,9 +937,9 @@ void c_FPPDiscovery::ProcessFile (
                 break;
             }
 
-            // DEBUG_V("New file starting. Aborting: '" + UploadFileName + "' and starting '" + filename + "'");
+            // DEBUG_V("New file starting. Aborting: '" + String(UploadFileName) + "' and starting '" + filename + "'");
             FileMgr.AbortSdFileUpload();
-            UploadFileName = filename;
+            strcpy(UploadFileName, filename.c_str());
         }
 
         // DEBUG_V("Write the file block");
@@ -953,7 +955,7 @@ void c_FPPDiscovery::ProcessFile (
         if (final || writeFailed)
         {
             inFileUpload = false;
-            UploadFileName = emptyString;
+            memset(UploadFileName, 0x0, sizeof(UploadFileName));
             writeFailed = false;
             OutputMgr.ClearBuffer();
             InputMgr.SetOperationalState(true);
@@ -962,7 +964,8 @@ void c_FPPDiscovery::ProcessFile (
             delay(1000);
             FeedWDT();
             // DEBUG_V("Allow file to play");
-            StartPlaying(UploadFileName, 0.0);
+            String temp = String(UploadFileName);
+            StartPlaying(temp, 0.0);
         }
 
     } while (false);
@@ -1009,7 +1012,7 @@ void c_FPPDiscovery::ProcessBody (
                     request->send (404);
                     break;
                 }
-                UploadFileName = String (request->getParam (CN_filename)->value ());
+                strcpy(UploadFileName, request->getParam (CN_filename)->value ().c_str());
                 // DEBUG_V (emptyString);
             }
 
@@ -1041,17 +1044,15 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, CN_Platform,           String(CN_ESPixelStick));
     JsonWrite(jsonResponse, F ("Variant"),         FPP_VARIANT_NAME);
     JsonWrite(jsonResponse, F ("Mode"),            String((FileMgr.SdCardIsInstalled ()) ? CN_remote : CN_bridge));
-    JsonWrite(jsonResponse, CN_Version,            VERSION);
+    JsonWrite(jsonResponse, CN_Version,            ConstConfig.Version);
 
-    const char* version = VERSION.c_str ();
-
-    JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (version));
-    JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&version[2]));
+    JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (ConstConfig.Version));
+    JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&ConstConfig.Version[2]));
     JsonWrite(jsonResponse, F ("typeId"),       FPP_TYPE_ID);
 #ifdef SUPPORT_UNZIP
     JsonWrite(jsonResponse, F ("zip"),          true);
 #else
-    JsonWrite(jsonResponse, F ("zip"),          false);
+    // JsonWrite(jsonResponse, F ("zip"),          false);
 #endif // def SUPPORT_UNZIP
 
     JsonObject jsonResponseUtilization = jsonResponse[F ("Utilization")].to<JsonObject> ();
