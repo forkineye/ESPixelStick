@@ -275,7 +275,7 @@ void c_WebMgr::init ()
             {
                 if (OutputMgr.GetBufferUsedSize ())
                 {
-                    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
+                    AsyncWebServerResponse *response = request->beginChunkedResponse("application/octet-stream",
                         [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t
                         {
                             // Write up to "MaxChunkLen" bytes into "buffer" and return the amount written.
@@ -301,12 +301,12 @@ void c_WebMgr::init ()
                 }
                 else
                 {
-                    AsyncWebServerResponse *response = request->beginChunkedResponse("text/plain",
+                    AsyncWebServerResponse *response = request->beginChunkedResponse("application/octet-stream",
                         [](uint8_t *buffer, size_t MaxChunkLen, size_t index) -> size_t
                         {
                             return 0;
                         });
-                    response->setContentLength(OutputMgr.GetBufferUsedSize ());
+                    response->setContentLength(0);
                     response->setContentType(F("application/octet-stream"));
                     response->addHeader(F("server"), F("ESPS Diag Data"));
                     request->send(response);
