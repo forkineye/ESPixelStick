@@ -36,33 +36,25 @@ gulp.task("css", function () {
     .src(["html/css/*.css"])
     .pipe(plumber())
     .pipe(using())
-    .pipe(concat("esps.css"))
+    /* .pipe(concat("esps.css")) */
     .pipe(cleancss())
     .pipe(gzip())
-    .pipe(gulp.dest("data/www"));
+    .pipe(gulp.dest("data/www/css"));
 });
 
 /* JavaScript Task */
 gulp.task("js", function () {
   return gulp
-    .src([
-      "html/js/jquery-*.js",
-      "html/js/bootstrap.js",
-      "html/js/jqColorPicker.js",
-      "html/js/dropzone.js",
-      "html/js/FileSaver.js",
-      "html/js/jquery.cookie.js",
-      "html/script.js",
-    ])
+    .src(["html/js/*.js"])
     .pipe(plumber())
     .pipe(using())
-    .pipe(concat("esps.js"))
-    .pipe(
+    /* .pipe(concat("esps.js")) */
+    /* .pipe(
       terser({ toplevel: true })
     ) /* comment out this line to debug the script file */
     .pipe(gzip())
     .pipe(using())
-    .pipe(gulp.dest("data/www"));
+    .pipe(gulp.dest("data/www/js"));
 });
 
 /* json Task */
