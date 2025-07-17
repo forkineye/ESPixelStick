@@ -25,12 +25,11 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
                           c_InputMgr::e_InputType       NewChannelType,
                           uint32_t                        BufferSize) :
     c_InputCommon(NewInputChannelId, NewChannelType, BufferSize)
-
 {
     // DEBUG_START;
-    // DEBUG_V ("BufferSize: " + String (BufferSize));
-    e131 = new(_ESPAsyncE131) ESPAsyncE131 (0);
 
+    // DEBUG_V ("BufferSize: " + String (BufferSize));
+    e131.setBuffers(0);
     memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
 
     // DEBUG_END;
@@ -58,7 +57,7 @@ void c_InputE131::Begin ()
         // DEBUG_V ("");
 
         // DEBUG_V ("");
-        e131->registerCallback ( (void*)this, [] (e131_packet_t* Packet, void * pThis)
+        e131.registerCallback ( (void*)this, [] (e131_packet_t* Packet, void * pThis)
             {
                 ((c_InputE131*)pThis)->ProcessIncomingE131Data (Packet);
             });
@@ -98,12 +97,12 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     JsonWrite(e131Status, CN_unilast,    LastUniverse);
     JsonWrite(e131Status, CN_unichanlim, ChannelsPerUniverse);
 
-    JsonWrite(e131Status, CN_num_packets,   e131->stats.num_packets);
-    JsonWrite(e131Status, CN_last_clientIP, uint32_t(e131->stats.last_clientIP));
+    JsonWrite(e131Status, CN_num_packets,   e131.stats.num_packets);
+    JsonWrite(e131Status, CN_last_clientIP, uint32_t(e131.stats.last_clientIP));
     // DEBUG_V ("");
 
     JsonArray e131UniverseStatus = e131Status[(char*)CN_channels].to<JsonArray> ();
-    uint32_t TotalErrors = 0; // e131->stats.packet_errors;
+    uint32_t TotalErrors = 0; // e131.stats.packet_errors;
     for (auto & CurrentUniverse : UniverseArray)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.add<JsonObject> ();
@@ -121,9 +120,9 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 //-----------------------------------------------------------------------------
 void c_InputE131::Process ()
 {
-    // DEBUG_START;
+    ///  // DEBUG_START;
 
-    // DEBUG_END;
+    ///  // DEBUG_END;
 
 } // process
 
@@ -147,7 +146,8 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
         E131Data = packet->property_values + 1;
 
         // DEBUG_V ("     CurrentUniverseId: " + String(CurrentUniverseId));
-        // DEBUG_V ("packet.sequence_number: " + String(packet.sequence_number));
+        // DEBUG_V ("         startUniverse: " + String(startUniverse));
+        // DEBUG_V ("packet.sequence_number: " + String(packet->sequence_number));
 
         if ((startUniverse <= CurrentUniverseId) && (LastUniverse >= CurrentUniverseId))
         {
@@ -236,7 +236,8 @@ void c_InputE131::SetBufferTranslation ()
         CurrentUniverse.SequenceErrorCounter = 0;
         CurrentUniverse.SequenceNumber = 0;
 
-        // DEBUG_V (String ("        Destination: 0x") + String (uint32_t (CurrentUniverse.Destination), HEX));
+        // DEBUG_V (String ("  DestinationOffset: 0x") + String (uint32_t (CurrentUniverse.DestinationOffset), HEX));
+        // DEBUG_V (String ("     SequenceNumber: ")   + String (uint32_t (CurrentUniverse.SequenceNumber)));
         // DEBUG_V (String ("        BytesToCopy:   ") + String (CurrentUniverse.BytesToCopy));
         // DEBUG_V (String ("   SourceDataOffset: 0x") + String (CurrentUniverse.SourceDataOffset, HEX));
 
@@ -288,6 +289,7 @@ bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 void c_InputE131::validateConfiguration ()
 {
     // DEBUG_START;
+    FeedWDT();
 
     // DEBUG_V (String ("             startUniverse: ") + String (startUniverse));
     // DEBUG_V (String ("       ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
@@ -357,7 +359,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     if (IsConnected)
     {
         // Get on with business
-        if (e131->begin (e131_listen_t::E131_MULTICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
+        if (e131.begin (e131_listen_t::E131_MULTICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
             // logcon (String (F ("Multicast enabled")));
         }
@@ -368,7 +370,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 
         // DEBUG_V ("");
 
-        if (e131->begin (e131_listen_t::E131_UNICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
+        if (e131.begin (e131_listen_t::E131_UNICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
             // logcon (String (F ("Listening on port ")) + PortId);
         }

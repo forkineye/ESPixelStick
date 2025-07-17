@@ -28,7 +28,7 @@ class c_InputE131 : public c_InputCommon
     static const char       ConfigFileName[];
     static const uint8_t    MAX_NUM_UNIVERSES = (OM_MAX_NUM_CHANNELS / UNIVERSE_MAX) + 1;
 
-    ESPAsyncE131  * e131 = nullptr; ///< ESPAsyncE131
+    ESPAsyncE131 e131; ///< ESPAsyncE131
     // e131_packet_t packet;           ///< Packet buffer for parsing
 
     /// JSON configuration parameters
@@ -51,7 +51,6 @@ class c_InputE131 : public c_InputCommon
       uint32_t   SequenceErrorCounter;
     };
     Universe_t UniverseArray[MAX_NUM_UNIVERSES];
-    char  _ESPAsyncE131[sizeof(ESPAsyncE131)];
 
     void validateConfiguration ();
     void NetworkStateChanged (bool IsConnected, bool RebootAllowed); // used by poorly designed rx functions
