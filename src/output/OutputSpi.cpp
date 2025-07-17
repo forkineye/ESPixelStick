@@ -163,7 +163,7 @@ bool c_OutputSpi::SetConfig (ArduinoJson::JsonObject & jsonConfig)
     // DEBUG_START;
 
     bool response = true;
-    JsonObject SpiConfig = jsonConfigF[F("dataspi")];
+    JsonObject SpiConfig = jsonConfig[F("dataspi")];
     response |= setFromJSON(CsPin,    SpiConfig, CN_cs_pin);
 
 /*
