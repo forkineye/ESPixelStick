@@ -91,7 +91,7 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-    JsonObject e131Status = jsonStatus[(char*)F ("e131")].to<JsonObject> ();
+    JsonObject e131Status = jsonStatus[F("e131")].to<JsonObject> ();
     JsonWrite(e131Status, CN_id,         InputChannelId);
     JsonWrite(e131Status, CN_unifirst,   startUniverse);
     JsonWrite(e131Status, CN_unilast,    LastUniverse);
@@ -289,7 +289,6 @@ bool c_InputE131::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 void c_InputE131::validateConfiguration ()
 {
     // DEBUG_START;
-    FeedWDT();
 
     // DEBUG_V (String ("             startUniverse: ") + String (startUniverse));
     // DEBUG_V (String ("       ChannelsPerUniverse: ") + String (ChannelsPerUniverse));
@@ -326,7 +325,7 @@ void c_InputE131::validateConfiguration ()
     }
 
     // Find the last universe we should listen for
-     // DEBUG_V ("");
+    // DEBUG_V ("");
     uint32_t span = FirstUniverseChannelOffset + InputDataBufferSize - 1;
     if (span % ChannelsPerUniverse)
     {
