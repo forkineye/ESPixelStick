@@ -159,14 +159,15 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     JsonWrite(JsonStatus, F ("SyncCount"),           SyncControl.SyncCount);
     JsonWrite(JsonStatus, F ("SyncAdjustmentCount"), SyncControl.SyncAdjustmentCount);
 
-    String temp = GetFileName ();
+    String temp = (!FileMgr.SdCardIsInstalled ()) ? F("No SD Installed") : GetFileName ();
+    DEBUG_V(String("temp: ") + temp);
 
-    JsonWrite(JsonStatus, CN_current_sequence,  (!FileMgr.SdCardIsInstalled ()) ? F("No SD Installed") : temp);
+    JsonWrite(JsonStatus, CN_current_sequence,  temp);
     JsonWrite(JsonStatus, CN_playlist,          temp);
     JsonWrite(JsonStatus, CN_seconds_elapsed,   String (secs));
     JsonWrite(JsonStatus, CN_seconds_played,    String (secs));
     JsonWrite(JsonStatus, CN_seconds_remaining, String (secsRem));
-    JsonWrite(JsonStatus, CN_sequence_filename, (!FileMgr.SdCardIsInstalled ()) ? F("No SD Installed") : temp);
+    JsonWrite(JsonStatus, CN_sequence_filename, temp);
     JsonWrite(JsonStatus, F("PlayedFileCount"), PlayedFileCount);
 
     // After inserting the total seconds and total seconds remaining,
