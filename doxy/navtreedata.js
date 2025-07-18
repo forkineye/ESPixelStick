@@ -63,12 +63,12 @@ var NAVTREEINDEX =
 "_input_d_d_p_8h.html#abba4e66dd408809819f6c486964d605c",
 "_unzip_files_8cpp.html",
 "classc___input_alexa.html#a00ff050d19b35c8ce8b8d383d346ec6a",
-"classc___input_f_p_p_remote.html#ac20d33080cef27922cc6350fcf25d8b6",
-"classc___network_mgr.html#aed8669649b1aad20da87b3c4bb176926",
-"classc___web_mgr.html#a02d3fef6b783f26270959e68c8a3c787",
-"classfsm___play_list__state___playing_file.html#a1d2db02507e7474ec6bf8c395e387b0f",
-"globals_defs_r.html",
-"structc___input_f_p_p_remote_1_1_player_info__t.html"
+"classc___input_f_p_p_remote.html#ac3caebaeae0b77be9680516b54edaa5b",
+"classc___network_mgr.html#af2b9dc93956b88607802667e89c76f75",
+"classc___web_mgr.html#a078d26bad50a9051344ff07ad8e746d8",
+"classfsm___play_list__state___playing_file.html#a471bea8f04253870645de27e8340d65a",
+"globals_defs_s.html",
+"structc___input_f_p_p_remote_1_1_player_info__t.html#a1d2a41492d8c852f0e749f433109a786"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
