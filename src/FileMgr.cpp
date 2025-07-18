@@ -461,7 +461,7 @@ void c_FileMgr::SetSpiIoPins ()
         }
         else
         {
-            // DEBUG_V();
+            // DEBUG_V("SdCardInstalled = true");
             SdCardInstalled = true;
             // DEBUG_V();
             SetSdSpeed ();
@@ -2139,7 +2139,7 @@ void c_FileMgr::BuildDefaultFseqList ()
     JsonWrite(jsonDoc, "usedBytes", 0);
     JsonWrite(jsonDoc, "numFiles", 0);
     jsonDoc["files"].to<JsonArray> ();
-    SaveFlashFile(CN_fseqfilelist, jsonDoc);
+    SaveFlashFile(String(CN_fseqfilelist) + F(".json"), jsonDoc);
 
     // DEBUG_END;
 
