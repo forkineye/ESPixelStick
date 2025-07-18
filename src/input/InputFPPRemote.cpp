@@ -125,6 +125,7 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
 
     if (PlayingRemoteFile ())
     {
+        // DEBUG_V();
         FPPDiscovery.GetStatus (LocalPlayerStatus);
     }
 
@@ -666,7 +667,7 @@ void c_InputFPPRemote::GetFppRemotePlayStatus (JsonObject& jsonStatus)
 
     if (pInputFPPRemotePlayItem)
     {
-        // DEBUG_V ("Ask FSM to start playing");
+        // DEBUG_V ("Ask FSM for status");
         pInputFPPRemotePlayItem->GetStatus (jsonStatus);
     }
 
