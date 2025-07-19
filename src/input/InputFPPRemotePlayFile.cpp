@@ -160,7 +160,7 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
     JsonWrite(JsonStatus, F ("SyncAdjustmentCount"), SyncControl.SyncAdjustmentCount);
 
     String temp = (!FileMgr.SdCardIsInstalled ()) ? F("No SD Installed") : GetFileName ();
-    DEBUG_V(String("temp: ") + temp);
+    // DEBUG_V(String("temp: ") + temp);
 
     JsonWrite(JsonStatus, CN_current_sequence,  temp);
     JsonWrite(JsonStatus, CN_playlist,          temp);
