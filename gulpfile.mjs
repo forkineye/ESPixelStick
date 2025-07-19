@@ -49,7 +49,7 @@ gulp.task("js", function () {
     .pipe(plumber())
     .pipe(using())
     /* .pipe(concat("esps.js")) */
-    /* .pipe(
+    .pipe(
       terser({ toplevel: true })
     ) /* comment out this line to debug the script file */
     .pipe(gzip())

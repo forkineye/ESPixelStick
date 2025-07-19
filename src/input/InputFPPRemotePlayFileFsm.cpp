@@ -236,6 +236,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
     ///DEBUG_V("fsm_PlayFile_state_PlayingFile::Poll");
 
     bool Response = false;
+    p_Parent->FileControl[CurrentFile].NumPollsSinceSync++;
 
     do // once
     {
@@ -406,8 +407,8 @@ void fsm_PlayFile_state_PlayingFile::Stop (void)
 //-----------------------------------------------------------------------------
 bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSeconds)
 {
-    ///DEBUG_START;
-    ///DEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
+    /// DEBUG_START;
+    /// DEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");
 
     bool response = false;
 
@@ -416,70 +417,77 @@ bool fsm_PlayFile_state_PlayingFile::Sync (String& FileName, float ElapsedSecond
         // are we on the correct file?
         if (!FileName.equals(p_Parent->GetFileName ()))
         {
-            // DEBUG_V ("Sync: Filename change");
-            // DEBUG_V (String("New FileName: ") + FileName);
-            // DEBUG_V (String("Old FileName: ") + p_Parent->GetFileName ());
+            /// DEBUG_V ("Sync: Filename change");
+            /// DEBUG_V (String("New FileName: ") + FileName);
+            /// DEBUG_V (String("Old FileName: ") + p_Parent->GetFileName ());
             Start (FileName, ElapsedSeconds, 1);
             break;
         }
 
         if (p_Parent->SyncControl.LastRcvdElapsedSeconds >= ElapsedSeconds)
         {
-            ///DEBUG_V ("Duplicate or older sync msg");
+            /// DEBUG_V ("Duplicate or older sync msg");
             break;
         }
 
-        ///DEBUG_V (String ("old LastRcvdElapsedSeconds: ") + String (p_Parent->SyncControl.LastRcvdElapsedSeconds));
+        /// DEBUG_V (String ("        ESPS millis: ") + String (millis()));
+        /// DEBUG_V (String ("ESPS StartingTimeMS: ") + String (p_Parent->FileControl[CurrentFile].StartingTimeMS));
+        /// DEBUG_V (String (" old  FPP ElapsedMS: ") + String (uint(p_Parent->SyncControl.LastRcvdElapsedSeconds) * 1000));
+        /// DEBUG_V (String ("      FPP ElapsedMS: ") + String (uint(ElapsedSeconds) * 1000));
+        /// DEBUG_V (String ("     ESPS ElapsedMS: ") + String ((millis() - p_Parent->FileControl[CurrentFile].StartingTimeMS)));
+        /// DEBUG_V (String ("  NumPollsSinceSync: ") + String (p_Parent->FileControl[CurrentFile].NumPollsSinceSync));
+        p_Parent->FileControl[CurrentFile].NumPollsSinceSync = 0;
 
         p_Parent->SyncControl.LastRcvdElapsedSeconds = ElapsedSeconds;
 
-        ///DEBUG_V (String ("new LastRcvdElapsedSeconds: ") + String (p_Parent->SyncControl.LastRcvdElapsedSeconds));
-        ///DEBUG_V (String ("         ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
+        /// DEBUG_V (String ("new LastRcvdElapsedSeconds: ") + String (p_Parent->SyncControl.LastRcvdElapsedSeconds));
+        /// DEBUG_V (String ("         ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
 
         uint32_t TargetElapsedMS = uint32_t (ElapsedSeconds * 1000);
         uint32_t CurrentFrame = p_Parent->FileControl[CurrentFile].LastPlayedFrameId;
         uint32_t TargetFrameId = p_Parent->CalculateFrameId (TargetElapsedMS, 0);
         int32_t  FrameDiff = TargetFrameId - CurrentFrame;
 
+        // DEBUG_V (String ("     CurrentFrameId: ") + String (CurrentFrame));
+        // DEBUG_V (String ("      TargetFrameId: ") + String (TargetFrameId));
+        // DEBUG_V (String ("          FrameDiff: ") + String (FrameDiff));
+
         if (2 > abs (FrameDiff))
         {
-            ///DEBUG_V ("No Need to adjust the time");
+            /// DEBUG_V ("No Need to adjust the time");
             break;
         }
 
         ///DEBUG_V ("Need to adjust the start time");
         ///DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl.ElapsedPlayTimeMS));
 
-        ///DEBUG_V (String ("     CurrentFrame: ") + String (CurrentFrame));
-        ///DEBUG_V (String ("    TargetFrameId: ") + String (TargetFrameId));
-        ///DEBUG_V (String ("        FrameDiff: ") + String (FrameDiff));
-
         // Adjust the start of the file time to align with the master FPP
         if (20 < abs (FrameDiff))
         {
-            ///DEBUG_V ("Large Setp Adjustment");
+            /// DEBUG_V ("Large Setp Adjustment");
             p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS = TargetElapsedMS;
             p_Parent->FileControl[CurrentFile].StartingTimeMS = millis() - TargetElapsedMS;
         }
         else if(CurrentFrame > TargetFrameId)
         {
-            ///DEBUG_V("go back a frame");
+            /// DEBUG_V("go back a frame");
             p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS -= p_Parent->FileControl[CurrentFile].FrameStepTimeMS;
-            p_Parent->FileControl[CurrentFile].StartingTimeMS = millis() - p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS;
+            p_Parent->FileControl[CurrentFile].StartingTimeMS += p_Parent->FileControl[CurrentFile].FrameStepTimeMS;
         }
         else
         {
-            ///DEBUG_V("go forward a frame");
+            /// DEBUG_V("go forward a frame");
             p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS += p_Parent->FileControl[CurrentFile].FrameStepTimeMS;
-            p_Parent->FileControl[CurrentFile].StartingTimeMS = millis() - p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS;
+            p_Parent->FileControl[CurrentFile].StartingTimeMS -= p_Parent->FileControl[CurrentFile].FrameStepTimeMS;
         }
 
         response = true;
-        ///DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS));
+        /// DEBUG_V (String ("ESPS StartingTimeMS: ") + String (p_Parent->FileControl[CurrentFile].StartingTimeMS));
+        /// DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent->FileControl[CurrentFile].ElapsedPlayTimeMS));
 
     } while (false);
 
-    ///DEBUG_END;
+    /// DEBUG_END;
     return response;
 
 } // fsm_PlayFile_state_PlayingFile::Sync

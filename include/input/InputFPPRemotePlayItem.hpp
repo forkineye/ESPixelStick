@@ -57,6 +57,7 @@ public:
         uint32_t    StartingTimeMS = 0;
         uint32_t    LastPollTimeMS = 0;
         uint32_t    LastPlayedFrameId = 0;
+        uint32_t    NumPollsSinceSync = 0;
     } FileControl[2];
     #define CurrentFile 0
     #define NextFile 1

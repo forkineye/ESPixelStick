@@ -1814,15 +1814,7 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
                 (0 != CurrentEntry.size ())
                )
             {
-                String LowerEntryName = EntryName;
-                LowerEntryName.toLowerCase();
-                // is this a zipped file?
-                if((-1 != LowerEntryName.indexOf(F(".zip"))) ||
-                   (-1 != LowerEntryName.indexOf(F(".xlz")))
-                   )
-                {
-                    FoundZipFile = true;
-                }
+                FoundZipFile = IsCompressed(EntryName);
 
                 usedBytes += CurrentEntry.size ();
                 ++numFiles;
@@ -1933,9 +1925,7 @@ void c_FileMgr::FindFirstZipFile(String &FileName)
             // DEBUG_V ("      entry.size(): " + int64String(CurrentEntry.size ()));
 
             // is this a zipped file?
-            if((-1 != EntryName.indexOf(F(".zip"))) ||
-               (-1 != EntryName.indexOf(F(".ZIP"))) ||
-               (-1 != EntryName.indexOf(F(".xlz"))))
+            if(IsCompressed(EntryName))
             {
                 FileName = EntryName;
                 CurrentEntry.close();
@@ -2066,9 +2056,7 @@ bool c_FileMgr::handleFileUpload (
 
         // DEBUG_V(String("Expected: ") + String(totalLen));
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
-        String temp = String(fsUploadFileName);
-        temp.toLowerCase();
-        if(temp.indexOf(".xlz"))
+        if(IsCompressed(fsUploadFileName))
         {
             String reason = F("Reboot after receiving a compressed file");
             RequestReboot(reason, 100000);
@@ -2235,6 +2223,19 @@ void c_FileMgr::AbortSdFileUpload()
 
     // DEBUG_END;
 } // AbortSdFileUpload
+
+//-----------------------------------------------------------------------------
+bool c_FileMgr::IsCompressed(String FileName)
+{
+    // DEBUG_START;
+    bool Response = false;
+
+    FileName.toLowerCase();
+    Response = ((-1 != FileName.indexOf(F(".zip"))) || (-1 != FileName.indexOf(F(".xlz"))));
+
+    // DEBUG_END;
+    return Response;
+} // IsCompressed
 
 // create a global instance of the File Manager
 c_FileMgr FileMgr;
