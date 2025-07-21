@@ -32,6 +32,7 @@ var classc___file_mgr =
     [ "handleFileUpload", "classc___file_mgr.html#a7fc07abded89ba2dc2fb88aa6e230da8", null ],
     [ "handleFileUploadNewFile", "classc___file_mgr.html#aad3d5c934b264ab5e66c5616c43fa060", null ],
     [ "InitSdFileList", "classc___file_mgr.html#a2893dc60a7f5ed7b66c5b9d1a741a396", null ],
+    [ "IsCompressed", "classc___file_mgr.html#a44931172f6751a91e801c191d9e60fe7", null ],
     [ "listDir", "classc___file_mgr.html#a3efba169d1b850dba52906cb4f6cd799", null ],
     [ "LoadFlashFile", "classc___file_mgr.html#a56a3ece591539d6b844ac99ecb2162bc", null ],
     [ "LockSd", "classc___file_mgr.html#a56a37e82a8da77e0ab8fb293779111ca", null ],

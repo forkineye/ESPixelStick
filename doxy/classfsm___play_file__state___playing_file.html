@@ -516,16 +516,16 @@ Here is the caller graph for this function:</div>
 </table>
 </div><div class="memdoc">
 <p>DEBUG_START; DEBUG_V("fsm_PlayFile_state_PlayingFile::Sync");</p>
+<p>DEBUG_V ("Sync: Filename change"); DEBUG_V (String("New FileName: ") + FileName); DEBUG_V (String("Old FileName: ") + p_Parent-&gt;GetFileName ());</p>
 <p>DEBUG_V ("Duplicate or older sync msg");</p>
-<p>DEBUG_V (String ("old LastRcvdElapsedSeconds: ") + String (p_Parent-&gt;SyncControl.LastRcvdElapsedSeconds));</p>
+<p>DEBUG_V (String ("        ESPS millis: ") + String (millis())); DEBUG_V (String ("ESPS StartingTimeMS: ") + String (p_Parent-&gt;FileControl[CurrentFile].StartingTimeMS)); DEBUG_V (String (" old  FPP ElapsedMS: ") + String (uint(p_Parent-&gt;SyncControl.LastRcvdElapsedSeconds) * 1000)); DEBUG_V (String ("      FPP ElapsedMS: ") + String (uint(ElapsedSeconds) * 1000)); DEBUG_V (String ("     ESPS ElapsedMS: ") + String ((millis() - p_Parent-&gt;FileControl[CurrentFile].StartingTimeMS))); DEBUG_V (String ("  NumPollsSinceSync: ") + String (p_Parent-&gt;FileControl[CurrentFile].NumPollsSinceSync));</p>
 <p>DEBUG_V (String ("new LastRcvdElapsedSeconds: ") + String (p_Parent-&gt;SyncControl.LastRcvdElapsedSeconds)); DEBUG_V (String ("         ElapsedPlayTimeMS: ") + String (p_Parent-&gt;FileControl.ElapsedPlayTimeMS));</p>
 <p>DEBUG_V ("No Need to adjust the time");</p>
 <p>DEBUG_V ("Need to adjust the start time"); DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent-&gt;FileControl.ElapsedPlayTimeMS));</p>
-<p>DEBUG_V (String ("     CurrentFrame: ") + String (CurrentFrame)); DEBUG_V (String ("    TargetFrameId: ") + String (TargetFrameId)); DEBUG_V (String ("        FrameDiff: ") + String (FrameDiff));</p>
 <p>DEBUG_V ("Large Setp Adjustment");</p>
 <p>DEBUG_V("go back a frame");</p>
 <p>DEBUG_V("go forward a frame");</p>
-<p>DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent-&gt;FileControl[CurrentFile].ElapsedPlayTimeMS));</p>
+<p>DEBUG_V (String ("ESPS StartingTimeMS: ") + String (p_Parent-&gt;FileControl[CurrentFile].StartingTimeMS)); DEBUG_V (String ("ElapsedPlayTimeMS: ") + String (p_Parent-&gt;FileControl[CurrentFile].ElapsedPlayTimeMS));</p>
 <p>DEBUG_END;</p>
 
 <p>Implements <a class="el" href="classfsm___play_file__state.html#a0ea185a29a785f198cc43ef410d76d6c">fsm_PlayFile_state</a>.</p>

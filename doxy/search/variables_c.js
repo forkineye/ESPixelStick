@@ -12,6 +12,7 @@ var searchData=
   ['numinterintensitybreakbits_9',['NumInterIntensityBreakBits',['../structc___output_uart_1_1_output_uart_config__t.html#a34574521c3842523ba81a0d8e01afea2',1,'c_OutputUart::OutputUartConfig_t']]],
   ['numinterintensitymabbits_10',['NumInterIntensityMABbits',['../structc___output_uart_1_1_output_uart_config__t.html#a18adbfab1fed6c979e4feea916edbe2d',1,'c_OutputUart::OutputUartConfig_t']]],
   ['numpixelsingroup_11',['NumPixelsInGroup',['../structc___input_effect_engine_1_1_marquee_group__t.html#a2b4dfa210a2b28ba1bc0548624556286',1,'c_InputEffectEngine::MarqueeGroup_t']]],
-  ['numsparseranges_12',['numSparseRanges',['../struct_f_s_e_q_raw_header.html#aa6dace473482943c077b3079bdb53ec4',1,'FSEQRawHeader::numSparseRanges'],['../struct_f_s_e_q_parsed_header.html#a048cd88b554c82a7e9070ac6263016a4',1,'FSEQParsedHeader::numSparseRanges'],['../fseq_8h.html#a96e54e69946f348e1bff7e3e04203321',1,'numSparseRanges:&#160;fseq.h']]],
-  ['numuartslotsperintensityvalue_13',['NumUartSlotsPerIntensityValue',['../classc___output_uart.html#a7c91bb1969dee4e2a52968088ec63b4c',1,'c_OutputUart']]]
+  ['numpollssincesync_12',['NumPollsSinceSync',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#a9791f313006fcb00e7737b3e113b13a5',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
+  ['numsparseranges_13',['numSparseRanges',['../struct_f_s_e_q_raw_header.html#aa6dace473482943c077b3079bdb53ec4',1,'FSEQRawHeader::numSparseRanges'],['../struct_f_s_e_q_parsed_header.html#a048cd88b554c82a7e9070ac6263016a4',1,'FSEQParsedHeader::numSparseRanges'],['../fseq_8h.html#a96e54e69946f348e1bff7e3e04203321',1,'numSparseRanges:&#160;fseq.h']]],
+  ['numuartslotsperintensityvalue_14',['NumUartSlotsPerIntensityValue',['../classc___output_uart.html#a7c91bb1969dee4e2a52968088ec63b4c',1,'c_OutputUart']]]
 ];
