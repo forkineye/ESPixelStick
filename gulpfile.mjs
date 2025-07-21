@@ -42,16 +42,30 @@ gulp.task("css", function () {
     .pipe(gulp.dest("data/www/css"));
 });
 
-/* JavaScript Task */
 gulp.task("js", function () {
   return gulp
     .src(["html/js/*.js"])
     .pipe(plumber())
     .pipe(using())
-    /* .pipe(concat("esps.js")) */
-    .pipe(
-      terser({ toplevel: true })
-    ) /* comment out this line to debug the script file */
+    /* .pipe(terser({ toplevel: false, keep_fnames: true })) /* comment out this line to debug the script file */
+    .pipe(terser(
+        {
+            compress:
+            {
+                passes: 5,
+                dead_code: true,
+            },
+            mangle:
+            {
+                toplevel: false,
+                keep_fnames: false,
+                keep_classnames : false,
+            },
+            output:
+            {
+                comments: false,
+            },
+        })) /* comment out this line to debug the script file */
     .pipe(gzip())
     .pipe(using())
     .pipe(gulp.dest("data/www/js"));
@@ -118,6 +132,7 @@ gulp.task("ci", function (done) {
 gulp.task("watch", function () {
   gulp.watch("html/*.html", gulp.series("html"));
   gulp.watch("html/**/*.css", gulp.series("css"));
+  gulp.watch("html/**/*.min.js", gulp.series("minjs"));
   gulp.watch("html/**/*.js", gulp.series("js"));
 });
 
