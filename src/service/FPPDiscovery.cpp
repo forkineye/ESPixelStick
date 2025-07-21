@@ -237,10 +237,12 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
         JsonWrite(MyJsonStatus, F ("FppRemoteIp"), FppRemoteIp.toString ());
         if (AllowedToPlayRemoteFile())
         {
+            // DEBUG_V();
             InputFPPRemote->GetFppRemotePlayStatus (MyJsonStatus);
         }
         else
         {
+            // DEBUG_V();
             JsonWrite(MyJsonStatus, CN_errors, F("No SD installed"));
         }
     }
@@ -607,7 +609,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseqFile
     // DEBUG_V(String("FileHandle: ") + String(fseq));
 
     FSEQRawHeader fsqHeader;
-    DEBUG_FILE_HANDLE(fseqFileHandle);
+    // DEBUG_FILE_HANDLE(fseqFileHandle);
     FileMgr.ReadSdFile (fseqFileHandle, (byte*)&fsqHeader, sizeof (fsqHeader), size_t(0));
 
     JsonWrite(JsonData, F ("Name"),            fname);
@@ -657,7 +659,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseqFile
         uint8_t* RangeDataBuffer = (uint8_t*)malloc (sizeof(FSEQRawRangeEntry) * fsqHeader.numSparseRanges);
         FSEQRawRangeEntry* CurrentFSEQRangeEntry = (FSEQRawRangeEntry*)RangeDataBuffer;
 
-        DEBUG_FILE_HANDLE(fseqFileHandle);
+        // DEBUG_FILE_HANDLE(fseqFileHandle);
         FileMgr.ReadSdFile (fseqFileHandle, RangeDataBuffer, sizeof (FSEQRawRangeEntry), size_t(fsqHeader.numCompressedBlocks * 8 + 32));
 
         for (int CurrentRangeIndex = 0;
@@ -699,7 +701,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseqFile
 
         while (FileOffsetToCurrentHeaderRecord < FileOffsetToStartOfSequenceData)
         {
-            DEBUG_FILE_HANDLE(fseqFileHandle);
+            // DEBUG_FILE_HANDLE(fseqFileHandle);
             FileMgr.ReadSdFile (fseqFileHandle, (byte*)FSEQVariableDataHeaderBuffer, sizeof (FSEQRawVariableDataHeader), FileOffsetToCurrentHeaderRecord);
 
             int VariableDataHeaderTotalLength = read16 ((uint8_t*)&(pCurrentVariableHeader->length));
@@ -712,7 +714,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseqFile
                 char * VariableDataHeaderDataBuffer = (char*)malloc (VariableDataHeaderDataLength + 1);
                 memset (VariableDataHeaderDataBuffer, 0x00, VariableDataHeaderDataLength + 1);
 
-                DEBUG_FILE_HANDLE(fseqFileHandle);
+                // DEBUG_FILE_HANDLE(fseqFileHandle);
                 FileMgr.ReadSdFile (fseqFileHandle, (byte*)VariableDataHeaderDataBuffer, VariableDataHeaderDataLength, FileOffsetToCurrentHeaderRecord);
 
                 JsonObject JsonDataHeader = JsonDataHeaders.add<JsonObject> ();
@@ -775,14 +777,14 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 
                 if (FileMgr.OpenSdFile (seq, c_FileMgr::FileMode::FileRead, FileHandle, -1))
                 {
-                    DEBUG_FILE_HANDLE(FileHandle);
+                    // DEBUG_FILE_HANDLE(FileHandle);
                     if (FileMgr.GetSdFileSize(FileHandle) > 0)
                     {
                         // DEBUG_V ("found the file. return metadata as json");
                         String resp = emptyString;
-                        DEBUG_FILE_HANDLE(FileHandle);
+                        // DEBUG_FILE_HANDLE(FileHandle);
                         BuildFseqResponse (seq, FileHandle, resp);
-                        DEBUG_FILE_HANDLE (FileHandle);
+                        // DEBUG_FILE_HANDLE (FileHandle);
                         FileMgr.CloseSdFile (FileHandle);
                         request->send (200, CN_applicationSLASHjson, resp);
                         break;
@@ -799,6 +801,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 	            JsonObject JsonData = JsonDoc.to<JsonObject> ();
 	            GetStatusJSON(JsonData, true);
 	            serializeJson (JsonDoc, Response);
+                // PrettyPrint(JsonDoc, "ProcessGET");
 			}
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
@@ -862,9 +865,9 @@ void c_FPPDiscovery::ProcessPOST (AsyncWebServerRequest* request)
 
         // DEBUG_V ("BuildFseqResponse");
         String resp = emptyString;
-        DEBUG_FILE_HANDLE(FileHandle);
+        // DEBUG_FILE_HANDLE(FileHandle);
         BuildFseqResponse (filename, FileHandle, resp);
-        DEBUG_FILE_HANDLE (FileHandle);
+        // DEBUG_FILE_HANDLE (FileHandle);
         FileMgr.CloseSdFile (FileHandle);
         request->send (200, CN_applicationSLASHjson, resp);
 
@@ -1121,8 +1124,9 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
         if (AllowedToPlayRemoteFile())
         {
             // DEBUG_V();
-            InputFPPRemote->GetStatus (JsonData);
+	        InputFPPRemote->GetFppRemotePlayStatus (JsonData);
         }
+
         JsonWrite(JsonData, CN_status,      1);
         JsonWrite(JsonData, CN_status_name, F ("playing"));
 
@@ -1138,6 +1142,7 @@ void c_FPPDiscovery::GetStatusJSON (JsonObject & JsonData, bool adv)
         GetSysInfoJSON (JsonDataAdvancedView);
         // DEBUG_V();
     }
+
     // DEBUG_END;
 }
 
@@ -1181,6 +1186,7 @@ void c_FPPDiscovery::ProcessFPPJson (AsyncWebServerRequest* request)
 
             String Response;
             serializeJson (JsonDoc, Response);
+            // PrettyPrint(JsonDoc, "ProcessFPPJson");
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
 

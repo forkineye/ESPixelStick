@@ -130,6 +130,7 @@ private:
     void    UnLockSd();
     bool    SeekSdFile(const FileId & FileHandle, uint64_t position, SeekMode Mode);
     void    BuildDefaultFseqList ();
+    bool    IsCompressed(String FileName);
 
 #   define SD_CARD_CLK_MHZ     SD_SCK_MHZ(37)  // 50 MHz SPI clock
 #ifndef MaxSdTransSpeedMHz
