@@ -29,6 +29,7 @@ c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,
     // DEBUG_START;
 
     // DEBUG_V ("BufferSize: " + String (BufferSize));
+    memset (_e131, 0x00, sizeof (_e131));
     memset ((void*)UniverseArray, 0x00, sizeof (UniverseArray));
 
     // DEBUG_END;
@@ -50,21 +51,33 @@ void c_InputE131::Begin ()
 
     do // once
     {
+        // DEBUG_V ("HasBeenInitialized: " + String(HasBeenInitialized));
+        if(HasBeenInitialized)
+        {
+            // DEBUG_V("Ignore duplicate init");
+            break;
+        }
+
         // DEBUG_V ("InputDataBufferSize: " + String(InputDataBufferSize));
-        new(&_e131[0]) ESPAsyncE131(0);
+        if(nullptr == pE131)
+        {
+            pE131 = new(&_e131[0]) ESPAsyncE131(0);
+            // DEBUG_V ("");
+            pE131->registerCallback ( (void*)this, [] (e131_packet_t* Packet, void * pThis)
+                {
+                    // DEBUG_V ("");
+                    ((c_InputE131*)pThis)->ProcessIncomingE131Data (Packet);
+                });
+            // DEBUG_V ("");
+        }
 
+        // DEBUG_V ("");
         validateConfiguration ();
-        // DEBUG_V ("");
-
-        // DEBUG_V ("");
-        e131.registerCallback ( (void*)this, [] (e131_packet_t* Packet, void * pThis)
-            {
-                ((c_InputE131*)pThis)->ProcessIncomingE131Data (Packet);
-            });
 
         NetworkStateChanged (NetworkMgr.IsConnected (), false);
 
         HasBeenInitialized = true;
+        // DEBUG_V ("HasBeenInitialized: " + String(HasBeenInitialized));
 
     } while (false);
 
@@ -97,12 +110,12 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
     JsonWrite(e131Status, CN_unilast,    LastUniverse);
     JsonWrite(e131Status, CN_unichanlim, ChannelsPerUniverse);
 
-    JsonWrite(e131Status, CN_num_packets,   e131.stats.num_packets);
-    JsonWrite(e131Status, CN_last_clientIP, uint32_t(e131.stats.last_clientIP));
+    JsonWrite(e131Status, CN_num_packets,   pE131->stats.num_packets);
+    JsonWrite(e131Status, CN_last_clientIP, uint32_t(pE131->stats.last_clientIP));
     // DEBUG_V ("");
 
     JsonArray e131UniverseStatus = e131Status[(char*)CN_channels].to<JsonArray> ();
-    uint32_t TotalErrors = 0; // e131.stats.packet_errors;
+    uint32_t TotalErrors = 0; // pE131->stats.packet_errors;
     for (auto & CurrentUniverse : UniverseArray)
     {
         JsonObject e131CurrentUniverseStatus = e131UniverseStatus.add<JsonObject> ();
@@ -199,7 +212,7 @@ void c_InputE131::SetBufferInfo (uint32_t BufferSize)
 
     if (HasBeenInitialized)
     {
-        // buffer has moved. Start Over
+        // DEBUG_V("buffer has moved. Start Over");
         HasBeenInitialized = false;
         Begin ();
     }
@@ -358,7 +371,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
     if (IsConnected)
     {
         // Get on with business
-        if (e131.begin (e131_listen_t::E131_MULTICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
+        if (pE131->begin (e131_listen_t::E131_MULTICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
             // logcon (String (F ("Multicast enabled")));
         }
@@ -369,7 +382,7 @@ void c_InputE131::NetworkStateChanged (bool IsConnected, bool ReBootAllowed)
 
         // DEBUG_V ("");
 
-        if (e131.begin (e131_listen_t::E131_UNICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
+        if (pE131->begin (e131_listen_t::E131_UNICAST, PortId, startUniverse, LastUniverse - startUniverse + 1))
         {
             // logcon (String (F ("Listening on port ")) + PortId);
         }

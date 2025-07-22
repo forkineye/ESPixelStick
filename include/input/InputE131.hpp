@@ -30,6 +30,7 @@ class c_InputE131 : public c_InputCommon
 
     byte _e131[sizeof(ESPAsyncE131)];
     #define e131 static_cast<ESPAsyncE131>(*(&_e131[0]))
+    ESPAsyncE131 * pE131 = nullptr;
 
     // e131_packet_t packet;           ///< Packet buffer for parsing
 
