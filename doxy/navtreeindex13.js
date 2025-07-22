@@ -1,5 +1,6 @@
 var NAVTREEINDEX13 =
 {
+"classfsm___play_list__state___playing_effect.html#afe6b59d135d0c3467e6f8014de53cdb1":[0,0,55,5],
 "classfsm___play_list__state___playing_file.html":[0,0,56],
 "classfsm___play_list__state___playing_file.html#a1d2db02507e7474ec6bf8c395e387b0f":[0,0,56,0],
 "classfsm___play_list__state___playing_file.html#a471bea8f04253870645de27e8340d65a":[0,0,56,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX13 =
 "globals_defs_j.html":[1,1,3,7],
 "globals_defs_l.html":[1,1,3,8],
 "globals_defs_m.html":[1,1,3,9],
-"globals_defs_n.html":[1,1,3,10],
-"globals_defs_o.html":[1,1,3,11]
+"globals_defs_n.html":[1,1,3,10]
 };

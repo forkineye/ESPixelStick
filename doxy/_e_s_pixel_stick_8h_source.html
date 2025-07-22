@@ -187,167 +187,163 @@ $(function(){initNavTree('_e_s_pixel_stick_8h_source.html',''); initResizable(tr
 <div class="foldopen" id="foldopen00084" data-start="{" data-end="}">
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a38c4f32904d571425ea367bd433b2e95">   84</a></span><span class="keywordtype">bool</span>    <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a0b66f59517303936e5ecb82ddf4c8780">dsNetwork</a>              (JsonObject &amp; json);</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="preprocessor">#ifndef ESPS_VERSION</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="preprocessor">    #define ESPS_VERSION &quot;4.x-dev&quot;</span></div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span><span class="keyword">struct </span><a class="code hl_variable" href="fseq_8h.html#ac166307bedcc799e3931a745b85628d2">__attribute__</a>((packed)) ConstConfig_t</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>{</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> key[32];</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> Version[32];</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> BuildDate[32];</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> ConfigFileName[32];</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keyword">const</span> uint8_t CurrentConfigVersion;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>};</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="keyword">struct </span><a class="code hl_variable" href="fseq_8h.html#ac166307bedcc799e3931a745b85628d2">__attribute__</a>((packed)) ConstConfig_t</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>{</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> key[32];</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> Version[32];</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> BuildDate[32];</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keyword">const</span> <span class="keywordtype">char</span> ConfigFileName[32];</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">const</span> uint8_t CurrentConfigVersion;</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>};</div>
 </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> </div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="keyword">extern</span> ConstConfig_t <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ac8e18d39f07a990eff94aba637891fdd">ConstConfig</a>;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span><span class="keyword">extern</span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ab73fab3bfc2da224ec67cc789fe7616a">IsBooting</a>;</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keyword">extern</span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a71cd754e8f1472f27fc5b805dfcb4251">ResetWiFi</a>;</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="keyword">extern</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#ace03924f16faf7e0c24590ede39ae2f2">FeedWDT</a> ();</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="keyword">extern</span>  uint32_t <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a70e2f5df671c5b18e60a1bbcf2c9586f">DiscardedRxData</a>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="keyword">extern</span> ConstConfig_t <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ac8e18d39f07a990eff94aba637891fdd">ConstConfig</a>;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span><span class="keyword">extern</span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ab73fab3bfc2da224ec67cc789fe7616a">IsBooting</a>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span><span class="keyword">extern</span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a71cd754e8f1472f27fc5b805dfcb4251">ResetWiFi</a>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span><span class="keyword">extern</span>  <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#ace03924f16faf7e0c24590ede39ae2f2">FeedWDT</a> ();</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span><span class="keyword">extern</span>  uint32_t <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a70e2f5df671c5b18e60a1bbcf2c9586f">DiscardedRxData</a>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span><span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (JsonObject&amp; jsonStuff, String Name);</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span><span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (JsonArray&amp; jsonStuff, String Name);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a>(JsonDocument &amp;jsonStuff, String Name);</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span> </div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (JsonObject&amp; jsonStuff, String Name);</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (JsonArray&amp; jsonStuff, String Name);</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="keyword">extern</span> <span class="keywordtype">void</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a>(JsonDocument &amp;jsonStuff, String Name);</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> N&gt;</div>
-<div class="foldopen" id="foldopen00111" data-start="{" data-end="}">
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">  111</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a> (T&amp; OutValue, JsonObject &amp; Json, N Name)</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>{</div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    {</div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>        T temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        <span class="keywordflow">if</span> (temp != OutValue)</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        {</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>            OutValue = temp;</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>            HasBeenModified = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        }</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>    }</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    {</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        <a class="code hl_define" href="memdebug_8h.html#a14d990269e60f38772eecaf63d3090d5">DEBUG_V</a>(String(<span class="stringliteral">&quot;Could not find field &#39;&quot;</span>) + Name + <span class="stringliteral">&quot;&#39; in the json record&quot;</span>);</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>        <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (Json, Name);</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    }</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    <span class="keywordflow">return</span> HasBeenModified;</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>};</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> N&gt;</div>
+<div class="foldopen" id="foldopen00107" data-start="{" data-end="}">
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">  107</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a> (T&amp; OutValue, JsonObject &amp; Json, N Name)</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>{</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>    {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>        T temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span>        <span class="keywordflow">if</span> (temp != OutValue)</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>        {</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>            OutValue = temp;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>            HasBeenModified = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>        }</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    }</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    {</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <a class="code hl_define" href="memdebug_8h.html#a14d990269e60f38772eecaf63d3090d5">DEBUG_V</a>(String(<span class="stringliteral">&quot;Could not find field &#39;&quot;</span>) + Name + <span class="stringliteral">&quot;&#39; in the json record&quot;</span>);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (Json, Name);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>    }</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span> </div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    <span class="keywordflow">return</span> HasBeenModified;</div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>};</div>
 </div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> N, <span class="keywordtype">size_t</span> S&gt;</div>
-<div class="foldopen" id="foldopen00134" data-start="{" data-end="}">
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a8fe2a1df9e408fa0e9f613be55c0956d">  134</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a> (<span class="keywordtype">char</span> (&amp;OutValue)[S], JsonObject &amp; Json, N Name)</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>{</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span> </div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;String&gt;())</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>    {</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        String temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        <span class="keywordflow">if</span> (!temp.equals(String(OutValue)))</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        {</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>            strncpy(OutValue, temp.c_str(), S);</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>            HasBeenModified = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        }</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>    }</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    {</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>        <a class="code hl_define" href="memdebug_8h.html#a14d990269e60f38772eecaf63d3090d5">DEBUG_V</a>(String(<span class="stringliteral">&quot;Could not find field &#39;&quot;</span>) + Name + <span class="stringliteral">&quot;&#39; in the json record&quot;</span>);</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>        <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (Json, Name);</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    }</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span> </div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    <span class="keywordflow">return</span> HasBeenModified;</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>};</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> N, <span class="keywordtype">size_t</span> S&gt;</div>
+<div class="foldopen" id="foldopen00130" data-start="{" data-end="}">
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a8fe2a1df9e408fa0e9f613be55c0956d">  130</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a> (<span class="keywordtype">char</span> (&amp;OutValue)[S], JsonObject &amp; Json, N Name)</div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>{</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;String&gt;())</div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    {</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        String temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keywordflow">if</span> (!temp.equals(String(OutValue)))</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>        {</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>            strncpy(OutValue, temp.c_str(), S);</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>            HasBeenModified = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        }</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    }</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    {</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>        <a class="code hl_define" href="memdebug_8h.html#a14d990269e60f38772eecaf63d3090d5">DEBUG_V</a>(String(<span class="stringliteral">&quot;Could not find field &#39;&quot;</span>) + Name + <span class="stringliteral">&quot;&#39; in the json record&quot;</span>);</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (Json, Name);</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>    }</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    <span class="keywordflow">return</span> HasBeenModified;</div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>};</div>
 </div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> N&gt;</div>
-<div class="foldopen" id="foldopen00157" data-start="{" data-end="}">
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a22f4176fd1b5a26a3d18c096681ad8e9">  157</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a> (T&amp; OutValue, JsonVariant &amp; Json, N Name)</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>{</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span> </div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>    {</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        T temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        <span class="keywordflow">if</span> (temp != OutValue)</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        {</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>            OutValue = temp;</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            HasBeenModified = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        }</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>    }</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    {</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>        <a class="code hl_define" href="memdebug_8h.html#a14d990269e60f38772eecaf63d3090d5">DEBUG_V</a>(String(<span class="stringliteral">&quot;Could not find field &#39;&quot;</span>) + Name + <span class="stringliteral">&quot;&#39; in the json record&quot;</span>);</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (Json, Name);</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    }</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <span class="keywordflow">return</span> HasBeenModified;</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>};</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span> </div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> N&gt;</div>
+<div class="foldopen" id="foldopen00153" data-start="{" data-end="}">
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a22f4176fd1b5a26a3d18c096681ad8e9">  153</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a> (T&amp; OutValue, JsonVariant &amp; Json, N Name)</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>{</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keywordtype">bool</span> HasBeenModified = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span> </div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    <span class="keywordflow">if</span> (Json[(<span class="keywordtype">char</span>*)Name].<span class="keyword">template</span> is&lt;T&gt;())</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    {</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        T temp = Json[(<span class="keywordtype">char</span>*)Name];</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>        <span class="keywordflow">if</span> (temp != OutValue)</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        {</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>            OutValue = temp;</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>            HasBeenModified = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        }</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    }</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    <span class="keywordflow">else</span></div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>    {</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        <a class="code hl_define" href="memdebug_8h.html#a14d990269e60f38772eecaf63d3090d5">DEBUG_V</a>(String(<span class="stringliteral">&quot;Could not find field &#39;&quot;</span>) + Name + <span class="stringliteral">&quot;&#39; in the json record&quot;</span>);</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a> (Json, Name);</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    }</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="keywordflow">return</span> HasBeenModified;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>};</div>
 </div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span><span class="preprocessor">#if defined(ARDUINO_ARCH_ESP8266)</span></div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span><span class="preprocessor">#   define JsonWrite(j, n, v)  (j)[String(n)] = (v)</span></div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span><span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">ResetGpio</a>(<span class="keyword">const</span> gpio_num_t pinId)</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>{</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <span class="keywordflow">if</span>(gpio_num_t(33) &gt; pinId)</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    {</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        pinMode(pinId, INPUT);</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    }</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>}</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span><span class="preprocessor">#else </span><span class="comment">// defined(ARDUINO_ARCH_ESP32)</span></div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#afc87444a05705e18a81a8fdac2d51080">  189</a></span><span class="preprocessor">#   define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)</span></div>
-<div class="foldopen" id="foldopen00190" data-start="{" data-end="}">
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">  190</a></span><span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">ResetGpio</a>(<span class="keyword">const</span> gpio_num_t pinId)</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>{</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="keywordflow">if</span>(GPIO_IS_VALID_OUTPUT_GPIO(pinId))</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    {</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        pinMatrixOutDetach(pinId, <span class="keyword">false</span>, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        gpio_reset_pin(pinId);</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        pinMode(pinId, INPUT);</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    }</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>}</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="preprocessor">#if defined(ARDUINO_ARCH_ESP8266)</span></div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span><span class="preprocessor">#   define JsonWrite(j, n, v)  (j)[String(n)] = (v)</span></div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">ResetGpio</a>(<span class="keyword">const</span> gpio_num_t pinId)</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>{</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keywordflow">if</span>(gpio_num_t(33) &gt; pinId)</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    {</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        pinMode(pinId, INPUT);</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    }</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>}</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span><span class="preprocessor">#else </span><span class="comment">// defined(ARDUINO_ARCH_ESP32)</span></div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#afc87444a05705e18a81a8fdac2d51080">  185</a></span><span class="preprocessor">#   define JsonWrite(j, n, v)  (j)[(char*)(n)] = (v)</span></div>
+<div class="foldopen" id="foldopen00186" data-start="{" data-end="}">
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">  186</a></span><span class="keywordtype">void</span> <span class="keyword">inline</span> <a class="code hl_function" href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">ResetGpio</a>(<span class="keyword">const</span> gpio_num_t pinId)</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>{</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="keywordflow">if</span>(GPIO_IS_VALID_OUTPUT_GPIO(pinId))</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    {</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        pinMatrixOutDetach(pinId, <span class="keyword">false</span>, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        gpio_reset_pin(pinId);</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>        pinMode(pinId, INPUT);</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    }</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>}</div>
 </div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#af3e03d06d3843c9ce26dc935016d8797">ConsoleUartIsActive</a>;</div>
-<div class="foldopen" id="foldopen00202" data-start="" data-end="">
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a5f7d358c60a640fdab4b7a753a6a1646">  202</a></span><span class="preprocessor">#define logcon(msg) \</span></div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span><span class="preprocessor">{ \</span></div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="preprocessor">    String DN; \</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span><span class="preprocessor">    GetDriverName (DN); \</span></div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="preprocessor">    extern void _logcon (String &amp; DriverName, String Message); \</span></div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="preprocessor">    _logcon (DN, msg); \</span></div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span><span class="preprocessor">}</span></div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span> </div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#af3e03d06d3843c9ce26dc935016d8797">ConsoleUartIsActive</a>;</div>
+<div class="foldopen" id="foldopen00198" data-start="" data-end="">
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#a5f7d358c60a640fdab4b7a753a6a1646">  198</a></span><span class="preprocessor">#define logcon(msg) \</span></div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span><span class="preprocessor">{ \</span></div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span><span class="preprocessor">    String DN; \</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span><span class="preprocessor">    GetDriverName (DN); \</span></div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span><span class="preprocessor">    extern void _logcon (String &amp; DriverName, String Message); \</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span><span class="preprocessor">    _logcon (DN, msg); \</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span><span class="preprocessor">}</span></div>
 </div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="keyword">extern</span> <a class="code hl_struct" href="structconfig__t.html">config_t</a> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">config</a>;</div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ConfigSaveNeeded</a>;</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span> </div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#ac54e13f4dd04bbd4e13299fb7062a6b1">  213</a></span><span class="preprocessor">#define LOAD_CONFIG_DELAY 4</span></div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span><span class="comment">// #define DEBUG_GPIO gpio_num_t::GPIO_NUM_25</span></div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span><span class="comment">// #define DEBUG_GPIO1 gpio_num_t::GPIO_NUM_14</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span> </div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span><span class="keyword">extern</span> <a class="code hl_struct" href="structconfig__t.html">config_t</a> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">config</a>;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span><span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code hl_variable" href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ConfigSaveNeeded</a>;</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno"><a class="line" href="_e_s_pixel_stick_8h.html#ac54e13f4dd04bbd4e13299fb7062a6b1">  209</a></span><span class="preprocessor">#define LOAD_CONFIG_DELAY 4</span></div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="comment">// #define DEBUG_GPIO gpio_num_t::GPIO_NUM_25</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span><span class="comment">// #define DEBUG_GPIO1 gpio_num_t::GPIO_NUM_14</span></div>
 <div class="ttc" id="a_const_names_8hpp_html"><div class="ttname"><a href="_const_names_8hpp.html">ConstNames.hpp</a></div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a067b67c856af5452506085e83cdb2b01"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a067b67c856af5452506085e83cdb2b01">deserializeCore</a></div><div class="ttdeci">bool deserializeCore(JsonObject &amp;json)</div><div class="ttdef"><b>Definition</b> main.cpp:319</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a067b67c856af5452506085e83cdb2b01"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a067b67c856af5452506085e83cdb2b01">deserializeCore</a></div><div class="ttdeci">bool deserializeCore(JsonObject &amp;json)</div><div class="ttdef"><b>Definition</b> main.cpp:323</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a0b66f59517303936e5ecb82ddf4c8780"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a0b66f59517303936e5ecb82ddf4c8780">dsNetwork</a></div><div class="ttdeci">bool dsNetwork(JsonObject &amp;json)</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a23e7afe154bda4f1d2e44818ed09843e"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a23e7afe154bda4f1d2e44818ed09843e">deserializeCoreHandler</a></div><div class="ttdeci">void deserializeCoreHandler(JsonDocument &amp;jsonDoc)</div><div class="ttdef"><b>Definition</b> main.cpp:400</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a25ce4b69d296fc9a3324b494542c2420"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">config</a></div><div class="ttdeci">config_t config</div><div class="ttdef"><b>Definition</b> main.cpp:94</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a2d941111e6837719d2ab46924313aca1"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a2d941111e6837719d2ab46924313aca1">DelayReboot</a></div><div class="ttdeci">void DelayReboot(uint32_t MinDelay)</div><div class="ttdef"><b>Definition</b> main.cpp:513</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a23e7afe154bda4f1d2e44818ed09843e"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a23e7afe154bda4f1d2e44818ed09843e">deserializeCoreHandler</a></div><div class="ttdeci">void deserializeCoreHandler(JsonDocument &amp;jsonDoc)</div><div class="ttdef"><b>Definition</b> main.cpp:404</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a25ce4b69d296fc9a3324b494542c2420"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a25ce4b69d296fc9a3324b494542c2420">config</a></div><div class="ttdeci">config_t config</div><div class="ttdef"><b>Definition</b> main.cpp:98</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a2d941111e6837719d2ab46924313aca1"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a2d941111e6837719d2ab46924313aca1">DelayReboot</a></div><div class="ttdeci">void DelayReboot(uint32_t MinDelay)</div><div class="ttdef"><b>Definition</b> main.cpp:517</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_a47bc5f5aa91e940e6cfc297466285595"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a47bc5f5aa91e940e6cfc297466285595">PrettyPrint</a></div><div class="ttdeci">void PrettyPrint(JsonObject &amp;jsonStuff, String Name)</div><div class="ttdef"><b>Definition</b> WebMgr.cpp:71</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a64caf298db9b3dcc081633371db4a441"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a64caf298db9b3dcc081633371db4a441">serializeCore</a></div><div class="ttdeci">String serializeCore(bool pretty=false)</div><div class="ttdef"><b>Definition</b> main.cpp:484</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a70e2f5df671c5b18e60a1bbcf2c9586f"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a70e2f5df671c5b18e60a1bbcf2c9586f">DiscardedRxData</a></div><div class="ttdeci">uint32_t DiscardedRxData</div><div class="ttdef"><b>Definition</b> main.cpp:103</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a71cd754e8f1472f27fc5b805dfcb4251"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a71cd754e8f1472f27fc5b805dfcb4251">ResetWiFi</a></div><div class="ttdeci">bool ResetWiFi</div><div class="ttdef"><b>Definition</b> main.cpp:98</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a8295d2ec53bab395bfc5811cfd78ca4d"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a></div><div class="ttdeci">bool setFromJSON(T &amp;OutValue, JsonObject &amp;Json, N Name)</div><div class="ttdef"><b>Definition</b> ESPixelStick.h:111</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_a97937ae3377e427d21b29966a14e964a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">ResetGpio</a></div><div class="ttdeci">void ResetGpio(const gpio_num_t pinId)</div><div class="ttdef"><b>Definition</b> ESPixelStick.h:190</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_aaffdda62d966b7a1777fec7ce955a22e"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#aaffdda62d966b7a1777fec7ce955a22e">RequestReboot</a></div><div class="ttdeci">void RequestReboot(String &amp;Reason, uint32_t LoopDelay, bool SkipDisable=false)</div><div class="ttdef"><b>Definition</b> main.cpp:605</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_ab73fab3bfc2da224ec67cc789fe7616a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ab73fab3bfc2da224ec67cc789fe7616a">IsBooting</a></div><div class="ttdeci">bool IsBooting</div><div class="ttdef"><b>Definition</b> main.cpp:99</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a64caf298db9b3dcc081633371db4a441"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a64caf298db9b3dcc081633371db4a441">serializeCore</a></div><div class="ttdeci">String serializeCore(bool pretty=false)</div><div class="ttdef"><b>Definition</b> main.cpp:488</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a70e2f5df671c5b18e60a1bbcf2c9586f"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a70e2f5df671c5b18e60a1bbcf2c9586f">DiscardedRxData</a></div><div class="ttdeci">uint32_t DiscardedRxData</div><div class="ttdef"><b>Definition</b> main.cpp:107</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a71cd754e8f1472f27fc5b805dfcb4251"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a71cd754e8f1472f27fc5b805dfcb4251">ResetWiFi</a></div><div class="ttdeci">bool ResetWiFi</div><div class="ttdef"><b>Definition</b> main.cpp:102</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a8295d2ec53bab395bfc5811cfd78ca4d"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d">setFromJSON</a></div><div class="ttdeci">bool setFromJSON(T &amp;OutValue, JsonObject &amp;Json, N Name)</div><div class="ttdef"><b>Definition</b> ESPixelStick.h:107</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_a97937ae3377e427d21b29966a14e964a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a">ResetGpio</a></div><div class="ttdeci">void ResetGpio(const gpio_num_t pinId)</div><div class="ttdef"><b>Definition</b> ESPixelStick.h:186</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_aaffdda62d966b7a1777fec7ce955a22e"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#aaffdda62d966b7a1777fec7ce955a22e">RequestReboot</a></div><div class="ttdeci">void RequestReboot(String &amp;Reason, uint32_t LoopDelay, bool SkipDisable=false)</div><div class="ttdef"><b>Definition</b> main.cpp:609</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_ab73fab3bfc2da224ec67cc789fe7616a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ab73fab3bfc2da224ec67cc789fe7616a">IsBooting</a></div><div class="ttdeci">bool IsBooting</div><div class="ttdef"><b>Definition</b> main.cpp:103</div></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html_ac8e18d39f07a990eff94aba637891fdd"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ac8e18d39f07a990eff94aba637891fdd">ConstConfig</a></div><div class="ttdeci">ConstConfig_t ConstConfig</div><div class="ttdef"><b>Definition</b> main.cpp:83</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_ace03924f16faf7e0c24590ede39ae2f2"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ace03924f16faf7e0c24590ede39ae2f2">FeedWDT</a></div><div class="ttdeci">void FeedWDT()</div><div class="ttdef"><b>Definition</b> main.cpp:639</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_ae3fa381b4975543d1b331c6aa0d4526a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ae3fa381b4975543d1b331c6aa0d4526a">dsDevice</a></div><div class="ttdeci">bool dsDevice(JsonObject &amp;json)</div><div class="ttdoc">Deserialize device configuration JSON to config structure - returns true if config change detected.</div><div class="ttdef"><b>Definition</b> main.cpp:277</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_ae44595345afc966d1f3de593d4c9b0f8"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ConfigSaveNeeded</a></div><div class="ttdeci">bool ConfigSaveNeeded</div><div class="ttdef"><b>Definition</b> main.cpp:101</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_aee3a92a77acd81bd67090432b16e23a1"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#aee3a92a77acd81bd67090432b16e23a1">RebootInProgress</a></div><div class="ttdeci">bool RebootInProgress()</div><div class="ttdef"><b>Definition</b> main.cpp:600</div></div>
-<div class="ttc" id="a_e_s_pixel_stick_8h_html_af3e03d06d3843c9ce26dc935016d8797"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#af3e03d06d3843c9ce26dc935016d8797">ConsoleUartIsActive</a></div><div class="ttdeci">bool ConsoleUartIsActive</div><div class="ttdef"><b>Definition</b> main.cpp:617</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_ace03924f16faf7e0c24590ede39ae2f2"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ace03924f16faf7e0c24590ede39ae2f2">FeedWDT</a></div><div class="ttdeci">void FeedWDT()</div><div class="ttdef"><b>Definition</b> main.cpp:643</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_ae3fa381b4975543d1b331c6aa0d4526a"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ae3fa381b4975543d1b331c6aa0d4526a">dsDevice</a></div><div class="ttdeci">bool dsDevice(JsonObject &amp;json)</div><div class="ttdoc">Deserialize device configuration JSON to config structure - returns true if config change detected.</div><div class="ttdef"><b>Definition</b> main.cpp:281</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_ae44595345afc966d1f3de593d4c9b0f8"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#ae44595345afc966d1f3de593d4c9b0f8">ConfigSaveNeeded</a></div><div class="ttdeci">bool ConfigSaveNeeded</div><div class="ttdef"><b>Definition</b> main.cpp:105</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_aee3a92a77acd81bd67090432b16e23a1"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#aee3a92a77acd81bd67090432b16e23a1">RebootInProgress</a></div><div class="ttdeci">bool RebootInProgress()</div><div class="ttdef"><b>Definition</b> main.cpp:604</div></div>
+<div class="ttc" id="a_e_s_pixel_stick_8h_html_af3e03d06d3843c9ce26dc935016d8797"><div class="ttname"><a href="_e_s_pixel_stick_8h.html#af3e03d06d3843c9ce26dc935016d8797">ConsoleUartIsActive</a></div><div class="ttdeci">bool ConsoleUartIsActive</div><div class="ttdef"><b>Definition</b> main.cpp:621</div></div>
 <div class="ttc" id="a_fast_timer_8hpp_html"><div class="ttname"><a href="_fast_timer_8hpp.html">FastTimer.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs_8hpp.html">GPIO_Defs.hpp</a></div></div>
 <div class="ttc" id="afseq_8h_html_ac166307bedcc799e3931a745b85628d2"><div class="ttname"><a href="fseq_8h.html#ac166307bedcc799e3931a745b85628d2">__attribute__</a></div><div class="ttdeci">struct FSEQParsedRangeEntry __attribute__</div></div>
