@@ -111,17 +111,29 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         }
 
         // DEBUG_V ();
+        ipBcast = WiFi.localIP ();
+        ipBcast[3] = 255;
 
         // Try to listen to the broadcast port
         bool Failed = true;
-        if (!udp.listen (FPP_DISCOVERY_PORT))
+        if (!udp.listen (WiFi.localIP (), FPP_DISCOVERY_PORT))
+        {
+            logcon (String (F ("FAILED to subscribed to local messages")));
+        }
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to local messages on ")) + WiFi.localIP ().toString() + ":" + (FPP_DISCOVERY_PORT));
+        }
+
+        if (!udp.listen (ipBcast, FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to broadcast messages")));
         }
         else
         {
             Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on port: ")) + String(FPP_DISCOVERY_PORT));
+            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on ")) + ipBcast.toString() + ":" + (FPP_DISCOVERY_PORT));
         }
 
         if (!udp.listenMulticast (MulticastAddress, FPP_DISCOVERY_PORT))
@@ -131,7 +143,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         else
         {
             Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + MulticastAddress.toString () + F(":") + String(FPP_DISCOVERY_PORT));
+            logcon (String (F ("FPPDiscovery subscribed to multicast messages on ")) + MulticastAddress.toString() + ":" + (FPP_DISCOVERY_PORT));
         }
 
         // did at least one binding work?
@@ -141,10 +153,12 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             break;
         }
 
-        udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
+        udp.onPacket ([this](AsyncUDPPacket packet)
+        {
+            DEBUG_V("Process UDP packet");
+            ProcessReceivedUdpPacket(packet);
+        });
 
-        ipBcast = WiFi.localIP ();
-        ipBcast[3] = 255;
         sendPingPacket (ipBcast);
         sendPingPacket (MulticastAddress);
         sendPingPacket (IPAddress(255, 255, 255, 255));
