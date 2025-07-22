@@ -124,6 +124,7 @@ struct SystemDebugStats_t
     uint32_t CmdNotFound = 0;
 };
 SystemDebugStats_t SystemDebugStats;
+    IPAddress ipBcast;
 
 public:
     c_FPPDiscovery ();

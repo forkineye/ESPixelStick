@@ -143,7 +143,11 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
 
-        sendPingPacket ();
+        ipBcast = WiFi.localIP ();
+        ipBcast[3] = 255;
+        sendPingPacket (ipBcast);
+        sendPingPacket (MulticastAddress);
+        sendPingPacket (IPAddress(255, 255, 255, 255));
 
     } while (false);
 
@@ -358,7 +362,9 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
                     if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
                     {
                         // DEBUG_V ("Broadcast Ping Response");
-                        sendPingPacket ();
+                        sendPingPacket (ipBcast);
+                        sendPingPacket (MulticastAddress);
+                        sendPingPacket (IPAddress(255, 255, 255, 255));
                     }
                     else
                     {
@@ -527,6 +533,8 @@ bool c_FPPDiscovery::PlayingFile ()
 void c_FPPDiscovery::sendPingPacket (IPAddress destination)
 {
     // DEBUG_START;
+
+    // DEBUG_V(String("destination: ") + destination.toString());
 
     FPPPingPacket packet;
     memset (packet.raw, 0, sizeof (packet));
@@ -805,7 +813,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 	            JsonObject JsonData = JsonDoc.to<JsonObject> ();
 	            GetStatusJSON(JsonData, true);
 	            serializeJson (JsonDoc, Response);
-                // PrettyPrint(JsonDoc, "ProcessGET");
+                // PrettyPrint(JsonDoc, "ProcessGET/api/system/status");
 			}
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
@@ -818,6 +826,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
 	            JsonDocument JsonDoc;
 	            JsonObject JsonData = JsonDoc.to<JsonObject> ();
 	            GetSysInfoJSON(JsonData);
+                // PrettyPrint(JsonDoc, "ProcessGET/api/system/info");
 	            serializeJson (JsonDoc, Response);
 			}
             // DEBUG_V (String ("JsonDoc: ") + Response);
