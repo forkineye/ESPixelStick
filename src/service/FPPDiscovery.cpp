@@ -556,6 +556,9 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     strcpy (packet.hardwareType, FPP_VARIANT_NAME.c_str());
     packet.ranges[0] = 0;
 
+    // DEBUG_V(String("packet.version: '") + String(packet.version) + "'");
+    // DEBUG_V(String("packet.versionMajor: ") + String(packet.versionMajor));
+    // DEBUG_V(String("packet.versionMinor: ") + String(packet.versionMinor));
     // DEBUG_V ("Send Ping to " + destination.toString());
     udp.writeTo (packet.raw, sizeof (packet), destination, FPP_DISCOVERY_PORT);
 
@@ -727,6 +730,7 @@ void c_FPPDiscovery::BuildFseqResponse (String fname, c_FileMgr::FileId fseqFile
         } // while there are headers to process
     } // there are headers to process
 
+    // PrettyPrint(JsonData, "BuildFseqResponse");
     serializeJson (JsonData, resp);
     // DEBUG_V (String ("resp: ") + resp);
 
@@ -1066,6 +1070,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonArray jsonResponseIpAddresses = jsonResponse[F ("IPS")].to<JsonArray> ();
     jsonResponseIpAddresses.add(WiFi.localIP ().toString ());
 
+    // PrettyPrint(jsonResponse, "GetSysInfoJSON");
     // DEBUG_END;
 
 } // GetSysInfoJSON
