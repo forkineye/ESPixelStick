@@ -1070,7 +1070,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonArray jsonResponseIpAddresses = jsonResponse[F ("IPS")].to<JsonArray> ();
     jsonResponseIpAddresses.add(WiFi.localIP ().toString ());
 
-    PrettyPrint(jsonResponse, "GetSysInfoJSON");
+    // PrettyPrint(jsonResponse, "GetSysInfoJSON");
     // DEBUG_END;
 
 } // GetSysInfoJSON
