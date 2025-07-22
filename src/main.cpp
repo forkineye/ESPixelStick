@@ -83,7 +83,11 @@ static void _u0_putc(char c){
 ConstConfig_t ConstConfig =
 {
     "configFoundHere",
-    ESPS_VERSION,
+#ifdef ESPS_VERSION
+    STRING(ESPS_VERSION),
+#else
+    "4.x-dev",
+#endif // ESPS_VERSION,
     __DATE__ " - " __TIME__,
     "/config.json",
     1

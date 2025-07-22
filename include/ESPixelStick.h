@@ -83,10 +83,6 @@ bool    deserializeCore        (JsonObject & json);
 bool    dsDevice               (JsonObject & json);
 bool    dsNetwork              (JsonObject & json);
 
-#ifndef ESPS_VERSION
-    #define ESPS_VERSION "4.x-dev"
-#endif
-
 struct __attribute__((packed)) ConstConfig_t
 {
     const char key[32];
