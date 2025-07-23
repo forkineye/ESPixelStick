@@ -488,7 +488,7 @@ void c_WebMgr::init ()
              {WebMgr.FirmwareUpload (request, filename, index, data, len, final); }); //.setFilter (ON_STA_FILTER);
 
     	// URL's needed for FPP Connect fseq uploading and querying
-   	 	webServer.on ("/fpp", HTTP_GET,
+        webServer.on ("/api/sequence", HTTP_GET,
         	[](AsyncWebServerRequest* request)
         	{
         		FPPDiscovery.ProcessGET(request);
@@ -525,6 +525,7 @@ void c_WebMgr::init ()
                 FPPDiscovery.ProcessFPPJson(request);
             });
 
+/*
     	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/fppd", HTTP_GET, [](AsyncWebServerRequest* request)
             {
@@ -549,12 +550,12 @@ void c_WebMgr::init ()
                 FPPDiscovery.ProcessFPPDJson(request);
             });
 
-    	// URL's needed for FPP Connect fseq uploading and querying
+        // URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/proxies", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
-
+*/
         // must be last servestatic entry
     	webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
