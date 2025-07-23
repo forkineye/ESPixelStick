@@ -124,14 +124,16 @@ struct SystemDebugStats_t
     uint32_t CmdNotFound = 0;
 };
 SystemDebugStats_t SystemDebugStats;
-    IPAddress ipBcast;
+    IPAddress   ipBcast;
+    time_t      LastFppMasterMessageRcvTime = 0;
+#   define      TIME_TO_WAIT 30
 
 public:
     c_FPPDiscovery ();
     virtual ~c_FPPDiscovery() {}
 
     void begin ();
-
+    void Poll ();
     void ProcessFPPJson      (AsyncWebServerRequest* request);
     void ProcessFPPDJson     (AsyncWebServerRequest* request);
     void ProcessGET          (AsyncWebServerRequest* request);

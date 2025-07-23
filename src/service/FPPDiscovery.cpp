@@ -111,12 +111,12 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         }
 
         // DEBUG_V ();
-        ipBcast = WiFi.localIP ();
+        ipBcast = NetworkMgr.GetlocalIP ();
         ipBcast[3] = 255;
 
         // Try to listen to the broadcast port
         bool Failed = true;
-        if (!udp.listen (WiFi.localIP (), FPP_DISCOVERY_PORT))
+        if (!udp.listen (NetworkMgr.GetlocalIP (), FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to local messages")));
         }
@@ -303,6 +303,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             break;
         }
         // DEBUG_V ();
+
+        LastFppMasterMessageRcvTime = now();
 
         struct timeval tv;
         gettimeofday (&tv, NULL);
@@ -789,6 +791,8 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         {
             // DEBUG_V (emptyString);
 
+            LastFppMasterMessageRcvTime = now();
+
             String seq = path.substring (14);
             // DEBUG_V (String ("seq: ") + seq);
             if (seq.endsWith (F ("/meta")))
@@ -821,6 +825,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         }
         else if (path.startsWith (F ("/api/system/status")))
         {
+            LastFppMasterMessageRcvTime = now();
             String Response;
             {
 	            JsonDocument JsonDoc;
@@ -835,6 +840,7 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         }
         else if (path.startsWith (F ("/api/system/info")))
         {
+            LastFppMasterMessageRcvTime = now();
             String Response;
             {
 	            JsonDocument JsonDoc;
@@ -1517,5 +1523,32 @@ bool c_FPPDiscovery::AllowedToPlayRemoteFile()
     // DEBUG_END;
     return Response;
 } // AllowedToPlayRemoteFile
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::Poll ()
+{
+    ///DEBUG_START;
+
+    // are we supposed to be in contact with an FPP Master device?
+    if(AllowedToPlayRemoteFile())
+    {
+        ///DEBUG_V("have we waited long enough?");
+        time_t TimeSinceLastContact = abs(now() - LastFppMasterMessageRcvTime);
+        if(TIME_TO_WAIT <= TimeSinceLastContact)
+        {
+            // DEBUG_V("reset the timer");
+            LastFppMasterMessageRcvTime = now();
+            if(NetworkMgr.IsConnected())
+            {
+                // DEBUG_V("Try to resend our ping");
+                sendPingPacket (ipBcast);
+                sendPingPacket (MulticastAddress);
+                sendPingPacket (IPAddress(255, 255, 255, 255));
+            }
+        }
+    }
+
+    ///DEBUG_END;
+} // Poll
 
 c_FPPDiscovery FPPDiscovery;
