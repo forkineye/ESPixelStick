@@ -155,7 +155,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         udp.onPacket ([this](AsyncUDPPacket packet)
         {
-            DEBUG_V("Process UDP packet");
+            // DEBUG_V("Process UDP packet");
             ProcessReceivedUdpPacket(packet);
         });
 
