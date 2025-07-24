@@ -53,7 +53,7 @@ class c_FPPDiscovery
 private:
 
     AsyncUDP udp;
-    void ProcessReceivedUdpPacket (AsyncUDPPacket _packet);
+    void ProcessReceivedUdpPacket (AsyncUDPPacket & _packet);
     void ProcessSyncPacket (uint8_t action, String filename, float seconds_elapsed);
     void ProcessBlankPacket ();
     bool PlayingFile ();
@@ -140,7 +140,7 @@ public:
     void ProcessPOST         (AsyncWebServerRequest* request);
     void ProcessFile         (AsyncWebServerRequest* request, String filename, uint32_t index, uint8_t* data, uint32_t len, bool final, uint32_t contentLength = 0);
     void ProcessBody         (AsyncWebServerRequest* request, uint8_t* data, uint32_t len, uint32_t index, uint32_t total);
-    void sendPingPacket      (IPAddress destination = IPAddress(255, 255, 255, 255));
+    void sendPingPacket      (IPAddress destination);
     void PlayFile            (String & FileToPlay);
     void Enable              (void);
     void Disable             (void);
