@@ -116,6 +116,16 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         // Try to listen to the broadcast port
         bool Failed = true;
+        if (!udp.listen (FPP_DISCOVERY_PORT))
+        {
+            logcon (String (F ("FAILED to subscribed to discovery port messages")));
+        }
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to discovery messages on port:")) + String(FPP_DISCOVERY_PORT));
+        }
+
         if (!udp.listen (NetworkMgr.GetlocalIP (), FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to local messages")));
@@ -123,7 +133,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         else
         {
             Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to local messages on ")) + WiFi.localIP ().toString() + ":" + (FPP_DISCOVERY_PORT));
+            logcon (String (F ("FPPDiscovery subscribed to local messages on ")) + NetworkMgr.GetlocalIP ().toString() + ":" + (FPP_DISCOVERY_PORT));
         }
 
         if (!udp.listen (ipBcast, FPP_DISCOVERY_PORT))
@@ -134,6 +144,16 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         {
             Failed = false;
             logcon (String (F ("FPPDiscovery subscribed to broadcast messages on ")) + ipBcast.toString() + ":" + (FPP_DISCOVERY_PORT));
+        }
+
+        if (!udp.listen (IPAddress(IPADDR_BROADCAST), FPP_DISCOVERY_PORT))
+        {
+            logcon (String (F ("FAILED to subscribed to broadcast messages")));
+        }
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on ")) + IPAddress(IPADDR_BROADCAST).toString() + ":" + (FPP_DISCOVERY_PORT));
         }
 
         if (!udp.listenMulticast (MulticastAddress, FPP_DISCOVERY_PORT))
@@ -153,7 +173,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             break;
         }
 
-        udp.onPacket ([this](AsyncUDPPacket packet)
+        udp.onPacket ([this](AsyncUDPPacket & packet)
         {
             // DEBUG_V("Process UDP packet");
             ProcessReceivedUdpPacket(packet);
@@ -161,7 +181,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         sendPingPacket (ipBcast);
         sendPingPacket (MulticastAddress);
-        sendPingPacket (IPAddress(255, 255, 255, 255));
+        sendPingPacket (IPAddress(IPADDR_BROADCAST));
 
     } while (false);
 
@@ -273,7 +293,7 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
+void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket & UDPpacket)
 {
     // DEBUG_START;
 
@@ -380,11 +400,11 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
                         // DEBUG_V ("Broadcast Ping Response");
                         sendPingPacket (ipBcast);
                         sendPingPacket (MulticastAddress);
-                        sendPingPacket (IPAddress(255, 255, 255, 255));
+                        sendPingPacket (IPAddress(IPADDR_BROADCAST));
                     }
                     else
                     {
-                        // DEBUG_V ("Unicast Ping Response");
+                        // DEBUG_V (String("Unicast Ping Response to " ) + UDPpacket.remoteIP ().toString());
                         sendPingPacket (UDPpacket.remoteIP ());
                     }
                 }
@@ -1475,8 +1495,9 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
 
         if(NetworkMgr.IsConnected())
         {
-            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), IPAddress(255,255,255,255), FPP_DISCOVERY_PORT);
+            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), ipBcast, FPP_DISCOVERY_PORT);
             udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), MulticastAddress, FPP_DISCOVERY_PORT);
+            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), IPAddress(IPADDR_BROADCAST), FPP_DISCOVERY_PORT);
         }
     } while(false);
 
@@ -1543,7 +1564,7 @@ void c_FPPDiscovery::Poll ()
                 // DEBUG_V("Try to resend our ping");
                 sendPingPacket (ipBcast);
                 sendPingPacket (MulticastAddress);
-                sendPingPacket (IPAddress(255, 255, 255, 255));
+                sendPingPacket (IPAddress(IPADDR_BROADCAST));
             }
         }
     }
