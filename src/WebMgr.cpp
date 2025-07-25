@@ -23,7 +23,9 @@
 #include "input/InputMgr.hpp"
 #include "service/FPPDiscovery.h"
 #include "network/NetworkMgr.hpp"
-#include <ESPAsyncTCP.h>
+#ifdef ARDUINO_ARCH_ESP8266
+#   include <ESPAsyncTCP.h>
+#endif // def ARDUINO_ARCH_ESP8266
 
 #include <Int64String.h>
 
@@ -135,11 +137,13 @@ void c_WebMgr::init ()
 {
     if(!HasBeenInitialized)
     {
+#ifdef ARDUINO_ARCH_ESP8266
         {
             AsyncServer * async = new AsyncServer(HTTP_PORT);
             async->SetMaxNumOpenTcpSessions(2);
             delete async;
         }
+#endif // def ARDUINO_ARCH_ESP8266
         // DEBUG_START;
         // Add header for SVG plot support?
     	DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"),  "*");
