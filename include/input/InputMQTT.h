@@ -22,7 +22,7 @@
 #include "InputEffectEngine.hpp"
 #include "InputFPPRemotePlayItem.hpp"
 #include <Arduino.h>
-#include <AsyncMqttClient.h>
+#include <AsyncMqttClient.hpp>
 #include "input/InputFPPRemotePlayFile.hpp"
 #include "input/InputFPPRemotePlayList.hpp"
 
@@ -33,7 +33,7 @@ class c_InputMQTT : public c_InputCommon
       c_InputMQTT (
           c_InputMgr::e_InputChannelIds NewInputChannelId,
           c_InputMgr::e_InputType       NewChannelType,
-          uint32_t                        BufferSize);
+          uint32_t                      BufferSize);
 
       virtual ~c_InputMQTT ();
 
