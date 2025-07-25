@@ -301,6 +301,8 @@ class AsyncServer {
     void setNoDelay(bool nodelay);
     bool getNoDelay();
     uint8_t status();
+    void SetMaxNumOpenTcpSessions(uint32_t value);
+
 #ifdef DEBUG_MORE
     int getEventCount(size_t ee) const { return _event_count[ee];}
 #endif

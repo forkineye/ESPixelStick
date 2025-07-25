@@ -84,7 +84,7 @@ extern "C"{
 #include <tcp_axtls.h>
 
 static uint32_t NumOpenTcpSessions = 0;
-static uint32_t MaxNumOpenTcpSessions = 4;
+static uint32_t MaxNumOpenTcpSessions = -2; // effectivly no limit
 
 /*
   Async Client Error Return Tracker
@@ -1202,6 +1202,11 @@ uint8_t AsyncServer::status(){
   if (!_pcb)
     return 0;
   return _pcb->state;
+}
+
+void AsyncServer::SetMaxNumOpenTcpSessions(uint32_t value)
+{
+    MaxNumOpenTcpSessions = value;
 }
 
 err_t AsyncServer::_accept(tcp_pcb* pcb, err_t err){
