@@ -23,6 +23,7 @@
 #include "input/InputMgr.hpp"
 #include "service/FPPDiscovery.h"
 #include "network/NetworkMgr.hpp"
+#include <ESPAsyncTCP.h>
 
 #include <Int64String.h>
 
@@ -134,6 +135,11 @@ void c_WebMgr::init ()
 {
     if(!HasBeenInitialized)
     {
+        {
+            AsyncServer * async = new AsyncServer(HTTP_PORT);
+            async->SetMaxNumOpenTcpSessions(2);
+            delete async;
+        }
         // DEBUG_START;
         // Add header for SVG plot support?
     	DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"),  "*");
