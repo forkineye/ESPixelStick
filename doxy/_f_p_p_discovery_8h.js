@@ -18,5 +18,6 @@ var _f_p_p_discovery_8h =
     [ "SYNC_PKT_START", "_f_p_p_discovery_8h.html#ac64ba753956e709745b12c58256ac8c1", null ],
     [ "SYNC_PKT_STOP", "_f_p_p_discovery_8h.html#ad96fa67d0b7f13b700b9c1f10ff19287", null ],
     [ "SYNC_PKT_SYNC", "_f_p_p_discovery_8h.html#a046b44498ffb477914f36cd4a2cb2983", null ],
+    [ "TIME_TO_WAIT", "_f_p_p_discovery_8h.html#ad23b8bff8593e175ae225317ab8ac663", null ],
     [ "FPPDiscovery", "_f_p_p_discovery_8h.html#a0644373e30f47c5b5fd9c60013175cc3", null ]
 ];

@@ -9,7 +9,7 @@ var searchData=
   ['scheduleloadconfig_6',['ScheduleLoadConfig',['../classc___input_mgr.html#a47a66106086819f5c9edf6c94df9adc5',1,'c_InputMgr::ScheduleLoadConfig()'],['../classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79',1,'c_OutputMgr::ScheduleLoadConfig()'],['../main_8cpp.html#a23c1f5f645fafe9824320be65b1ae241',1,'ScheduleLoadConfig():&#160;main.cpp']]],
   ['sdcardisinstalled_7',['SdCardIsInstalled',['../classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e',1,'c_FileMgr']]],
   ['seeksdfile_8',['SeekSdFile',['../classc___file_mgr.html#a10e9e007f5a1c3d0ab9dcaf04944ebcf',1,'c_FileMgr']]],
-  ['sendpingpacket_9',['sendPingPacket',['../classc___f_p_p_discovery.html#aed2b9148b3ad82d03c7bab89cc2927e8',1,'c_FPPDiscovery']]],
+  ['sendpingpacket_9',['sendPingPacket',['../classc___f_p_p_discovery.html#a1d66c1d27377c6c737917521a2a4f752',1,'c_FPPDiscovery']]],
   ['serializecore_10',['serializeCore',['../main_8cpp.html#a03b64a11fdb210669823536c42932fd0',1,'serializeCore(bool pretty):&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#a64caf298db9b3dcc081633371db4a441',1,'serializeCore(bool pretty=false):&#160;main.cpp']]],
   ['set_5fpin_11',['set_pin',['../classc___output_uart.html#abf36c2b329517bb7f4c95350f8551086',1,'c_OutputUart']]],
   ['setall_12',['setAll',['../classc___input_effect_engine.html#af6c8141b2b5d63e69151cb0f07fe9281',1,'c_InputEffectEngine']]],
