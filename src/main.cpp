@@ -551,11 +551,13 @@ void loop()
     NetworkMgr.Poll ();
 
     // Poll output
-    OutputMgr.Poll();
+    OutputMgr.Poll ();
 
     WebMgr.Process ();
 
-    FileMgr.Poll();
+    FileMgr.Poll ();
+
+    FPPDiscovery.Poll ();
 
 #ifdef SUPPORT_SENSOR_DS18B20
     SensorDS18B20.Poll();

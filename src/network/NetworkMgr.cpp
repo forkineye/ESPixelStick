@@ -114,7 +114,7 @@ void c_NetworkMgr::GetConfig (JsonObject & json)
 //-----------------------------------------------------------------------------
 IPAddress c_NetworkMgr::GetlocalIP ()
 {
-    return WiFi.localIP ();
+    return WiFiDriver.getIpAddress();
 } // GetlocalIP
 
 //-----------------------------------------------------------------------------

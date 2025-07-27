@@ -111,17 +111,49 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         }
 
         // DEBUG_V ();
+        ipBcast = NetworkMgr.GetlocalIP ();
+        ipBcast[3] = 255;
 
         // Try to listen to the broadcast port
         bool Failed = true;
         if (!udp.listen (FPP_DISCOVERY_PORT))
+        {
+            logcon (String (F ("FAILED to subscribed to discovery port messages")));
+        }
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to discovery messages on port:")) + String(FPP_DISCOVERY_PORT));
+        }
+
+        if (!udp.listen (NetworkMgr.GetlocalIP (), FPP_DISCOVERY_PORT))
+        {
+            logcon (String (F ("FAILED to subscribed to local messages")));
+        }
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to local messages on ")) + NetworkMgr.GetlocalIP ().toString() + ":" + (FPP_DISCOVERY_PORT));
+        }
+
+        if (!udp.listen (ipBcast, FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to broadcast messages")));
         }
         else
         {
             Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on port: ")) + String(FPP_DISCOVERY_PORT));
+            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on ")) + ipBcast.toString() + ":" + (FPP_DISCOVERY_PORT));
+        }
+
+        if (!udp.listen (IPAddress(IPADDR_BROADCAST), FPP_DISCOVERY_PORT))
+        {
+            logcon (String (F ("FAILED to subscribed to broadcast messages")));
+        }
+        else
+        {
+            Failed = false;
+            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on ")) + IPAddress(IPADDR_BROADCAST).toString() + ":" + (FPP_DISCOVERY_PORT));
         }
 
         if (!udp.listenMulticast (MulticastAddress, FPP_DISCOVERY_PORT))
@@ -131,7 +163,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         else
         {
             Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to multicast: ")) + MulticastAddress.toString () + F(":") + String(FPP_DISCOVERY_PORT));
+            logcon (String (F ("FPPDiscovery subscribed to multicast messages on ")) + MulticastAddress.toString() + ":" + (FPP_DISCOVERY_PORT));
         }
 
         // did at least one binding work?
@@ -141,9 +173,15 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             break;
         }
 
-        udp.onPacket (std::bind (&c_FPPDiscovery::ProcessReceivedUdpPacket, this, std::placeholders::_1));
+        udp.onPacket ([this](AsyncUDPPacket & packet)
+        {
+            // DEBUG_V("Process UDP packet");
+            ProcessReceivedUdpPacket(packet);
+        });
 
-        sendPingPacket ();
+        sendPingPacket (ipBcast);
+        sendPingPacket (MulticastAddress);
+        sendPingPacket (IPAddress(IPADDR_BROADCAST));
 
     } while (false);
 
@@ -255,7 +293,7 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
-void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
+void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket & UDPpacket)
 {
     // DEBUG_START;
 
@@ -285,6 +323,8 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
             break;
         }
         // DEBUG_V ();
+
+        LastFppMasterMessageRcvTime = now();
 
         struct timeval tv;
         gettimeofday (&tv, NULL);
@@ -358,11 +398,13 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket UDPpacket)
                     if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
                     {
                         // DEBUG_V ("Broadcast Ping Response");
-                        sendPingPacket ();
+                        sendPingPacket (ipBcast);
+                        sendPingPacket (MulticastAddress);
+                        sendPingPacket (IPAddress(IPADDR_BROADCAST));
                     }
                     else
                     {
-                        // DEBUG_V ("Unicast Ping Response");
+                        // DEBUG_V (String("Unicast Ping Response to " ) + UDPpacket.remoteIP ().toString());
                         sendPingPacket (UDPpacket.remoteIP ());
                     }
                 }
@@ -527,6 +569,8 @@ bool c_FPPDiscovery::PlayingFile ()
 void c_FPPDiscovery::sendPingPacket (IPAddress destination)
 {
     // DEBUG_START;
+
+    // DEBUG_V(String("destination: ") + destination.toString());
 
     FPPPingPacket packet;
     memset (packet.raw, 0, sizeof (packet));
@@ -767,6 +811,8 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         {
             // DEBUG_V (emptyString);
 
+            LastFppMasterMessageRcvTime = now();
+
             String seq = path.substring (14);
             // DEBUG_V (String ("seq: ") + seq);
             if (seq.endsWith (F ("/meta")))
@@ -799,13 +845,14 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         }
         else if (path.startsWith (F ("/api/system/status")))
         {
+            LastFppMasterMessageRcvTime = now();
             String Response;
             {
 	            JsonDocument JsonDoc;
 	            JsonObject JsonData = JsonDoc.to<JsonObject> ();
 	            GetStatusJSON(JsonData, true);
 	            serializeJson (JsonDoc, Response);
-                // PrettyPrint(JsonDoc, "ProcessGET");
+                // PrettyPrint(JsonDoc, "ProcessGET/api/system/status");
 			}
             // DEBUG_V (String ("JsonDoc: ") + Response);
             request->send (200, CN_applicationSLASHjson, Response);
@@ -813,11 +860,13 @@ void c_FPPDiscovery::ProcessGET (AsyncWebServerRequest* request)
         }
         else if (path.startsWith (F ("/api/system/info")))
         {
+            LastFppMasterMessageRcvTime = now();
             String Response;
             {
 	            JsonDocument JsonDoc;
 	            JsonObject JsonData = JsonDoc.to<JsonObject> ();
 	            GetSysInfoJSON(JsonData);
+                // PrettyPrint(JsonDoc, "ProcessGET/api/system/info");
 	            serializeJson (JsonDoc, Response);
 			}
             // DEBUG_V (String ("JsonDoc: ") + Response);
@@ -1446,8 +1495,9 @@ void c_FPPDiscovery::GenerateFppSyncMsg(uint8_t Action, const String & FileName,
 
         if(NetworkMgr.IsConnected())
         {
-            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), IPAddress(255,255,255,255), FPP_DISCOVERY_PORT);
+            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), ipBcast, FPP_DISCOVERY_PORT);
             udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), MulticastAddress, FPP_DISCOVERY_PORT);
+            udp.writeTo (SyncPacket.raw, sizeof (SyncPacket), IPAddress(IPADDR_BROADCAST), FPP_DISCOVERY_PORT);
         }
     } while(false);
 
@@ -1494,5 +1544,32 @@ bool c_FPPDiscovery::AllowedToPlayRemoteFile()
     // DEBUG_END;
     return Response;
 } // AllowedToPlayRemoteFile
+
+//-----------------------------------------------------------------------------
+void c_FPPDiscovery::Poll ()
+{
+    ///DEBUG_START;
+
+    // are we supposed to be in contact with an FPP Master device?
+    if(AllowedToPlayRemoteFile())
+    {
+        ///DEBUG_V("have we waited long enough?");
+        time_t TimeSinceLastContact = abs(now() - LastFppMasterMessageRcvTime);
+        if(TIME_TO_WAIT <= TimeSinceLastContact)
+        {
+            // DEBUG_V("reset the timer");
+            LastFppMasterMessageRcvTime = now();
+            if(NetworkMgr.IsConnected())
+            {
+                // DEBUG_V("Try to resend our ping");
+                sendPingPacket (ipBcast);
+                sendPingPacket (MulticastAddress);
+                sendPingPacket (IPAddress(IPADDR_BROADCAST));
+            }
+        }
+    }
+
+    ///DEBUG_END;
+} // Poll
 
 c_FPPDiscovery FPPDiscovery;

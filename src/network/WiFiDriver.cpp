@@ -859,9 +859,10 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
             strcpy(pWiFiDriver->ap_ssid, (String(F("ESPixelStick-")) + Hostname).c_str());
         }
         // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
+        WiFi.softAPConfig(IPAddress(192,168,4,1), IPAddress(192,168,4,1), IPAddress(255,255,255,0));
         WiFi.softAP (pWiFiDriver->ap_ssid, pWiFiDriver->ap_passphrase, int(pWiFiDriver->ap_channelNumber));
 
-        pWiFiDriver->setIpAddress (WiFi.localIP ());
+        pWiFiDriver->setIpAddress (IPAddress(192,168,4,1));
         pWiFiDriver->setIpSubNetMask (WiFi.subnetMask ());
 
         logcon (String (F ("WiFi SOFTAP:       ssid: '")) + String(pWiFiDriver->ap_ssid));

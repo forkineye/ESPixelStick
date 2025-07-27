@@ -23,6 +23,9 @@
 #include "input/InputMgr.hpp"
 #include "service/FPPDiscovery.h"
 #include "network/NetworkMgr.hpp"
+#ifdef ARDUINO_ARCH_ESP8266
+#   include <ESPAsyncTCP.h>
+#endif // def ARDUINO_ARCH_ESP8266
 
 #include <Int64String.h>
 
@@ -134,6 +137,13 @@ void c_WebMgr::init ()
 {
     if(!HasBeenInitialized)
     {
+#ifdef ARDUINO_ARCH_ESP8266
+        {
+            AsyncServer * async = new AsyncServer(HTTP_PORT);
+            async->SetMaxNumOpenTcpSessions(2);
+            delete async;
+        }
+#endif // def ARDUINO_ARCH_ESP8266
         // DEBUG_START;
         // Add header for SVG plot support?
     	DefaultHeaders::Instance ().addHeader (F ("Access-Control-Allow-Origin"),  "*");
@@ -488,7 +498,7 @@ void c_WebMgr::init ()
              {WebMgr.FirmwareUpload (request, filename, index, data, len, final); }); //.setFilter (ON_STA_FILTER);
 
     	// URL's needed for FPP Connect fseq uploading and querying
-   	 	webServer.on ("/fpp", HTTP_GET,
+        webServer.on ("/api/sequence", HTTP_GET,
         	[](AsyncWebServerRequest* request)
         	{
         		FPPDiscovery.ProcessGET(request);
@@ -525,6 +535,7 @@ void c_WebMgr::init ()
                 FPPDiscovery.ProcessFPPJson(request);
             });
 
+/*
     	// URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/fppd", HTTP_GET, [](AsyncWebServerRequest* request)
             {
@@ -549,12 +560,12 @@ void c_WebMgr::init ()
                 FPPDiscovery.ProcessFPPDJson(request);
             });
 
-    	// URL's needed for FPP Connect fseq uploading and querying
+        // URL's needed for FPP Connect fseq uploading and querying
     	webServer.on ("/api/proxies", HTTP_GET, [](AsyncWebServerRequest* request)
             {
                 FPPDiscovery.ProcessFPPDJson(request);
             });
-
+*/
         // must be last servestatic entry
     	webServer.serveStatic ("/", LittleFS, "/www/").setDefaultFile ("index.html");
 
