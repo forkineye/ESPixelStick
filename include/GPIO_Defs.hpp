@@ -98,6 +98,8 @@ typedef enum
 #   include "platforms/GPIO_Defs_ESP32_Olimex_Gateway.hpp"
 #elif defined (BOARD_ESP32_QUINLED_QUAD_ETH)
 #   include "platforms/GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp"
+#elif defined (BOARD_ESP32_QUINLED_QUAD_ETH_P5)
+#   include "platforms/GPIO_Defs_ESP32_QUINLED_QUAD_ETH_P5.hpp"
 #elif defined (BOARD_ESP32_QUINLED_QUAD_AE_PLUS)
 #   include "platforms/GPIO_Defs_ESP32_QUINLED_QUAD_AE_Plus.hpp"
 #elif defined (BOARD_ESP32_QUINLED_QUAD_AE_PLUS_8)

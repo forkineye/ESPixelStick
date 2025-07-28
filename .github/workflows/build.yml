@@ -61,6 +61,9 @@ jobs:
           # QuinLed QUAD Eth
           - target: "esp32_quinled_quad_eth"
             chip: "esp32"
+          # QuinLed QUAD Eth 5 Port
+          - target: "esp32_quinled_quad_eth_p5"
+            chip: "esp32"
           # QuinLed UNO
           - target: "esp32_quinled_uno"
             chip: "esp32"
