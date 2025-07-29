@@ -1,6 +1,6 @@
 #pragma once
 /*
- * GPIO_Defs_ESP32_QUINLED_QUAD.hpp - Output Management class
+ * GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
  * Copyright (c) 2021 Shelby Merrick
