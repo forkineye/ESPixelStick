@@ -1,6 +1,6 @@
 #pragma once
 /*
- * GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp - Output Management class
+ * GPIO_Defs_ESP32_QUINLED_QUAD_ETH_P5.hpp - Output Management class
  *
  * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
  * Copyright (c) 2021 Shelby Merrick
@@ -21,14 +21,12 @@
 #define SUPPORT_ETHERNET
 
 //Output Manager
-#define DEFAULT_RMT_0_GPIO     gpio_num_t::GPIO_NUM_16
-#define DEFAULT_RMT_2_GPIO     gpio_num_t::GPIO_NUM_3
+#define DEFAULT_RMT_0_GPIO      gpio_num_t::GPIO_NUM_16
+#define DEFAULT_RMT_2_GPIO      gpio_num_t::GPIO_NUM_3
 
 #define DEFAULT_RMT_3_GPIO      gpio_num_t::GPIO_NUM_1
 #define DEFAULT_RMT_4_GPIO      gpio_num_t::GPIO_NUM_4
-
-//Power relay output over Q1 or Q1R
-#define DEFAULT_RELAY_GPIO      gpio_num_t::GPIO_NUM_15
+#define DEFAULT_RMT_5_GPIO      gpio_num_t::GPIO_NUM_15
 
 //I2c over Q3 and Q4 (might require HW pullups to be installed)
 #define DEFAULT_I2C_SDA         gpio_num_t::GPIO_NUM_2
