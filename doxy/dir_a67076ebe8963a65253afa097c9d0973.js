@@ -23,6 +23,8 @@ var dir_a67076ebe8963a65253afa097c9d0973 =
     [ "GPIO_Defs_ESP32_QUINLED_QUAD_AE_Plus.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___a_e___plus_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___a_e___plus_8hpp" ],
     [ "GPIO_Defs_ESP32_QUINLED_QUAD_AE_Plus_8.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___a_e___plus__8_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___a_e___plus__8_8hpp" ],
     [ "GPIO_Defs_ESP32_QUINLED_QUAD_ETH.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp" ],
+    [ "GPIO_Defs_ESP32_QUINLED_QUAD_ETH_P5.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h___p5_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h___p5_8hpp" ],
+    [ "GPIO_Defs_ESP32_QUINLED_QUAD_P5.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___p5_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___p5_8hpp" ],
     [ "GPIO_Defs_ESP32_QUINLED_UNO.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o_8hpp" ],
     [ "GPIO_Defs_ESP32_QUINLED_UNO_AE_Plus.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___a_e___plus_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___a_e___plus_8hpp" ],
     [ "GPIO_Defs_ESP32_QUINLED_UNO_ESPSV3.hpp", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_s_p_s_v3_8hpp.html", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_s_p_s_v3_8hpp" ],
