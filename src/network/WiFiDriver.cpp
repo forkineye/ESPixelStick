@@ -128,6 +128,9 @@ void c_WiFiDriver::Begin ()
     // save the pointer to the config
     // config = NewConfig;
 
+    // DEBUG_V("      default_ssid: '" + default_ssid + "'");
+    // DEBUG_V("default_passphrase: '" + default_passphrase + "'");
+
     if (FileMgr.SdCardIsInstalled())
     {
         JsonDocument jsonConfigDoc;
@@ -787,7 +790,11 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
         pWiFiDriver->SetFsmState (this);
         pWiFiDriver->AnnounceState ();
         pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout (), false);
+        // DEBUG_V("      default_ssid: '" + default_ssid + "'");
+        // DEBUG_V("default_passphrase: '" + default_passphrase + "'");
         pWiFiDriver->connectWifi (default_ssid, default_passphrase);
+        // DEBUG_V("      default_ssid: '" + default_ssid + "'");
+        // DEBUG_V("default_passphrase: '" + default_passphrase + "'");
     }
     else
     {
