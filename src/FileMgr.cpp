@@ -1960,7 +1960,7 @@ bool c_FileMgr::handleFileUpload (
     bool response = false;
 
     // try to keep a reboot from causing a corrupted file
-    DelayReboot(10000);
+    // DelayReboot(10000);
 
     // DEBUG_V (String ("filename: ") + filename);
     // DEBUG_V (String ("   index: ") + String (index));
@@ -2058,8 +2058,8 @@ bool c_FileMgr::handleFileUpload (
         // DEBUG_V(String("     Got: ") + String(GetSdFileSize(fsUploadFileName)));
         if(IsCompressed(fsUploadFileName))
         {
-            String reason = F("Reboot after receiving a compressed file");
-            RequestReboot(reason, 100000);
+            // String reason = F("Reboot after receiving a compressed file");
+            // RequestReboot(reason, 100000);
         }
 
         memset(fsUploadFileName, 0x0, sizeof(fsUploadFileName));
