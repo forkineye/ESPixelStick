@@ -81,5 +81,6 @@ class c_InputArtnet : public c_InputCommon
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
     virtual void Process () {}                                       ///< Call from loop(),  renders Input data
+    void ClearStatistics ();
 
-};
+  }; // c_InputArtnet

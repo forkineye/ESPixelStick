@@ -131,6 +131,25 @@ void c_InputE131::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputE131::ClearStatistics ()
+{
+    // DEBUG_START;
+
+
+    pE131->stats.num_packets = 0;
+    // DEBUG_V ("");
+
+    for (auto & CurrentUniverse : UniverseArray)
+    {
+
+        CurrentUniverse.SequenceErrorCounter = 0;
+    }
+
+    // DEBUG_END;
+
+} // ClearStatistics
+
+//-----------------------------------------------------------------------------
 void c_InputE131::Process ()
 {
     ///  // DEBUG_START;

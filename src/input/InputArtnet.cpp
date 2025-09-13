@@ -113,6 +113,25 @@ void c_InputArtnet::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputArtnet::ClearStatistics ()
+{
+    // DEBUG_START;
+
+    num_packets = 0;
+    packet_errors = 0;
+    PollCounter = 0;
+
+    for (auto & CurrentUniverse : UniverseArray)
+    {
+        CurrentUniverse.SequenceErrorCounter = 0;
+        CurrentUniverse.num_packets = 0;
+    }
+
+    // DEBUG_END;
+
+} // GetStatus
+
+//-----------------------------------------------------------------------------
 void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
                                 uint32_t  length,
                                 uint8_t   SequenceNumber,

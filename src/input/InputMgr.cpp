@@ -393,6 +393,28 @@ void c_InputMgr::GetStatus (JsonObject& jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputMgr::ClearStatistics ()
+{
+    // DEBUG_START;
+    logcon(F("Process reset statistics request"));
+
+    ExternalInput.ClearStatistics ();
+
+    for (auto & CurrentInput : InputChannelDrivers)
+    {
+        if(!CurrentInput.DriverInUse)
+        {
+            continue;
+        }
+
+        ((c_InputCommon*)(CurrentInput.InputDriver))->ClearStatistics ();
+        // DEBUG_V("");
+    }
+
+    // DEBUG_END;
+} // GetStatus
+
+//-----------------------------------------------------------------------------
 /* Determine whether the input type is allowed on the desired input channel
 *
     needs

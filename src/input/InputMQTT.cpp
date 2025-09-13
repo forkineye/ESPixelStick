@@ -142,6 +142,15 @@ void c_InputMQTT::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputMQTT::ClearStatistics ()
+{
+    // DEBUG_START;
+
+    // DEBUG_END;
+
+} // ClearStatistics
+
+//-----------------------------------------------------------------------------
 void c_InputMQTT::Process ()
 {
     // DEBUG_START;

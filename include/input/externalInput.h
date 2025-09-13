@@ -47,8 +47,9 @@ public:
 	void         GetStatistics     (JsonObject JsonData);
 	void         ProcessConfig     (JsonObject JsonData);
 	bool		 IsEnabled ()      { return Enabled; }
-	uint32_t	 GetTriggerChannel() { return TriggerChannel; }
+	uint32_t	 GetTriggerChannel () { return TriggerChannel; }
 	void         GetDriverName     (String & Name) { Name = "ExtInput"; }
+    void         ClearStatistics   (void) {}
 
 protected:
 

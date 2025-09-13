@@ -265,6 +265,10 @@ $(function ()
         $('#DeviceConfigSave').prop("disabled", ValidateConfigFields($('#config input')));
     }));
 
+    $('#btn_clearstatistics').on("click", (function () {
+        SendCommand('clearstatistics');
+    }));
+
     $('#DeviceConfigSave').on("click", (function () {
         submitDeviceConfig();
     }));

@@ -145,6 +145,7 @@ public:
     void Enable              (void);
     void Disable             (void);
     void GetStatus           (JsonObject& jsonStatus);
+    void ClearStatistics     (void);
     void NetworkStateChanged (bool NewNetworkState);
     void SetOperationalState (bool ActiveFlag);
     bool SetConfig           (JsonObject& jsonConfig);

@@ -77,4 +77,5 @@ class c_InputE131 : public c_InputCommon
     void NetworkStateChanged (bool IsConnected); // used by poorly designed rx functions
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
     void ProcessIncomingE131Data (e131_packet_t *);
+    void ClearStatistics (void);
 };

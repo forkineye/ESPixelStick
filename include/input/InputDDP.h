@@ -142,5 +142,6 @@ public:
     void GetDriverName (String& sDriverName) { sDriverName = "DDP"; } ///< get the name for the instantiated driver
     void SetBufferInfo (uint32_t BufferSize);
     bool isShutDownRebootNeeded () { return HasBeenInitialized; }
+    void ClearStatistics (void);
 
 };
