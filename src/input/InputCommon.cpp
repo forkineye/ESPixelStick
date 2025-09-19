@@ -45,3 +45,12 @@ c_InputCommon::~c_InputCommon ()
     // DEBUG_END;
 
 } // ~c_InputMgr
+
+//----------------------------------------------------------------------------
+ void  c_InputCommon::ClearStatistics (void)
+ {
+    // DEBUG_START;
+
+    
+    // DEBUG_END;
+ } // ClearStatistics

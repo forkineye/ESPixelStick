@@ -66,6 +66,7 @@ public:
     virtual bool         DriverIsSendingIntensityData() {return false;}
     virtual uint32_t     GetFrameTimeMs() {return 1 + (ActualFrameDurationMicroSec / 1000); }
     bool                 IsPaused() {return Paused;}
+    virtual void         ClearStatistics (void);
 
 protected:
 

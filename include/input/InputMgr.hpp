@@ -67,6 +67,7 @@ public:
     bool BlankTimerHasExpired (e_InputChannelIds Selector) { return (BlankEndTime[int(Selector)].IsExpired()); }
     void ProcessButtonActions (c_ExternalInput::InputValue_t value);
     bool RemotePlayEnabled    (void);
+    void ClearStatistics      (void);
 
     enum e_InputType
     {

@@ -42,6 +42,7 @@ class c_InputMQTT : public c_InputCommon
       bool SetConfig (JsonObject& jsonConfig); ///< Set a new config in the driver
       void GetConfig (JsonObject& jsonConfig); ///< Get the current config used by the driver
       void GetStatus (JsonObject& jsonStatus);
+      void ClearStatistics ();
       void Process   ();
       void GetDriverName (String& sDriverName) { sDriverName = "MQTT"; } ///< get the name for the instantiated driver
       void SetBufferInfo (uint32_t BufferSize);

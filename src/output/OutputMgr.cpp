@@ -493,6 +493,25 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_OutputMgr::ClearStatistics ()
+{
+    // DEBUG_START;
+
+#if defined(ARDUINO_ARCH_ESP32)
+    // PollCount = 0;
+#endif // defined(ARDUINO_ARCH_ESP32)
+
+    for (DriverInfo_t & CurrentOutput : OutputChannelDrivers)
+    {
+        // DEBUG_V ();
+        ((c_OutputCommon*)CurrentOutput.OutputDriver)->ClearStatistics();
+        // DEBUG_V ();
+    }
+
+    // DEBUG_END;
+} // GetStatus
+
+//-----------------------------------------------------------------------------
 /* Create an instance of the desired output type in the desired channel
 *
 * WARNING:  This function assumes there is a driver running in the identified

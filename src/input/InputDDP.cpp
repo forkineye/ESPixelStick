@@ -107,6 +107,22 @@ void c_InputDDP::GetStatus (JsonObject& jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputDDP::ClearStatistics ()
+{
+    // DEBUG_START;
+
+    // DEBUG_V ("");
+
+    stats.packetsReceived = 0;
+    stats.bytesReceived = 0;
+    stats.errors = 0;
+    lastError = emptyString;
+
+    // DEBUG_END;
+
+} // ClearStatistics
+
+//-----------------------------------------------------------------------------
 bool c_InputDDP::SetConfig (JsonObject& jsonConfig)
 {
     // DEBUG_START;

@@ -267,6 +267,25 @@ void c_WebMgr::init ()
             }
         });
 
+    	webServer.on ("/clearstatistics", HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
+        {
+            // DEBUG_V("clearstatistics - start")
+            if(HTTP_OPTIONS == request->method())
+            {
+                request->send (200);
+            }
+            else
+            {
+                // DEBUG_V ("clearstatistics");
+                // DEBUG_V(String("url: ") + request->url ());
+                InputMgr.ClearStatistics();
+                OutputMgr.ClearStatistics();
+
+                request->send (200, CN_textSLASHplain);
+            }
+            // DEBUG_V ("clearstatistics - Done");
+        });
+
         // ping handler
     	webServer.on ("/XP", HTTP_GET | HTTP_POST | HTTP_OPTIONS, [](AsyncWebServerRequest* request)
         {

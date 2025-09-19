@@ -155,3 +155,14 @@ bool c_OutputCommon::ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleR
     // DEBUG_END;
     return response;
 } // ValidateGpio
+
+//----------------------------------------------------------------------------
+ void  c_OutputCommon::ClearStatistics (void)
+ {
+    // DEBUG_START;
+
+    FrameCount = 0;
+    
+    // DEBUG_END;
+ } // ClearStatistics
+

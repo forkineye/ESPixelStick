@@ -117,6 +117,17 @@ void c_InputFPPRemotePlayList::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayList::ClearStatistics ()
+{
+    // DEBUG_START;
+
+    pCurrentFsmState->ClearStatistics ();
+
+    // DEBUG_END;
+
+} // ClearStatistics
+
+//-----------------------------------------------------------------------------
 bool c_InputFPPRemotePlayList::ProcessPlayListEntry ()
 {
     // DEBUG_START;

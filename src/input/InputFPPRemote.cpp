@@ -149,6 +149,35 @@ void c_InputFPPRemote::GetStatus (JsonObject& jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputFPPRemote::ClearStatistics ()
+{
+    // DEBUG_START;
+
+    if (PlayingRemoteFile ())
+    {
+        // DEBUG_V();
+        FPPDiscovery.ClearStatistics ();
+    }
+
+    else if (PlayingFile ())
+    {
+        FilePlayCount = 0;
+        if(pInputFPPRemotePlayItem)
+        {
+            pInputFPPRemotePlayItem->ClearStatistics ();
+        }
+    }
+
+    else
+    {
+        // DEBUG_V ("Not Playing");
+    }
+
+    // DEBUG_END;
+
+} // ClearStatistics
+
+//-----------------------------------------------------------------------------
 void c_InputFPPRemote::PlayNextFile ()
 {
     // DEBUG_START;

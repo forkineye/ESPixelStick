@@ -185,6 +185,24 @@ void c_InputFPPRemotePlayFile::GetStatus (JsonObject& JsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayFile::ClearStatistics ()
+{
+    // xDEBUG_START;
+
+    // NOTE:
+
+    SyncControl.SyncCount = 0;
+    SyncControl.SyncAdjustmentCount = 0;
+
+    PlayedFileCount = 0;
+
+    memset(LastFailedPlayStatusMsg, 0x0, sizeof(LastFailedPlayStatusMsg));
+
+    // xDEBUG_END;
+
+} // ClearStatistics
+
+//-----------------------------------------------------------------------------
 void c_InputFPPRemotePlayFile::UpdateElapsedPlayTimeMS ()
 {
     // noInterrupts ();

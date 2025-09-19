@@ -39,6 +39,7 @@ public:
     virtual void Sync (String& FileName, float SecondsElapsed);
     virtual bool Poll ();
     virtual void GetStatus (JsonObject & jsonStatus);
+    virtual void ClearStatistics ();
     virtual bool IsIdle () { return (pCurrentFsmState == &fsm_PlayFile_state_Idle_imp); }
 
 #ifdef ARDUINO_ARCH_ESP32

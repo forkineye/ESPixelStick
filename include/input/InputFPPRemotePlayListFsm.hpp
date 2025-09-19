@@ -42,6 +42,7 @@ public:
     virtual void Stop (void) = 0;
     virtual bool Sync (String&, float) { return false; };
     virtual void GetStatus (JsonObject& jsonStatus) = 0;
+    virtual void ClearStatistics () {}
     void GetDriverName (String& Name) { Name = "InputMgr"; }
 
 protected:

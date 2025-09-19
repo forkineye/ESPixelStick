@@ -293,6 +293,29 @@ void c_FPPDiscovery::GetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //-----------------------------------------------------------------------------
+void c_FPPDiscovery::ClearStatistics ()
+{
+    // DEBUG_START;
+
+    if (IsEnabled)
+    {
+#ifdef FPP_DEBUG_ENABLED
+        memset (&MultiSyncStats, 0x0, sizeof(MultiSyncStats));
+        memset (&SystemDebugStats, 0x0, sizeof(SystemDebugStats));
+#endif // def FPP_DEBUG_ENABLED
+
+        // DEBUG_V ("Is Enabled");
+        if (AllowedToPlayRemoteFile())
+        {
+            // DEBUG_V();
+            InputFPPRemote->ClearStatistics ();
+        }
+    }
+
+    // DEBUG_END;
+} // ClearStatistics
+
+//-----------------------------------------------------------------------------
 void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket & UDPpacket)
 {
     // DEBUG_START;

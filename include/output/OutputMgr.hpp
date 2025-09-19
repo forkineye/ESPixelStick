@@ -62,6 +62,7 @@ public:
     void      ClearBuffer       ();
     void      TaskPoll          ();
     void      RelayUpdate       (uint8_t RelayId, String & NewValue, String & Response);
+    void      ClearStatistics   (void);
 
     // handles to determine which output channel we are dealing with
     enum e_OutputChannelIds

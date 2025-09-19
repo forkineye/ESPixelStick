@@ -114,3 +114,14 @@ void c_InputFPPRemotePlayEffect::GetStatus (JsonObject & jsonStatus)
     // DEBUG_END;
 
 } // GetStatus
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemotePlayEffect::ClearStatistics ()
+{
+    // DEBUG_START;
+
+    pCurrentFsmState->ClearStatistics ();
+
+    // DEBUG_END;
+
+} // ClearStatistics
