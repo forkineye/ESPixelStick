@@ -2,6 +2,7 @@ var classc___input_f_p_p_remote_play_list =
 [
     [ "c_InputFPPRemotePlayList", "classc___input_f_p_p_remote_play_list.html#aa15a2509664914994d710aaef6a406dc", null ],
     [ "~c_InputFPPRemotePlayList", "classc___input_f_p_p_remote_play_list.html#ac160e1d397d20ad38e3b5216cbb9ab81", null ],
+    [ "ClearStatistics", "classc___input_f_p_p_remote_play_list.html#a98f6d971605beb160388a751b7160bff", null ],
     [ "GetStatus", "classc___input_f_p_p_remote_play_list.html#aa1b7a712f2c4b3ea3278aa85a86d16cd", null ],
     [ "IsIdle", "classc___input_f_p_p_remote_play_list.html#a42caa09112959030b8bd4c12bcbf8219", null ],
     [ "Poll", "classc___input_f_p_p_remote_play_list.html#a16b9241330bbf4090aba25d380d9b506", null ],

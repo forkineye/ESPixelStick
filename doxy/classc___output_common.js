@@ -7,6 +7,7 @@ var classc___output_common =
     [ "BaseGetStatus", "classc___output_common.html#a8f58ca24d1d37983afab81c9eebf6a85", null ],
     [ "Begin", "classc___output_common.html#a23ef97415464d74fe780256b6680bfb1", null ],
     [ "canRefresh", "classc___output_common.html#a571adc45a6ceab09aaad36802507cc69", null ],
+    [ "ClearStatistics", "classc___output_common.html#a509f339ec701c5554a9ab1a7c169f915", null ],
     [ "DriverIsSendingIntensityData", "classc___output_common.html#a6b5a27c4548473466e0832698401a489", null ],
     [ "GetBufferAddress", "classc___output_common.html#a83f1ea04a95de1af5ad0e5a5130bdcad", null ],
     [ "GetBufferUsedSize", "classc___output_common.html#ac7853ec4ed8c3a173cfd3110b0838585", null ],

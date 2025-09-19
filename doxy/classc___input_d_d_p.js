@@ -13,6 +13,7 @@ var classc___input_d_d_p =
     [ "__attribute__", "classc___input_d_d_p.html#ae592d5692a84ab5534b38222152a616c", null ],
     [ "__attribute__", "classc___input_d_d_p.html#a03fabba35c34683ec4a5c2ea90d833bf", null ],
     [ "Begin", "classc___input_d_d_p.html#aff1d43d659dccea70ca4204bd477508b", null ],
+    [ "ClearStatistics", "classc___input_d_d_p.html#a097a973404c13a88f144d4ea6006064b", null ],
     [ "GetConfig", "classc___input_d_d_p.html#a67c310af3fef4c92525bbb770956d7b8", null ],
     [ "GetDriverName", "classc___input_d_d_p.html#a3163cf5eae1b038b9c9595dfa5d99295", null ],
     [ "GetStatus", "classc___input_d_d_p.html#a566ec949bf0b2c581cf8fd796d964ebd", null ],

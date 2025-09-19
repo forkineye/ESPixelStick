@@ -5,6 +5,7 @@ var classc___input_f_p_p_remote_play_file =
     [ "~c_InputFPPRemotePlayFile", "classc___input_f_p_p_remote_play_file.html#af23b055872e43550e0beb3eb3380ac47", null ],
     [ "CalculateFrameId", "classc___input_f_p_p_remote_play_file.html#ab51a277842369af49e1d24a815e0dced", null ],
     [ "ClearControlFileInfo", "classc___input_f_p_p_remote_play_file.html#a6889af64a14a8973e8808ad6822b01d1", null ],
+    [ "ClearStatistics", "classc___input_f_p_p_remote_play_file.html#ad7b459c331c77650b11f5cf7b92ff695", null ],
     [ "GetStatus", "classc___input_f_p_p_remote_play_file.html#a3817166d37aee9933378edc4a8eb5500", null ],
     [ "IsIdle", "classc___input_f_p_p_remote_play_file.html#a832119422e2b13fc06059dd73215cf75", null ],
     [ "ParseFseqFile", "classc___input_f_p_p_remote_play_file.html#a588e1c419a88dc3536d9867f25f074cd", null ],

@@ -4,6 +4,7 @@ var classc___input_f_p_p_remote_play_item =
     [ "c_InputFPPRemotePlayItem", "classc___input_f_p_p_remote_play_item.html#aec0b936da6295cacd8927e743adf3f29", null ],
     [ "~c_InputFPPRemotePlayItem", "classc___input_f_p_p_remote_play_item.html#a5f09aac495135e5edea106fc79e96604", null ],
     [ "ClearFileNames", "classc___input_f_p_p_remote_play_item.html#ac3dab9ea5afed487d175d3dca6dc7b23", null ],
+    [ "ClearStatistics", "classc___input_f_p_p_remote_play_item.html#adc02c64aa126e3ec303376210277d862", null ],
     [ "GetDriverName", "classc___input_f_p_p_remote_play_item.html#ad1d6bb590f3bb28893d7b5c8fe6d7661", null ],
     [ "GetFileName", "classc___input_f_p_p_remote_play_item.html#a18aa37d56d43b19d1b5801a7a304e06c", null ],
     [ "GetInputChannelId", "classc___input_f_p_p_remote_play_item.html#a6e0e0d5ded2fbb53fc654fe43afcd207", null ],

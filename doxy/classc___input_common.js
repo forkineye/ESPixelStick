@@ -3,6 +3,7 @@ var classc___input_common =
     [ "c_InputCommon", "classc___input_common.html#a9b5ac2c3fadc9eb69204adc43e595176", null ],
     [ "~c_InputCommon", "classc___input_common.html#aa12aa6b031d2b37ed2009b56f8bf6bc4", null ],
     [ "Begin", "classc___input_common.html#ab048d5e7494a1f0f2b56ac04d1fab490", null ],
+    [ "ClearStatistics", "classc___input_common.html#a30fb6834a22b6d35f7785d126c747845", null ],
     [ "GetConfig", "classc___input_common.html#a5d19e3ce61d8b8a30334b7f958485c03", null ],
     [ "GetDriverName", "classc___input_common.html#a748af3e95c6f199379cdf6c95bb0f245", null ],
     [ "GetInputChannelId", "classc___input_common.html#ac3751b26171be9a48861c73d8d4a5fe3", null ],

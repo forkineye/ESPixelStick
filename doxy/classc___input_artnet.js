@@ -4,6 +4,7 @@ var classc___input_artnet =
     [ "c_InputArtnet", "classc___input_artnet.html#afd80a0baf36ea68335bfa2e8ed14945f", null ],
     [ "~c_InputArtnet", "classc___input_artnet.html#a2bc0ecce6c8fbe81ff83202888a405c6", null ],
     [ "Begin", "classc___input_artnet.html#a563a8812372831c86d5db8bee8e3cba9", null ],
+    [ "ClearStatistics", "classc___input_artnet.html#a93ab420ae9fc9cc8973fc0c7dc9b8670", null ],
     [ "GetConfig", "classc___input_artnet.html#ae18005028b9d8ed8870824ba40b043cb", null ],
     [ "GetDriverName", "classc___input_artnet.html#a7c8914c1f765f22bf4e62ea8fa95b3a2", null ],
     [ "GetStatus", "classc___input_artnet.html#a9dedb65c78cedc3d329d33590cca3fbc", null ],

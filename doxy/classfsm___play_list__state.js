@@ -2,6 +2,7 @@ var classfsm___play_list__state =
 [
     [ "fsm_PlayList_state", "classfsm___play_list__state.html#a300141836518233b8730e740ccf6c0b0", null ],
     [ "~fsm_PlayList_state", "classfsm___play_list__state.html#af56e58488c68f183f187108ecfba2695", null ],
+    [ "ClearStatistics", "classfsm___play_list__state.html#a87d0dc7a6bda6761d0d541ace0a763a2", null ],
     [ "GetDriverName", "classfsm___play_list__state.html#aa47f94384c03a69cb97c8415eda82a94", null ],
     [ "GetStateName", "classfsm___play_list__state.html#a7b9e7a138e79dc03b3921ac21dc8fa72", null ],
     [ "GetStatus", "classfsm___play_list__state.html#a09be290de40105a2e6aed57f68786109", null ],

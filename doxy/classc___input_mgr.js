@@ -25,6 +25,7 @@ var classc___input_mgr =
     [ "~c_InputMgr", "classc___input_mgr.html#a809ba0112a730f8ddec1396f7fa2a9fc", null ],
     [ "Begin", "classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33", null ],
     [ "BlankTimerHasExpired", "classc___input_mgr.html#affbccb36556f158a6e2a73565af71bdf", null ],
+    [ "ClearStatistics", "classc___input_mgr.html#a2504bc3279756894dd2f88a444c4b50d", null ],
     [ "CreateJsonConfig", "classc___input_mgr.html#a18e0b867953657d8362cdee1db08b0f7", null ],
     [ "CreateNewConfig", "classc___input_mgr.html#a90b28a72c3c887ec9b222744b52a05ec", null ],
     [ "DeleteConfig", "classc___input_mgr.html#a468e07f1080b710b35059bc87b9b8729", null ],

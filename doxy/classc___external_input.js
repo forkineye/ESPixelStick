@@ -11,6 +11,7 @@ var classc___external_input =
     ] ],
     [ "c_ExternalInput", "classc___external_input.html#a532053d0781f75d7d9fbe297eafa2e53", null ],
     [ "~c_ExternalInput", "classc___external_input.html#a2ce77c3ef246b898f9978856660f14e5", null ],
+    [ "ClearStatistics", "classc___external_input.html#a0dcde64376c9c25890501ef64eb37e15", null ],
     [ "GetConfig", "classc___external_input.html#a6c2e127e96ae50d0cda699b9fb981373", null ],
     [ "GetDriverName", "classc___external_input.html#af9b261e5341fb8d0675bbb54849fb2cc", null ],
     [ "GetStatistics", "classc___external_input.html#a6dafefeee113e1da710b1de370e9dbb6", null ],

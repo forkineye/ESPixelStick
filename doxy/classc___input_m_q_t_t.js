@@ -3,6 +3,7 @@ var classc___input_m_q_t_t =
     [ "c_InputMQTT", "classc___input_m_q_t_t.html#aabc1f56d20afe334f5a754f3c3a97cde", null ],
     [ "~c_InputMQTT", "classc___input_m_q_t_t.html#a1fcf1224e5c573a2ac9450cf146dcdca", null ],
     [ "Begin", "classc___input_m_q_t_t.html#a00dad1347b7fbe42eb3f3b444f219254", null ],
+    [ "ClearStatistics", "classc___input_m_q_t_t.html#a28e6e6dc65e5d32f7188c4989c5874bf", null ],
     [ "connectToMqtt", "classc___input_m_q_t_t.html#a8dcaa1fe9629a2ac95927cfafb7b5e56", null ],
     [ "disconnectFromMqtt", "classc___input_m_q_t_t.html#a54511768dafc3f9b45fd17199f4a8ea1", null ],
     [ "GetConfig", "classc___input_m_q_t_t.html#a45f3b817bdfce5db4df35d25414fb4b3", null ],

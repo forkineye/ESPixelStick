@@ -21,6 +21,7 @@ var classc___output_mgr =
     [ "~c_OutputMgr", "classc___output_mgr.html#a53b2aa00d678f200c871af2db1d44b01", null ],
     [ "Begin", "classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3", null ],
     [ "ClearBuffer", "classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8", null ],
+    [ "ClearStatistics", "classc___output_mgr.html#a39f709257037d896bd685d38ec66f9af", null ],
     [ "CreateJsonConfig", "classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d", null ],
     [ "CreateNewConfig", "classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0", null ],
     [ "DeleteConfig", "classc___output_mgr.html#a697acb245b061406959eacd968eb74d7", null ],

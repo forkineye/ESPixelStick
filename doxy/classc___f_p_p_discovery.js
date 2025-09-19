@@ -7,6 +7,7 @@ var classc___f_p_p_discovery =
     [ "AllowedToPlayRemoteFile", "classc___f_p_p_discovery.html#af4d43b6ccbd2643c81e064f9264182f6", null ],
     [ "begin", "classc___f_p_p_discovery.html#a09dd955e78cdd72066e022c493a59d96", null ],
     [ "BuildFseqResponse", "classc___f_p_p_discovery.html#aebf914d165d32003ef1c96b38ba2be51", null ],
+    [ "ClearStatistics", "classc___f_p_p_discovery.html#af70909d90b17f2a2e77b461b68354c93", null ],
     [ "Disable", "classc___f_p_p_discovery.html#abd09ea00b6e680a8e55283ec47c3dcdf", null ],
     [ "Enable", "classc___f_p_p_discovery.html#af8b8c645e4a23ec95ab938891b4953f1", null ],
     [ "ForgetInputFPPRemotePlayFile", "classc___f_p_p_discovery.html#ad55f04ef98a7f5a291b6b190702cbe8b", null ],

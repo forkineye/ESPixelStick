@@ -4,6 +4,7 @@ var classc___input_e131 =
     [ "c_InputE131", "classc___input_e131.html#a5b42ec53aec5db6647b09ab01f3a7548", null ],
     [ "~c_InputE131", "classc___input_e131.html#a5b36a1f188b30c305a457c60c244629b", null ],
     [ "Begin", "classc___input_e131.html#ab842aa2de00cbf0d80c10b288213cea3", null ],
+    [ "ClearStatistics", "classc___input_e131.html#a2d4dff37a90067f953062006d3ab7625", null ],
     [ "GetConfig", "classc___input_e131.html#ab0144cfa0af7372b295f443b49265e50", null ],
     [ "GetDriverName", "classc___input_e131.html#ab40ad7f0b7c47bfb4c51f4d2526dab9a", null ],
     [ "GetStatus", "classc___input_e131.html#a827ddca3da4e4c1dae629a7250dd4917", null ],

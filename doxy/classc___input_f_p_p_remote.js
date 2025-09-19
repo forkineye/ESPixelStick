@@ -5,6 +5,7 @@ var classc___input_f_p_p_remote =
     [ "~c_InputFPPRemote", "classc___input_f_p_p_remote.html#a53f59cf53b918b6ac45432aee251f808", null ],
     [ "AllowedToPlayRemoteFile", "classc___input_f_p_p_remote.html#a49952f48c45c1d31ffb14a18a030a853", null ],
     [ "Begin", "classc___input_f_p_p_remote.html#a64189e9f0cea780352bcf3587c9b698c", null ],
+    [ "ClearStatistics", "classc___input_f_p_p_remote.html#a70d4839f17cdf18c14d9541798193d26", null ],
     [ "FppStartRemoteFilePlay", "classc___input_f_p_p_remote.html#a2f8e3e6822647118d4d3e470ceb336a0", null ],
     [ "FppStopRemoteFilePlay", "classc___input_f_p_p_remote.html#a2f11845f9b3c3b91cc8c276981062b2f", null ],
     [ "FppSyncRemoteFilePlay", "classc___input_f_p_p_remote.html#a3727153303b6713782a69667774f2153", null ],
