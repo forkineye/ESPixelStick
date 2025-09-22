@@ -244,7 +244,7 @@ void c_OutputPixel::updateColorOrderOffsets ()
 
     // DEBUG_V (String ("color_order: ") + color_order);
 
-    if (String (F ("wrgb")) == _color_order) { ColorOffsets.offset.r = 3; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 2; NumIntensityBytesPerPixel = 4; }
+    if (     String (F ("wrgb")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 3; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
     else if (String (F ("rgbw")) == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
     else if (String (F ("grbw")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
     else if (String (F ("brgw")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
