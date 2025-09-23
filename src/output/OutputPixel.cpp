@@ -242,7 +242,9 @@ void c_OutputPixel::updateColorOrderOffsets ()
     String _color_order = String(color_order);
     _color_order.toLowerCase ();
 
-    // DEBUG_V (String ("color_order: ") + color_order);
+    // DEBUG_V (String (" color_order: ") + color_order);
+    // DEBUG_V (String ("_color_order: ") + _color_order);
+
          if (String (F ("rgb"))  == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
     else if (String (F ("rbg"))  == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
     else if (String (F ("gbr"))  == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
@@ -263,7 +265,7 @@ void c_OutputPixel::updateColorOrderOffsets ()
     else if (String (F ("bgrw")) == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
     else
     {
-        logcon(String(F("Error: Unsupported Color Order: '")) + _color_order + F("'. Using RGB"));
+        // DEBUG_V(String(F("Error: Unsupported Color Order: '")) + _color_order + F("'. Using RGB"));
         strcpy(color_order, String(F ("rgb")).c_str());
         ColorOffsets.offset.r = 0;
         ColorOffsets.offset.g = 1;
