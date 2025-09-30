@@ -53,11 +53,16 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
+    // DEBUG_V (String (                "gamma: ") + String (gamma));
+    // DEBUG_V (String ("PrependNullPixelCount: ") + String (PrependNullPixelCount));
+    // DEBUG_V (String (" AppendNullPixelCount: ") + String (AppendNullPixelCount));
+    // DEBUG_V (String ("           PixelCount: ") + String (pixel_count));
+
     JsonWrite(jsonConfig, CN_color_order,      color_order);
     JsonWrite(jsonConfig, CN_pixel_count,      pixel_count);
     JsonWrite(jsonConfig, CN_group_size,       PixelGroupSize);
     JsonWrite(jsonConfig, CN_zig_size,         zig_size);
-    JsonWrite(jsonConfig, CN_gamma,            gamma);
+    JsonWrite(jsonConfig, CN_gamma,            serialized(String(gamma, 2)));
     JsonWrite(jsonConfig, CN_brightness,       brightness); // save as a 0 - 100 percentage
     JsonWrite(jsonConfig, CN_interframetime,   InterFrameGapInMicroSec);
     JsonWrite(jsonConfig, CN_prependnullcount, PrependNullPixelCount);
@@ -65,6 +70,7 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     c_OutputCommon::GetConfig (jsonConfig);
 
+    // PrettyPrint(jsonConfig, "GetConfig");
     // DEBUG_END;
 } // GetConfig
 
@@ -174,6 +180,8 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
+    // PrettyPrint(jsonConfig, "SetConfig");
+
     // enums need to be converted to uints for json
     setFromJSON (color_order, jsonConfig, CN_color_order);
     setFromJSON (pixel_count, jsonConfig, CN_pixel_count);
@@ -185,11 +193,12 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (PrependNullPixelCount, jsonConfig, CN_prependnullcount);
     setFromJSON (AppendNullPixelCount, jsonConfig, CN_appendnullcount);
 
+    c_OutputCommon::SetConfig (jsonConfig);
+
+    // DEBUG_V (String (                "gamma: ") + String (gamma));
     // DEBUG_V (String ("PrependNullPixelCount: ") + String (PrependNullPixelCount));
     // DEBUG_V (String (" AppendNullPixelCount: ") + String (AppendNullPixelCount));
     // DEBUG_V (String ("           PixelCount: ") + String (pixel_count));
-
-    c_OutputCommon::SetConfig (jsonConfig);
 
     bool response = validate ();
 
