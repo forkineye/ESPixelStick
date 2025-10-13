@@ -809,12 +809,12 @@ void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCo
             // DEBUG_V(String("    CalculatedChannelId: 0x") + String(CalculatedChannelId, HEX));
             if(uint32_t(pBuffer) >= uint32_t(&pOutputBuffer[OutputBufferSize]))
             {
-                DEBUG_V("This write is beyond the end of the Output buffer for this channel");
-                DEBUG_V(String("      CalculatedChannelId: ") + String(CalculatedChannelId));
-                DEBUG_V(String("NumIntensityBytesPerPixel: ") + String(NumIntensityBytesPerPixel));
-                DEBUG_V(String("           PixelGroupSize: ") + String(PixelGroupSize));
-                DEBUG_V(String("                Last Data: ") + String((CalculatedChannelId + (NumIntensityBytesPerPixel * PixelGroupSize))));
-                DEBUG_V(String("         OutputBufferSize: ") + String(OutputBufferSize));
+                // DEBUG_V("This write is beyond the end of the Output buffer for this channel");
+                // DEBUG_V(String("      CalculatedChannelId: ") + String(CalculatedChannelId));
+                // DEBUG_V(String("NumIntensityBytesPerPixel: ") + String(NumIntensityBytesPerPixel));
+                // DEBUG_V(String("           PixelGroupSize: ") + String(PixelGroupSize));
+                // DEBUG_V(String("                Last Data: ") + String((CalculatedChannelId + (NumIntensityBytesPerPixel * PixelGroupSize))));
+                // DEBUG_V(String("         OutputBufferSize: ") + String(OutputBufferSize));
                 break;
             }
 
