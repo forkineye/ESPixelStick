@@ -1996,8 +1996,22 @@ function ExtractConfigFromHtmlPages(elementids, modeControlName, ChannelConfig)
         }
         else if ($(SelectedElement).attr('type') === 'number')
         {
-            // console.debug("Found Number: " + $(SelectedElement).id)
-            ChannelConfig[elementid] = parseInt($(SelectedElement).val());
+            // console.debug("Found Number: " + $(SelectedElement).id);
+            var inputValue = $(SelectedElement).val();
+            // console.debug("inputValue: " + inputValue);
+            var floatValue = parseFloat(inputValue);
+            // console.debug("floatValue: " + floatValue);
+            var isFloat = !isNaN(floatValue) && inputValue.indexOf('.') !== -1;
+            // console.debug("isFloat: " + isFloat);
+            if(isFloat)
+            {
+                // console.debug("Save floatValue: " + floatValue);
+                ChannelConfig[elementid] = floatValue;
+            }
+            else
+            {
+                ChannelConfig[elementid] = parseInt(inputValue);
+            }
         }
         else
         {

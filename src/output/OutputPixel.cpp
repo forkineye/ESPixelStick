@@ -53,11 +53,16 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
+    // DEBUG_V (String (                "gamma: ") + String (gamma));
+    // DEBUG_V (String ("PrependNullPixelCount: ") + String (PrependNullPixelCount));
+    // DEBUG_V (String (" AppendNullPixelCount: ") + String (AppendNullPixelCount));
+    // DEBUG_V (String ("           PixelCount: ") + String (pixel_count));
+
     JsonWrite(jsonConfig, CN_color_order,      color_order);
     JsonWrite(jsonConfig, CN_pixel_count,      pixel_count);
     JsonWrite(jsonConfig, CN_group_size,       PixelGroupSize);
     JsonWrite(jsonConfig, CN_zig_size,         zig_size);
-    JsonWrite(jsonConfig, CN_gamma,            gamma);
+    JsonWrite(jsonConfig, CN_gamma,            serialized(String(gamma, 2)));
     JsonWrite(jsonConfig, CN_brightness,       brightness); // save as a 0 - 100 percentage
     JsonWrite(jsonConfig, CN_interframetime,   InterFrameGapInMicroSec);
     JsonWrite(jsonConfig, CN_prependnullcount, PrependNullPixelCount);
@@ -65,6 +70,7 @@ void c_OutputPixel::GetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     c_OutputCommon::GetConfig (jsonConfig);
 
+    // PrettyPrint(jsonConfig, "GetConfig");
     // DEBUG_END;
 } // GetConfig
 
@@ -174,6 +180,8 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
+    // PrettyPrint(jsonConfig, "SetConfig");
+
     // enums need to be converted to uints for json
     setFromJSON (color_order, jsonConfig, CN_color_order);
     setFromJSON (pixel_count, jsonConfig, CN_pixel_count);
@@ -185,11 +193,12 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (PrependNullPixelCount, jsonConfig, CN_prependnullcount);
     setFromJSON (AppendNullPixelCount, jsonConfig, CN_appendnullcount);
 
+    c_OutputCommon::SetConfig (jsonConfig);
+
+    // DEBUG_V (String (                "gamma: ") + String (gamma));
     // DEBUG_V (String ("PrependNullPixelCount: ") + String (PrependNullPixelCount));
     // DEBUG_V (String (" AppendNullPixelCount: ") + String (AppendNullPixelCount));
     // DEBUG_V (String ("           PixelCount: ") + String (pixel_count));
-
-    c_OutputCommon::SetConfig (jsonConfig);
 
     bool response = validate ();
 
@@ -242,22 +251,30 @@ void c_OutputPixel::updateColorOrderOffsets ()
     String _color_order = String(color_order);
     _color_order.toLowerCase ();
 
-    // DEBUG_V (String ("color_order: ") + color_order);
+    // DEBUG_V (String (" color_order: ") + color_order);
+    // DEBUG_V (String ("_color_order: ") + _color_order);
 
-    if (     String (F ("wrgb")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 3; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
-    else if (String (F ("rgbw")) == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
-    else if (String (F ("grbw")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
-    else if (String (F ("brgw")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
-    else if (String (F ("rbgw")) == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
-    else if (String (F ("gbrw")) == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
-    else if (String (F ("bgrw")) == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
-    else if (String (F ("grb"))  == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
-    else if (String (F ("brg"))  == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+         if (String (F ("rgb"))  == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
     else if (String (F ("rbg"))  == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
     else if (String (F ("gbr"))  == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+    else if (String (F ("grb"))  == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+    else if (String (F ("brg"))  == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
     else if (String (F ("bgr"))  == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 3; }
+    else if (String (F ("wrgb")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 3; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("wrbg")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 3; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("wgbr")) == _color_order) { ColorOffsets.offset.r = 3; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("wgrb")) == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 3; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("wbrg")) == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 3; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("wbgr")) == _color_order) { ColorOffsets.offset.r = 3; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 0; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("rgbw")) == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("rbgw")) == _color_order) { ColorOffsets.offset.r = 0; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("gbrw")) == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 1; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("grbw")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 0; ColorOffsets.offset.b = 2; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("brgw")) == _color_order) { ColorOffsets.offset.r = 1; ColorOffsets.offset.g = 2; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
+    else if (String (F ("bgrw")) == _color_order) { ColorOffsets.offset.r = 2; ColorOffsets.offset.g = 1; ColorOffsets.offset.b = 0; ColorOffsets.offset.w = 3; NumIntensityBytesPerPixel = 4; }
     else
     {
+        // DEBUG_V(String(F("Error: Unsupported Color Order: '")) + _color_order + F("'. Using RGB"));
         strcpy(color_order, String(F ("rgb")).c_str());
         ColorOffsets.offset.r = 0;
         ColorOffsets.offset.g = 1;
@@ -792,12 +809,12 @@ void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCo
             // DEBUG_V(String("    CalculatedChannelId: 0x") + String(CalculatedChannelId, HEX));
             if(uint32_t(pBuffer) >= uint32_t(&pOutputBuffer[OutputBufferSize]))
             {
-                DEBUG_V("This write is beyond the end of the Output buffer for this channel");
-                DEBUG_V(String("      CalculatedChannelId: ") + String(CalculatedChannelId));
-                DEBUG_V(String("NumIntensityBytesPerPixel: ") + String(NumIntensityBytesPerPixel));
-                DEBUG_V(String("           PixelGroupSize: ") + String(PixelGroupSize));
-                DEBUG_V(String("                Last Data: ") + String((CalculatedChannelId + (NumIntensityBytesPerPixel * PixelGroupSize))));
-                DEBUG_V(String("         OutputBufferSize: ") + String(OutputBufferSize));
+                // DEBUG_V("This write is beyond the end of the Output buffer for this channel");
+                // DEBUG_V(String("      CalculatedChannelId: ") + String(CalculatedChannelId));
+                // DEBUG_V(String("NumIntensityBytesPerPixel: ") + String(NumIntensityBytesPerPixel));
+                // DEBUG_V(String("           PixelGroupSize: ") + String(PixelGroupSize));
+                // DEBUG_V(String("                Last Data: ") + String((CalculatedChannelId + (NumIntensityBytesPerPixel * PixelGroupSize))));
+                // DEBUG_V(String("         OutputBufferSize: ") + String(OutputBufferSize));
                 break;
             }
 
