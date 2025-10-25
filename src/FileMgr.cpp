@@ -184,7 +184,7 @@ void c_FileMgr::Begin ()
         }
 
         SetSpiIoPins ();
-
+        // DEBUG_V(String("FoundZipFile: ") + String(FoundZipFile))
         if(FoundZipFile)
         {
             FeedWDT();
@@ -1814,7 +1814,7 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
                 (0 != CurrentEntry.size ())
                )
             {
-                FoundZipFile = IsCompressed(EntryName);
+                FoundZipFile |= IsCompressed(EntryName);
 
                 usedBytes += CurrentEntry.size ();
                 ++numFiles;
@@ -2230,8 +2230,10 @@ bool c_FileMgr::IsCompressed(String FileName)
     // DEBUG_START;
     bool Response = false;
 
+    // DEBUG_V(String("FileName: ") + FileName);
     FileName.toLowerCase();
     Response = ((-1 != FileName.indexOf(F(".zip"))) || (-1 != FileName.indexOf(F(".xlz"))));
+    // DEBUG_V(String("Response: ") + String(Response));
 
     // DEBUG_END;
     return Response;
