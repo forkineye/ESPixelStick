@@ -39,7 +39,8 @@ private:
         bool        IsReversed      = false;
         bool        Is16Bit         = false;
         bool        IsScaled        = true;
-        uint8_t     HomeValue       = 0;
+        uint16_t    HomeValue       = 0;
+        uint8_t     BufferOffset    = 0;
     };
     Adafruit_PWMServoDriver pwm;
 
@@ -81,13 +82,13 @@ private:
 #   define SERVO_PCA9685_UPDATE_FREQUENCY           50
 
     bool    validate ();
+    void    CalculateNumChannels();
 
     // config data
     ServoPCA9685Channel_t     OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];
     float                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;
 
     // non config data
-    uint16_t    Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;
 
 }; // c_OutputServoPCA9685
 
