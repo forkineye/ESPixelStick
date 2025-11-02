@@ -47,6 +47,7 @@ public:
     bool IsConnected () { return (IsWiFiConnected || IsEthernetConnected); }
     void GetHostname (String & name) { name = hostname; }
     IPAddress GetlocalIP ();
+    String GetWiFiMacAddress() {return WiFiDriver.GetWiFiMacAddress();}
 
 private:
     bool Validate ();
