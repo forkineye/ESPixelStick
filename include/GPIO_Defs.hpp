@@ -156,6 +156,8 @@ typedef enum
 #   include "platforms/GPIO_Defs_ESP32_generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)
 #   include "platforms/GPIO_Defs_ESP8266_Generic.hpp"
+#elif defined (BOARD_SEEED_XIAO_ESP32S3)
+#   include "platforms/GPIO_Defs_ESP32_XIAO_S3.hpp"
 #else
 #   error "No valid platform definition"
 #endif // ndef platform specific GPIO definitions
