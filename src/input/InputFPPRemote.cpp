@@ -440,6 +440,7 @@ void c_InputFPPRemote::StartPlaying (String& FileName)
     {
         if(!IsInputChannelActive || IsBooting)
         {
+            // DEBUG_V("Not Starting");
             break;
         }
 
@@ -710,7 +711,7 @@ bool c_InputFPPRemote::IsIdle ()
     bool Response = true;
     if (pInputFPPRemotePlayItem)
     {
-        // DEBUG_V ("Ask FSM to start playing");
+        // DEBUG_V ("Ask FSM if idle");
         Response = pInputFPPRemotePlayItem->IsIdle ();
     }
     return Response;
@@ -753,3 +754,17 @@ void c_InputFPPRemote::SetBackgroundFile ()
 
     // DEBUG_END;
 } // SetBackgroundFile
+
+//-----------------------------------------------------------------------------
+void c_InputFPPRemote::SetBlankTimerIsRunning (bool BlankTimerRunning)
+{
+    // DEBUG_START;
+
+    c_InputCommon::SetBlankTimerIsRunning(BlankTimerRunning);
+    if(BlankTimerRunning)
+    {
+        StopPlaying();
+    }
+
+    // DEBUG_END;
+} // SetBlankTimerIsRunning

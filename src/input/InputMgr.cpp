@@ -755,11 +755,17 @@ void c_InputMgr::Process ()
         for (auto & CurrentInput : InputChannelDrivers)
         {
             FeedWDT();
-            if(!CurrentInput.DriverInUse || aBlankTimerIsRunning)
+            if(!CurrentInput.DriverInUse)
             {
                 continue;
             }
-            ((c_InputCommon*)(CurrentInput.InputDriver))->Process ();
+
+            ((c_InputCommon*)(CurrentInput.InputDriver))->SetBlankTimerIsRunning (aBlankTimerIsRunning);
+
+            if(!aBlankTimerIsRunning)
+            {
+                ((c_InputCommon*)(CurrentInput.InputDriver))->Process ();
+            }
 
             if (!BlankTimerHasExpired (((c_InputCommon*)(CurrentInput.InputDriver))->GetInputChannelId()))
             {

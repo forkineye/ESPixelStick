@@ -44,6 +44,7 @@ public:
     virtual bool isShutDownRebootNeeded () { return false; }
     virtual void ProcessButtonActions(c_ExternalInput::InputValue_t value) {};
     virtual void ClearStatistics (void);
+    virtual void SetBlankTimerIsRunning (bool value) {IsBlankTimerRunning = value;}
 
     c_InputMgr::e_InputChannelIds GetInputChannelId () { return InputChannelId; }
     c_InputMgr::e_InputType       GetInputType ()      { return ChannelType; }
@@ -52,6 +53,7 @@ protected:
     bool        HasBeenInitialized  = false;
     uint32_t    InputDataBufferSize = 0;
     bool        IsInputChannelActive = true;
+    bool        IsBlankTimerRunning = false;
     c_InputMgr::e_InputChannelIds InputChannelId = c_InputMgr::e_InputChannelIds::InputChannelId_ALL;
     c_InputMgr::e_InputType       ChannelType = c_InputMgr::e_InputType::InputType_Disabled;
 
