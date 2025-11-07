@@ -150,14 +150,14 @@ typedef enum
 #   include "platforms/GPIO_Defs_ESP32_kr_lights_msm.hpp"
 #elif defined (BOARD_ESP32_BREAKDANCEV2)
 #   include "platforms/GPIO_Defs_ESP32_BreakDanceV2.hpp"
+#elif defined (BOARD_SEEED_XIAO_ESP32S3)
+#   include "platforms/GPIO_Defs_ESP32_XIAO_S3.hpp"
 #elif defined (BOARD_ESP8266_D1MINI_LOLIN_SD)
 #   include "platforms/GPIO_Defs_ESP8266_D1_mini_lolinsd.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)
 #   include "platforms/GPIO_Defs_ESP32_generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)
 #   include "platforms/GPIO_Defs_ESP8266_Generic.hpp"
-#elif defined (BOARD_SEEED_XIAO_ESP32S3)
-#   include "platforms/GPIO_Defs_ESP32_XIAO_S3.hpp"
 #else
 #   error "No valid platform definition"
 #endif // ndef platform specific GPIO definitions
