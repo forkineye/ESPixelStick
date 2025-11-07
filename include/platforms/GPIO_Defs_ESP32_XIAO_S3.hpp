@@ -1,6 +1,6 @@
 #pragma once
 /*
-* GPIO_Defs_ESP32_S.hpp - Output Management class
+* GPIO_Defs_ESP32_XIAO_S3.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
 * Copyright (c) 2025 Shelby Merrick
