@@ -1416,7 +1416,7 @@
             "name": "Seeed Studio XIAO ESP32-S3",
             "description": "ESP32-S3 mini Controller",
             "chip": "esp32",
-            "appbin": "esp32/xiao_esp32s3-app.bin",
+            "appbin": "esp32/seeed_xiao_esp32s3-app.bin",
             "esptool": {
                 "baudrate": "460800",
                 "options": "--before default_reset --after hard_reset",
@@ -1424,11 +1424,11 @@
             },
             "binfiles": [
                 {
-                    "name": "esp32/xiao_esp32s3-bootloader.bin",
+                    "name": "esp32/seeed_xiao_esp32s3-bootloader.bin",
                     "offset": "0x01000"
                 },
                 {
-                    "name": "esp32/xiao_esp32s3-partitions.bin",
+                    "name": "esp32/seeed_xiao_esp32s3-partitions.bin",
                     "offset": "0x08000"
                 },
                 {
@@ -1436,7 +1436,7 @@
                     "offset": "0x0e000"
                 },
                 {
-                    "name": "esp32/xiao_esp32s3-app.bin",
+                    "name": "esp32/seeed_xiao_esp32s3-app.bin",
                     "offset": "0x10000"
                 }
             ],
