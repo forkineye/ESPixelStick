@@ -132,7 +132,7 @@ jobs:
           - target: "esp32_foo"
             chip: "esp32"
           # Seeed Studio XIAO ESP32-S3
-          - target: "esp32_xiao_esp32_s3"
+          - target: "xiao_esp32_s3"
             chip: "esp32"
 
     runs-on: ubuntu-latest
