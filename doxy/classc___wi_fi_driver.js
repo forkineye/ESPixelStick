@@ -22,6 +22,7 @@ var classc___wi_fi_driver =
     [ "getIpAddress", "classc___wi_fi_driver.html#afe9c1360d6ecfa12687cad7b9c2a04f8", null ],
     [ "getIpSubNetMask", "classc___wi_fi_driver.html#a9b1a0a5468f5c39b65b98067c9ef745b", null ],
     [ "GetStatus", "classc___wi_fi_driver.html#ab1a256c975d0390dde77307768eee4fd", null ],
+    [ "GetWiFiMacAddress", "classc___wi_fi_driver.html#a984e5ff44b8274a7a67c93992050e721", null ],
     [ "IsWiFiConnected", "classc___wi_fi_driver.html#a0f9150ccd57dd9f749950aaf50dfd2d0", null ],
     [ "onWiFiConnect", "classc___wi_fi_driver.html#a03e9bd390e8fb42cd4ff24f0be0a9b40", null ],
     [ "onWiFiDisconnect", "classc___wi_fi_driver.html#aa3c35bf335930335d1669d2d56342a44", null ],

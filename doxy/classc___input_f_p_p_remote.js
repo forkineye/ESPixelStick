@@ -25,6 +25,7 @@ var classc___input_f_p_p_remote =
     [ "ProcessButtonActions", "classc___input_f_p_p_remote.html#a3695b4762e16bd621444ae3460e50cbe", null ],
     [ "save", "classc___input_f_p_p_remote.html#acba9db785e2b10c568283b0b9510f00b", null ],
     [ "SetBackgroundFile", "classc___input_f_p_p_remote.html#a1405999d86876af900002852842461da", null ],
+    [ "SetBlankTimerIsRunning", "classc___input_f_p_p_remote.html#aa097f5fc1bbdea7af3710d61056284b5", null ],
     [ "SetBufferInfo", "classc___input_f_p_p_remote.html#ac20d33080cef27922cc6350fcf25d8b6", null ],
     [ "SetConfig", "classc___input_f_p_p_remote.html#a1ee15e1c30584550418fd15599f8de61", null ],
     [ "SetOperationalState", "classc___input_f_p_p_remote.html#a2a56acde47495178be59070c79d037d5", null ],

@@ -13,6 +13,7 @@ var classc___input_common =
     [ "NetworkStateChanged", "classc___input_common.html#aaee6fff6fa265a2bce64285002e91e03", null ],
     [ "Process", "classc___input_common.html#a6164edb288d34ceca86cbc8917ca1dae", null ],
     [ "ProcessButtonActions", "classc___input_common.html#a23b9547e80b69ead8a92d4858023db7b", null ],
+    [ "SetBlankTimerIsRunning", "classc___input_common.html#ac2eb673e832e4addb81364f5473b2e21", null ],
     [ "SetBufferInfo", "classc___input_common.html#ad7de5817a9b501804f89c2a5e63d8cdc", null ],
     [ "SetConfig", "classc___input_common.html#a91676b3553f3a5b06361d43c2a81d45e", null ],
     [ "SetOperationalState", "classc___input_common.html#a1649cd7444c3219b37fd8627754e2e56", null ],
@@ -20,5 +21,6 @@ var classc___input_common =
     [ "HasBeenInitialized", "classc___input_common.html#a998706211cdea080c6cdbb2a54ababc3", null ],
     [ "InputChannelId", "classc___input_common.html#a0eba8f685e86b7f6831a8e4163079ebb", null ],
     [ "InputDataBufferSize", "classc___input_common.html#ad9a18b2db333d979e7dce166f1912006", null ],
+    [ "IsBlankTimerRunning", "classc___input_common.html#a7df523803a5a4ccb46dfcc2759755488", null ],
     [ "IsInputChannelActive", "classc___input_common.html#a2b97140ab2ad6b79fa04a7603b078de0", null ]
 ];

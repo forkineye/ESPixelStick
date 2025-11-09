@@ -1,7 +1,11 @@
 <map id="c_FPPDiscovery::GetSysInfoJSON" name="c_FPPDiscovery::GetSysInfoJSON">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,31,231,56"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,231,88"/>
 <area shape="rect" id="Node000002" href="$classc___network_mgr.html#a1aec189a4006416d95097292a5be5610" title=" " alt="" coords="279,5,472,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="231,30,263,27,264,32,231,35"/>
-<area shape="rect" id="Node000003" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="282,55,469,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,51,266,55,266,60,231,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,59,299,32,300,38,180,65"/>
+<area shape="rect" id="Node000003" href="$classc___network_mgr.html#a9de53476d4d43c99516cb914e1979977" title=" " alt="" coords="283,55,468,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="231,73,268,73,268,78,231,78"/>
+<area shape="rect" id="Node000005" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="282,120,469,146"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="180,86,300,113,299,119,178,92"/>
+<area shape="rect" id="Node000004" href="$classc___wi_fi_driver.html#a984e5ff44b8274a7a67c93992050e721" title=" " alt="" coords="520,55,693,96"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="468,73,504,73,504,78,468,78"/>
 </map>

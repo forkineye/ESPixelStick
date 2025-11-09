@@ -9,6 +9,7 @@ var classc___network_mgr =
     [ "GetHostname", "classc___network_mgr.html#a1aec189a4006416d95097292a5be5610", null ],
     [ "GetlocalIP", "classc___network_mgr.html#a501393baa790344757bd736270dfe359", null ],
     [ "GetStatus", "classc___network_mgr.html#a4a178526bb8b689b1ef9ba56ad85198c", null ],
+    [ "GetWiFiMacAddress", "classc___network_mgr.html#a9de53476d4d43c99516cb914e1979977", null ],
     [ "IsConnected", "classc___network_mgr.html#adb2bfe0b52822c8b9936696d9d03031d", null ],
     [ "Poll", "classc___network_mgr.html#a1a7aa80b325ff6d1610ba4ea775724bf", null ],
     [ "SetConfig", "classc___network_mgr.html#a50d97dec317ecb4cc9a308b5e0aadf2d", null ],

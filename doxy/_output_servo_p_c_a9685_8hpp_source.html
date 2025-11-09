@@ -141,59 +141,60 @@ $(function(){initNavTree('_output_servo_p_c_a9685_8hpp_source.html',''); initRes
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordtype">bool</span>        IsReversed      = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordtype">bool</span>        Is16Bit         = <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordtype">bool</span>        IsScaled        = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        uint8_t     HomeValue       = 0;</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    };</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    Adafruit_PWMServoDriver pwm;</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> </div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="comment">// These functions are inherited from c_OutputCommon</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    c_OutputServoPCA9685 (<a class="code hl_enumeration" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a> OutputChannelId,</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>                          gpio_num_t outputGpio,</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                          uart_port_t uart,</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                          <a class="code hl_enumeration" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a> outputType);</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">virtual</span> ~c_OutputServoPCA9685 ();</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    <span class="comment">// functions to be provided by the derived class</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#a23ef97415464d74fe780256b6680bfb1">Begin</a> ();                                         </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classc___output_common.html#acc5c49f206afba001b6514aeb4b6b2ba">SetConfig</a> (ArduinoJson::JsonObject &amp; jsonConfig); </div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#af5012304489562dff5cd3814791b37f6">GetConfig</a> (ArduinoJson::JsonObject &amp; jsonConfig); </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    uint32_t    <a class="code hl_function" href="classc___output_common.html#ac254686a33bd04f5255a69f40a5a2788">Poll</a> ();                                        </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#if defined(ARDUINO_ARCH_ESP32)</span></div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <span class="keywordtype">bool</span>            RmtPoll () {<span class="keywordflow">return</span> <span class="keyword">false</span>;}</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span><span class="preprocessor">#endif </span><span class="comment">// defined(ARDUINO_ARCH_ESP32)</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#a23228420b2471f0f041c0df0865cc60e">GetDriverName</a> (String&amp; sDriverName);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#ac021e275ea90fcfbdc659918d2b78c03">GetStatus</a> (ArduinoJson::JsonObject &amp; jsonStatus) { <a class="code hl_function" href="classc___output_common.html#a8f58ca24d1d37983afab81c9eebf6a85">c_OutputCommon::BaseGetStatus</a> (jsonStatus); }</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    uint32_t    <a class="code hl_function" href="classc___output_common.html#ac657725842d075415641e11871bd01f7">GetNumOutputBufferBytesNeeded</a> () { <span class="keywordflow">return</span> <a class="code hl_variable" href="classc___output_common.html#a6c6a0c4679e3059f945887fe7eac30aa">OutputBufferSize</a>; };</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    uint32_t    <a class="code hl_function" href="classc___output_common.html#a68284ed16932a4f76be6ccddd7871f26">GetNumOutputBufferChannelsServiced</a> () { <span class="keywordflow">return</span> <a class="code hl_variable" href="classc___output_common.html#a6c6a0c4679e3059f945887fe7eac30aa">OutputBufferSize</a>; };</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span> </div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span><span class="keyword">private</span>:</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16</span></div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    CN_updateinterval</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNELS_NAME           CN_channels</span></div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME    CN_en</span></div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME   CN_Min</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME   CN_Max</span></div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_GPIO_NAME       CN_gid</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_ID_NAME         CN_id</span></div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_REVERSED        CN_rev</span></div>
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_16BITS          CN_b16</span></div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_SCALED          CN_sca</span></div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_HOME            CN_hv</span></div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#   define SERVO_PCA9685_UPDATE_FREQUENCY           50</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordtype">bool</span>    validate ();</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="comment">// config data</span></div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    ServoPCA9685Channel_t     OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">float</span>                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="comment">// non config data</span></div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    uint16_t    Num_Channels = OM_SERVO_PCA9685_CHANNEL_LIMIT;</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}; <span class="comment">// c_OutputServoPCA9685</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif </span><span class="comment">// def SUPPORT_OutputType_Servo_PCA9685</span></div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        uint16_t    HomeValue       = 0;</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        uint8_t     BufferOffset    = 0;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>    };</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    Adafruit_PWMServoDriver pwm;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="keyword">public</span>:</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span> </div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>    <span class="comment">// These functions are inherited from c_OutputCommon</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    c_OutputServoPCA9685 (<a class="code hl_enumeration" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a> OutputChannelId,</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>                          gpio_num_t outputGpio,</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>                          uart_port_t uart,</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>                          <a class="code hl_enumeration" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a> outputType);</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keyword">virtual</span> ~c_OutputServoPCA9685 ();</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="comment">// functions to be provided by the derived class</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#a23ef97415464d74fe780256b6680bfb1">Begin</a> ();                                         </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keywordtype">bool</span>        <a class="code hl_function" href="classc___output_common.html#acc5c49f206afba001b6514aeb4b6b2ba">SetConfig</a> (ArduinoJson::JsonObject &amp; jsonConfig); </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#af5012304489562dff5cd3814791b37f6">GetConfig</a> (ArduinoJson::JsonObject &amp; jsonConfig); </div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    uint32_t    <a class="code hl_function" href="classc___output_common.html#ac254686a33bd04f5255a69f40a5a2788">Poll</a> ();                                        </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#if defined(ARDUINO_ARCH_ESP32)</span></div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>    <span class="keywordtype">bool</span>            RmtPoll () {<span class="keywordflow">return</span> <span class="keyword">false</span>;}</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span><span class="preprocessor">#endif </span><span class="comment">// defined(ARDUINO_ARCH_ESP32)</span></div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#a23228420b2471f0f041c0df0865cc60e">GetDriverName</a> (String&amp; sDriverName);</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordtype">void</span>        <a class="code hl_function" href="classc___output_common.html#ac021e275ea90fcfbdc659918d2b78c03">GetStatus</a> (ArduinoJson::JsonObject &amp; jsonStatus) { <a class="code hl_function" href="classc___output_common.html#a8f58ca24d1d37983afab81c9eebf6a85">c_OutputCommon::BaseGetStatus</a> (jsonStatus); }</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    uint32_t    <a class="code hl_function" href="classc___output_common.html#ac657725842d075415641e11871bd01f7">GetNumOutputBufferBytesNeeded</a> () { <span class="keywordflow">return</span> <a class="code hl_variable" href="classc___output_common.html#a6c6a0c4679e3059f945887fe7eac30aa">OutputBufferSize</a>; };</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    uint32_t    <a class="code hl_function" href="classc___output_common.html#a68284ed16932a4f76be6ccddd7871f26">GetNumOutputBufferChannelsServiced</a> () { <span class="keywordflow">return</span> <a class="code hl_variable" href="classc___output_common.html#a6c6a0c4679e3059f945887fe7eac30aa">OutputBufferSize</a>; };</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span> </div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keyword">private</span>:</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_LIMIT           16</span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span><span class="preprocessor">#   define OM_SERVO_PCA9685_UPDATE_INTERVAL_NAME    CN_updateinterval</span></div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNELS_NAME           CN_channels</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_ENABLED_NAME    CN_en</span></div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_MINLEVEL_NAME   CN_Min</span></div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_MAXLEVEL_NAME   CN_Max</span></div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_GPIO_NAME       CN_gid</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_ID_NAME         CN_id</span></div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_REVERSED        CN_rev</span></div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_16BITS          CN_b16</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_SCALED          CN_sca</span></div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#   define OM_SERVO_PCA9685_CHANNEL_HOME            CN_hv</span></div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="preprocessor">#   define SERVO_PCA9685_UPDATE_FREQUENCY           50</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordtype">bool</span>    validate ();</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keywordtype">void</span>    CalculateNumChannels();</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span> </div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="comment">// config data</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    ServoPCA9685Channel_t     OutputList[OM_SERVO_PCA9685_CHANNEL_LIMIT];</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keywordtype">float</span>                     UpdateFrequency = SERVO_PCA9685_UPDATE_FREQUENCY;</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="comment">// non config data</span></div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>}; <span class="comment">// c_OutputServoPCA9685</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span> </div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="preprocessor">#endif </span><span class="comment">// def SUPPORT_OutputType_Servo_PCA9685</span></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_output_common_8hpp_html"><div class="ttname"><a href="_output_common_8hpp.html">OutputCommon.hpp</a></div></div>
 <div class="ttc" id="aclassc___output_common_html"><div class="ttname"><a href="classc___output_common.html">c_OutputCommon</a></div><div class="ttdef"><b>Definition</b> OutputCommon.hpp:31</div></div>
