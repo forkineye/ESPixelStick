@@ -43,6 +43,7 @@ class c_InputFPPRemote : public c_InputCommon
       void SetBufferInfo (uint32_t BufferSize);
       void ProcessButtonActions(c_ExternalInput::InputValue_t value);
       void SetOperationalState (bool ActiveFlag);
+      void SetBlankTimerIsRunning (bool BlankTimerRunning);
 
       void FppStartRemoteFilePlay (String & FileName, uint32_t ElapsedTimeSec);
       void FppStopRemoteFilePlay  ();

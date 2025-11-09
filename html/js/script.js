@@ -1370,7 +1370,7 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig) {
         let EnabledPattern = '<td><input type="checkbox" id="ServoEnabled_' + (CurrentRowId) + '"></td>';
         let MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
         let MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
-        let RestingPattern = '<td><input type="number"   id="ServoHomeValue_' + (CurrentRowId) + '"step="1" min="0"  max="255"   value="0"  class="form-control is-valid"></td>';
+        let RestingPattern = '<td><input type="number"   id="ServoHomeValue_' + (CurrentRowId) + '"step="1" min="0"  max="65535" value="0"  class="form-control is-valid"></td>';
         let DataType = '<td><select class="form-control is-valid" id="ServoDataType_' + (CurrentRowId) + '" title="Effect to generate"></select></td>';
 
         let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + DataType + RestingPattern + '</tr>';
@@ -1846,7 +1846,8 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
         }
         else if ((ChannelConfig.type === "Servo PCA9685") && ($("#servo_pca9685channelconfigurationtable").length)) {
             ChannelConfig.updateinterval = parseInt($('#updateinterval').val(), 10);
-            $.each(ChannelConfig.channels, function (i, CurrentChannelConfig) {
+            $.each(ChannelConfig.channels, function (i, CurrentChannelConfig)
+            {
                 // console.debug("Current Channel Id = " + CurrentChannelConfig.id);
                 let currentChannelRowId = CurrentChannelConfig.id + 1;
                 CurrentChannelConfig.en = $('#ServoEnabled_' + (currentChannelRowId)).prop("checked");
@@ -1858,6 +1859,10 @@ function ExtractChannelConfigFromHtmlPage(JsonConfig, SectionName) {
                 CurrentChannelConfig.rev = (ServoDataType & 0x01) ? true : false;
                 CurrentChannelConfig.sca = (ServoDataType & 0x02) ? true : false;
                 CurrentChannelConfig.b16 = (ServoDataType & 0x04) ? true : false;
+                // console.debug("CurrentChannelConfig.id: " + CurrentChannelConfig.id);
+                // console.debug("CurrentChannelConfig.rev: " + CurrentChannelConfig.rev);
+                // console.debug("CurrentChannelConfig.sca: " + CurrentChannelConfig.sca);
+                // console.debug("CurrentChannelConfig.b16: " + CurrentChannelConfig.b16);
             });
         }
         else if (ChannelConfig.type === "Effects") {

@@ -20,7 +20,7 @@
 
 #include "UnzipFiles.hpp"
 #include "FileMgr.hpp"
-
+#include <TimeLib.h>
 //
 // Callback functions needed by the unzipLIB to access a file system
 // The library has built-in code for memory-to-memory transfers, but needs
@@ -105,18 +105,18 @@ void UnzipFiles::Run()
 } // Run
 
 //-----------------------------------------------------------------------------
-void UnzipFiles::ProcessZipFile(String & FileName)
+void UnzipFiles::ProcessZipFile(String & ArchiveFileName)
 {
     // DEBUG_START;
     char szComment[256], szName[256];
     unz_file_info fi;
 
-    logcon(String("Unzip file: '") + String(FileName) + "'");
+    logcon(String("Unzip file: '") + String(ArchiveFileName) + "'");
 
-    int returnCode = zip.openZIP(FileName.c_str(), _OpenZipFile, _CloseZipFile, _ReadZipFile, _SeekZipFile);
+    int returnCode = zip.openZIP(ArchiveFileName.c_str(), _OpenZipFile, _CloseZipFile, _ReadZipFile, _SeekZipFile);
     if (returnCode == UNZ_OK)
     {
-        bool IsSpecialxLightsZipFile = (-1 != FileName.indexOf(".xlz"));
+        bool IsSpecialxLightsZipFile = (-1 != ArchiveFileName.indexOf(".xlz"));
         // logcon(String("Opened zip file: '") + FileName + "'");
 
         // Display the global comment and all of the FileNames within
@@ -126,19 +126,33 @@ void UnzipFiles::ProcessZipFile(String & FileName)
         returnCode = zip.gotoFirstFile();
         while (returnCode == UNZ_OK)
         {
-            // Display all files contained in the archive
+            // Process all files contained in the archive
             returnCode = zip.getFileInfo(&fi, szName, sizeof(szName), NULL, 0, szComment, sizeof(szComment));
             if (returnCode == UNZ_OK)
             {
+                tmElements_t FileDate = {0};
+                DosDateToTmuDate (fi.dosDate, &FileDate);
+                setTime(makeTime(FileDate));
                 FeedWDT();
-                String SubFileName = String(szName);
-                ProcessCurrentFileInZip(fi, SubFileName);
+
+                String ArchiveSubFileName = String(szName);
+                String FinalFileName = String(szName);
                 if(IsSpecialxLightsZipFile)
                 {
-                    String NewName = FileName;
-                    NewName.replace(".xlz", ".fseq");
+                    // DEBUG_V("Modifying File Name");
+                    FinalFileName = ArchiveFileName;
+                    FinalFileName.replace(".xlz", ".fseq");
+                }
+                // DEBUG_V(String("ArchiveSubFileName: ") + ArchiveSubFileName);
+                // DEBUG_V(String("     FinalFileName: ") + FinalFileName);
+                FileMgr.DeleteSdFile(FinalFileName);
+
+                ProcessCurrentFileInZip(fi, ArchiveSubFileName);
+
+                if(IsSpecialxLightsZipFile)
+                {
                     // DEBUG_V(String("Rename '") + SubFileName + "' to '" + NewName);
-                    FileMgr.RenameSdFile(SubFileName, NewName);
+                    FileMgr.RenameSdFile(ArchiveSubFileName, FinalFileName);
                     // only a single file is alowed in an xlz zip file.
                     break;
                 }
@@ -165,7 +179,7 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
     int BytesRead = 0;
     uint32_t TotalBytesWritten = 0;
 
-    logcon(FileName +
+    logcon(String("Uncompressing '") + FileName + "'" +
     " - " + String(fi.compressed_size, DEC) +
     "/" + String(fi.uncompressed_size, DEC) + " Started.\n");
 
@@ -203,7 +217,7 @@ void UnzipFiles::ProcessCurrentFileInZip(unz_file_info & fi, String & FileName)
 
         } while (BytesRead > 0);
 
-        DEBUG_FILE_HANDLE (FileHandle);
+        // DEBUG_FILE_HANDLE (FileHandle);
         FileMgr.CloseSdFile(FileHandle);
         zip.closeCurrentFile();
         logcon(FileName + F(" - Done."));
@@ -250,7 +264,7 @@ void UnzipFiles::CloseZipFile(void *p)
     c_FileMgr::FileId FileHandle = (c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle);
     // DEBUG_V(String("FileHandle: ") + String(FileHandle));
 
-    DEBUG_FILE_HANDLE (FileHandle);
+    // DEBUG_FILE_HANDLE (FileHandle);
     FileMgr.CloseSdFile(FileHandle);
     SeekPosition = 0;
 
@@ -267,7 +281,7 @@ int32_t UnzipFiles::ReadZipFile(void *p, uint8_t *buffer, int32_t length)
     c_FileMgr::FileId FileHandle = (c_FileMgr::FileId)(((ZIPFILE *)p)->fHandle);
     // DEBUG_V(String("FileHandle: ") + String(FileHandle));
 
-    DEBUG_FILE_HANDLE(FileHandle);
+    // DEBUG_FILE_HANDLE(FileHandle);
     size_t BytesRead = FileMgr.ReadSdFile(FileHandle, buffer, length, SeekPosition);
     // DEBUG_V(String(" BytesRead: ") + String(BytesRead));
 
@@ -292,6 +306,27 @@ int32_t UnzipFiles::SeekZipFile(void *p, int32_t position, int iType)
     // DEBUG_END;
     return SeekPosition; // FileMgr.SeekSdFile(FileHandle, position, SeekMode(iType));
 } // SeekZipFile
+
+void UnzipFiles::DosDateToTmuDate (uint32_t DosDate, tmElements_t * ptm)
+{
+    uint32_t Date;
+    Date = (uLong)(DosDate>>16);
+    ptm->Day   = (uInt)(Date&0x1f);
+    ptm->Month = (uInt)((((Date)&0x1E0)/0x20)-1);
+    ptm->Year  = CalendarYrToTm((uInt)(((Date&0x0FE00)/0x0200)+1980));
+
+    ptm->Hour   = (uInt) ((DosDate &0xF800)/0x800);
+    ptm->Minute = (uInt) ((DosDate&0x7E0)/0x20);
+    ptm->Second = (uInt) (2*(DosDate&0x1f));
+/*
+    // DEBUG_V(String("Year: ") + String(tmYearToCalendar(FileDate.Year)));
+    // DEBUG_V(String("Month: ") + String(FileDate.Month));
+    // DEBUG_V(String("Day: ") + String(FileDate.Day));
+    // DEBUG_V(String("Hour: ") + String(FileDate.Hour));
+    // DEBUG_V(String("Minute: ") + String(FileDate.Minute));
+    // DEBUG_V(String("Second: ") + String(FileDate.Second));
+*/
+} // DosDateToTmuDate
 
 UnzipFiles gUnzipFiles;
 

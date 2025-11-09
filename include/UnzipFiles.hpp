@@ -21,6 +21,7 @@
 
 #include "ESPixelStick.h"
 #include <unzipLIB.h>
+#include <TimeLib.h>
 
 class UnzipFiles
 {
@@ -43,6 +44,7 @@ private:
     uint8_t     *pOutputBuffer = nullptr;
     uint32_t    BufferSize = 0;
     int32_t     SeekPosition = 0;
+    void        DosDateToTmuDate (uint32_t DosDate, tmElements_t * ptm);
 
 protected:
 

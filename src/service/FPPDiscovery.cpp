@@ -1128,6 +1128,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
     JsonWrite(jsonResponse, F ("majorVersion"), (uint16_t)atoi (ConstConfig.Version));
     JsonWrite(jsonResponse, F ("minorVersion"), (uint16_t)atoi (&ConstConfig.Version[2]));
     JsonWrite(jsonResponse, F ("typeId"),       FPP_TYPE_ID);
+    JsonWrite(jsonResponse, F ("UUID"),         NetworkMgr.GetWiFiMacAddress());
 #ifdef SUPPORT_UNZIP
     JsonWrite(jsonResponse, F ("zip"),          true);
 #else

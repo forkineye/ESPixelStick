@@ -85,6 +85,7 @@ public:
     void      SetHostname (String & name);
     void      Disable ();
     void      Enable ();
+    String    GetWiFiMacAddress() {return WiFi.macAddress ();}
 
 private:
 #define DEFAULT_SSID_NOT_SET "DEFAULT_SSID_NOT_SET"
