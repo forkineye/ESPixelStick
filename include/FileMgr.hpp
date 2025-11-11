@@ -137,6 +137,7 @@ private:
 #   define MaxSdTransSpeedMHz 200
 #endif // ndef MaxSdTransSpeedMHz
 
+    void StartSdCard ();
     void listDir (fs::FS& fs, String dirname, uint8_t levels);
     void DescribeSdCardToUser ();
     void handleFileUploadNewFile (const String & filename);
