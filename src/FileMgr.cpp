@@ -183,6 +183,17 @@ void c_FileMgr::Begin ()
             listDir (LittleFS, String ("/"), 3);
         }
 
+        // StartSdCard();
+
+    } while (false);
+
+    // DEBUG_END;
+} // begin
+
+void c_FileMgr::StartSdCard ()
+{
+    do // once
+    {
         SetSpiIoPins ();
         // DEBUG_V(String("FoundZipFile: ") + String(FoundZipFile))
         if(FoundZipFile)
@@ -199,8 +210,7 @@ void c_FileMgr::Begin ()
 
     } while (false);
 
-    // DEBUG_END;
-} // begin
+} // StartSdCard
 
 //-----------------------------------------------------------------------------
 //    Cause the FTP operation to get re-established.
@@ -260,6 +270,7 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     // DEBUG_START;
 
     bool ConfigChanged = false;
+    bool SpiConfigChanged = false;
     JsonObject JsonDeviceConfig = json[(char*)CN_device].as<JsonObject>();
     if (JsonDeviceConfig)
     {
@@ -269,12 +280,13 @@ bool c_FileMgr::SetConfig (JsonObject & json)
         // DEBUG_V("mosi_pin: " + String(mosi_pin));
         // DEBUG_V(" clk_pin: " + String(clk_pin));
         // DEBUG_V("  cs_pin: " + String(cs_pin));
+        // DEBUG_V("   Speed: " + String(MaxSdSpeed));
 
-        ConfigChanged |= setFromJSON (miso_pin,   JsonDeviceConfig, CN_miso_pin);
-        ConfigChanged |= setFromJSON (mosi_pin,   JsonDeviceConfig, CN_mosi_pin);
-        ConfigChanged |= setFromJSON (clk_pin,    JsonDeviceConfig, CN_clock_pin);
-        ConfigChanged |= setFromJSON (cs_pin,     JsonDeviceConfig, CN_cs_pin);
-        ConfigChanged |= setFromJSON (MaxSdSpeed, JsonDeviceConfig, CN_sdspeed);
+        SpiConfigChanged |= setFromJSON (miso_pin,   JsonDeviceConfig, CN_miso_pin);
+        SpiConfigChanged |= setFromJSON (mosi_pin,   JsonDeviceConfig, CN_mosi_pin);
+        SpiConfigChanged |= setFromJSON (clk_pin,    JsonDeviceConfig, CN_clock_pin);
+        SpiConfigChanged |= setFromJSON (cs_pin,     JsonDeviceConfig, CN_cs_pin);
+        SpiConfigChanged |= setFromJSON (MaxSdSpeed, JsonDeviceConfig, CN_sdspeed);
 
         ConfigChanged |= setFromJSON (FtpUserName, JsonDeviceConfig, CN_user);
         ConfigChanged |= setFromJSON (FtpPassword, JsonDeviceConfig, CN_password);
@@ -294,16 +306,28 @@ bool c_FileMgr::SetConfig (JsonObject & json)
     }
 
     // DEBUG_V (String ("ConfigChanged: ") + String (ConfigChanged));
+    // DEBUG_V (String ("SpiConfigChanged: ") + String (SpiConfigChanged));
+
+    if(IsBooting)
+    {
+        StartSdCard ();
+        SpiConfigChanged = false;
+    }
+
+    else if (SpiConfigChanged)
+    {
+        String msg = "SD Card gpio change requires reboot";
+        RequestReboot(msg,1000);
+    }
 
     if (ConfigChanged)
     {
-        SetSpiIoPins ();
         NetworkStateChanged(NetworkMgr.IsConnected());
     }
 
     // DEBUG_END;
 
-    return ConfigChanged;
+    return ConfigChanged || SpiConfigChanged;
 
 } // SetConfig
 
@@ -412,8 +436,8 @@ void c_FileMgr::SetSpiIoPins ()
         // DEBUG_V();
         SPI.end ();
         // DEBUG_V();
-        ResetGpio(gpio_num_t(cs_pin));
         pinMode(cs_pin, OUTPUT);
+        // DEBUG_V();
 #       ifdef USE_MISO_PULLUP
         // DEBUG_V("USE_MISO_PULLUP");
         // on some hardware MISO is missing a required pull-up resistor, use internal pull-up.
@@ -421,12 +445,10 @@ void c_FileMgr::SetSpiIoPins ()
         pinMode(miso_pin, INPUT_PULLUP);
 #       else
         // DEBUG_V();
-        ResetGpio(gpio_num_t(miso_pin));
         pinMode(miso_pin, INPUT);
+        // DEBUG_V();
 #       endif // def USE_MISO_PULLUP
-        ResetGpio(gpio_num_t(clk_pin));
-        ResetGpio(gpio_num_t(miso_pin));
-        ResetGpio(gpio_num_t(cs_pin));
+        // DEBUG_V();
         SPI.begin (clk_pin, miso_pin, mosi_pin, cs_pin); // uses HSPI by default
 #   else // ESP8266
         SPI.end ();
@@ -472,6 +494,7 @@ void c_FileMgr::SetSpiIoPins ()
             // DEBUG_V();
         }
 
+        // DEBUG_V();
         BuildFseqList(true);
         // DEBUG_V();
     }
