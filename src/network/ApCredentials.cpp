@@ -46,6 +46,8 @@ void c_ApCredentials::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
+    // DEBUG_V(String("      ssid: ") + _ApCredentials[0].ssid);
+    // DEBUG_V(String("passphrase: ") + _ApCredentials[0].passphrase);
 
     JsonArray ApCredentialsArray = json[CN_ApCredentials].to<JsonArray>();
     for(auto & currentCredentials : _ApCredentials)
@@ -55,7 +57,7 @@ void c_ApCredentials::GetConfig (JsonObject& json)
         JsonWrite(NewArrayEntry, CN_passphrase, currentCredentials.passphrase);
     }
 
-    // PrettyPrint(json, "Credentials Config");
+    // PrettyPrint(json, "Get Credentials Config");
 
     // DEBUG_END;
 
@@ -67,16 +69,23 @@ bool c_ApCredentials::SetConfig (JsonObject & json)
     // DEBUG_START;
 
     bool ConfigChanged = false;
+    // PrettyPrint(json, "Set Credentials Config");
 
     do // once
     {
         // is this an old style config?
-        if(json[CN_ssid].is<JsonObject>())
+        if(json[CN_ssid].is<String>())
         {
             // DEBUG_V("Old Style Config");
             memset(_ApCredentials, 0x00, sizeof(_ApCredentials));
             ConfigChanged |= setFromJSON (_ApCredentials[0].ssid,       json, CN_ssid);
             ConfigChanged |= setFromJSON (_ApCredentials[0].passphrase, json, CN_passphrase);
+
+            ConfigChanged = true;
+
+            // DEBUG_V(String("      ssid: ") + _ApCredentials[0].ssid);
+            // DEBUG_V(String("passphrase: ") + _ApCredentials[0].passphrase);
+
             break;
         }
 
@@ -115,6 +124,9 @@ bool c_ApCredentials::SetConfig (JsonObject & json)
     {
         ResetCurrentCredentials();
     }
+
+    // DEBUG_V(String("      ssid: ") + _ApCredentials[0].ssid);
+    // DEBUG_V(String("passphrase: ") + _ApCredentials[0].passphrase);
 
     // DEBUG_END;
     return ConfigChanged;
