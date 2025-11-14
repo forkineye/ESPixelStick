@@ -28,6 +28,7 @@ const CN_PROGMEM char CN_addr                     [] = "addr";
 const CN_PROGMEM char CN_advancedView             [] = "advancedView";
 const CN_PROGMEM char CN_allleds                  [] = "allleds";
 const CN_PROGMEM char CN_ap_channel               [] = "ap_channel";
+const CN_PROGMEM char CN_ApCredentials            [] = "ApCredentials";
 const CN_PROGMEM char CN_ap_fallback              [] = "ap_fallback";
 const CN_PROGMEM char CN_ap_passphrase            [] = "ap_passphrase";
 const CN_PROGMEM char CN_ap_ssid                  [] = "ap_ssid";

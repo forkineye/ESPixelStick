@@ -27,6 +27,12 @@
     width: 100%;
 }
 
+.ApCred-table {
+    margin-left: 17%;
+    table-layout: auto;
+    width: 100%;
+}
+
 .footer {
   position: fixed;
   bottom: 0;

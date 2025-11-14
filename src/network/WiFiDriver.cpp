@@ -2,7 +2,7 @@
 * WiFiDriver.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -128,8 +128,8 @@ void c_WiFiDriver::Begin ()
     // save the pointer to the config
     // config = NewConfig;
 
-    // DEBUG_V("      default_ssid: '" + default_ssid + "'");
-    // DEBUG_V("default_passphrase: '" + default_passphrase + "'");
+    // DEBUG_V ("      default_ssid: '" + default_ssid + "'");
+    // DEBUG_V ("default_passphrase: '" + default_passphrase + "'");
 
     if (FileMgr.SdCardIsInstalled())
     {
@@ -140,10 +140,9 @@ void c_WiFiDriver::Begin ()
         {
             // DEBUG_V ("Process the sdcard config");
             JsonObject jsonConfig = jsonConfigDoc.as<JsonObject> ();
+            ApCredentials.SetConfig(jsonConfig);
 
             // copy the fields of interest into the local structure
-            setFromJSON (ssid,         jsonConfig, CN_ssid);
-            setFromJSON (passphrase,   jsonConfig, CN_passphrase);
             setFromJSON (ap_ssid,       jsonConfig, CN_ap_ssid);
             setFromJSON (ap_passphrase, jsonConfig, CN_ap_passphrase);
 
@@ -221,12 +220,12 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
 
         String Hostname;
         NetworkMgr.GetHostname(Hostname);
-        // DEBUG_V(String("Hostname: ") + Hostname);
+        // DEBUG_V (String("Hostname: ") + Hostname);
 
         // Hostname must be set after the mode on ESP8266 and before on ESP32
 #ifdef ARDUINO_ARCH_ESP8266
         WiFi.disconnect();
-        // DEBUG_V("");
+        // DEBUG_V ("");
 
         // Switch to station mode
         WiFi.mode(WIFI_STA);
@@ -237,22 +236,22 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
             // DEBUG_V (String ("Setting WiFi hostname: ") + Hostname);
             WiFi.hostname(Hostname);
         }
-        // DEBUG_V("");
+        // DEBUG_V ("");
 #else
         WiFi.persistent(false);
-        // DEBUG_V("");
+        // DEBUG_V ("");
         WiFi.disconnect(true);
-        // DEBUG_V("");
+        // DEBUG_V ("");
 
         if (0 != Hostname.length())
         {
-            // DEBUG_V(String("Setting WiFi hostname: ") + Hostname);
+            // DEBUG_V (String("Setting WiFi hostname: ") + Hostname);
             WiFi.hostname(Hostname);
         }
 
-        // DEBUG_V("Setting WiFi Mode to STA");
+        // DEBUG_V ("Setting WiFi Mode to STA");
         WiFi.enableAP(false);
-        // DEBUG_V();
+        // DEBUG_V ();
         WiFi.enableSTA(true);
 
 #endif
@@ -266,7 +265,7 @@ void c_WiFiDriver::connectWifi (const String & current_ssid, const String & curr
                Hostname);
 
         WiFi.setSleep(false);
-        // DEBUG_V("");
+        // DEBUG_V ("");
         WiFi.begin(current_ssid.c_str(), current_passphrase.c_str());
     } while (false);
 
@@ -316,8 +315,7 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    JsonWrite(json, CN_ssid,          ssid);
-    JsonWrite(json, CN_passphrase,    passphrase);
+    ApCredentials.GetConfig(json);
     JsonWrite(json, CN_ap_ssid,       ap_ssid);
     JsonWrite(json, CN_ap_passphrase, ap_passphrase);
 
@@ -347,6 +345,8 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
     JsonWrite(json, CN_ap_fallback,  ap_fallbackIsEnabled);
     JsonWrite(json, CN_ap_timeout,   ap_timeout);
     JsonWrite(json, CN_ap_reboot,    RebootOnWiFiFailureToConnect);
+
+    PrettyPrint(json, "WiFi Config");
 
     // DEBUG_END;
 
@@ -462,14 +462,14 @@ void c_WiFiDriver::reset ()
 
     // Reset address in case we're switching from static to dhcp
     // WiFi.config (0u, 0u, 0u);
-    // DEBUG_V("");
+    // DEBUG_V ("");
 
     if (IsWiFiConnected ())
     {
-        // DEBUG_V("");
+        // DEBUG_V ("");
         NetworkMgr.SetWiFiIsConnected (false);
     }
-    // DEBUG_V("");
+    // DEBUG_V ("");
 
     fsm_WiFi_state_Boot_imp.Init ();
 
@@ -481,7 +481,7 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
 {
     // DEBUG_START;
 
-    // DEBUG_V(String("ap_channelNumber: ") + String(ap_channelNumber));
+    // DEBUG_V (String("ap_channelNumber: ") + String(ap_channelNumber));
     bool ConfigChanged = false;
 
     String sIp = ip.toString ();
@@ -489,9 +489,9 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     String sNetmask = netmask.toString ();
     String sdnsp = primaryDns.toString ();
     String sdnss = secondaryDns.toString ();
-    
-    ConfigChanged |= setFromJSON (ssid, json, CN_ssid);
-    ConfigChanged |= setFromJSON (passphrase, json, CN_passphrase);
+
+    ConfigChanged |= ApCredentials.SetConfig(json);
+
     ConfigChanged |= setFromJSON (sIp, json, CN_ip);
     ConfigChanged |= setFromJSON (sNetmask, json, CN_netmask);
     ConfigChanged |= setFromJSON (sGateway, json, CN_gateway);
@@ -513,7 +513,7 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     // DEBUG_V (String("ap_channelNumber: ") + String(ap_channelNumber));
     // String StateName;
     // pCurrentFsmState->GetStateName(StateName);
-    // DEBUG_V(String("       CurrState: ") + StateName);
+    // DEBUG_V (String("       CurrState: ") + StateName);
 
     ip.fromString (sIp);
     gateway.fromString (sGateway);
@@ -521,23 +521,17 @@ bool c_WiFiDriver::SetConfig (JsonObject & json)
     primaryDns.fromString (sdnsp);
     secondaryDns.fromString (sdnss);
 
-    if((String(passphrase).length() < 8) && (String(passphrase).length() > 0))
-    {
-        logcon (String (F ("WiFi Passphrase is too short. Using Empty String")));
-        memset(passphrase, 0x0, sizeof(passphrase));
-    }
-
     if(ConfigChanged)
     {
-        // DEBUG_V("WiFi Settings changed");
+        // DEBUG_V ("WiFi Settings changed");
         if(pCurrentFsmState == &fsm_WiFi_state_ConnectedToAP_imp)
         {
-            // DEBUG_V("need to cycle the WiFi to move to new STA settings");
+            // DEBUG_V ("need to cycle the WiFi to move to new STA settings");
             WiFi.disconnect();
         }
         else if(pCurrentFsmState == &fsm_WiFi_state_ConnectedToSta_imp)
         {
-            // DEBUG_V("need to cycle the WiFi to move to new AP settings");
+            // DEBUG_V ("need to cycle the WiFi to move to new AP settings");
             WiFi.softAPdisconnect();
         }
     }
@@ -600,7 +594,7 @@ void c_WiFiDriver::SetUpIp ()
             (netmask == WiFi.subnetMask ()) &&
             (gateway == WiFi.gatewayIP ()))
         {
-            // DEBUG_V();
+            // DEBUG_V ();
             // correct IP is already set
             break;
         }
@@ -628,18 +622,6 @@ int c_WiFiDriver::ValidateConfig ()
     // DEBUG_START;
 
     int response = 0;
-
-    if (0 == strlen(ssid))
-    {
-        // DEBUG_V ();
-        response++;
-    }
-
-    if (0 == strlen(passphrase))
-    {
-        // DEBUG_V ();
-        response++;
-    }
 
     if (sta_timeout < 5)
     {
@@ -672,6 +654,7 @@ void fsm_WiFi_state_Boot::Poll ()
 
     // Start trying to connect to the AP
     /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
+    pWiFiDriver->ApCredentials.ResetCurrentCredentials();
     fsm_WiFi_state_ConnectingUsingConfig_imp.Init ();
     // pWiFiDriver->displayFsmState ();
 
@@ -709,7 +692,9 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
         {
             /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
-            fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
+            DEBUG_V ("Try the next SSID");
+            pWiFiDriver->ApCredentials.GetNextCredentials();
+            Init ();
         }
     }
 
@@ -720,27 +705,44 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
 // Wait for events
 void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 {
-    // DEBUG_START;
-    String CurrentSsid = pWiFiDriver->GetConfig_ssid ();
-    String CurrentPassphrase = pWiFiDriver->GetConfig_passphrase ();
-    // DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
+    DEBUG_START;
+    c_ApCredentials::ApCredentials credentials;
 
-    if ((0 == CurrentSsid.length ()) || (String("null") == CurrentSsid))
+    do
     {
-        // DEBUG_V ();
-        fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
-    }
-    else
-    {
-        pWiFiDriver->SetFsmState (this);
-        pWiFiDriver->AnnounceState ();
-        pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout(), false);
+        if(!pWiFiDriver->ApCredentials.GetCurrentCredentials(credentials))
+        {
+            DEBUG_V ("No additional SSIDs to try");
+            pWiFiDriver->ApCredentials.ResetCurrentCredentials();
+            fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
+            break;
+        }
 
-        pWiFiDriver->connectWifi (CurrentSsid, CurrentPassphrase);
-    }
+        String ssid = String(credentials.ssid);
+        String pw = String(credentials.passphrase);
+
+        DEBUG_V (String("ssid: ") + ssid);
+        DEBUG_V (String("  pw: ") + pw);
+
+        if (!ssid.isEmpty())
+        {
+            DEBUG_V ("Try this ssid");
+            pWiFiDriver->SetFsmState (this);
+            pWiFiDriver->AnnounceState ();
+            pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout(), false);
+
+            pWiFiDriver->connectWifi (ssid, pw);
+            break;
+        }
+
+        DEBUG_V ("Try next ssid");
+        pWiFiDriver->ApCredentials.GetNextCredentials();
+
+    } while(true);
+
     // pWiFiDriver->displayFsmState ();
 
-    // DEBUG_END;
+    DEBUG_END;
 
 } // fsm_WiFi_state_ConnectingUsingConfig::Init
 
@@ -790,11 +792,11 @@ void fsm_WiFi_state_ConnectingUsingDefaults::Init ()
         pWiFiDriver->SetFsmState (this);
         pWiFiDriver->AnnounceState ();
         pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout (), false);
-        // DEBUG_V("      default_ssid: '" + default_ssid + "'");
-        // DEBUG_V("default_passphrase: '" + default_passphrase + "'");
+        // DEBUG_V ("      default_ssid: '" + default_ssid + "'");
+        // DEBUG_V ("default_passphrase: '" + default_passphrase + "'");
         pWiFiDriver->connectWifi (default_ssid, default_passphrase);
-        // DEBUG_V("      default_ssid: '" + default_ssid + "'");
-        // DEBUG_V("default_passphrase: '" + default_passphrase + "'");
+        // DEBUG_V ("      default_ssid: '" + default_ssid + "'");
+        // DEBUG_V ("default_passphrase: '" + default_passphrase + "'");
     }
     else
     {
@@ -865,7 +867,7 @@ void fsm_WiFi_state_ConnectingAsAP::Init ()
             NetworkMgr.GetHostname (Hostname);
             strcpy(pWiFiDriver->ap_ssid, (String(F("ESPixelStick-")) + Hostname).c_str());
         }
-        // DEBUG_V(String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
+        // DEBUG_V (String("ap_channelNumber: ") + String(pWiFiDriver->ap_channelNumber));
         WiFi.softAPConfig(IPAddress(192,168,4,1), IPAddress(192,168,4,1), IPAddress(255,255,255,0));
         WiFi.softAP (pWiFiDriver->ap_ssid, pWiFiDriver->ap_passphrase, int(pWiFiDriver->ap_channelNumber));
 

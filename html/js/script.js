@@ -1366,11 +1366,11 @@ function ProcessModeConfigurationDataServoPCA9685(ServoConfig) {
     // add as many rows as we need
     for (let CurrentRowId = 1; CurrentRowId <= ChannelConfigs.length; CurrentRowId++) {
         // console.log("CurrentRowId = " + CurrentRowId);
-        let ChanIdPattern = '<td                        id="ServoChanId_' + (CurrentRowId) + '">a</td>';
-        let EnabledPattern = '<td><input type="checkbox" id="ServoEnabled_' + (CurrentRowId) + '"></td>';
-        let MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
-        let MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_' + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
-        let RestingPattern = '<td><input type="number"   id="ServoHomeValue_' + (CurrentRowId) + '"step="1" min="0"  max="65535" value="0"  class="form-control is-valid"></td>';
+        let ChanIdPattern   = '<td                        id="ServoChanId_'    + (CurrentRowId) + '">a</td>';
+        let EnabledPattern  = '<td><input type="checkbox" id="ServoEnabled_'   + (CurrentRowId) + '"></td>';
+        let MinLevelPattern = '<td><input type="number"   id="ServoMinLevel_'  + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        let MaxLevelPattern = '<td><input type="number"   id="ServoMaxLevel_'  + (CurrentRowId) + '"step="1" min="10" max="4095"  value="0"  class="form-control is-valid"></td>';
+        let RestingPattern  = '<td><input type="number"   id="ServoHomeValue_' + (CurrentRowId) + '"step="1" min="0"  max="65535" value="0"  class="form-control is-valid"></td>';
         let DataType = '<td><select class="form-control is-valid" id="ServoDataType_' + (CurrentRowId) + '" title="Effect to generate"></select></td>';
 
         let rowPattern = '<tr>' + ChanIdPattern + EnabledPattern + MinLevelPattern + MaxLevelPattern + DataType + RestingPattern + '</tr>';
@@ -1552,6 +1552,25 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
         $('#ftpusername').val(System_Config.device.user);
         $('#ftppassword').val(System_Config.device.password);
         $('#ftp_enable').prop("checked", System_Config.device.enabled);
+
+        let ApCredentials = System_Config.network.wifi.ApCredentials;
+        let CurrentRowId = 0;
+        $('#ApCredentialsTable').empty();
+
+        ApCredentials.forEach(ApCredential =>
+        {
+            console.debug("SSID: " + ApCredential.ssid);
+
+            let SsidPattern = '<td><input type="text" id="ApCredentialSsid_' + (CurrentRowId) + '" maxlength="32"></td>';
+            let PwPattern   = '<td><input type="text" id="ApCredentialPw_'   + (CurrentRowId) + '" maxlength="64"></td>';
+
+            let rowPattern = '<tr>' + SsidPattern + PwPattern + '</tr>';
+            $('#ApCredentialsTable').append(rowPattern);
+
+            $('#ApCredentialSsid_' + CurrentRowId).val(ApCredential.ssid);
+            $('#ApCredentialPw_'   + CurrentRowId).val(ApCredential.passphrase);
+            CurrentRowId++;
+        });
 
         if ({}.hasOwnProperty.call(System_Config.network, 'eth')) {
             $('#pg_network #network #eth').removeClass("hidden")
@@ -1737,8 +1756,7 @@ function CreateOptionsFromConfig(OptionListName, Config) {
 // Builds JSON config submission for "WiFi" tab
 function ExtractNetworkWiFiConfigFromHtmlPage() {
     let wifi = System_Config.network.wifi;
-    wifi.ssid = $('#network #wifi #ssid').val();
-    wifi.passphrase = $('#network #wifi #passphrase').val();
+
     wifi.sta_timeout = parseInt($('#network #wifi #sta_timeout').val());
     wifi.ip = $('#network #wifi #ip').val();
     wifi.netmask = $('#network #wifi #netmask').val();
@@ -1754,6 +1772,13 @@ function ExtractNetworkWiFiConfigFromHtmlPage() {
     wifi.ap_timeout = parseInt($('#network #wifi #ap_timeout').val());
     wifi.StayInApMode = $('#network #wifi #StayInApMode').prop('checked');
 
+    let CurrentRowId = 0;
+    wifi.ApCredentials.forEach(ApCredential =>
+    {
+        ApCredential.ssid       = $("#ApCredentialSsid_" + CurrentRowId).val();
+        ApCredential.passphrase = $("#ApCredentialPw_"   + CurrentRowId).val();
+        CurrentRowId++;
+    });
 } // ExtractNetworkWiFiConfigFromHtmlPage
 
 function ExtractNetworkEthernetConfigFromHtmlPage() {
