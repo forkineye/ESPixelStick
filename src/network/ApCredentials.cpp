@@ -46,15 +46,16 @@ void c_ApCredentials::GetConfig (JsonObject& json)
 {
     // DEBUG_START;
 
-    JsonArray ApCredentialsArray = json.createNestedArray(CN_ApCredentials);
+
+    JsonArray ApCredentialsArray = json[CN_ApCredentials].to<JsonArray>();
     for(auto & currentCredentials : _ApCredentials)
     {
-        JsonObject NewArrayEntry = ApCredentialsArray.createNestedObject();
+        JsonObject NewArrayEntry = ApCredentialsArray.add<JsonObject>();
         JsonWrite(NewArrayEntry, CN_ssid,       currentCredentials.ssid);
         JsonWrite(NewArrayEntry, CN_passphrase, currentCredentials.passphrase);
     }
 
-    PrettyPrint(json, "Credentials Config");
+    // PrettyPrint(json, "Credentials Config");
 
     // DEBUG_END;
 
@@ -70,7 +71,7 @@ bool c_ApCredentials::SetConfig (JsonObject & json)
     do // once
     {
         // is this an old style config?
-        if(json.containsKey(CN_ssid))
+        if(json[CN_ssid].is<JsonObject>())
         {
             // DEBUG_V("Old Style Config");
             memset(_ApCredentials, 0x00, sizeof(_ApCredentials));
