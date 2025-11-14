@@ -1559,10 +1559,10 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
 
         ApCredentials.forEach(ApCredential =>
         {
-            console.debug("SSID: " + ApCredential.ssid);
+            // console.debug("SSID: " + ApCredential.ssid);
 
-            let SsidPattern = '<td><input type="text" id="ApCredentialSsid_' + (CurrentRowId) + '" maxlength="32"></td>';
-            let PwPattern   = '<td><input type="text" id="ApCredentialPw_'   + (CurrentRowId) + '" maxlength="64"></td>';
+            let SsidPattern = '<td style="padding: 0; border-collapse: collapse;"><input type="text" id="ApCredentialSsid_' + (CurrentRowId) + '" maxlength="32"></td>';
+            let PwPattern   = '<td style="padding: 0; border-collapse: collapse;"><input type="text" id="ApCredentialPw_'   + (CurrentRowId) + '" maxlength="64"></td>';
 
             let rowPattern = '<tr>' + SsidPattern + PwPattern + '</tr>';
             $('#ApCredentialsTable').append(rowPattern);

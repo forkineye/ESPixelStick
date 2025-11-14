@@ -30,7 +30,7 @@
 .ApCred-table {
     margin-left: 17%;
     table-layout: auto;
-    width: 100%;
+    border-collapse: collapse;
 }
 
 .footer {
