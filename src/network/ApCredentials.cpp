@@ -23,12 +23,12 @@
 ///< Start up the driver and put it into a safe mode
 c_ApCredentials::c_ApCredentials ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     memset(_ApCredentials, 0x00, sizeof(_ApCredentials));
     ResetCurrentCredentials();
 
-    DEBUG_END;
+    // DEBUG_END;
 } // c_ApCredentials
 
 //-----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ c_ApCredentials::~c_ApCredentials()
 //-----------------------------------------------------------------------------
 void c_ApCredentials::GetConfig (JsonObject& json)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     JsonArray ApCredentialsArray = json.createNestedArray(CN_ApCredentials);
     for(auto & currentCredentials : _ApCredentials)
@@ -56,14 +56,14 @@ void c_ApCredentials::GetConfig (JsonObject& json)
 
     PrettyPrint(json, "Credentials Config");
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // GetConfig
 
 //-----------------------------------------------------------------------------
 bool c_ApCredentials::SetConfig (JsonObject & json)
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     bool ConfigChanged = false;
 
@@ -72,18 +72,18 @@ bool c_ApCredentials::SetConfig (JsonObject & json)
         // is this an old style config?
         if(json.containsKey(CN_ssid))
         {
-            DEBUG_V("Old Style Config");
+            // DEBUG_V("Old Style Config");
             memset(_ApCredentials, 0x00, sizeof(_ApCredentials));
             ConfigChanged |= setFromJSON (_ApCredentials[0].ssid,       json, CN_ssid);
             ConfigChanged |= setFromJSON (_ApCredentials[0].passphrase, json, CN_passphrase);
             break;
         }
 
-        DEBUG_V("New style config");
+        // DEBUG_V("New style config");
         JsonArray CredentialsArray = json[CN_ApCredentials];
         // adjust the number of entries in the vector
-        DEBUG_V(String("MAX_NUM_CREDENTIALS: ") + String(MAX_NUM_CREDENTIALS));
-        DEBUG_V(String("CredentialsArray.size: ") + String(CredentialsArray.size()));
+        // DEBUG_V(String("MAX_NUM_CREDENTIALS: ") + String(MAX_NUM_CREDENTIALS));
+        // DEBUG_V(String("CredentialsArray.size: ") + String(CredentialsArray.size()));
         if(CredentialsArray.size() != MAX_NUM_CREDENTIALS)
         {
             logcon("ERROR: AP Credentials Config data is not valid.");
@@ -109,13 +109,13 @@ bool c_ApCredentials::SetConfig (JsonObject & json)
         }
     } while (false);
 
-    DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
+    // DEBUG_V (String("ConfigChanged: ") + String(ConfigChanged));
     if(ConfigChanged)
     {
         ResetCurrentCredentials();
     }
 
-    DEBUG_END;
+    // DEBUG_END;
     return ConfigChanged;
 
 } // SetConfig
@@ -123,7 +123,7 @@ bool c_ApCredentials::SetConfig (JsonObject & json)
 //-----------------------------------------------------------------------------
 bool c_ApCredentials::GetCurrentCredentials (ApCredentials & OutValue)
 {
-    DEBUG_START;
+    // DEBUG_START;
     bool Response = false;
 
     // DEBUG_V(String("CredentialsIndex: ") + String(ApCredentialsIterator));
@@ -136,10 +136,10 @@ bool c_ApCredentials::GetCurrentCredentials (ApCredentials & OutValue)
     }
     else
     {
-        DEBUG_V("No credentials to send");
+        // DEBUG_V("No credentials to send");
     }
 
-    DEBUG_END;
+    // DEBUG_END;
     return Response;
 
 } // GetCurrentCredentials
@@ -147,11 +147,11 @@ bool c_ApCredentials::GetCurrentCredentials (ApCredentials & OutValue)
 //-----------------------------------------------------------------------------
 bool c_ApCredentials::GetNextCredentials ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     ApCredentialsIterator++;
 
-    DEBUG_END;
+    // DEBUG_END;
     return ApCredentialsIterator < MAX_NUM_CREDENTIALS;
 
 } // GetNextCredentials
@@ -159,10 +159,10 @@ bool c_ApCredentials::GetNextCredentials ()
 //-----------------------------------------------------------------------------
 void c_ApCredentials::ResetCurrentCredentials ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     ApCredentialsIterator = 0;
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // ResetCurrentCredentials
