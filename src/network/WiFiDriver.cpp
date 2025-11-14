@@ -346,7 +346,7 @@ void c_WiFiDriver::GetConfig (JsonObject& json)
     JsonWrite(json, CN_ap_timeout,   ap_timeout);
     JsonWrite(json, CN_ap_reboot,    RebootOnWiFiFailureToConnect);
 
-    PrettyPrint(json, "WiFi Config");
+    // PrettyPrint(json, "WiFi Config");
 
     // DEBUG_END;
 
@@ -692,7 +692,7 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
         {
             /// DEBUG_V (String ("this: ") + String (uint32_t (this), HEX));
             logcon (F ("WiFi Failed to connect using Configured Credentials"));
-            DEBUG_V ("Try the next SSID");
+            // DEBUG_V ("Try the next SSID");
             pWiFiDriver->ApCredentials.GetNextCredentials();
             Init ();
         }
@@ -705,14 +705,14 @@ void fsm_WiFi_state_ConnectingUsingConfig::Poll ()
 // Wait for events
 void fsm_WiFi_state_ConnectingUsingConfig::Init ()
 {
-    DEBUG_START;
+    // DEBUG_START;
     c_ApCredentials::ApCredentials credentials;
 
     do
     {
         if(!pWiFiDriver->ApCredentials.GetCurrentCredentials(credentials))
         {
-            DEBUG_V ("No additional SSIDs to try");
+            // DEBUG_V ("No additional SSIDs to try");
             pWiFiDriver->ApCredentials.ResetCurrentCredentials();
             fsm_WiFi_state_ConnectingUsingDefaults_imp.Init ();
             break;
@@ -721,12 +721,12 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
         String ssid = String(credentials.ssid);
         String pw = String(credentials.passphrase);
 
-        DEBUG_V (String("ssid: ") + ssid);
-        DEBUG_V (String("  pw: ") + pw);
+        // DEBUG_V (String("ssid: ") + ssid);
+        // DEBUG_V (String("  pw: ") + pw);
 
         if (!ssid.isEmpty())
         {
-            DEBUG_V ("Try this ssid");
+            // DEBUG_V ("Try this ssid");
             pWiFiDriver->SetFsmState (this);
             pWiFiDriver->AnnounceState ();
             pWiFiDriver->GetFsmTimer().StartTimer(1000 * pWiFiDriver->Get_sta_timeout(), false);
@@ -735,14 +735,14 @@ void fsm_WiFi_state_ConnectingUsingConfig::Init ()
             break;
         }
 
-        DEBUG_V ("Try next ssid");
+        // DEBUG_V ("Try next ssid");
         pWiFiDriver->ApCredentials.GetNextCredentials();
 
     } while(true);
 
     // pWiFiDriver->displayFsmState ();
 
-    DEBUG_END;
+    // DEBUG_END;
 
 } // fsm_WiFi_state_ConnectingUsingConfig::Init
 
