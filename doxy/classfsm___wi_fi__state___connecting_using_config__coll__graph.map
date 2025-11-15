@@ -1,10 +1,14 @@
 <map id="fsm_WiFi_state_ConnectingUsingConfig" name="fsm_WiFi_state_ConnectingUsingConfig">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,109,190,150"/>
-<area shape="rect" id="Node000002" href="$classfsm___wi_fi__state.html" title=" " alt="" coords="85,5,198,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,45,119,56,109,83,103,109,98,108,104,82,114,54,120,42"/>
-<area shape="rect" id="Node000003" href="$classc___wi_fi_driver.html" title=" " alt="" coords="234,116,329,142"/>
-<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="135,46,134,66,140,83,174,98,234,114,233,119,172,103,136,87,129,67,130,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="274,102,265,78,250,57,226,40,197,30,199,25,228,36,254,53,270,75,279,100"/>
-<area shape="rect" id="Node000004" href="$class_fast_timer.html" title=" " alt="" coords="343,5,423,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="378,47,369,67,355,87,334,105,312,118,309,114,331,101,352,83,364,65,373,45"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,198,190,238"/>
+<area shape="rect" id="Node000002" href="$classfsm___wi_fi__state.html" title=" " alt="" coords="85,94,198,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="125,134,119,145,109,172,103,198,98,197,104,171,114,143,120,131"/>
+<area shape="rect" id="Node000003" href="$classc___wi_fi_driver.html" title=" " alt="" coords="284,205,380,231"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="135,135,133,155,140,172,158,180,195,190,285,207,284,212,193,195,156,185,136,175,128,155,130,134"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="302,198,276,176,264,159,251,146,225,132,197,122,199,117,227,127,254,142,268,156,280,172,305,194"/>
+<area shape="rect" id="Node000004" href="$class_fast_timer.html" title=" " alt="" coords="343,94,423,120"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="374,135,356,175,341,206,336,204,351,173,369,133"/>
+<area shape="rect" id="Node000005" href="$classc___ap_credentials.html" title=" " alt="" coords="447,94,564,120"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="486,133,463,155,435,176,402,194,370,207,368,202,400,189,432,171,459,151,482,129"/>
+<area shape="rect" id="Node000006" href="$structc___ap_credentials_1_1_ap_credentials.html" title=" " alt="" coords="404,5,607,31"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="508,47,508,94,503,94,503,47"/>
 </map>

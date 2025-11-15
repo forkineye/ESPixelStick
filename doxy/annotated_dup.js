@@ -1,5 +1,6 @@
 var annotated_dup =
 [
+    [ "c_ApCredentials", "classc___ap_credentials.html", "classc___ap_credentials" ],
     [ "c_ExternalInput", "classc___external_input.html", "classc___external_input" ],
     [ "c_FileMgr", "classc___file_mgr.html", "classc___file_mgr" ],
     [ "c_FPPDiscovery", "classc___f_p_p_discovery.html", "classc___f_p_p_discovery" ],

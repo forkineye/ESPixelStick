@@ -1,5 +1,7 @@
 var hierarchy =
 [
+    [ "c_ApCredentials::ApCredentials", "structc___ap_credentials_1_1_ap_credentials.html", null ],
+    [ "c_ApCredentials", "classc___ap_credentials.html", null ],
     [ "c_ExternalInput", "classc___external_input.html", null ],
     [ "c_FileMgr", "classc___file_mgr.html", null ],
     [ "c_FPPDiscovery", "classc___f_p_p_discovery.html", null ],

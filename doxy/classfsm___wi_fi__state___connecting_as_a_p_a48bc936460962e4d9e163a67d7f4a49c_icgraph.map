@@ -1,17 +1,15 @@
 <map id="fsm_WiFi_state_ConnectingAsAP::Init" name="fsm_WiFi_state_ConnectingAsAP::Init">
-<area shape="rect" id="Node000001" title=" " alt="" coords="664,136,849,177"/>
-<area shape="rect" id="Node000002" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a312d128379e2c56f6f4d6619d64c1988" title=" " alt="" coords="432,37,616,78"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="698,131,615,93,584,81,586,76,617,89,700,126"/>
-<area shape="rect" id="Node000006" href="$classfsm___wi_fi__state___connected_to_sta.html#aa53957a3d45167be9dc596cfffc3f4be" title=" " alt="" coords="434,103,615,143"/>
-<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="648,144,615,139,616,133,649,138"/>
-<area shape="rect" id="Node000007" href="$classfsm___wi_fi__state___connected_to_sta.html#a5d7d67f31b4bb74acea5d8018efdd77a" title=" " alt="" coords="434,168,615,209"/>
-<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="649,174,616,178,615,173,648,169"/>
-<area shape="rect" id="Node000008" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a1add8feff5b4e42832629d6993c09a96" title=" " alt="" coords="432,233,616,274"/>
-<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="700,186,617,223,585,235,583,230,615,218,698,181"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="664,104,849,145"/>
+<area shape="rect" id="Node000002" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a312d128379e2c56f6f4d6619d64c1988" title=" " alt="" coords="432,5,616,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="698,99,615,61,584,49,586,44,617,57,700,94"/>
+<area shape="rect" id="Node000005" href="$classfsm___wi_fi__state___connected_to_sta.html#aa53957a3d45167be9dc596cfffc3f4be" title=" " alt="" coords="434,71,615,111"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="648,112,615,107,616,101,649,106"/>
+<area shape="rect" id="Node000006" href="$classfsm___wi_fi__state___connected_to_sta.html#a5d7d67f31b4bb74acea5d8018efdd77a" title=" " alt="" coords="434,136,615,177"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="649,142,616,146,615,141,648,137"/>
+<area shape="rect" id="Node000007" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a1add8feff5b4e42832629d6993c09a96" title=" " alt="" coords="432,201,616,242"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="700,154,617,191,585,203,583,198,615,186,698,149"/>
 <area shape="rect" id="Node000003" href="$classfsm___wi_fi__state___connecting_using_config.html#ad48a3649d60e18e369a0a2c499fa3613" title=" " alt="" coords="200,5,384,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="416,45,384,41,385,36,417,40"/>
-<area shape="rect" id="Node000005" href="$classfsm___wi_fi__state___connecting_using_config.html#a2f4e42b79508b89d361989d86d8acd7b" title=" " alt="" coords="200,71,384,111"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="417,76,385,80,384,75,416,70"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="416,28,385,28,385,23,416,23"/>
 <area shape="rect" id="Node000004" href="$classfsm___wi_fi__state___boot.html#a8063e8f2dff740f938a920e287b68709" title=" " alt="" coords="5,5,152,46"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="184,28,152,28,152,23,184,23"/>
 </map>

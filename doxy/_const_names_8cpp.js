@@ -14,6 +14,7 @@ var _const_names_8cpp =
     [ "CN_ap_reboot", "_const_names_8cpp.html#acb838dbe72c813eda9a0ddc0943404af", null ],
     [ "CN_ap_ssid", "_const_names_8cpp.html#a5871151a37bd0a752a895924f2da0f10", null ],
     [ "CN_ap_timeout", "_const_names_8cpp.html#a6138d4fafcb472f898b1278af7543337", null ],
+    [ "CN_ApCredentials", "_const_names_8cpp.html#a01a80243293a34331d774b6114dac660", null ],
     [ "CN_appendnullcount", "_const_names_8cpp.html#adf004f95fc93ade7ca0503f948d3c9db", null ],
     [ "CN_applicationSLASHjson", "_const_names_8cpp.html#a61910de8e07e5ea32ce7246be71fc80a", null ],
     [ "CN_b", "_const_names_8cpp.html#a18851a8bcb22a3b7f390d9c8516503b2", null ],

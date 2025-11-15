@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['unzipfiles_2ecpp_0',['UnzipFiles.cpp',['../_unzip_files_8cpp.html',1,'']]],
-  ['unzipfiles_2ehpp_1',['UnzipFiles.hpp',['../_unzip_files_8hpp.html',1,'']]]
+  ['saferstringconversion_2ehpp_0',['SaferStringConversion.hpp',['../_safer_string_conversion_8hpp.html',1,'']]],
+  ['sensords18b20_2ecpp_1',['SensorDS18B20.cpp',['../_sensor_d_s18_b20_8cpp.html',1,'']]],
+  ['sensords18b20_2eh_2',['SensorDS18B20.h',['../_sensor_d_s18_b20_8h.html',1,'']]]
 ];

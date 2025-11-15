@@ -14,7 +14,7 @@ var searchData=
   ['size_11',['size',['../union_e_f_update_1_1efurecord__t.html#a3009a7d74e911b8a12404a32183c0a98',1,'EFUpdate::efurecord_t::size'],['../structc___file_mgr_1_1_file_list_entry__t.html#a004583b0bfee708652aa238b715bc57c',1,'c_FileMgr::FileListEntry_t::size'],['../_e_f_update_8h.html#ab2c6b258f02add8fdf4cfc7c371dd772',1,'size:&#160;EFUpdate.h']]],
   ['sourcedataoffset_12',['SourceDataOffset',['../structc___input_artnet_1_1_universe__t.html#a05f9c0ee84486a9abc9c015d3b7a806a',1,'c_InputArtnet::Universe_t::SourceDataOffset'],['../structc___input_e131_1_1_universe__t.html#ab03c57eeb49b58d73e6c3dfb42f1a433',1,'c_InputE131::Universe_t::SourceDataOffset']]],
   ['sparseranges_13',['SparseRanges',['../classc___input_f_p_p_remote_play_file.html#ae253a268fe8a6f3c99b5592b50cb776b',1,'c_InputFPPRemotePlayFile']]],
-  ['ssid_14',['ssid',['../classc___wi_fi_driver.html#a388490570a8fc470b83649cde6ddfa8b',1,'c_WiFiDriver']]],
+  ['ssid_14',['ssid',['../structc___ap_credentials_1_1_ap_credentials.html#a879f10f86729e37a9406c2294069b4d7',1,'c_ApCredentials::ApCredentials']]],
   ['sta_5ftimeout_15',['sta_timeout',['../classc___wi_fi_driver.html#af2f7c714065674c5c8c085836370d4e0',1,'c_WiFiDriver']]],
   ['start_16',['Start',['../struct_f_s_e_q_raw_range_entry.html#a08c70d57f202cba568f6891017d3a8b3',1,'FSEQRawRangeEntry::Start'],['../fseq_8h.html#a2ba9d94b21d85e2bdebe710895705d1e',1,'Start:&#160;fseq.h']]],
   ['startingintensity_17',['StartingIntensity',['../structc___input_effect_engine_1_1_marquee_group__t.html#adc649d61c54db516ab8b94d84ba7a597',1,'c_InputEffectEngine::MarqueeGroup_t']]],
