@@ -2,7 +2,7 @@
     "release": "ESPixelStick 4.0-dev - Development Release",
     "baudrate": "115200",
     "boards": [
-        {
+		{
             "name": "ESPixelStick V3",
             "description": "Official hardware from Forkineye",
             "chip": "esp8266",
@@ -1437,6 +1437,41 @@
                 },
                 {
                     "name": "esp32/esp32_s-app.bin",
+                    "offset": "0x10000"
+                }
+            ],
+            "filesystem": {
+                "page": "256",
+                "block": "4096",
+                "size": "0x50000",
+                "offset": "0x3B0000"
+            }
+        },
+        {
+            "name": "Seeed Studio XIAO ESP32-S3",
+            "description": "ESP32-S3 mini Controller",
+            "chip": "esp32s3",
+            "appbin": "esp32s3/seeed_xiao_esp32s3-app.bin",
+            "esptool": {
+                "baudrate": "115200",
+                "options": "--before default_reset --after hard_reset",
+                "flashcmd": "write_flash -z"
+            },
+            "binfiles": [
+                {
+                    "name": "esp32s3/seeed_xiao_esp32s3-bootloader.bin",
+                    "offset": "0x00000"
+                },
+                {
+                    "name": "esp32s3/seeed_xiao_esp32s3-partitions.bin",
+                    "offset": "0x08000"
+                },
+                {
+                    "name": "esp32s3/boot_app0.bin",
+                    "offset": "0x0e000"
+                },
+                {
+                    "name": "esp32s3/seeed_xiao_esp32s3-app.bin",
                     "offset": "0x10000"
                 }
             ],
