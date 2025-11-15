@@ -3,7 +3,7 @@
 * WiFiDriver.hpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2022 Shelby Merrick
+* Copyright (c) 2021, 2025 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -19,6 +19,7 @@
 */
 
 #include "ESPixelStick.h"
+#include "network/ApCredentials.hpp"
 
 #ifdef ARDUINO_ARCH_ESP8266
 #   include <ESP8266WiFi.h>
@@ -78,9 +79,7 @@ public:
     bool      Get_ap_fallbackIsEnabled () { return ap_fallbackIsEnabled; }
     bool      Get_ap_StayInApMode () { return StayInApMode; }
     bool      Get_RebootOnWiFiFailureToConnect () { return RebootOnWiFiFailureToConnect; }
-    String    GetConfig_ssid () { return ssid; }
     String    GetConfig_apssid () { return ap_ssid; }
-    String    GetConfig_passphrase () { return passphrase; }
     void      GetHostname (String& name);
     void      SetHostname (String & name);
     void      Disable ();
@@ -102,8 +101,6 @@ private:
     uint32_t    PollInterval = 1000;
     bool        ReportedIsWiFiConnected = false;
 
-    char        ssid[65];
-    char        passphrase[65];
     char        ap_ssid[65];
     char        ap_passphrase[65];
     IPAddress   ip = INADDR_NONE;
@@ -149,6 +146,7 @@ protected:
     friend class fsm_WiFi_state;
     fsm_WiFi_state * pCurrentFsmState = nullptr;
     FastTimer        FsmTimer;
+    c_ApCredentials  ApCredentials;
 
 }; // c_WiFiDriver
 
