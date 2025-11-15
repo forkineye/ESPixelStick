@@ -130,10 +130,12 @@ jobs:
           #
           - target: "esp32_s"
             chip: "esp32"
-          #
           # WT 32 Foo Board
           - target: "esp32_foo"
             chip: "esp32"
+          # Seeed Studio XIAO ESP32-S3
+          - target: "seeed_xiao_esp32s3"
+            chip: "esp32s3"
 
     runs-on: ubuntu-latest
     steps:

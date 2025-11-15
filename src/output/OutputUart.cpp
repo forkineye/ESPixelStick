@@ -859,31 +859,62 @@ void c_OutputUart::PauseOutput(bool PauseOutput)
 //-----------------------------------------------------------------------------
 bool c_OutputUart::RegisterUartIsrHandler()
 {
-    // DEBUG_START;
+#if defined(ARDUINO_ARCH_ESP8266)
 
-    bool ret = true;
-    DisableUartInterrupts();
-
-#ifdef ARDUINO_ARCH_ESP8266
-    // ETS_UART_INTR_DETACH(uart_intr_handler);
+    ETS_UART_INTR_DISABLE();
     ETS_UART_INTR_ATTACH(uart_intr_handler, this);
-#else
-    // UART_ENTER_CRITICAL(&(uart_context[uart_num].spinlock));
-    if (IsrHandle)
-    {
-        esp_intr_free(IsrHandle);
-        IsrHandle = nullptr;
-    }
-    ret = (ESP_OK == esp_intr_alloc((OutputUartConfig.UartId == UART_NUM_1) ? ETS_UART1_INTR_SOURCE : ETS_UART2_INTR_SOURCE,
-                                    UART_TXFIFO_EMPTY_INT_ENA | ESP_INTR_FLAG_IRAM,
-                                    uart_intr_handler,
-                                    this,
-                                    &IsrHandle));
-    // UART_EXIT_CRITICAL(&(uart_context[uart_num].spinlock));
-#endif
-    // DEBUG_END;
+    ETS_UART_INTR_ENABLE();
+    return true;
 
-    return ret;
+#elif defined(ARDUINO_ARCH_ESP32)
+
+    int intr_source = 0;
+
+    switch (OutputUartConfig.UartId)
+    {
+        case UART_NUM_0:
+        #ifdef ETS_UART0_INTR_SOURCE
+            intr_source = ETS_UART0_INTR_SOURCE;
+        #else
+            intr_source = ETS_UART0_INUM;
+        #endif
+            break;
+
+        case UART_NUM_1:
+        #ifdef ETS_UART1_INTR_SOURCE
+            intr_source = ETS_UART1_INTR_SOURCE;
+        #else
+            intr_source = ETS_UART1_INUM;
+        #endif
+            break;
+
+#if UART_NUM_MAX > 2
+        case UART_NUM_2:
+        #ifdef ETS_UART2_INTR_SOURCE
+            intr_source = ETS_UART2_INTR_SOURCE;
+        #else
+            intr_source = ETS_UART1_INUM;
+        #endif
+            break;
+#endif
+
+        default:
+            return false;
+    }
+
+    esp_err_t err = esp_intr_alloc(
+        intr_source,
+        ESP_INTR_FLAG_IRAM,
+        uart_intr_handler,
+        this,
+        &IsrHandle
+    );
+
+    return (err == ESP_OK);
+
+#else
+    return false;
+#endif
 } // RegisterUartIsrHandler
 
 //----------------------------------------------------------------------------
