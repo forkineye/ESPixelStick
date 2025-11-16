@@ -620,7 +620,6 @@ bool c_OutputRmt::StartNewFrame()
 			g_reusableBuffers[this] = heap_items;
 			g_reusableCapacities[this] = newCapacity;
 
-			reusableCapacity = newCapacity;   // now actually needed
 		}
 
 		// copy items to heap buffer
