@@ -5,6 +5,9 @@
 * Copyright (c) 2015, 2024 Shelby Merrick
 * http://www.forkineye.com
 *
+* Adapted to use IDF4-style RMT function API (driver/rmt.h) so it compiles with
+* platform-espressif32 @ 6.12.0 and runs on ESP32-S3 without direct register access.
+*
 *  This program is provided free for you to use in any way that you wish,
 *  subject to the laws and regulations where you are using it.  Due diligence
 *  is strongly suggested before using this code.  Please give credit where due.
@@ -14,9 +17,6 @@
 *  Author shall not be liable in any event for incidental or consequential
 *  damages in connection with, or arising out of, the furnishing, performance
 *  or use of these programs.
-*
-* Adapted to use IDF4-style RMT function API (driver/rmt.h) so it compiles with
-* platform-espressif32 @ 6.12.0 and runs on ESP32-S3 without direct register access.
 *
 */
 #include "ESPixelStick.h"
@@ -45,13 +45,6 @@ static uint32_t RawIsrCounter = 0;
 static TaskHandle_t SendFrameTaskHandle = NULL;
 static uint32_t FrameCompletes = 0;
 static uint32_t FrameTimeouts = 0;
-
-// small struct passed to watcher task
-struct TransmitWatcherParam {
-    int channel;
-    rmt_item32_t * items;
-    size_t count;
-};
 
 // watcher task removed: synchronous TX wait used instead
 
@@ -197,7 +190,12 @@ void c_OutputRmt::Begin(OutputRmtConfig_t config, c_OutputCommon * _pParent)
             rmt_channel_t ch = OutputRmtConfig.RmtChannelId;
 
             UpdateBitXlatTable(OutputRmtConfig.CitrdsArray);
-            bool ok = ValidateBitXlatTable(OutputRmtConfig.CitrdsArray);
+			
+            if (!ValidateBitXlatTable(OutputRmtConfig.CitrdsArray))
+			{
+				logcon("[RMT] ERROR: Bit translation table is invalid");
+				break;
+			}
 
             #if defined(rmt_set_gpio)
                 rmt_set_gpio(ch, RMT_MODE_TX, (gpio_num_t)OutputRmtConfig.DataPin, true);
@@ -210,7 +208,7 @@ void c_OutputRmt::Begin(OutputRmtConfig_t config, c_OutputCommon * _pParent)
 
         // reset the internal indices & buffer counters (kept for compatibility; not used)
         ISR_ResetRmtBlockPointers();
-        memset((void*)&SendBuffer[0], 0x0, sizeof(SendBuffer));
+        memset(SendBuffer, 0, sizeof(SendBuffer));
 
         UpdateBitXlatTable(OutputRmtConfig.CitrdsArray);
 
@@ -583,38 +581,50 @@ bool c_OutputRmt::StartNewFrame()
         items.push_back(endItem);
 
         // --- Reusable heap buffer (Performance optimization) ---
-        size_t count = items.size();
+		size_t count = items.size();
 
-        rmt_item32_t* heap_items = nullptr;
-        size_t reusableCapacity = 0;
+		// local capacity variable
+		size_t reusableCapacity = 0;
 
-        auto itC = g_reusableCapacities.find(this);
-        if (itC != g_reusableCapacities.end()) reusableCapacity = itC->second;
+		rmt_item32_t* heap_items = nullptr;
 
-        auto itB = g_reusableBuffers.find(this);
-        if (itB != g_reusableBuffers.end()) heap_items = itB->second;
+		// read existing capacity
+		auto itC = g_reusableCapacities.find(this);
+		if (itC != g_reusableCapacities.end())
+			reusableCapacity = itC->second;
 
-        if (reusableCapacity < count)
-        {
-            if (heap_items)
-                free(heap_items);
+		// read existing buffer
+		auto itB = g_reusableBuffers.find(this);
+		if (itB != g_reusableBuffers.end())
+			heap_items = itB->second;
 
-            size_t newCapacity = count + 64;
-            heap_items = (rmt_item32_t*)malloc(newCapacity * sizeof(rmt_item32_t));
+		// reallocate if too small
+		if (reusableCapacity < count)
+		{
+			if (heap_items)
+				free(heap_items);
 
-            if (!heap_items)
-            {
-                logcon("[RMT] ERROR: malloc failed");
-                ok = false;
-                break;
-            }
+			size_t newCapacity = count + 64;
 
-            g_reusableBuffers[this] = heap_items;
-            g_reusableCapacities[this] = newCapacity;
-            reusableCapacity = newCapacity;
-        }
+			heap_items = static_cast<rmt_item32_t*>(
+				malloc(newCapacity * sizeof(rmt_item32_t))
+			);
 
-        memcpy(heap_items, items.data(), count * sizeof(rmt_item32_t));
+			if (!heap_items)
+			{
+				logcon("[RMT] ERROR: malloc failed");
+				ok = false;
+				break;
+			}
+
+			g_reusableBuffers[this] = heap_items;
+			g_reusableCapacities[this] = newCapacity;
+
+			reusableCapacity = newCapacity;   // now actually needed
+		}
+
+		// copy items to heap buffer
+		memcpy(heap_items, items.data(), count * sizeof(rmt_item32_t));
 
         // --- Send frame ---
         esp_err_t e = rmt_write_items(
