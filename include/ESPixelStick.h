@@ -75,6 +75,8 @@ struct config_t
     // Device
     char        id[65];
     uint32_t    BlankDelay = uint32_t(5);
+    gpio_num_t  MainRelayGpio = gpio_num_t::GPIO_NUM_NC; // Main relay GPIO pin (toggled on data reception)
+    bool        MainRelayInvert = false; // Invert main relay logic (active low)
 };
 
 String  serializeCore          (bool pretty = false);

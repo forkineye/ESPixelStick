@@ -728,6 +728,19 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label class="control-label col-sm-2" for="main_relay_gpio">Main Relay GPIO</label>
+                        <div class="col-sm-4">
+                            <input type="number" class="form-control is-valid col-sm-2" id="main_relay_gpio" step="1" min="-1"
+                                max="48" value="-1" required
+                                title="GPIO pin for main relay (toggled when data is received). Set to -1 to disable.">
+                        </div>
+                        <label class="control-label col-sm-2" for="main_relay_invert">Invert Relay</label>
+                        <div class="col-sm-4">
+                            <input type="checkbox" id="main_relay_invert" title="Invert relay logic (active low for most relay modules).">
+                        </div>
+                    </div>
+
                     <div class="form-group" id="TemperatureSensorGrp">
                         <label class="control-label col-sm-2" for="TemperatureSensorUnits">Temperature Unit</label>
                         <div class="col-sm-4">

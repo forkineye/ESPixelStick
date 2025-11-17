@@ -1553,6 +1553,11 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
         $('#ftppassword').val(System_Config.device.password);
         $('#ftp_enable').prop("checked", System_Config.device.enabled);
 
+        // Load main relay config if it exists
+        if ({}.hasOwnProperty.call(System_Config.device, 'main_relay_invert')) {
+            $('#main_relay_invert').prop("checked", System_Config.device.main_relay_invert);
+        }
+
         let ApCredentials = System_Config.network.wifi.ApCredentials;
         let CurrentRowId = 0;
         $('#ApCredentialsTable').empty();
@@ -1816,6 +1821,8 @@ function ExtractNetworkConfigFromHtmlPage() {
 function submitNetworkConfig() {
     System_Config.device.id = $('#config #device #id').val();
     System_Config.device.blanktime = parseInt($('#config #device #blanktime').val());
+    System_Config.device.main_relay_gpio = parseInt($('#config #device #main_relay_gpio').val());
+    System_Config.device.main_relay_invert = $('#main_relay_invert').prop('checked');
     System_Config.device.miso_pin = parseInt($('#config #device #miso_pin').val());
     System_Config.device.mosi_pin = parseInt($('#config #device #mosi_pin').val());
     System_Config.device.clock_pin = parseInt($('#config #device #clock_pin').val());
