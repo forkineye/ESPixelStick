@@ -292,6 +292,12 @@ bool dsDevice(JsonObject & json)
 //TODO: Add configuration upgrade handling - cfgver moved to root level
         ConfigChanged |= setFromJSON (config.id,         JsonDeviceConfig, CN_id);
         ConfigChanged |= setFromJSON (config.BlankDelay, JsonDeviceConfig, CN_blanktime);
+
+        int TempMainRelayGpio = int(config.MainRelayGpio);
+        ConfigChanged |= setFromJSON (TempMainRelayGpio, JsonDeviceConfig, CN_main_relay_gpio);
+        config.MainRelayGpio = gpio_num_t(TempMainRelayGpio);
+
+        ConfigChanged |= setFromJSON (config.MainRelayInvert, JsonDeviceConfig, CN_main_relay_invert);
     }
     else
     {
@@ -470,6 +476,8 @@ void GetConfig (JsonObject & json)
     JsonObject device = json[(char*)CN_device].to<JsonObject>();
     JsonWrite(device, CN_id,        config.id);
     JsonWrite(device, CN_blanktime, config.BlankDelay);
+    JsonWrite(device, CN_main_relay_gpio, int(config.MainRelayGpio));
+    JsonWrite(device, CN_main_relay_invert, config.MainRelayInvert);
 
     // PrettyPrint(device, "device");
 

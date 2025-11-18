@@ -63,7 +63,7 @@ public:
     void DeleteConfig         () { FileMgr.DeleteFlashFile (ConfigFileName); }
     bool GetNetworkState      () { return IsConnected; }
     void GetDriverName        (String & Name) { Name = "InputMgr"; }
-    void RestartBlankTimer    (e_InputChannelIds Selector) { BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000, false); }
+    void RestartBlankTimer    (e_InputChannelIds Selector);
     bool BlankTimerHasExpired (e_InputChannelIds Selector) { return (BlankEndTime[int(Selector)].IsExpired()); }
     void ProcessButtonActions (c_ExternalInput::InputValue_t value);
     bool RemotePlayEnabled    (void);

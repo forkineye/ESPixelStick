@@ -135,6 +135,8 @@ extern const CN_PROGMEM char CN_last_clientIP [];
 extern const CN_PROGMEM char CN_long [];
 extern const CN_PROGMEM char CN_lwt [];
 extern const CN_PROGMEM char CN_mac [];
+extern const CN_PROGMEM char CN_main_relay_gpio [];
+extern const CN_PROGMEM char CN_main_relay_invert [];
 extern const CN_PROGMEM char CN_MarqueeGroups [];
 extern const CN_PROGMEM char CN_mdc_pin [];
 extern const CN_PROGMEM char CN_mdio_pin [];
