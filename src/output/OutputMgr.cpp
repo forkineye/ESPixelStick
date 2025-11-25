@@ -49,6 +49,7 @@
 #include "output/OutputUCS8903Rmt.hpp"
 // needs to be last
 #include "output/OutputMgr.hpp"
+#include "output/MainRelayMgr.hpp"
 
 #include "input/InputMgr.hpp"
 
@@ -282,6 +283,11 @@ void c_OutputMgr::Begin ()
         // Preset the output memory
         memset((void*)&OutputBuffer[0], 0x00, sizeof(OutputBuffer));
 
+#ifdef SUPPORT_MAIN_RELAY
+        // Initialize main relay manager
+        MainRelayMgr.Begin();
+#endif // SUPPORT_MAIN_RELAY
+
     } while (false);
 
     // DEBUG_END;
@@ -297,6 +303,16 @@ void c_OutputMgr::CreateJsonConfig (JsonObject& jsonConfig)
 
     // add OM config parameters
     // DEBUG_V ();
+
+#ifdef SUPPORT_MAIN_RELAY
+    // Add main relay configuration
+    JsonObject MainRelayData = jsonConfig[F("main_relay")];
+    if (!MainRelayData)
+    {
+        MainRelayData = jsonConfig[F("main_relay")].to<JsonObject>();
+    }
+    MainRelayMgr.GetConfig(MainRelayData);
+#endif // SUPPORT_MAIN_RELAY
 
     // add the channels header
     JsonObject OutputMgrChannelsData = jsonConfig[(char*)CN_channels];
@@ -1166,6 +1182,15 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
 
     do // once
     {
+#ifdef SUPPORT_MAIN_RELAY
+        // Process main relay configuration
+        JsonObject MainRelayConfig = jsonConfig[F("main_relay")];
+        if (MainRelayConfig)
+        {
+            MainRelayMgr.SetConfig(MainRelayConfig);
+        }
+#endif // SUPPORT_MAIN_RELAY
+
         // for each output channel
         for (DriverInfo_t & CurrentOutput : OutputChannelDrivers)
         {
@@ -1628,6 +1653,14 @@ void c_OutputMgr::ClearBuffer()
     // DEBUG_END;
 
 } // ClearBuffer
+
+//-----------------------------------------------------------------------------
+void c_OutputMgr::SetMainRelayState(bool Active)
+{
+#ifdef SUPPORT_MAIN_RELAY
+    MainRelayMgr.SetRelayState(Active);
+#endif // SUPPORT_MAIN_RELAY
+} // SetMainRelayState
 
 // create a global instance of the output channel factory
 c_OutputMgr OutputMgr;

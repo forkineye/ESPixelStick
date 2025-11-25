@@ -189,16 +189,6 @@ void c_InputMgr::Begin (uint32_t BufferSize)
     String temp = String (F("Effects Control"));
     ExternalInput.Init (0,0, c_ExternalInput::Polarity_t::ActiveLow, temp);
 
-    // Initialize main relay GPIO if configured
-    if (GPIO_IS_VALID_OUTPUT_GPIO(config.MainRelayGpio))
-    {
-        pinMode(config.MainRelayGpio, OUTPUT);
-        // Set to OFF state (respecting invert setting)
-        digitalWrite(config.MainRelayGpio, config.MainRelayInvert ? HIGH : LOW);
-        logcon(String(F("Main Relay GPIO initialized on pin ")) + String(config.MainRelayGpio) +
-               String(config.MainRelayInvert ? F(" (inverted)") : F(" (normal)")));
-    }
-
     // make sure the pointers are set up properly
     for (auto & CurrentInput : InputChannelDrivers)
     {
@@ -791,11 +781,8 @@ void c_InputMgr::Process ()
             OutputMgr.ClearBuffer ();
             RestartBlankTimer (InputSecondaryChannelId);
 
-            // Turn off main relay GPIO when no data is being received (respecting invert setting)
-            if (GPIO_IS_VALID_OUTPUT_GPIO(config.MainRelayGpio))
-            {
-                digitalWrite(config.MainRelayGpio, config.MainRelayInvert ? HIGH : LOW);
-            }
+            // Turn off main relay when no data is being received
+            OutputMgr.SetMainRelayState(false);
         } // ALL blank timers have expired
 
         if (RebootNeeded)
@@ -815,11 +802,8 @@ void c_InputMgr::RestartBlankTimer (e_InputChannelIds Selector)
     // Restart the blank timer
     BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000, false);
 
-    // Set main relay GPIO to ON state (respecting invert setting)
-    if (GPIO_IS_VALID_OUTPUT_GPIO(config.MainRelayGpio))
-    {
-        digitalWrite(config.MainRelayGpio, config.MainRelayInvert ? LOW : HIGH);
-    }
+    // Turn on main relay when data is being received
+    OutputMgr.SetMainRelayState(true);
 } // RestartBlankTimer
 
 //-----------------------------------------------------------------------------

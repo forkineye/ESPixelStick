@@ -74,3 +74,6 @@
 #define SUPPORT_OutputType_Relay            // GPIO
 // Disabled by default, on Atom Matrix I2C is shared with a 6-Axis IMU (MPU-6886)
 // #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+
+// Main Relay Support
+#define SUPPORT_MAIN_RELAY                  // Main relay control on data reception

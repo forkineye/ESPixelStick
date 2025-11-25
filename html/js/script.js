@@ -1533,6 +1533,15 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
         Output_Config = JsonConfigData.output_config;
         // console.debug("Got Output Config: " + JSON.stringify(Output_Config) );
         CreateOptionsFromConfig("output", Output_Config);
+
+        // Handle main relay configuration if present
+        if (Output_Config.main_relay) {
+            $('#fg_main_relay').removeClass('hidden');
+            $('#main_relay_gpio').val(Output_Config.main_relay.main_relay_gpio || -1);
+            $('#main_relay_invert').prop('checked', Output_Config.main_relay.main_relay_invert || false);
+        } else {
+            $('#fg_main_relay').addClass('hidden');
+        }
     }
 
     // is this an input config?
@@ -1821,8 +1830,6 @@ function ExtractNetworkConfigFromHtmlPage() {
 function submitNetworkConfig() {
     System_Config.device.id = $('#config #device #id').val();
     System_Config.device.blanktime = parseInt($('#config #device #blanktime').val());
-    System_Config.device.main_relay_gpio = parseInt($('#config #device #main_relay_gpio').val());
-    System_Config.device.main_relay_invert = $('#main_relay_invert').prop('checked');
     System_Config.device.miso_pin = parseInt($('#config #device #miso_pin').val());
     System_Config.device.mosi_pin = parseInt($('#config #device #mosi_pin').val());
     System_Config.device.clock_pin = parseInt($('#config #device #clock_pin').val());
@@ -2096,6 +2103,16 @@ function submitDeviceConfig()
     }
 
     ExtractChannelConfigFromHtmlPage(Output_Config.channels, "output");
+
+    // Save main relay configuration if the section is visible
+    if (!$('#fg_main_relay').hasClass('hidden')) {
+        if (!Output_Config.main_relay) {
+            Output_Config.main_relay = {};
+        }
+        Output_Config.main_relay.main_relay_gpio = parseInt($('#main_relay_gpio').val(), 10);
+        Output_Config.main_relay.main_relay_invert = $('#main_relay_invert').prop('checked');
+    }
+
     submitNetworkConfig();
 
 } // submitDeviceConfig

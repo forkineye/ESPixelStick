@@ -83,3 +83,6 @@
 #define SUPPORT_OutputType_WS2811           // UART / RMT
 #define SUPPORT_OutputType_Relay            // GPIO
 // #define SUPPORT_OutputType_Servo_PCA9685    // I2C (default pins)
+
+// Main Relay Support
+#define SUPPORT_MAIN_RELAY                  // Main relay control on data reception
