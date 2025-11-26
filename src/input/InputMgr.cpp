@@ -797,12 +797,6 @@ void c_InputMgr::Process ()
 } // Process
 
 //-----------------------------------------------------------------------------
-void c_InputMgr::RestartBlankTimer (e_InputChannelIds Selector)
-{
-    BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000, false);
-} // RestartBlankTimer
-
-//-----------------------------------------------------------------------------
 void c_InputMgr::ProcessButtonActions (c_ExternalInput::InputValue_t value)
 {
     // DEBUG_START;
