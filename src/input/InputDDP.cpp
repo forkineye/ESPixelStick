@@ -18,6 +18,7 @@
 
 #include "input/InputDDP.h"
 #include "network/NetworkMgr.hpp"
+#include "output/OutputMgr.hpp"
 #include "service/FPPDiscovery.h"
 #include <string.h>
 

@@ -20,6 +20,7 @@
 #include "input/InputArtnet.hpp"
 #include "input/externalInput.h"
 #include "network/NetworkMgr.hpp"
+#include "output/OutputMgr.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputArtnet::c_InputArtnet (c_InputMgr::e_InputChannelIds NewInputChannelId,

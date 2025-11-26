@@ -19,6 +19,7 @@
 
 #include "input/InputE131.hpp"
 #include "network/NetworkMgr.hpp"
+#include "output/OutputMgr.hpp"
 
 //-----------------------------------------------------------------------------
 c_InputE131::c_InputE131 (c_InputMgr::e_InputChannelIds NewInputChannelId,

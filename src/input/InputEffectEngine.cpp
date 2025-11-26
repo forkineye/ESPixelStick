@@ -19,6 +19,7 @@
 #include "ESPixelStick.h"
 #include "utility/SaferStringConversion.hpp"
 #include "input/InputEffectEngine.hpp"
+#include "output/OutputMgr.hpp"
 #include <vector>
 
 //-----------------------------------------------------------------------------

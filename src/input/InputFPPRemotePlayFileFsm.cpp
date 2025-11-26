@@ -20,6 +20,7 @@
 
 #include "input/InputFPPRemotePlayFile.hpp"
 #include "input/InputMgr.hpp"
+#include "output/OutputMgr.hpp"
 #include "service/FPPDiscovery.h"
 
 //-----------------------------------------------------------------------------
