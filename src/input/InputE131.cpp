@@ -210,6 +210,7 @@ void c_InputE131::ProcessIncomingE131Data (e131_packet_t * packet)
                    min(CurrentUniverse.BytesToCopy, NumBytesOfE131Data));
 */
             InputMgr.RestartBlankTimer (GetInputChannelId ());
+            OutputMgr.SetMainRelayState(true);
         }
         else
         {

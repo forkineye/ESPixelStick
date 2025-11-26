@@ -799,11 +799,7 @@ void c_InputMgr::Process ()
 //-----------------------------------------------------------------------------
 void c_InputMgr::RestartBlankTimer (e_InputChannelIds Selector)
 {
-    // Restart the blank timer
     BlankEndTime[int(Selector)].StartTimer(config.BlankDelay * 1000, false);
-
-    // Turn on main relay when data is being received
-    OutputMgr.SetMainRelayState(true);
 } // RestartBlankTimer
 
 //-----------------------------------------------------------------------------

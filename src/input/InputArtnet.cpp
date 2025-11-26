@@ -173,6 +173,7 @@ void c_InputArtnet::onDmxFrame (uint16_t  CurrentUniverseId,
                                  &data[CurrentUniverse.SourceDataOffset]);
 
         InputMgr.RestartBlankTimer (GetInputChannelId ());
+        OutputMgr.SetMainRelayState(true);
     }
     else
     {

@@ -366,6 +366,7 @@ void c_InputEffectEngine::Process ()
         }
         EffectCounter++;
         InputMgr.RestartBlankTimer (GetInputChannelId ());
+        OutputMgr.SetMainRelayState(true);
 
         PollFlash();
 
@@ -428,6 +429,7 @@ void c_InputEffectEngine::Poll ()
         // // DEBUG_V("Update Blank timer");
         EffectCounter++;
         InputMgr.RestartBlankTimer (GetInputChannelId ());
+        OutputMgr.SetMainRelayState(true);
 
         // // DEBUG_V("Check Flash operation");
         PollFlash();

@@ -304,6 +304,7 @@ bool fsm_PlayFile_state_PlayingFile::Poll ()
         ///DEBUG_V (String ("               MaxBytesToRead: ") + String (MaxBytesToRead));
 
         InputMgr.RestartBlankTimer (p_Parent->GetInputChannelId ());
+        OutputMgr.SetMainRelayState(true);
         ///DEBUG_V();
 
         if(p_Parent->SendFppSync)
