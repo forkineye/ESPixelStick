@@ -31,6 +31,7 @@ var _g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp =
     [ "SD_CARD_MOSI_PIN", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#aca6c98b14a61849654e93ee35fd1d1ab", null ],
     [ "SUPPORT_ETHERNET", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a3caa63f16e3dcb8b7b137a99d926439a", null ],
     [ "SUPPORT_OutputType_DMX", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#aaf891b2fa73c266aa119bed242c5ea30", null ],
+    [ "SUPPORT_OutputType_FireGod", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#aa6c0b147c999ec91d0850c1cbe533e8e", null ],
     [ "SUPPORT_OutputType_GECE", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#ad99563c913b8da40ad1a5a305bf3ed3d", null ],
     [ "SUPPORT_OutputType_GS8208", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#a4519f799b3e11a08d0b7377dac008a4e", null ],
     [ "SUPPORT_OutputType_Relay", "_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#acd6e6f0240598bf75d38ce85c4b91d92", null ],

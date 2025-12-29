@@ -29,7 +29,6 @@ var classc___input_f_p_p_remote_play_file =
     [ "LastFailedFilename", "classc___input_f_p_p_remote_play_file.html#a840cfe33a9ba494d5962d9f59d0a55ee", null ],
     [ "LastFailedPlayStatusMsg", "classc___input_f_p_p_remote_play_file.html#a4f6faaac8129be24da260c3421e40515", null ],
     [ "pCurrentFsmState", "classc___input_f_p_p_remote_play_file.html#a8e88c26ce22ade8c25fedb840eacded9", null ],
-    [ "PlayedFileCount", "classc___input_f_p_p_remote_play_file.html#a0aadefff87d80c39b06c916dff0f1c52", null ],
     [ "SparseRanges", "classc___input_f_p_p_remote_play_file.html#ae253a268fe8a6f3c99b5592b50cb776b", null ],
     [ "SyncControl", "classc___input_f_p_p_remote_play_file.html#a93bf35e3719ccb4e2fda0ad003013931", null ]
 ];

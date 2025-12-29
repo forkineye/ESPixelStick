@@ -6,6 +6,7 @@ var _g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp =
     [ "SD_CARD_MISO_PIN", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html#a1683e2f1e1a3fb629bd7c17dfd8d1e58", null ],
     [ "SD_CARD_MOSI_PIN", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html#aca6c98b14a61849654e93ee35fd1d1ab", null ],
     [ "SUPPORT_OutputType_DMX", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html#aaf891b2fa73c266aa119bed242c5ea30", null ],
+    [ "SUPPORT_OutputType_FireGod", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html#aa6c0b147c999ec91d0850c1cbe533e8e", null ],
     [ "SUPPORT_OutputType_GECE", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html#ad99563c913b8da40ad1a5a305bf3ed3d", null ],
     [ "SUPPORT_OutputType_Renard", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html#ad1cdaf2881d19f91216c4a64f925d072", null ],
     [ "SUPPORT_OutputType_Serial", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html#a6935dea675e388d8e9c6fe125d36c4e6", null ],

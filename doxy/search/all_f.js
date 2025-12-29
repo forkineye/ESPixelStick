@@ -62,7 +62,7 @@ var searchData=
   ['pktsyncseqsync_59',['pktSyncSeqSync',['../structc___f_p_p_discovery_1_1_multi_sync_stats__t.html#a3aba96e62c9a0288300add95285697be',1,'c_FPPDiscovery::MultiSyncStats_t']]],
   ['pktunknown_60',['pktUnknown',['../structc___f_p_p_discovery_1_1_multi_sync_stats__t.html#a5099eae93bfa2969a18c785bbf87b465',1,'c_FPPDiscovery::MultiSyncStats_t']]],
   ['playdurationsec_61',['PlayDurationSec',['../classc___input_f_p_p_remote_play_item.html#a8327a95abc807e625a2b82fef912e3fc',1,'c_InputFPPRemotePlayItem']]],
-  ['playedfilecount_62',['PlayedFileCount',['../classc___input_f_p_p_remote_play_file.html#a0aadefff87d80c39b06c916dff0f1c52',1,'c_InputFPPRemotePlayFile']]],
+  ['playedfilecount_62',['PlayedFileCount',['../classc___input_f_p_p_remote_play_item.html#a428b1929c666a3e5aa2f24d935b37734',1,'c_InputFPPRemotePlayItem']]],
   ['playeffect_63',['PlayEffect',['../classc___input_m_q_t_t.html#a3868e04d5b087dc00ec90f0e52fce304',1,'c_InputMQTT']]],
   ['playeffecttimer_64',['PlayEffectTimer',['../classc___input_f_p_p_remote_play_effect.html#aa69569a1145f64286acb57f0690409a6',1,'c_InputFPPRemotePlayEffect']]],
   ['player_65',['Player',['../structc___input_f_p_p_remote_1_1_player_info__t.html#a1d2a41492d8c852f0e749f433109a786',1,'c_InputFPPRemote::PlayerInfo_t']]],

@@ -20,7 +20,7 @@ var searchData=
   ['fppdiscovery_17',['FPPDiscovery',['../_f_p_p_discovery_8cpp.html#a0644373e30f47c5b5fd9c60013175cc3',1,'FPPDiscovery:&#160;FPPDiscovery.cpp'],['../_f_p_p_discovery_8h.html#a0644373e30f47c5b5fd9c60013175cc3',1,'FPPDiscovery:&#160;FPPDiscovery.cpp']]],
   ['fppremoteip_18',['FppRemoteIp',['../classc___f_p_p_discovery.html#a1194ce246f35cffcbb1b9329aa1dbe2e',1,'c_FPPDiscovery']]],
   ['fppsemaphore_19',['FPPSemaphore',['../classc___f_p_p_discovery.html#ada133c13a843e62f9d4d255a509a4bfd',1,'c_FPPDiscovery']]],
-  ['fppsyncoverride_20',['FppSyncOverride',['../classc___input_f_p_p_remote.html#a1026fa25a114a817ca6a47a3df45d047',1,'c_InputFPPRemote::FppSyncOverride'],['../classc___f_p_p_discovery.html#a5e5aeedf5f096803cf2ab766290ed9ac',1,'c_FPPDiscovery::FppSyncOverride']]],
+  ['fppsyncoverride_20',['FppSyncOverride',['../classc___input_f_p_p_remote.html#a1026fa25a114a817ca6a47a3df45d047',1,'c_InputFPPRemote']]],
   ['frame_5fnumber_21',['frame_number',['../union_f_p_p_multi_sync_packet.html#ae87c5c402d088e554cd00a9247fb63ac',1,'FPPMultiSyncPacket::frame_number'],['../fseq_8h.html#a57cc7f4d579276167efca6cf047839b2',1,'frame_number:&#160;fseq.h']]],
   ['frameappenddatacurrentindex_22',['FrameAppendDataCurrentIndex',['../classc___output_pixel.html#a8bf3a48e20aafeaabd5fd2d453e8dda7',1,'c_OutputPixel']]],
   ['frameappenddatasize_23',['FrameAppendDataSize',['../classc___output_pixel.html#a2bc3add348369373601544b31549aeae',1,'c_OutputPixel']]],

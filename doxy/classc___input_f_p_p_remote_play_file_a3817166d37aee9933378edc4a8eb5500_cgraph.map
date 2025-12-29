@@ -1,9 +1,11 @@
 <map id="c_InputFPPRemotePlayFile::GetStatus" name="c_InputFPPRemotePlayFile::GetStatus">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,71,187,111"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,187,145"/>
 <area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote_play_item.html#a18aa37d56d43b19d1b5801a7a304e06c" title=" " alt="" coords="252,5,438,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="176,67,250,48,251,53,177,73"/>
-<area shape="rect" id="Node000003" href="$_safer_string_conversion_8hpp.html#aeab01c8a84641e02d18990accf788d9f" title=" " alt="" coords="235,71,456,111"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,88,219,88,219,94,187,94"/>
-<area shape="rect" id="Node000004" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="252,136,439,161"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="188,109,235,120,272,129,271,134,234,126,186,115"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="136,101,234,57,255,49,256,54,236,61,138,106"/>
+<area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote_play_item.html#a3baea76df7eb2bc86512e8252d711961" title=" " alt="" coords="252,71,438,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="187,110,236,103,237,108,187,115"/>
+<area shape="rect" id="Node000004" href="$_safer_string_conversion_8hpp.html#aeab01c8a84641e02d18990accf788d9f" title=" " alt="" coords="235,136,456,177"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="187,133,219,137,219,143,187,139"/>
+<area shape="rect" id="Node000005" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="252,201,439,226"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="137,143,184,165,236,186,263,194,261,199,234,191,182,170,135,147"/>
 </map>

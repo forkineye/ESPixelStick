@@ -16,6 +16,7 @@ var _g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp =
     [ "SD_CARD_MOSI_PIN", "_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html#aca6c98b14a61849654e93ee35fd1d1ab", null ],
     [ "SUPPORT_OutputType_APA102", "_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html#acbbd37d4f74ca5158899749f3f2d1dfc", null ],
     [ "SUPPORT_OutputType_DMX", "_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html#aaf891b2fa73c266aa119bed242c5ea30", null ],
+    [ "SUPPORT_OutputType_FireGod", "_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html#aa6c0b147c999ec91d0850c1cbe533e8e", null ],
     [ "SUPPORT_OutputType_GECE", "_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html#ad99563c913b8da40ad1a5a305bf3ed3d", null ],
     [ "SUPPORT_OutputType_GRINCH", "_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html#ae8c525cd14332c006b01bbd05aad9174", null ],
     [ "SUPPORT_OutputType_GS8208", "_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html#a4519f799b3e11a08d0b7377dac008a4e", null ],

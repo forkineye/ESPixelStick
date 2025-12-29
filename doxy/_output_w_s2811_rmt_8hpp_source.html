@@ -151,11 +151,16 @@ $(function(){initNavTree('_output_w_s2811_rmt_8hpp_source.html',''); initResizab
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    c_OutputRmt Rmt;</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}; <span class="comment">// c_OutputWS2811Rmt</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_OutputType_WS2811) &amp;&amp; defined(ARDUINO_ARCH_ESP32)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="preprocessor">#ifdef USE_RMT_DEBUG_COUNTERS</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    uint32_t CanRefresh = 0;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    uint32_t CannotRefresh = 0;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#endif </span><span class="comment">// def USE_RMT_DEBUG_COUNTERS</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    c_OutputRmt Rmt;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>}; <span class="comment">// c_OutputWS2811Rmt</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_OutputType_WS2811) &amp;&amp; defined(ARDUINO_ARCH_ESP32)</span></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_output_rmt_8hpp_html"><div class="ttname"><a href="_output_rmt_8hpp.html">OutputRmt.hpp</a></div></div>
 <div class="ttc" id="a_output_w_s2811_8hpp_html"><div class="ttname"><a href="_output_w_s2811_8hpp.html">OutputWS2811.hpp</a></div></div>

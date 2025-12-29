@@ -1,15 +1,17 @@
 <map id="fsm_PlayFile_state_Idle::Poll" name="fsm_PlayFile_state_Idle::Poll">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,80,138,121"/>
-<area shape="rect" id="Node000002" href="$classfsm___play_file__state___starting.html#ad394ce5f02f91b924c1e7873fb1a2a3c" title=" " alt="" coords="186,80,318,121"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,98,170,98,170,104,138,104"/>
-<area shape="rect" id="Node000003" href="$classc___f_p_p_discovery.html#a6ef4a34e0c4a6fe52ac7b0ee4034f4dd" title=" " alt="" coords="370,47,548,88"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="318,88,354,82,355,87,319,93"/>
-<area shape="rect" id="Node000007" href="$classc___input_f_p_p_remote_play_item.html#a18aa37d56d43b19d1b5801a7a304e06c" title=" " alt="" coords="366,112,552,153"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="319,108,351,113,350,119,318,114"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,106,138,146"/>
+<area shape="rect" id="Node000002" href="$classfsm___play_file__state___starting.html#ad394ce5f02f91b924c1e7873fb1a2a3c" title=" " alt="" coords="186,106,318,146"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,124,170,124,170,129,138,129"/>
+<area shape="rect" id="Node000003" href="$classc___f_p_p_discovery.html#a6ef4a34e0c4a6fe52ac7b0ee4034f4dd" title=" " alt="" coords="370,72,548,113"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="318,113,354,107,355,112,319,118"/>
+<area shape="rect" id="Node000008" href="$classc___input_f_p_p_remote_play_item.html#a18aa37d56d43b19d1b5801a7a304e06c" title=" " alt="" coords="366,138,552,178"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="319,134,351,139,350,144,318,139"/>
 <area shape="rect" id="Node000004" href="$classc___network_mgr.html#adb2bfe0b52822c8b9936696d9d03031d" title=" " alt="" coords="600,5,786,31"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="547,46,613,32,614,37,548,51"/>
-<area shape="rect" id="Node000005" href="$fseq_8h.html#a5d05476d4f29f4fbc1769c4b186d45d3" title=" " alt="" coords="661,55,725,80"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="548,65,645,65,645,70,548,70"/>
-<area shape="rect" id="Node000006" href="$fseq_8h.html#a3acd03a9c12a4b6126f59bbe3442f141" title=" " alt="" coords="661,104,725,130"/>
-<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="548,84,646,104,645,110,547,89"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="514,69,600,40,622,33,624,38,601,45,515,74"/>
+<area shape="rect" id="Node000005" href="$_e_s_pixel_stick_8h.html#a9761805047799d9f01571e31dc8dea76" title=" " alt="" coords="647,55,739,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="548,81,631,71,631,77,548,86"/>
+<area shape="rect" id="Node000006" href="$fseq_8h.html#a5d05476d4f29f4fbc1769c4b186d45d3" title=" " alt="" coords="661,104,725,130"/>
+<area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="548,99,646,109,645,115,548,105"/>
+<area shape="rect" id="Node000007" href="$fseq_8h.html#a3acd03a9c12a4b6126f59bbe3442f141" title=" " alt="" coords="661,153,725,179"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="519,111,601,140,647,152,646,158,600,145,517,116"/>
 </map>

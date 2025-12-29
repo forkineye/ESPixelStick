@@ -1,7 +1,9 @@
 <map id="c_FPPDiscovery::sendPingPacket" name="c_FPPDiscovery::sendPingPacket">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,23,184,64"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,47,184,88"/>
 <area shape="rect" id="Node000002" href="$classc___network_mgr.html#a1aec189a4006416d95097292a5be5610" title=" " alt="" coords="232,5,425,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="184,31,216,28,216,33,184,37"/>
-<area shape="rect" id="Node000003" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="235,55,422,80"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,50,220,54,219,59,184,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="183,46,249,32,250,37,184,51"/>
+<area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html#a9761805047799d9f01571e31dc8dea76" title=" " alt="" coords="282,55,374,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="184,65,267,65,267,70,184,70"/>
+<area shape="rect" id="Node000004" href="$classc___file_mgr.html#a9d269a5325ae97f480a9c8e7671c862e" title=" " alt="" coords="235,104,422,130"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="184,84,250,98,249,103,183,89"/>
 </map>

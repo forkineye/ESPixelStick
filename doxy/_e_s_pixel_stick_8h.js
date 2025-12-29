@@ -32,6 +32,7 @@ var _e_s_pixel_stick_8h =
     [ "RebootInProgress", "_e_s_pixel_stick_8h.html#aee3a92a77acd81bd67090432b16e23a1", null ],
     [ "RequestReboot", "_e_s_pixel_stick_8h.html#aaffdda62d966b7a1777fec7ce955a22e", null ],
     [ "ResetGpio", "_e_s_pixel_stick_8h.html#a97937ae3377e427d21b29966a14e964a", null ],
+    [ "SafeStrncpy", "_e_s_pixel_stick_8h.html#a9761805047799d9f01571e31dc8dea76", null ],
     [ "serializeCore", "_e_s_pixel_stick_8h.html#a64caf298db9b3dcc081633371db4a441", null ],
     [ "setFromJSON", "_e_s_pixel_stick_8h.html#a8fe2a1df9e408fa0e9f613be55c0956d", null ],
     [ "setFromJSON", "_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d", null ],

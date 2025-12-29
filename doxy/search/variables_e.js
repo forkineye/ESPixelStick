@@ -52,7 +52,7 @@ var searchData=
   ['pktsyncseqsync_49',['pktSyncSeqSync',['../structc___f_p_p_discovery_1_1_multi_sync_stats__t.html#a3aba96e62c9a0288300add95285697be',1,'c_FPPDiscovery::MultiSyncStats_t']]],
   ['pktunknown_50',['pktUnknown',['../structc___f_p_p_discovery_1_1_multi_sync_stats__t.html#a5099eae93bfa2969a18c785bbf87b465',1,'c_FPPDiscovery::MultiSyncStats_t']]],
   ['playdurationsec_51',['PlayDurationSec',['../classc___input_f_p_p_remote_play_item.html#a8327a95abc807e625a2b82fef912e3fc',1,'c_InputFPPRemotePlayItem']]],
-  ['playedfilecount_52',['PlayedFileCount',['../classc___input_f_p_p_remote_play_file.html#a0aadefff87d80c39b06c916dff0f1c52',1,'c_InputFPPRemotePlayFile']]],
+  ['playedfilecount_52',['PlayedFileCount',['../classc___input_f_p_p_remote_play_item.html#a428b1929c666a3e5aa2f24d935b37734',1,'c_InputFPPRemotePlayItem']]],
   ['playeffecttimer_53',['PlayEffectTimer',['../classc___input_f_p_p_remote_play_effect.html#aa69569a1145f64286acb57f0690409a6',1,'c_InputFPPRemotePlayEffect']]],
   ['player_54',['Player',['../structc___input_f_p_p_remote_1_1_player_info__t.html#a1d2a41492d8c852f0e749f433109a786',1,'c_InputFPPRemote::PlayerInfo_t']]],
   ['playerinfo_55',['PlayerInfo',['../classc___input_f_p_p_remote.html#ad0ff0485d3361b4a32631109d1c696d3',1,'c_InputFPPRemote']]],

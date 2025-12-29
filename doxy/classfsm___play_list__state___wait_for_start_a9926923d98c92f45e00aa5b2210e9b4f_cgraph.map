@@ -1,5 +1,7 @@
 <map id="fsm_PlayList_state_WaitForStart::Start" name="fsm_PlayList_state_WaitForStart::Start">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,141,46"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,35,141,75"/>
 <area shape="rect" id="Node000002" href="$classfsm___play_list__state___idle.html#abfa40fccfc7ba68b1a00d6774823519b" title=" " alt="" coords="189,5,322,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,23,173,23,173,28,141,28"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,41,173,36,174,41,142,47"/>
+<area shape="rect" id="Node000003" href="$_e_s_pixel_stick_8h.html#a9761805047799d9f01571e31dc8dea76" title=" " alt="" coords="209,70,302,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="142,63,194,71,193,76,141,68"/>
 </map>

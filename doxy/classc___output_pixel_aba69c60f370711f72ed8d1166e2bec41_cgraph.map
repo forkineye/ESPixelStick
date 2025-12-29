@@ -10,13 +10,15 @@
 <area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="170,166,202,166,202,172,170,172"/>
 <area shape="rect" id="Node000008" href="$classc___output_pixel.html#a9ba93bde21a6a41d53ad4b5773ad331b" title="Update color order." alt="" coords="238,206,415,246"/>
 <area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="145,180,225,199,223,204,144,185"/>
-<area shape="rect" id="Node000009" href="$classc___output_pixel.html#ae85f097b7467cb4aeb13a6dce4902127" title="Generate gamma correction table." alt="" coords="230,271,423,312"/>
-<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="106,180,155,217,219,256,235,263,233,268,216,261,152,221,103,184"/>
-<area shape="rect" id="Node000010" href="$classc___output_pixel.html#a66f72d19f572047c01268a95d8cadaf0" title="confirm that the current configuration is valid" alt="" coords="250,336,403,362"/>
-<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="98,181,143,249,178,288,219,321,236,330,234,335,216,326,174,292,139,252,94,184"/>
+<area shape="rect" id="Node000010" href="$classc___output_pixel.html#ae85f097b7467cb4aeb13a6dce4902127" title="Generate gamma correction table." alt="" coords="230,271,423,312"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="106,180,155,217,219,256,235,263,233,268,216,261,152,221,103,184"/>
+<area shape="rect" id="Node000011" href="$classc___output_pixel.html#a66f72d19f572047c01268a95d8cadaf0" title="confirm that the current configuration is valid" alt="" coords="250,336,403,362"/>
+<area shape="poly" id="edge11_Node000001_Node000011" title=" " alt="" coords="98,181,143,249,178,288,219,321,236,330,234,335,216,326,174,292,139,252,94,184"/>
 <area shape="rect" id="Node000003" href="$classc___output_common.html#af5012304489562dff5cd3814791b37f6" title="Get the current config used by the driver." alt="" coords="483,5,672,31"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="409,16,468,16,468,21,409,21"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="421,74,510,83,509,89,421,80"/>
 <area shape="rect" id="Node000006" href="$_web_mgr_8cpp.html#a47bc5f5aa91e940e6cfc297466285595" title=" " alt="" coords="720,80,803,106"/>
 <area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="631,90,705,90,705,96,631,96"/>
+<area shape="rect" id="Node000009" href="$_e_s_pixel_stick_8h.html#a9761805047799d9f01571e31dc8dea76" title=" " alt="" coords="532,213,624,239"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="415,224,516,224,516,229,415,229"/>
 </map>
