@@ -22,6 +22,7 @@ var classc___web_mgr =
     [ "processCmdOpt", "classc___web_mgr.html#abbef88f739edfe4f685eba944885bc12", null ],
     [ "processCmdSet", "classc___web_mgr.html#aa2dabdf8f6f1eff455fdc7e2d729a487", null ],
     [ "processCmdSetTime", "classc___web_mgr.html#af729e648a154b8a0228c6fe90dba70ab", null ],
+    [ "ProcessHeapRequest", "classc___web_mgr.html#ac53c585dcb3b7c9105d769cd32bc5612", null ],
     [ "ProcessSetTimeRequest", "classc___web_mgr.html#a0d5feca56e0e864aeff5994857d67663", null ],
     [ "ProcessXJRequest", "classc___web_mgr.html#acffc5a44584e814738cfa0034a899f7e", null ],
     [ "RegisterAlexaCallback", "classc___web_mgr.html#aaad811dbabf3626c6ddb95f13f301f7f", null ],

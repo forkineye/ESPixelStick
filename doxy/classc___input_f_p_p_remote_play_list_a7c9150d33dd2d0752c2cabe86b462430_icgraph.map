@@ -1,5 +1,7 @@
 <map id="c_InputFPPRemotePlayList::ProcessPlayListEntry" name="c_InputFPPRemotePlayList::ProcessPlayListEntry">
-<area shape="rect" id="Node000001" title=" " alt="" coords="187,5,369,46"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="187,39,369,79"/>
 <area shape="rect" id="Node000002" href="$classfsm___play_list__state___idle.html#ad4f5fd4702fffb217b50f7809d6a9141" title=" " alt="" coords="5,5,139,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,28,139,28,139,23,171,23"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="171,44,139,39,139,34,172,39"/>
+<area shape="rect" id="Node000003" href="$classfsm___play_list__state___playing_file.html#a6d4ff27930b37b98f423091145487648" title=" " alt="" coords="5,71,139,111"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="172,78,139,83,139,78,171,73"/>
 </map>

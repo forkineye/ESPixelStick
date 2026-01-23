@@ -1,14 +1,12 @@
 <map id="c_FileMgr::Begin" name="c_FileMgr::Begin">
-<area shape="rect" id="Node000001" title="&lt; Start the module" alt="" coords="5,79,123,104"/>
-<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a2893dc60a7f5ed7b66c5b9d1a741a396" title=" " alt="" coords="171,5,332,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="90,76,170,40,186,34,188,39,172,45,92,80"/>
-<area shape="rect" id="Node000003" href="$classc___file_mgr.html#a3efba169d1b850dba52906cb4f6cd799" title=" " alt="" coords="193,79,310,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="123,89,177,89,177,94,123,94"/>
-<area shape="rect" id="Node000004" href="$main_8cpp.html#a23252221d60de2259fe00859f716c72e" title=" " alt="" coords="196,128,306,154"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="116,102,186,121,184,126,115,108"/>
-<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="220,80,214,70,217,60,230,54,251,52,274,55,286,61,283,66,272,60,251,57,232,59,221,64,219,69,224,77"/>
-<area shape="rect" id="Node000005" href="$classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="380,99,565,124"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="306,131,365,123,365,128,307,136"/>
-<area shape="rect" id="Node000006" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="384,148,562,189"/>
-<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="307,145,369,153,368,158,306,150"/>
+<area shape="rect" id="Node000001" title="&lt; Start the module" alt="" coords="5,55,123,80"/>
+<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a3efba169d1b850dba52906cb4f6cd799" title=" " alt="" coords="171,29,288,55"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="123,56,155,51,156,56,124,61"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a23252221d60de2259fe00859f716c72e" title=" " alt="" coords="174,79,284,104"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="124,73,159,79,158,84,123,79"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="201,30,196,21,199,11,211,5,229,3,249,5,260,12,257,16,248,10,229,8,212,10,203,15,201,20,206,28"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="336,49,521,75"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="285,81,322,75,322,81,285,86"/>
+<area shape="rect" id="Node000005" href="$classc___input_mgr.html#a8a195063dcc63c1fd8de7c14ab3bf0a2" title=" " alt="" coords="340,99,518,140"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="285,97,324,102,323,107,285,102"/>
 </map>

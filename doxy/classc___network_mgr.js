@@ -16,6 +16,7 @@ var classc___network_mgr =
     [ "SetEthernetIsConnected", "classc___network_mgr.html#aa9d587432312a58a8d98b5b0a75796fb", null ],
     [ "SetWiFiEnable", "classc___network_mgr.html#a734bce5d4408855944972ff28b13569a", null ],
     [ "SetWiFiIsConnected", "classc___network_mgr.html#a21de268df9b77ee26f74ae4712537c21", null ],
+    [ "UpdateMdns", "classc___network_mgr.html#a4f2bed5aa8b01c9e0471116176e44f2a", null ],
     [ "Validate", "classc___network_mgr.html#ac656f99b15313118a5f177adf20a819d", null ],
     [ "AllowWiFiAndEthUpSimultaneously", "classc___network_mgr.html#aed8669649b1aad20da87b3c4bb176926", null ],
     [ "HasBeenInitialized", "classc___network_mgr.html#a3de152746dd2d7a9bd55499feaf4374d", null ],

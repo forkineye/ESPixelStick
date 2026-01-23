@@ -44,5 +44,6 @@ var _g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp =
     [ "SUPPORT_OutputType_UCS8903", "_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#ae296313c7ea19d6e5f4c49d57187490e", null ],
     [ "SUPPORT_OutputType_WS2801", "_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#a79e0ab0467f37ea3d6293e6f27997473", null ],
     [ "SUPPORT_OutputType_WS2811", "_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#afa2071e30f23ea87fdcd80a2e4634bde", null ],
+    [ "SUPPORT_SD", "_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#aba5621a9fd6fd7ddca8fd3249560f239", null ],
     [ "SUPPORT_SPI_OUTPUT", "_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#a48a8ebc9d00cc27b9997acc5c358b70e", null ]
 ];

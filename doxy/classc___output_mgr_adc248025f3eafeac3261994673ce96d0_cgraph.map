@@ -1,14 +1,16 @@
 <map id="c_OutputMgr::CreateNewConfig" name="c_OutputMgr::CreateNewConfig">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,63,209,88"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,84,209,110"/>
 <area shape="rect" id="Node000002" href="$classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d" title=" " alt="" coords="257,5,461,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,59,284,32,285,38,167,65"/>
-<area shape="rect" id="Node000003" href="$classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968" title=" " alt="" coords="277,55,440,96"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,73,262,73,262,78,209,78"/>
-<area shape="rect" id="Node000004" href="$classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="280,120,438,146"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="167,86,285,113,284,119,166,92"/>
-<area shape="rect" id="Node000005" href="$classc___file_mgr.html#a91d8ba978954c06f5448afb5c75f34b4" title=" " alt="" coords="518,91,685,116"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="438,121,502,113,503,118,438,126"/>
-<area shape="rect" id="Node000006" href="$classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79" title=" " alt="" coords="509,140,694,181"/>
-<area shape="poly" id="edge6_Node000004_Node000006" title=" " alt="" coords="438,139,494,146,493,151,438,145"/>
-<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="562,92,554,82,558,72,575,66,602,64,632,67,647,74,644,79,630,72,602,69,576,71,562,76,559,81,566,89"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="140,81,256,40,280,33,282,38,257,45,142,86"/>
+<area shape="rect" id="Node000003" href="$classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="268,55,450,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="209,82,252,77,252,83,210,88"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968" title=" " alt="" coords="277,104,440,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="210,106,262,111,261,117,209,111"/>
+<area shape="rect" id="Node000005" href="$classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="280,169,438,195"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="139,108,258,154,285,162,283,168,256,159,137,113"/>
+<area shape="rect" id="Node000006" href="$classc___file_mgr.html#a91d8ba978954c06f5448afb5c75f34b4" title=" " alt="" coords="518,140,685,166"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="438,170,502,162,503,167,438,175"/>
+<area shape="rect" id="Node000007" href="$classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79" title=" " alt="" coords="509,190,694,230"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="438,189,494,195,493,200,438,194"/>
+<area shape="poly" id="edge6_Node000006_Node000006" title=" " alt="" coords="562,141,554,131,558,122,575,115,602,113,632,116,647,123,644,128,630,121,602,119,576,121,562,126,559,131,566,138"/>
 </map>

@@ -65,7 +65,7 @@ var searchData=
   ['port_62',['port',['../classc___input_m_q_t_t.html#ab8a32cdf7cc50d097eaf92fc7a6945cc',1,'c_InputMQTT']]],
   ['portid_63',['PortId',['../struct_output_channel_id_to_gpio_and_port_entry__t.html#a36ecb20c20f96038b336338b548766c5',1,'OutputChannelIdToGpioAndPortEntry_t::PortId'],['../classc___input_e131.html#a52cf81d70ad8626a2271159f4d543f26',1,'c_InputE131::PortId'],['../structc___output_mgr_1_1_driver_info__t.html#a9831548b4d2f5ed8c4bf65108296894d',1,'c_OutputMgr::DriverInfo_t::PortId']]],
   ['porttype_64',['PortType',['../struct_output_channel_id_to_gpio_and_port_entry__t.html#ad49b54ca07c9522fe805c5ec4e26ea36',1,'OutputChannelIdToGpioAndPortEntry_t::PortType'],['../structc___output_mgr_1_1_driver_info__t.html#a3423c032a40c53f3d2f42344066ad601',1,'c_OutputMgr::DriverInfo_t::PortType']]],
-  ['poutputbuffer_65',['pOutputBuffer',['../classc___output_common.html#a4a14a3bbbc484b50ff0abf62d4e3e732',1,'c_OutputCommon']]],
+  ['poutputbuffer_65',['pOutputBuffer',['../classc___output_common.html#a4a14a3bbbc484b50ff0abf62d4e3e732',1,'c_OutputCommon::pOutputBuffer'],['../classc___output_mgr.html#a068bba05c9c35db7db26d5516c904f9e',1,'c_OutputMgr::pOutputBuffer']]],
   ['ppixeldatasource_66',['pPixelDataSource',['../structc___output_uart_1_1_output_uart_config__t.html#a96d5a30495d74e6a7582f96f8edb4d3c',1,'c_OutputUart::OutputUartConfig_t']]],
   ['pplayfileengine_67',['pPlayFileEngine',['../classc___input_m_q_t_t.html#a2a0a222d54dba4533f155476efea8cb2',1,'c_InputMQTT']]],
   ['prependnullpixelcount_68',['PrependNullPixelCount',['../classc___output_pixel.html#a54a6e75333ee8c5bc7b9cdba5f3d3c16',1,'c_OutputPixel']]],

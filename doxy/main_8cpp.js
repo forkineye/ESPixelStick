@@ -21,6 +21,7 @@ var main_8cpp =
     [ "setup", "main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d", null ],
     [ "TestHeap", "main_8cpp.html#a425a5b292b56daa3d1454e1a8db59933", null ],
     [ "validateConfig", "main_8cpp.html#aa83bf610d4f986357e0ea1274d087680", null ],
+    [ "BackupFlashToolConfig", "main_8cpp.html#a94a5deb9216af8059c21c32349e7e35f", null ],
     [ "config", "main_8cpp.html#a25ce4b69d296fc9a3324b494542c2420", null ],
     [ "ConfigLoadNeeded", "main_8cpp.html#acdf4ed1900624d89fafc8866ad45d29f", null ],
     [ "ConfigSaveNeeded", "main_8cpp.html#ae44595345afc966d1f3de593d4c9b0f8", null ],

@@ -6,7 +6,7 @@ var searchData=
   ['marqueegroup_5ft_3',['MarqueeGroup_t',['../structc___input_effect_engine_1_1_marquee_group__t.html',1,'c_InputEffectEngine']]],
   ['marqueuegrouptable_4',['MarqueueGroupTable',['../_input_effect_engine_8cpp.html#a2723f91904a5852ed5bbf18664c0b898',1,'InputEffectEngine.cpp']]],
   ['max_5fnum_5fcredentials_5',['MAX_NUM_CREDENTIALS',['../_ap_credentials_8hpp.html#a7c95b32d94779a43633a02cee8a54bd3',1,'ApCredentials.hpp']]],
-  ['max_5fnum_5frmt_5fchannels_6',['MAX_NUM_RMT_CHANNELS',['../_g_p_i_o___defs___e_s_p32___s_8hpp.html#a584ac3fbddc90a4f6758a3bd6b9ec76c',1,'GPIO_Defs_ESP32_S.hpp']]],
+  ['max_5fnum_5frmt_5fchannels_6',['MAX_NUM_RMT_CHANNELS',['../_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#a584ac3fbddc90a4f6758a3bd6b9ec76c',1,'GPIO_Defs_ESP32S3_DevkitC.hpp']]],
   ['max_5fnum_5fsparse_5franges_7',['MAX_NUM_SPARSE_RANGES',['../_input_f_p_p_remote_play_file_8hpp.html#ae47639c73fc39c184c97d253e216d2bc',1,'InputFPPRemotePlayFile.hpp']]],
   ['max_5fnum_5funiverses_8',['MAX_NUM_UNIVERSES',['../classc___input_artnet.html#a0393b43f98fed59e7d080c113ca460e6',1,'c_InputArtnet::MAX_NUM_UNIVERSES'],['../classc___input_e131.html#ac0aae26f37068d38277b8badf236480a',1,'c_InputE131::MAX_NUM_UNIVERSES']]],
   ['max_5fsd_5fbuffer_5fsize_9',['MAX_SD_BUFFER_SIZE',['../_file_mgr_8hpp.html#aed84cc54e24bfaea1c811d103d150d78',1,'FileMgr.hpp']]],
