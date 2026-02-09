@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['data_0',['DATA',['../class_e_f_update.html#a9054f60484e702da4458451c49916bfeae44f9e348e41cb272efa87387728571b',1,'EFUpdate']]]
+  ['channelmode_0',['ChannelMode',['../classc___input_effect_engine.html#a53529eb713a399effb4d52e08270352ea08fa64feea96348b803ea69f931b30a7',1,'c_InputEffectEngine']]]
 ];

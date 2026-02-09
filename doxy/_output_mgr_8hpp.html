@@ -105,6 +105,7 @@ $(function(){initNavTree('_output_mgr_8hpp.html',''); initResizable(true); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="_e_s_pixel_stick_8h_source.html">ESPixelStick.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="_output_mgr_port_defs_8hpp_source.html">OutputMgrPortDefs.hpp</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="memdebug_8h_source.html">memdebug.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="_file_mgr_8hpp_source.html">FileMgr.hpp</a>&quot;</code><br />
 <code>#include &lt;TimeLib.h&gt;</code><br />
@@ -113,40 +114,44 @@ Include dependency graph for OutputMgr.hpp:</div>
 <div class="dyncontent">
 <div class="center"><img src="_output_mgr_8hpp__incl.png" border="0" usemap="#a_2github_2workspace_2include_2output_2_output_mgr_8hpp" alt=""/></div>
 <map name="a_2github_2workspace_2include_2output_2_output_mgr_8hpp" id="a_2github_2workspace_2include_2output_2_output_mgr_8hpp">
-<area shape="rect" title=" " alt="" coords="375,5,547,46"/>
-<area shape="rect" href="_e_s_pixel_stick_8h.html" title=" " alt="" coords="333,168,440,193"/>
-<area shape="poly" title=" " alt="" coords="454,47,401,155,396,152,449,45"/>
-<area shape="rect" href="memdebug_8h.html" title=" " alt="" coords="5,241,101,267"/>
-<area shape="poly" title=" " alt="" coords="427,49,89,236,87,231,424,44"/>
-<area shape="rect" href="_file_mgr_8hpp.html" title=" " alt="" coords="458,94,546,120"/>
-<area shape="poly" title=" " alt="" coords="474,45,491,79,487,81,469,48"/>
-<area shape="rect" title=" " alt="" coords="571,94,650,120"/>
-<area shape="poly" title=" " alt="" coords="500,44,575,84,573,89,497,49"/>
-<area shape="rect" title=" " alt="" coords="58,315,133,341"/>
-<area shape="poly" title=" " alt="" coords="333,189,250,206,206,222,165,244,134,272,112,303,107,300,130,268,162,239,204,217,249,201,332,184"/>
-<area shape="rect" title=" " alt="" coords="175,241,243,267"/>
-<area shape="poly" title=" " alt="" coords="357,196,254,238,252,233,355,191"/>
-<area shape="rect" title=" " alt="" coords="267,241,370,267"/>
-<area shape="poly" title=" " alt="" coords="377,195,342,232,338,228,373,192"/>
-<area shape="poly" title=" " alt="" coords="333,196,116,242,115,237,332,191"/>
-<area shape="rect" href="_const_names_8hpp.html" title=" " alt="" coords="394,241,515,267"/>
-<area shape="poly" title=" " alt="" coords="399,192,435,228,431,232,396,195"/>
-<area shape="rect" href="_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="540,241,652,267"/>
-<area shape="poly" title=" " alt="" coords="416,191,540,234,538,239,414,196"/>
-<area shape="rect" href="_fast_timer_8hpp.html" title=" " alt="" coords="676,241,780,267"/>
-<area shape="poly" title=" " alt="" coords="438,191,661,238,660,243,437,197"/>
-<area shape="poly" title=" " alt="" coords="62,266,83,300,78,303,58,269"/>
-<area shape="poly" title=" " alt="" coords="566,243,442,201,444,196,568,238"/>
-<area shape="poly" title=" " alt="" coords="676,243,454,197,455,192,677,238"/>
-<area shape="poly" title=" " alt="" coords="484,122,420,162,417,157,481,118"/>
-<area shape="rect" title=" " alt="" coords="464,168,541,193"/>
-<area shape="poly" title=" " alt="" coords="505,120,505,152,500,152,500,120"/>
-<area shape="rect" title=" " alt="" coords="565,168,632,193"/>
-<area shape="poly" title=" " alt="" coords="520,118,572,156,569,161,517,122"/>
-<area shape="rect" title=" " alt="" coords="655,168,702,193"/>
-<area shape="poly" title=" " alt="" coords="533,118,642,162,640,166,531,123"/>
-<area shape="rect" title=" " alt="" coords="726,168,783,193"/>
-<area shape="poly" title=" " alt="" coords="546,118,711,164,710,169,544,123"/>
+<area shape="rect" title=" " alt="" coords="480,5,653,46"/>
+<area shape="rect" href="_e_s_pixel_stick_8h.html" title=" " alt="" coords="423,168,529,193"/>
+<area shape="poly" title=" " alt="" coords="557,48,493,155,489,153,553,45"/>
+<area shape="rect" href="memdebug_8h.html" title=" " alt="" coords="822,241,917,267"/>
+<area shape="poly" title=" " alt="" coords="566,47,563,78,564,117,573,157,582,175,593,191,671,210,807,238,806,243,670,215,591,196,577,178,568,159,559,118,558,78,561,46"/>
+<area shape="rect" href="_output_mgr_port_defs_8hpp.html" title=" " alt="" coords="5,315,203,341"/>
+<area shape="poly" title=" " alt="" coords="481,42,388,65,337,82,285,103,235,129,187,161,144,199,109,243,103,256,100,271,101,300,95,300,95,270,98,254,104,240,140,195,184,157,232,125,283,98,335,77,387,60,479,37"/>
+<area shape="rect" href="_file_mgr_8hpp.html" title=" " alt="" coords="604,94,692,120"/>
+<area shape="poly" title=" " alt="" coords="589,44,626,81,623,85,585,48"/>
+<area shape="rect" title=" " alt="" coords="717,94,795,120"/>
+<area shape="poly" title=" " alt="" coords="615,44,714,85,712,90,613,49"/>
+<area shape="rect" title=" " alt="" coords="680,315,755,341"/>
+<area shape="poly" title=" " alt="" coords="492,192,536,226,592,265,675,306,672,311,589,269,532,231,489,196"/>
+<area shape="rect" title=" " alt="" coords="602,241,670,267"/>
+<area shape="poly" title=" " alt="" coords="504,191,596,232,594,237,502,196"/>
+<area shape="rect" title=" " alt="" coords="694,241,797,267"/>
+<area shape="poly" title=" " alt="" coords="522,191,685,234,684,239,521,196"/>
+<area shape="poly" title=" " alt="" coords="530,189,807,238,806,243,529,194"/>
+<area shape="rect" href="_const_names_8hpp.html" title=" " alt="" coords="142,241,263,267"/>
+<area shape="poly" title=" " alt="" coords="430,196,264,240,263,234,429,191"/>
+<area shape="rect" href="_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="288,241,400,267"/>
+<area shape="poly" title=" " alt="" coords="448,196,374,235,371,231,445,192"/>
+<area shape="rect" href="_fast_timer_8hpp.html" title=" " alt="" coords="424,241,528,267"/>
+<area shape="poly" title=" " alt="" coords="472,194,470,226,465,226,466,193"/>
+<area shape="poly" title=" " alt="" coords="845,270,758,310,756,306,842,265"/>
+<area shape="poly" title=" " alt="" coords="372,238,446,199,449,204,375,243"/>
+<area shape="poly" title=" " alt="" coords="304,270,160,313,158,308,303,265"/>
+<area shape="poly" title=" " alt="" coords="101,314,106,277,114,257,128,239,148,227,176,216,250,199,332,189,407,183,408,188,332,194,251,205,178,221,150,231,131,243,119,259,111,279,106,315"/>
+<area shape="poly" title=" " alt="" coords="480,241,482,208,487,209,486,241"/>
+<area shape="poly" title=" " alt="" coords="620,123,520,164,518,159,618,118"/>
+<area shape="rect" title=" " alt="" coords="756,168,833,193"/>
+<area shape="poly" title=" " alt="" coords="674,118,757,158,755,163,672,123"/>
+<area shape="rect" title=" " alt="" coords="858,168,924,193"/>
+<area shape="poly" title=" " alt="" coords="690,118,844,163,842,168,688,123"/>
+<area shape="rect" title=" " alt="" coords="604,168,650,193"/>
+<area shape="poly" title=" " alt="" coords="647,121,637,153,632,152,642,119"/>
+<area shape="rect" title=" " alt="" coords="674,168,731,193"/>
+<area shape="poly" title=" " alt="" coords="659,118,686,154,682,157,655,122"/>
 </map>
 </div>
 </div><div class="textblock"><div class="dynheader">
@@ -330,10 +335,6 @@ Macros</h2></td></tr>
 <tr class="separator:a6dc4c220baec42d8411386cda27ceae4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a412688b6020bceb2940c433f7924f79e" id="r_a412688b6020bceb2940c433f7924f79e"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a412688b6020bceb2940c433f7924f79e">DEFAULT_CONSOLE_RX_GPIO</a>&#160;&#160;&#160;gpio_num_t::GPIO_NUM_3</td></tr>
 <tr class="separator:a412688b6020bceb2940c433f7924f79e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f8e57be85acf1580548dcbec0019a18" id="r_a5f8e57be85acf1580548dcbec0019a18"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f8e57be85acf1580548dcbec0019a18">OM_IS_UART</a>&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Uart)</td></tr>
-<tr class="separator:a5f8e57be85acf1580548dcbec0019a18"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4aa294a2f6c841a2ab5aa2f541e8b0df" id="r_a4aa294a2f6c841a2ab5aa2f541e8b0df"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4aa294a2f6c841a2ab5aa2f541e8b0df">OM_IS_RMT</a>&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Rmt)</td></tr>
-<tr class="separator:a4aa294a2f6c841a2ab5aa2f541e8b0df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -396,34 +397,6 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>forward declaration to the pure virtual output class that will be defined later. </p>
-
-</div>
-</div>
-<a id="a4aa294a2f6c841a2ab5aa2f541e8b0df" name="a4aa294a2f6c841a2ab5aa2f541e8b0df"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4aa294a2f6c841a2ab5aa2f541e8b0df">&#9670;&#160;</a></span>OM_IS_RMT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OM_IS_RMT&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Rmt)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a5f8e57be85acf1580548dcbec0019a18" name="a5f8e57be85acf1580548dcbec0019a18"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f8e57be85acf1580548dcbec0019a18">&#9670;&#160;</a></span>OM_IS_UART</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define OM_IS_UART&#160;&#160;&#160;(CurrentOutput.PortType == OM_PortType_t::Uart)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
 
 </div>
 </div>

@@ -45,6 +45,9 @@ var NAVTREE =
         [ "All", "globals.html", "globals_dup" ],
         [ "Functions", "globals_func.html", null ],
         [ "Variables", "globals_vars.html", "globals_vars" ],
+        [ "Typedefs", "globals_type.html", null ],
+        [ "Enumerations", "globals_enum.html", null ],
+        [ "Enumerator", "globals_eval.html", null ],
         [ "Macros", "globals_defs.html", "globals_defs" ]
       ] ]
     ] ]
@@ -54,22 +57,21 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_ap_credentials_8cpp.html",
-"_const_names_8cpp.html#afb61829b5f9bd4dba287f5878d9185e9",
-"_const_names_8hpp.html#af9dd0d23dd8a32bb2b2f29f3cc394b24",
-"_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#a03a909b01ab18eaa867c51c31695efc9",
-"_g_p_i_o___defs___e_s_p32___k_a__4_8hpp.html#afa2071e30f23ea87fdcd80a2e4634bde",
-"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___a_e___plus_8hpp.html",
-"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_t_h_8hpp.html#a7b3ca01a31109575d4bd2bf82e692d0b",
-"_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01_8hpp.html#aca6c98b14a61849654e93ee35fd1d1ab",
-"_input_f_p_p_remote_8cpp.html#a05f2ca589c42eecadaecf95f69428333",
-"_wi_fi_driver_8cpp.html#a667bab2e55abbfb23d99e1e94177bd3f",
-"classc___input_alexa.html#a514052a254b938befb3a4c933efe15c4",
-"classc___input_f_p_p_remote.html#ac20d33080cef27922cc6350fcf25d8b6",
-"classc___network_mgr.html#a74dcaab71bd78aee245b11edeca5e94b",
-"classc___output_uart.html#ad201cf8c69ead52acf4a885f90a91a3b",
-"classfsm___play_list__state___paused.html#a6e70ea3c06b4aa4d916d4ce0bfc81cc0",
-"globals_d.html",
-"structc___input_effect_engine_1_1_m_q_t_t_configuration__t.html#a64c62821a612be02d41d64bc66f2bb38"
+"_const_names_8cpp.html#af677cd8c5e5971dd98fceae73000e74d",
+"_const_names_8hpp.html#ae3afd847590d80f125e2dc675786c35d",
+"_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#a319d1c078a4ace47775ecd6615a796a7",
+"_g_p_i_o___defs___e_s_p32___m5_stack___atom_8hpp.html#aea53898829210ed1fbac67d4aa855a6e",
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h___p5_8hpp.html#aeed05cdd33507563bb8551bc006bc0f1",
+"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#adaf0753131bfc7ffd9f67c5061606ed1",
+"_input_d_d_p_8h.html#aea80a7c46e66f756c8f0c03775a7b747",
+"_safer_string_conversion_8hpp.html#abaa5f3baa5ae9ae6df677674285ab8da",
+"classc___file_mgr.html#aab11aa92f9253ec95ec5b2dc7be1c55e",
+"classc___input_effect_engine.html#afaf6b474467520e248c2e79d3bdc8146",
+"classc___input_mgr.html#ab7a89ecb21bf23364999dedc7e474fc5ac02c03efd74ae5f6fe72e72aa48b9adf",
+"classc___output_uart.html#aa3a0f9697d6b37c7eef0f17923eac717",
+"classfsm___play_list__state.html#a300141836518233b8730e740ccf6c0b0",
+"functions_vars_f.html",
+"structc___input_e131_1_1_universe__t.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

@@ -40,7 +40,6 @@ var dir_a67076ebe8963a65253afa097c9d0973 =
     [ "GPIO_Defs_ESP32_WT32ETH01_Wasatch.hpp", "_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01___wasatch_8hpp.html", "_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01___wasatch_8hpp" ],
     [ "GPIO_Defs_ESP32S3_DevkitC.hpp", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp" ],
     [ "GPIO_Defs_ESP32S3_seed_XIAO.hpp", "_g_p_i_o___defs___e_s_p32_s3__seed___x_i_a_o_8hpp.html", "_g_p_i_o___defs___e_s_p32_s3__seed___x_i_a_o_8hpp" ],
-    [ "GPIO_Defs_ESP8266_D1_mini_lolinsd.hpp", "_g_p_i_o___defs___e_s_p8266___d1__mini__lolinsd_8hpp.html", "_g_p_i_o___defs___e_s_p8266___d1__mini__lolinsd_8hpp" ],
     [ "GPIO_Defs_ESP8266_ESP01S.hpp", "_g_p_i_o___defs___e_s_p8266___e_s_p01_s_8hpp.html", "_g_p_i_o___defs___e_s_p8266___e_s_p01_s_8hpp" ],
     [ "GPIO_Defs_ESP8266_ESPS_V3.hpp", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html", "_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp" ],
     [ "GPIO_Defs_ESP8266_Generic.hpp", "_g_p_i_o___defs___e_s_p8266___generic_8hpp.html", "_g_p_i_o___defs___e_s_p8266___generic_8hpp" ]

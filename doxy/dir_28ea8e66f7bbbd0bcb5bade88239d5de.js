@@ -14,6 +14,7 @@ var dir_28ea8e66f7bbbd0bcb5bade88239d5de =
     [ "OutputGS8208Rmt.hpp", "_output_g_s8208_rmt_8hpp.html", null ],
     [ "OutputGS8208Uart.hpp", "_output_g_s8208_uart_8hpp.html", null ],
     [ "OutputMgr.hpp", "_output_mgr_8hpp.html", "_output_mgr_8hpp" ],
+    [ "OutputMgrPortDefs.hpp", "_output_mgr_port_defs_8hpp.html", "_output_mgr_port_defs_8hpp" ],
     [ "OutputPixel.hpp", "_output_pixel_8hpp.html", "_output_pixel_8hpp" ],
     [ "OutputRelay.hpp", "_output_relay_8hpp.html", null ],
     [ "OutputRmt.hpp", "_output_rmt_8hpp.html", null ],

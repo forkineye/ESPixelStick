@@ -69,6 +69,7 @@ var annotated_dup =
     [ "fsm_WiFi_state_ConnectionFailed", "classfsm___wi_fi__state___connection_failed.html", "classfsm___wi_fi__state___connection_failed" ],
     [ "fsm_WiFi_state_Disabled", "classfsm___wi_fi__state___disabled.html", "classfsm___wi_fi__state___disabled" ],
     [ "InputTypeXlateMap_t", "struct_input_type_xlate_map__t.html", "struct_input_type_xlate_map__t" ],
-    [ "OutputChannelIdToGpioAndPortEntry_t", "struct_output_channel_id_to_gpio_and_port_entry__t.html", "struct_output_channel_id_to_gpio_and_port_entry__t" ],
-    [ "OutputTypeXlateMap_t", "struct_output_type_xlate_map__t.html", "struct_output_type_xlate_map__t" ]
+    [ "OM_GPIOS_t", "struct_o_m___g_p_i_o_s__t.html", "struct_o_m___g_p_i_o_s__t" ],
+    [ "OM_OutputPortDefinition_t", "struct_o_m___output_port_definition__t.html", "struct_o_m___output_port_definition__t" ],
+    [ "SupportedOutputProtocol_t", "struct_supported_output_protocol__t.html", "struct_supported_output_protocol__t" ]
 ];

@@ -10,6 +10,10 @@ var classc___input_effect_engine =
     [ "Transition_t", "structc___input_effect_engine_1_1_transition__t.html", "structc___input_effect_engine_1_1_transition__t" ],
     [ "EffectFunc", "classc___input_effect_engine.html#a7fca30fbfe44212fdd030029088aa21b", null ],
     [ "timeType", "classc___input_effect_engine.html#a12b43d4049b18c978b7f22df2da2efaa", null ],
+    [ "EffectChannelMode_t", "classc___input_effect_engine.html#a53529eb713a399effb4d52e08270352e", [
+      [ "ChannelMode", "classc___input_effect_engine.html#a53529eb713a399effb4d52e08270352ea08fa64feea96348b803ea69f931b30a7", null ],
+      [ "PixelMode", "classc___input_effect_engine.html#a53529eb713a399effb4d52e08270352ea0173278fa931b23c49dceae57b72b6a1", null ]
+    ] ],
     [ "c_InputEffectEngine", "classc___input_effect_engine.html#a61dc0e2f64570d9a7f7b534027a24863", null ],
     [ "~c_InputEffectEngine", "classc___input_effect_engine.html#a2edf1f1611f0631ca2a1d6d8d65bf0da", null ],
     [ "c_InputEffectEngine", "classc___input_effect_engine.html#a50de6fdb56648338c95c3b675f3ac3bf", null ],
@@ -60,10 +64,12 @@ var classc___input_effect_engine =
     [ "setSpeed", "classc___input_effect_engine.html#a3628411bc599079aa0e45dd3df1682fc", null ],
     [ "validateConfiguration", "classc___input_effect_engine.html#abcbf05e7ca16985fa97382121a08867b", null ],
     [ "ActiveEffect", "classc___input_effect_engine.html#ab9e6427393356e025356dd307dff4098", null ],
+    [ "ChannelCount", "classc___input_effect_engine.html#a1fb52b02b3b4a849194202c2210065ea", null ],
     [ "ChannelsPerPixel", "classc___input_effect_engine.html#a2ce41cfe7b3c283a60786f2875abcc32", null ],
     [ "Disabled", "classc___input_effect_engine.html#ac65e7f765bfe855b23ca9388f257fecb", null ],
     [ "EffectAllLeds", "classc___input_effect_engine.html#ad921d2884e3282104e8577c6e38d52f3", null ],
     [ "EffectBrightness", "classc___input_effect_engine.html#a18ed4df2461fffa00499578000946825", null ],
+    [ "EffectChannelMode", "classc___input_effect_engine.html#afac4d3235c168fdfd8306ed3bf95e7af", null ],
     [ "EffectColor", "classc___input_effect_engine.html#a728d914d1b5e7b226ac7399d6b25dd62", null ],
     [ "EffectCounter", "classc___input_effect_engine.html#a47d3d8f591fee5159a70c3415e78711e", null ],
     [ "EffectDelay", "classc___input_effect_engine.html#a01df4bbcf6c566165eab42083ec75e2b", null ],

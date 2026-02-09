@@ -1,0 +1,23 @@
+<map id="/github/workspace/include/output/OutputMgrPortDefs.hpp" name="/github/workspace/include/output/OutputMgrPortDefs.hpp">
+<area shape="rect" id="Node000001" title=" " alt="" coords="436,5,638,46"/>
+<area shape="rect" id="Node000002" href="$_e_s_pixel_stick_8h.html" title=" " alt="" coords="439,94,545,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="528,48,509,82,504,79,524,45"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="102,241,177,267"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="438,114,192,133,75,149,35,159,15,170,9,180,9,189,14,199,24,208,53,224,88,237,86,242,51,229,21,212,10,202,4,191,4,179,11,166,34,154,74,144,191,127,438,108"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="25,168,92,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="439,117,293,138,108,170,107,165,292,132,438,112"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="116,168,219,193"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="439,122,235,167,234,162,438,117"/>
+<area shape="rect" id="Node000006" href="$memdebug_8h.html" title=" " alt="" coords="244,168,339,193"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="459,123,341,165,339,159,457,118"/>
+<area shape="rect" id="Node000007" href="$_const_names_8hpp.html" title=" " alt="" coords="363,168,484,193"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="482,122,447,158,444,155,479,118"/>
+<area shape="rect" id="Node000008" href="$_g_p_i_o___defs_8hpp.html" title=" " alt="" coords="637,168,749,193"/>
+<area shape="poly" id="edge8_Node000002_Node000008" title=" " alt="" coords="520,118,639,160,637,165,518,123"/>
+<area shape="rect" id="Node000009" href="$_fast_timer_8hpp.html" title=" " alt="" coords="509,168,613,193"/>
+<area shape="poly" id="edge11_Node000002_Node000009" title=" " alt="" coords="498,118,533,155,529,159,494,122"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="267,196,181,237,178,232,265,191"/>
+<area shape="poly" id="edge10_Node000008_Node000001" title=" " alt="" coords="679,169,566,59,570,55,683,165"/>
+<area shape="poly" id="edge9_Node000008_Node000002" title=" " alt="" coords="665,170,546,127,548,122,667,165"/>
+<area shape="poly" id="edge12_Node000009_Node000002" title=" " alt="" coords="555,169,520,132,524,128,558,165"/>
+</map>

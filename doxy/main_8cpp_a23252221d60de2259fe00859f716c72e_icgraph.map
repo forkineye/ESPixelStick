@@ -1,117 +1,121 @@
 <map id="RequestReboot" name="RequestReboot">
-<area shape="rect" id="Node000001" title=" " alt="" coords="2869,503,2979,528"/>
-<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a2e86f9c538a117790a96317890d68a55" title="&lt; Start the module" alt="" coords="1673,5,1790,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2920,487,2917,419,2904,327,2891,278,2873,229,2849,183,2819,143,2782,105,2747,76,2712,54,2677,39,2639,30,2598,24,2497,21,2246,21,1791,21,1791,16,2246,16,2497,16,2598,19,2640,24,2679,34,2715,50,2750,71,2785,101,2823,139,2854,181,2878,227,2896,276,2909,326,2923,418,2926,487"/>
-<area shape="rect" id="Node000004" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="2428,553,2563,579"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="2854,522,2750,531,2634,543,2563,555,2562,550,2633,538,2749,525,2853,517"/>
-<area shape="rect" id="Node000005" href="$classc___output_uart.html#a53c5ab20679c0ebd73e2a13d45742115" title=" " alt="" coords="2658,249,2796,275"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="2914,488,2903,446,2884,394,2857,342,2839,318,2819,296,2788,278,2791,273,2822,292,2843,314,2861,339,2889,392,2908,444,2920,487"/>
-<area shape="rect" id="Node000006" href="$classc___web_mgr.html#a529c105b3389d78208078fd9c6847367" title=" " alt="" coords="2635,351,2819,376"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="2905,491,2869,444,2845,419,2819,398,2781,379,2784,374,2822,393,2849,415,2873,440,2909,488"/>
-<area shape="rect" id="Node000007" href="$classc___web_mgr.html#a2c6189891b0496dae7d89ea7cdb24aee" title=" " alt="" coords="2442,345,2549,371"/>
-<area shape="poly" id="edge42_Node000001_Node000007" title=" " alt="" coords="2893,495,2859,471,2820,449,2768,430,2696,409,2548,373,2550,368,2697,404,2770,425,2822,444,2862,466,2896,491"/>
-<area shape="rect" id="Node000019" href="$classfsm___wi_fi__state___connection_failed.html#a721084d33603f03e8be94782e050c08a" title=" " alt="" coords="1384,454,1568,494"/>
-<area shape="poly" id="edge41_Node000001_Node000019" title=" " alt="" coords="2853,505,2691,480,2594,471,2497,467,1991,467,1569,474,1569,469,1991,462,2497,462,2594,466,2691,475,2853,499"/>
-<area shape="rect" id="Node000041" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="2648,153,2806,179"/>
-<area shape="poly" id="edge43_Node000001_Node000041" title=" " alt="" coords="2915,488,2904,437,2885,373,2857,303,2819,238,2786,206,2751,182,2754,177,2789,201,2823,235,2861,301,2890,371,2909,436,2920,486"/>
-<area shape="rect" id="Node000043" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="2426,153,2566,179"/>
-<area shape="poly" id="edge58_Node000001_Node000043" title=" " alt="" coords="2912,489,2899,455,2879,415,2853,374,2819,340,2795,325,2773,316,2730,311,2685,308,2660,302,2632,290,2592,264,2557,234,2506,181,2510,177,2560,230,2596,260,2635,285,2661,297,2685,303,2730,306,2774,311,2797,320,2822,336,2857,371,2884,412,2904,453,2917,487"/>
-<area shape="rect" id="Node000045" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="2643,553,2811,579"/>
-<area shape="poly" id="edge49_Node000001_Node000045" title=" " alt="" coords="2857,535,2780,555,2779,550,2856,530"/>
-<area shape="rect" id="Node000047" href="$classc___input_e131.html#a6098950d3be2934c5ae667a42cf9ccf1" title=" " alt="" coords="2637,768,2817,809"/>
-<area shape="poly" id="edge53_Node000001_Node000047" title=" " alt="" coords="2921,544,2911,590,2892,647,2864,707,2845,734,2822,759,2807,770,2804,766,2819,755,2841,731,2859,704,2887,645,2906,589,2916,543"/>
-<area shape="rect" id="Node000051" href="$classc___input_m_q_t_t.html#ad67733726b14ea7d85904985b235efb8" title=" " alt="" coords="2633,654,2821,694"/>
-<area shape="poly" id="edge57_Node000001_Node000051" title=" " alt="" coords="2908,543,2872,590,2848,615,2822,638,2791,656,2788,651,2819,633,2845,612,2868,587,2904,540"/>
-<area shape="rect" id="Node000052" href="$classc___input_f_p_p_remote_play_file.html#ae88277a6b0c791cb4f930a95a6013a29" title=" " alt="" coords="2636,883,2818,924"/>
-<area shape="poly" id="edge59_Node000001_Node000052" title=" " alt="" coords="2925,544,2922,610,2907,698,2894,745,2877,791,2853,835,2823,873,2809,885,2805,881,2819,870,2848,832,2872,789,2889,743,2902,697,2916,609,2920,544"/>
-<area shape="rect" id="Node000054" href="$classc___file_mgr.html#ac14c25f4d4db4016303b200f6bd9ae99" title=" " alt="" coords="2426,719,2566,744"/>
-<area shape="poly" id="edge61_Node000001_Node000054" title=" " alt="" coords="2899,541,2864,569,2822,594,2794,605,2769,611,2726,616,2683,623,2660,631,2635,644,2620,658,2611,672,2602,687,2587,702,2549,720,2547,716,2584,697,2598,683,2607,669,2616,654,2632,640,2658,626,2682,617,2725,611,2768,606,2792,600,2819,589,2861,564,2895,537"/>
-<area shape="rect" id="Node000055" href="$classc___input_e131.html#ae77e361a9e510852cd0b7d0cf6721ec6" title="Set a new config in the driver." alt="" coords="2649,833,2805,859"/>
-<area shape="poly" id="edge63_Node000001_Node000055" title=" " alt="" coords="2924,544,2918,602,2902,677,2889,717,2872,755,2850,791,2822,823,2805,835,2802,831,2819,819,2846,788,2867,753,2884,715,2897,676,2913,601,2919,543"/>
-<area shape="rect" id="Node000056" href="$classc___file_mgr.html#a0986fc423ff9a5f4f5e8c48c0752c3d2" title=" " alt="" coords="2649,719,2805,744"/>
-<area shape="poly" id="edge64_Node000001_Node000056" title=" " alt="" coords="2918,544,2905,582,2886,626,2858,670,2822,708,2802,720,2799,716,2819,704,2854,667,2881,623,2900,580,2913,543"/>
-<area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,107,59,132"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="1657,21,1245,21,353,21,226,19,172,28,108,53,89,64,71,79,45,108,41,104,68,75,85,60,105,48,171,23,226,14,353,16,1245,16,1657,16"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="2416,585,2225,616,2109,628,1994,633,1475,633,1351,635,1246,640,1066,647,980,643,890,631,789,607,673,570,565,524,461,467,363,403,274,337,194,273,128,214,44,135,48,131,132,211,198,269,277,333,366,399,464,463,568,519,675,565,791,602,891,626,981,638,1066,641,1246,635,1351,630,1474,628,1994,628,2109,623,2224,611,2415,580"/>
-<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="2619,364,2549,362,2549,357,2620,358"/>
-<area shape="rect" id="Node000008" href="$classc___web_mgr.html#a078d26bad50a9051344ff07ad8e746d8" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,107,229,132"/>
-<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="2447,342,2290,284,2179,247,2053,211,1915,177,1770,149,1623,129,1477,122,551,122,229,122,229,117,551,117,1477,117,1624,124,1771,143,1916,172,2054,206,2180,242,2291,279,2449,337"/>
-<area shape="rect" id="Node000009" href="$classc___web_mgr.html#aa3c98d4d503811ca4071b3e3ba84fa0f" title=" " alt="" coords="2138,336,2358,362"/>
-<area shape="poly" id="edge10_Node000007_Node000009" title=" " alt="" coords="2427,358,2358,356,2359,350,2428,353"/>
-<area shape="poly" id="edge9_Node000008_Node000003" title=" " alt="" coords="91,122,59,122,59,117,91,117"/>
-<area shape="rect" id="Node000010" href="$classc___network_mgr.html#af2b9dc93956b88607802667e89c76f75" title=" " alt="" coords="1895,323,2090,364"/>
-<area shape="poly" id="edge11_Node000009_Node000010" title=" " alt="" coords="2122,349,2090,348,2090,343,2122,344"/>
-<area shape="rect" id="Node000011" href="$classc___network_mgr.html#aa9d587432312a58a8d98b5b0a75796fb" title=" " alt="" coords="676,419,856,460"/>
-<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="1941,318,1856,274,1743,227,1679,206,1612,189,1545,177,1477,173,1242,173,1141,170,1060,172,1023,180,987,193,949,215,908,247,894,261,887,276,881,307,877,340,871,357,860,376,835,401,808,421,805,416,832,397,856,373,866,355,872,338,876,306,882,274,890,258,904,243,946,211,985,188,1022,174,1060,167,1141,165,1242,168,1477,168,1545,172,1613,183,1680,201,1744,222,1858,269,1944,313"/>
-<area shape="rect" id="Node000012" href="$classc___network_mgr.html#a21de268df9b77ee26f74ae4712537c21" title=" " alt="" coords="1616,331,1847,356"/>
-<area shape="poly" id="edge13_Node000010_Node000012" title=" " alt="" coords="1879,346,1848,346,1848,341,1879,341"/>
-<area shape="rect" id="Node000013" href="$classfsm___wi_fi__state___connected_to_a_p.html#ab31da7c2aca52cf01dfe971d663073d5" title=" " alt="" coords="1385,258,1566,298"/>
-<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="1663,329,1558,302,1559,297,1664,324"/>
-<area shape="rect" id="Node000016" href="$classfsm___wi_fi__state___connected_to_sta.html#a97b6baf24ad1c608f6ff7cac18b56034" title=" " alt="" coords="1385,323,1566,364"/>
-<area shape="poly" id="edge16_Node000012_Node000016" title=" " alt="" coords="1601,346,1567,346,1567,341,1601,341"/>
-<area shape="poly" id="edge18_Node000012_Node000019" title=" " alt="" coords="1700,367,1640,405,1569,443,1540,456,1538,451,1567,438,1638,400,1697,363"/>
-<area shape="rect" id="Node000035" href="$classfsm___wi_fi__state___disabled.html#af598b29015fcdfe6f03d50aac9d1d9ea" title=" " alt="" coords="1391,388,1560,429"/>
-<area shape="poly" id="edge39_Node000012_Node000035" title=" " alt="" coords="1664,363,1559,390,1558,385,1663,358"/>
-<area shape="rect" id="Node000037" href="$classc___wi_fi_driver.html#a73ac32c8db2b76fe03893dde2a2ad134" title=" " alt="" coords="1411,208,1541,234"/>
-<area shape="poly" id="edge40_Node000012_Node000037" title=" " alt="" coords="1698,324,1639,286,1567,249,1533,237,1535,232,1569,244,1641,281,1701,319"/>
-<area shape="rect" id="Node000014" href="$classfsm___wi_fi__state___connecting_using_config.html#ad687833f55433c760ef15c7c99b1f513" title=" " alt="" coords="1151,207,1336,248"/>
-<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="1370,258,1336,250,1337,245,1371,253"/>
-<area shape="rect" id="Node000018" href="$classfsm___wi_fi__state___connecting_as_a_p.html#abfa70db6d7a2dedf0c0fe1f87f679f63" title=" " alt="" coords="1151,272,1336,313"/>
-<area shape="poly" id="edge17_Node000016_Node000018" title=" " alt="" coords="1370,323,1336,316,1337,310,1371,318"/>
-<area shape="poly" id="edge38_Node000019_Node000018" title=" " alt="" coords="1387,447,1382,443,1370,429,1363,415,1357,387,1351,360,1345,347,1334,333,1309,316,1312,311,1337,330,1349,344,1356,358,1362,386,1368,413,1374,426,1386,439,1390,443"/>
-<area shape="rect" id="Node000020" href="$classc___wi_fi_driver.html#a282b20cd06da439d8fcf1890b2e75361" title=" " alt="" coords="1173,503,1314,528"/>
-<area shape="poly" id="edge19_Node000019_Node000020" title=" " alt="" coords="1369,496,1314,506,1314,500,1368,491"/>
-<area shape="rect" id="Node000027" href="$classfsm___wi_fi__state___connecting_as_a_p.html#a48bc936460962e4d9e163a67d7f4a49c" title=" " alt="" coords="1151,387,1336,428"/>
-<area shape="poly" id="edge28_Node000019_Node000027" title=" " alt="" coords="1387,452,1316,431,1318,426,1389,447"/>
-<area shape="rect" id="Node000031" href="$classfsm___wi_fi__state___connected_to_sta.html#aa53957a3d45167be9dc596cfffc3f4be" title=" " alt="" coords="914,256,1095,297"/>
-<area shape="poly" id="edge36_Node000019_Node000031" title=" " alt="" coords="1390,448,1382,443,1366,426,1358,409,1349,393,1334,378,1288,353,1247,344,1204,339,1151,327,1066,300,1068,295,1152,322,1205,334,1248,339,1290,348,1337,373,1354,390,1362,407,1370,423,1385,439,1393,444"/>
-<area shape="rect" id="Node000032" href="$classfsm___wi_fi__state___connected_to_sta.html#a5d7d67f31b4bb74acea5d8018efdd77a" title=" " alt="" coords="914,452,1095,493"/>
-<area shape="poly" id="edge37_Node000019_Node000032" title=" " alt="" coords="1368,477,1096,476,1096,470,1368,471"/>
-<area shape="rect" id="Node000034" href="$classfsm___wi_fi__state___connected_to_a_p.html#a991ed1f90951f5540f7accbb89bb048b" title=" " alt="" coords="1153,552,1334,593"/>
-<area shape="poly" id="edge35_Node000019_Node000034" title=" " alt="" coords="1422,504,1337,543,1308,554,1306,549,1335,538,1420,499"/>
-<area shape="rect" id="Node000021" href="$classc___network_mgr.html#a734bce5d4408855944972ff28b13569a" title=" " alt="" coords="906,517,1103,543"/>
-<area shape="poly" id="edge20_Node000020_Node000021" title=" " alt="" coords="1158,523,1104,527,1104,521,1158,518"/>
-<area shape="poly" id="edge27_Node000021_Node000011" title=" " alt="" coords="929,515,905,507,852,486,805,463,808,458,855,481,907,502,931,510"/>
-<area shape="rect" id="Node000022" href="$classc___network_mgr.html#a50d97dec317ecb4cc9a308b5e0aadf2d" title=" " alt="" coords="682,529,850,555"/>
-<area shape="poly" id="edge21_Node000021_Node000022" title=" " alt="" coords="891,539,851,541,850,535,890,533"/>
-<area shape="rect" id="Node000023" href="$main_8cpp.html#a067b67c856af5452506085e83cdb2b01" title=" " alt="" coords="498,617,607,643"/>
-<area shape="poly" id="edge22_Node000022_Node000023" title=" " alt="" coords="720,564,587,619,585,614,718,559"/>
-<area shape="rect" id="Node000024" href="$main_8cpp.html#a23e7afe154bda4f1d2e44818ed09843e" title=" " alt="" coords="277,617,431,643"/>
-<area shape="poly" id="edge23_Node000023_Node000024" title=" " alt="" coords="482,633,432,633,432,628,482,628"/>
-<area shape="rect" id="Node000025" href="$main_8cpp.html#a3e32a397e7564d7bbd024686c107ccf1" title="Load configuration file." alt="" coords="125,617,211,643"/>
-<area shape="poly" id="edge24_Node000024_Node000025" title=" " alt="" coords="261,633,211,633,211,628,261,628"/>
-<area shape="poly" id="edge26_Node000025_Node000003" title=" " alt="" coords="114,610,104,600,85,559,70,503,48,362,36,224,31,133,36,132,41,223,53,362,75,502,90,558,109,597,118,607"/>
-<area shape="rect" id="Node000026" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,643,55,668"/>
-<area shape="poly" id="edge25_Node000025_Node000026" title=" " alt="" coords="110,644,56,654,55,649,109,638"/>
-<area shape="rect" id="Node000028" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a312d128379e2c56f6f4d6619d64c1988" title=" " alt="" coords="912,322,1097,362"/>
-<area shape="poly" id="edge29_Node000027_Node000028" title=" " alt="" coords="1152,385,1081,366,1083,361,1153,380"/>
-<area shape="poly" id="edge32_Node000027_Node000031" title=" " alt="" coords="1167,382,1150,371,1134,355,1125,341,1117,326,1102,312,1080,300,1082,295,1105,308,1121,323,1130,338,1138,352,1153,367,1170,378"/>
-<area shape="poly" id="edge33_Node000027_Node000032" title=" " alt="" coords="1153,435,1083,454,1081,449,1152,430"/>
-<area shape="rect" id="Node000033" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a1add8feff5b4e42832629d6993c09a96" title=" " alt="" coords="912,387,1097,428"/>
-<area shape="poly" id="edge34_Node000027_Node000033" title=" " alt="" coords="1136,410,1097,410,1097,405,1136,405"/>
-<area shape="rect" id="Node000029" href="$classfsm___wi_fi__state___connecting_using_config.html#ad48a3649d60e18e369a0a2c499fa3613" title=" " alt="" coords="674,322,858,362"/>
-<area shape="poly" id="edge30_Node000028_Node000029" title=" " alt="" coords="897,345,859,345,859,340,897,340"/>
-<area shape="rect" id="Node000030" href="$classfsm___wi_fi__state___boot.html#a8063e8f2dff740f938a920e287b68709" title=" " alt="" coords="479,322,626,362"/>
-<area shape="poly" id="edge31_Node000029_Node000030" title=" " alt="" coords="658,345,626,345,626,340,658,340"/>
-<area shape="rect" id="Node000042" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="1930,56,2055,82"/>
-<area shape="poly" id="edge44_Node000041_Node000042" title=" " alt="" coords="2654,152,2517,123,2358,97,2194,81,2055,73,2055,68,2194,76,2358,92,2518,118,2655,147"/>
-<area shape="poly" id="edge46_Node000041_Node000043" title=" " alt="" coords="2633,169,2566,169,2566,164,2633,164"/>
-<area shape="poly" id="edge45_Node000042_Node000003" title=" " alt="" coords="1915,72,1477,72,353,71,229,75,107,97,60,112,58,106,106,92,229,70,353,66,1477,66,1915,66"/>
-<area shape="rect" id="Node000044" href="$_input_mgr_8cpp.html#acaee0a3ecdf748027dec320e1f7bb64e" title=" " alt="" coords="2187,107,2308,132"/>
-<area shape="poly" id="edge47_Node000043_Node000044" title=" " alt="" coords="2410,153,2308,133,2309,128,2411,148"/>
-<area shape="poly" id="edge48_Node000044_Node000042" title=" " alt="" coords="2171,107,2055,84,2056,79,2172,102"/>
-<area shape="poly" id="edge50_Node000045_Node000004" title=" " alt="" coords="2628,569,2564,569,2564,564,2628,564"/>
-<area shape="rect" id="Node000046" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="292,668,416,694"/>
-<area shape="poly" id="edge51_Node000045_Node000046" title=" " alt="" coords="2668,587,2449,647,2334,673,2249,683,764,684,417,684,417,678,764,678,2249,678,2333,668,2447,642,2666,581"/>
-<area shape="poly" id="edge52_Node000046_Node000026" title=" " alt="" coords="276,677,55,660,56,655,277,672"/>
-<area shape="rect" id="Node000048" href="$classc___input_e131.html#ab842aa2de00cbf0d80c10b288213cea3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="2430,833,2562,859"/>
-<area shape="poly" id="edge54_Node000047_Node000048" title=" " alt="" coords="2629,816,2551,835,2550,830,2627,811"/>
-<area shape="rect" id="Node000050" href="$classc___input_e131.html#a245537b7fe532208f81ed3e3a070d190" title=" " alt="" coords="2406,768,2585,809"/>
-<area shape="poly" id="edge56_Node000047_Node000050" title=" " alt="" coords="2622,792,2586,792,2586,786,2622,786"/>
-<area shape="rect" id="Node000049" href="$classc___input_e131.html#ac18882d8a5a97e6d69c42c498af823bd" title=" " alt="" coords="2160,833,2336,859"/>
-<area shape="poly" id="edge55_Node000048_Node000049" title=" " alt="" coords="2414,849,2336,849,2336,844,2414,844"/>
-<area shape="rect" id="Node000053" href="$classfsm___play_file__state___playing_file.html#a78f01a0f55770883e74f07e65769f8a2" title=" " alt="" coords="2430,883,2562,924"/>
-<area shape="poly" id="edge60_Node000052_Node000053" title=" " alt="" coords="2621,906,2562,906,2562,901,2621,901"/>
-<area shape="poly" id="edge62_Node000054_Node000023" title=" " alt="" coords="2410,734,1994,734,1003,734,943,732,882,724,764,700,662,672,588,646,590,641,664,666,765,695,883,719,943,726,1003,729,1994,729,2410,729"/>
-<area shape="poly" id="edge65_Node000056_Node000054" title=" " alt="" coords="2634,734,2566,734,2566,729,2634,729"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="2869,598,2979,624"/>
+<area shape="rect" id="Node000002" href="$classc___file_mgr.html#a2e86f9c538a117790a96317890d68a55" title="&lt; Start the module" alt="" coords="296,190,413,216"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="2917,583,2908,523,2891,442,2862,353,2842,310,2818,269,2751,163,2720,119,2688,81,2652,50,2610,27,2559,13,2497,8,765,8,680,15,647,22,617,34,556,65,481,108,418,151,371,191,368,187,414,147,478,103,553,60,615,29,646,17,679,9,764,3,2497,3,2560,8,2612,22,2655,46,2692,77,2724,116,2755,160,2823,267,2847,307,2867,351,2896,440,2914,522,2922,582"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="2659,698,2795,724"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="2899,636,2864,664,2822,689,2794,700,2792,695,2819,684,2861,659,2896,632"/>
+<area shape="rect" id="Node000007" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="1909,783,2076,809"/>
+<area shape="poly" id="edge56_Node000001_Node000007" title=" " alt="" coords="2919,639,2908,678,2889,724,2861,768,2843,787,2822,802,2795,815,2761,825,2678,838,2580,843,2471,842,2253,828,2076,810,2077,804,2253,823,2471,837,2579,838,2678,833,2760,820,2793,810,2819,798,2840,783,2857,764,2885,721,2903,676,2914,638"/>
+<area shape="rect" id="Node000011" href="$classc___output_uart.html#a53c5ab20679c0ebd73e2a13d45742115" title=" " alt="" coords="2658,395,2796,421"/>
+<area shape="poly" id="edge15_Node000001_Node000011" title=" " alt="" coords="2911,584,2877,513,2851,475,2819,442,2785,424,2788,419,2822,438,2855,472,2882,511,2915,582"/>
+<area shape="rect" id="Node000012" href="$classc___web_mgr.html#a529c105b3389d78208078fd9c6847367" title=" " alt="" coords="2635,346,2819,372"/>
+<area shape="poly" id="edge16_Node000001_Node000012" title=" " alt="" coords="2915,583,2905,539,2887,485,2859,431,2840,406,2819,385,2802,374,2805,370,2822,381,2844,403,2863,428,2892,483,2910,538,2921,582"/>
+<area shape="rect" id="Node000013" href="$classc___web_mgr.html#a2c6189891b0496dae7d89ea7cdb24aee" title=" " alt="" coords="2442,410,2549,436"/>
+<area shape="poly" id="edge49_Node000001_Node000013" title=" " alt="" coords="2907,586,2871,534,2847,508,2819,486,2770,468,2697,452,2549,431,2550,426,2698,447,2771,463,2822,482,2851,504,2876,530,2911,583"/>
+<area shape="rect" id="Node000025" href="$classfsm___wi_fi__state___connection_failed.html#a721084d33603f03e8be94782e050c08a" title=" " alt="" coords="1384,192,1568,232"/>
+<area shape="poly" id="edge48_Node000001_Node000025" title=" " alt="" coords="2918,583,2910,530,2893,464,2864,395,2843,363,2819,335,2780,302,2744,277,2709,259,2674,248,2636,241,2596,238,2497,237,1991,237,1763,232,1568,221,1569,216,1763,226,1991,232,2497,232,2596,233,2637,236,2675,243,2711,254,2746,272,2783,297,2823,331,2848,360,2868,392,2898,462,2915,529,2923,582"/>
+<area shape="rect" id="Node000046" href="$classc___input_mgr.html#a86facb1b4291c34d64365c6171cd6802" title=" " alt="" coords="2648,496,2806,522"/>
+<area shape="poly" id="edge50_Node000001_Node000046" title=" " alt="" coords="2892,590,2858,566,2819,544,2774,525,2776,520,2822,539,2861,562,2895,586"/>
+<area shape="rect" id="Node000048" href="$classc___input_mgr.html#a1823b8316d8574f82bdb06ed1412f161" title="&lt; Called from loop(), renders Input data" alt="" coords="2426,539,2566,565"/>
+<area shape="poly" id="edge62_Node000001_Node000048" title=" " alt="" coords="2853,597,2820,591,2685,572,2566,560,2566,555,2686,567,2821,585,2854,592"/>
+<area shape="rect" id="Node000050" href="$classc___input_e131.html#a6098950d3be2934c5ae667a42cf9ccf1" title=" " alt="" coords="2637,893,2817,934"/>
+<area shape="poly" id="edge57_Node000001_Node000050" title=" " alt="" coords="2922,640,2912,689,2894,752,2865,818,2846,849,2822,877,2798,895,2795,890,2819,873,2841,846,2860,815,2889,750,2907,688,2916,639"/>
+<area shape="rect" id="Node000054" href="$classc___input_m_q_t_t.html#ad67733726b14ea7d85904985b235efb8" title=" " alt="" coords="2633,748,2821,788"/>
+<area shape="poly" id="edge61_Node000001_Node000054" title=" " alt="" coords="2909,639,2874,689,2849,715,2822,738,2803,749,2800,745,2819,734,2846,711,2869,686,2905,636"/>
+<area shape="rect" id="Node000055" href="$classc___input_f_p_p_remote_play_file.html#ae88277a6b0c791cb4f930a95a6013a29" title=" " alt="" coords="2636,1008,2818,1048"/>
+<area shape="poly" id="edge63_Node000001_Node000055" title=" " alt="" coords="2926,639,2924,710,2911,805,2898,857,2880,907,2855,955,2823,998,2809,1009,2806,1005,2819,994,2850,952,2875,905,2893,855,2906,804,2919,709,2921,639"/>
+<area shape="rect" id="Node000057" href="$classc___file_mgr.html#ac14c25f4d4db4016303b200f6bd9ae99" title=" " alt="" coords="2426,590,2566,616"/>
+<area shape="poly" id="edge65_Node000001_Node000057" title=" " alt="" coords="2853,612,2566,607,2566,601,2853,607"/>
+<area shape="rect" id="Node000058" href="$classc___input_e131.html#ae77e361a9e510852cd0b7d0cf6721ec6" title="Set a new config in the driver." alt="" coords="2649,958,2805,984"/>
+<area shape="poly" id="edge67_Node000001_Node000058" title=" " alt="" coords="2925,640,2921,703,2906,785,2893,829,2876,872,2852,912,2822,947,2805,960,2802,955,2819,943,2848,909,2871,870,2888,827,2901,784,2916,702,2920,639"/>
+<area shape="rect" id="Node000059" href="$classc___file_mgr.html#a0986fc423ff9a5f4f5e8c48c0752c3d2" title=" " alt="" coords="2649,648,2805,674"/>
+<area shape="poly" id="edge68_Node000001_Node000059" title=" " alt="" coords="2857,631,2780,650,2779,645,2856,625"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,539,59,565"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="329,228,229,323,168,386,109,452,72,500,44,541,40,538,67,497,105,449,164,383,226,320,325,224"/>
+<area shape="poly" id="edge14_Node000004_Node000003" title=" " alt="" coords="2660,696,2585,681,2418,660,2249,656,353,656,225,661,171,655,105,630,84,617,66,600,40,567,44,564,70,596,88,613,108,626,172,650,226,656,353,651,2249,651,2418,655,2586,676,2661,691"/>
+<area shape="rect" id="Node000005" href="$classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="2414,690,2577,731"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="2644,722,2578,722,2578,717,2644,717"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="2593,699,2659,700,2659,705,2593,704"/>
+<area shape="rect" id="Node000006" href="$classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="2146,742,2350,768"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="2399,731,2325,744,2324,739,2398,725"/>
+<area shape="rect" id="Node000010" href="$classc___output_mgr.html#a33b3e6588cc7639555d7e91b59378540" title=" " alt="" coords="1903,700,2082,740"/>
+<area shape="poly" id="edge13_Node000005_Node000010" title=" " alt="" coords="2399,715,2082,721,2082,716,2399,710"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="2150,773,2077,785,2076,780,2149,768"/>
+<area shape="poly" id="edge12_Node000006_Node000010" title=" " alt="" coords="2133,742,2082,735,2082,729,2134,737"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="2092,792,2219,788,2358,777,2472,762,2585,740,2670,722,2671,727,2586,745,2473,767,2358,783,2219,793,2092,798"/>
+<area shape="rect" id="Node000008" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="1670,735,1794,761"/>
+<area shape="poly" id="edge9_Node000007_Node000008" title=" " alt="" coords="1903,782,1794,762,1795,757,1904,777"/>
+<area shape="poly" id="edge11_Node000008_Node000008" title=" " alt="" coords="1777,723,1762,716,1732,714,1704,716,1690,721,1686,726,1694,733,1690,737,1681,727,1686,717,1703,711,1732,709,1763,711,1779,718"/>
+<area shape="rect" id="Node000009" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,646,55,672"/>
+<area shape="poly" id="edge10_Node000008_Node000009" title=" " alt="" coords="1654,742,1468,727,1356,721,1245,719,353,719,265,713,180,699,55,668,56,663,181,694,266,708,353,713,1245,713,1357,716,1468,722,1654,737"/>
+<area shape="poly" id="edge17_Node000012_Node000013" title=" " alt="" coords="2659,379,2634,385,2542,412,2540,407,2633,380,2657,373"/>
+<area shape="rect" id="Node000014" href="$classc___web_mgr.html#a078d26bad50a9051344ff07ad8e746d8" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,463,229,489"/>
+<area shape="poly" id="edge18_Node000013_Node000014" title=" " alt="" coords="2427,431,2233,446,1994,453,551,453,376,460,230,472,229,467,376,455,551,448,1994,448,2232,440,2427,426"/>
+<area shape="rect" id="Node000015" href="$classc___web_mgr.html#aa3c98d4d503811ca4071b3e3ba84fa0f" title=" " alt="" coords="2138,383,2358,409"/>
+<area shape="poly" id="edge20_Node000013_Node000015" title=" " alt="" coords="2427,418,2358,411,2359,405,2428,413"/>
+<area shape="poly" id="edge19_Node000014_Node000003" title=" " alt="" coords="132,499,58,541,55,536,129,494"/>
+<area shape="rect" id="Node000016" href="$classc___network_mgr.html#af2b9dc93956b88607802667e89c76f75" title=" " alt="" coords="1895,373,2090,414"/>
+<area shape="poly" id="edge21_Node000015_Node000016" title=" " alt="" coords="2122,397,2090,397,2090,392,2122,392"/>
+<area shape="rect" id="Node000017" href="$classc___network_mgr.html#aa9d587432312a58a8d98b5b0a75796fb" title=" " alt="" coords="676,373,856,414"/>
+<area shape="poly" id="edge22_Node000016_Node000017" title=" " alt="" coords="1880,398,1477,403,1242,403,856,398,856,393,1242,397,1477,397,1880,393"/>
+<area shape="rect" id="Node000018" href="$classc___network_mgr.html#a21de268df9b77ee26f74ae4712537c21" title=" " alt="" coords="1616,296,1847,322"/>
+<area shape="poly" id="edge23_Node000016_Node000018" title=" " alt="" coords="1911,370,1773,325,1775,320,1913,365"/>
+<area shape="rect" id="Node000019" href="$classfsm___wi_fi__state___connected_to_a_p.html#ab31da7c2aca52cf01dfe971d663073d5" title=" " alt="" coords="1385,257,1566,298"/>
+<area shape="poly" id="edge24_Node000018_Node000019" title=" " alt="" coords="1608,297,1567,291,1567,286,1609,291"/>
+<area shape="rect" id="Node000022" href="$classfsm___wi_fi__state___connected_to_sta.html#a97b6baf24ad1c608f6ff7cac18b56034" title=" " alt="" coords="1385,322,1566,363"/>
+<area shape="poly" id="edge25_Node000018_Node000022" title=" " alt="" coords="1614,327,1568,333,1567,328,1613,322"/>
+<area shape="poly" id="edge27_Node000018_Node000025" title=" " alt="" coords="1682,293,1567,248,1534,235,1536,230,1569,243,1684,288"/>
+<area shape="rect" id="Node000024" href="$classfsm___wi_fi__state___connecting_as_a_p.html#abfa70db6d7a2dedf0c0fe1f87f679f63" title=" " alt="" coords="1151,322,1336,363"/>
+<area shape="poly" id="edge26_Node000022_Node000024" title=" " alt="" coords="1370,345,1336,345,1336,340,1370,340"/>
+<area shape="poly" id="edge47_Node000025_Node000024" title=" " alt="" coords="1393,242,1385,247,1370,263,1362,279,1353,296,1337,313,1319,324,1316,319,1334,309,1349,293,1357,277,1366,260,1382,243,1390,238"/>
+<area shape="rect" id="Node000026" href="$classc___wi_fi_driver.html#a282b20cd06da439d8fcf1890b2e75361" title=" " alt="" coords="1173,272,1314,298"/>
+<area shape="poly" id="edge28_Node000025_Node000026" title=" " alt="" coords="1396,240,1288,274,1286,269,1394,235"/>
+<area shape="rect" id="Node000032" href="$classfsm___wi_fi__state___connecting_as_a_p.html#a48bc936460962e4d9e163a67d7f4a49c" title=" " alt="" coords="1151,157,1336,198"/>
+<area shape="poly" id="edge37_Node000025_Node000032" title=" " alt="" coords="1368,199,1336,194,1337,189,1369,193"/>
+<area shape="rect" id="Node000036" href="$classfsm___wi_fi__state___connected_to_sta.html#aa53957a3d45167be9dc596cfffc3f4be" title=" " alt="" coords="914,52,1095,92"/>
+<area shape="poly" id="edge45_Node000025_Node000036" title=" " alt="" coords="1423,187,1335,148,1211,113,1095,89,1096,84,1212,107,1337,143,1425,182"/>
+<area shape="rect" id="Node000037" href="$classfsm___wi_fi__state___connected_to_sta.html#a5d7d67f31b4bb74acea5d8018efdd77a" title=" " alt="" coords="914,248,1095,288"/>
+<area shape="poly" id="edge46_Node000025_Node000037" title=" " alt="" coords="1368,227,1096,260,1095,255,1368,222"/>
+<area shape="rect" id="Node000039" href="$classfsm___wi_fi__state___connected_to_a_p.html#a991ed1f90951f5540f7accbb89bb048b" title=" " alt="" coords="1153,42,1334,83"/>
+<area shape="poly" id="edge44_Node000025_Node000039" title=" " alt="" coords="1440,183,1391,143,1334,104,1300,86,1302,81,1337,99,1394,139,1443,179"/>
+<area shape="rect" id="Node000027" href="$classc___network_mgr.html#a734bce5d4408855944972ff28b13569a" title=" " alt="" coords="906,323,1103,349"/>
+<area shape="poly" id="edge29_Node000026_Node000027" title=" " alt="" coords="1165,305,1069,325,1068,320,1164,299"/>
+<area shape="poly" id="edge36_Node000027_Node000017" title=" " alt="" coords="934,356,854,375,853,370,933,350"/>
+<area shape="rect" id="Node000028" href="$classc___network_mgr.html#a50d97dec317ecb4cc9a308b5e0aadf2d" title=" " alt="" coords="682,323,850,349"/>
+<area shape="poly" id="edge30_Node000027_Node000028" title=" " alt="" coords="890,339,851,339,851,333,890,333"/>
+<area shape="rect" id="Node000029" href="$main_8cpp.html#a067b67c856af5452506085e83cdb2b01" title=" " alt="" coords="498,488,607,514"/>
+<area shape="poly" id="edge31_Node000028_Node000029" title=" " alt="" coords="686,358,675,364,638,393,606,428,564,489,559,486,602,425,634,390,672,359,683,353"/>
+<area shape="rect" id="Node000030" href="$main_8cpp.html#a23e7afe154bda4f1d2e44818ed09843e" title=" " alt="" coords="277,488,431,514"/>
+<area shape="poly" id="edge32_Node000029_Node000030" title=" " alt="" coords="482,504,432,504,432,499,482,499"/>
+<area shape="rect" id="Node000031" href="$main_8cpp.html#a3e32a397e7564d7bbd024686c107ccf1" title="Load configuration file." alt="" coords="125,590,211,616"/>
+<area shape="poly" id="edge33_Node000030_Node000031" title=" " alt="" coords="317,524,194,592,192,587,314,520"/>
+<area shape="poly" id="edge35_Node000031_Node000003" title=" " alt="" coords="116,586,58,564,60,559,118,581"/>
+<area shape="poly" id="edge34_Node000031_Node000009" title=" " alt="" coords="122,624,56,652,54,647,120,620"/>
+<area shape="rect" id="Node000033" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a312d128379e2c56f6f4d6619d64c1988" title=" " alt="" coords="912,117,1097,158"/>
+<area shape="poly" id="edge38_Node000032_Node000033" title=" " alt="" coords="1135,162,1097,155,1098,150,1136,157"/>
+<area shape="poly" id="edge41_Node000032_Node000036" title=" " alt="" coords="1173,153,1150,141,1126,124,1102,108,1074,95,1076,91,1105,103,1129,119,1153,136,1175,148"/>
+<area shape="poly" id="edge42_Node000032_Node000037" title=" " alt="" coords="1181,207,1104,237,1070,250,1068,245,1102,232,1179,202"/>
+<area shape="rect" id="Node000038" href="$classfsm___wi_fi__state___connecting_using_defaults.html#a1add8feff5b4e42832629d6993c09a96" title=" " alt="" coords="912,182,1097,223"/>
+<area shape="poly" id="edge43_Node000032_Node000038" title=" " alt="" coords="1136,191,1098,196,1097,190,1136,186"/>
+<area shape="rect" id="Node000034" href="$classfsm___wi_fi__state___connecting_using_config.html#ad48a3649d60e18e369a0a2c499fa3613" title=" " alt="" coords="674,117,858,158"/>
+<area shape="poly" id="edge39_Node000033_Node000034" title=" " alt="" coords="897,140,859,140,859,135,897,135"/>
+<area shape="rect" id="Node000035" href="$classfsm___wi_fi__state___boot.html#a8063e8f2dff740f938a920e287b68709" title=" " alt="" coords="479,117,626,158"/>
+<area shape="poly" id="edge40_Node000034_Node000035" title=" " alt="" coords="658,140,626,140,626,135,658,135"/>
+<area shape="rect" id="Node000047" href="$classc___input_mgr.html#a06a5f6adfd1e87d4d30a7fa0f78ecc33" title="&lt; Start the module" alt="" coords="1930,539,2055,565"/>
+<area shape="poly" id="edge51_Node000046_Node000047" title=" " alt="" coords="2633,511,2407,513,2272,519,2138,529,2056,542,2055,536,2137,524,2272,513,2407,508,2633,505"/>
+<area shape="poly" id="edge53_Node000046_Node000048" title=" " alt="" coords="2639,528,2567,542,2566,536,2638,523"/>
+<area shape="poly" id="edge52_Node000047_Node000003" title=" " alt="" coords="1915,555,1477,555,353,555,59,555,59,549,353,549,1477,549,1915,549"/>
+<area shape="rect" id="Node000049" href="$_input_mgr_8cpp.html#acaee0a3ecdf748027dec320e1f7bb64e" title=" " alt="" coords="2187,539,2308,565"/>
+<area shape="poly" id="edge54_Node000048_Node000049" title=" " alt="" coords="2410,555,2309,555,2309,549,2410,549"/>
+<area shape="poly" id="edge55_Node000049_Node000047" title=" " alt="" coords="2172,555,2055,555,2055,549,2172,549"/>
+<area shape="rect" id="Node000051" href="$classc___input_e131.html#ab842aa2de00cbf0d80c10b288213cea3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="2430,894,2562,920"/>
+<area shape="poly" id="edge58_Node000050_Node000051" title=" " alt="" coords="2622,913,2562,911,2563,906,2622,908"/>
+<area shape="rect" id="Node000053" href="$classc___input_e131.html#a245537b7fe532208f81ed3e3a070d190" title=" " alt="" coords="2406,944,2585,984"/>
+<area shape="poly" id="edge60_Node000050_Node000053" title=" " alt="" coords="2623,939,2587,947,2585,942,2622,934"/>
+<area shape="rect" id="Node000052" href="$classc___input_e131.html#ac18882d8a5a97e6d69c42c498af823bd" title=" " alt="" coords="2160,894,2336,920"/>
+<area shape="poly" id="edge59_Node000051_Node000052" title=" " alt="" coords="2414,909,2336,909,2336,904,2414,904"/>
+<area shape="rect" id="Node000056" href="$classfsm___play_file__state___playing_file.html#a78f01a0f55770883e74f07e65769f8a2" title=" " alt="" coords="2430,1009,2562,1050"/>
+<area shape="poly" id="edge64_Node000055_Node000056" title=" " alt="" coords="2621,1031,2562,1032,2562,1026,2621,1026"/>
+<area shape="poly" id="edge66_Node000057_Node000029" title=" " alt="" coords="2410,605,1994,605,1242,605,1151,603,1058,595,878,572,721,543,607,517,608,512,722,537,879,566,1059,590,1151,597,1242,600,1994,600,2410,600"/>
+<area shape="poly" id="edge69_Node000059_Node000057" title=" " alt="" coords="2658,647,2549,619,2550,614,2659,642"/>
 </map>

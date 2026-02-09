@@ -1,0 +1,21 @@
+<map id="c_OutputMgr::InstantiateNewOutputChannel" name="c_OutputMgr::InstantiateNewOutputChannel">
+<area shape="rect" id="Node000001" title=" " alt="" coords="768,30,931,70"/>
+<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,5,242,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="752,55,490,45,242,30,243,24,491,39,752,49"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="516,68,720,94"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="753,66,720,70,719,65,752,60"/>
+<area shape="rect" id="Node000008" href="$classc___output_mgr.html#a33b3e6588cc7639555d7e91b59378540" title=" " alt="" coords="290,118,468,158"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="797,80,760,96,720,109,656,122,589,132,469,140,469,135,589,126,655,117,719,104,758,91,795,75"/>
+<area shape="poly" id="edge2_Node000002_Node000001" title=" " alt="" coords="258,13,513,23,767,38,767,43,513,28,258,19"/>
+<area shape="rect" id="Node000003" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="5,5,59,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="91,21,59,21,59,16,91,16"/>
+<area shape="rect" id="Node000005" href="$classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="296,68,463,94"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="501,84,463,84,463,78,501,78"/>
+<area shape="poly" id="edge10_Node000004_Node000008" title=" " alt="" coords="547,100,468,120,466,115,546,95"/>
+<area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="319,65,218,34,220,29,321,60"/>
+<area shape="rect" id="Node000006" href="$classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="112,79,236,104"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="280,89,237,91,237,86,280,83"/>
+<area shape="poly" id="edge9_Node000006_Node000006" title=" " alt="" coords="198,66,190,60,174,57,160,59,152,64,150,70,154,77,150,79,145,70,148,61,158,54,174,52,192,55,201,61"/>
+<area shape="rect" id="Node000007" href="$main_8cpp.html#afe461d27b9c48d5921c00d521181f12f" title="Main Loop." alt="" coords="9,79,55,104"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="96,94,55,94,55,89,96,89"/>
+</map>

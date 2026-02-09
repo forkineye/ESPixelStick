@@ -126,13 +126,17 @@ Collaboration diagram for c_OutputPixel:</div>
 <div class="dyncontent">
 <div class="center"><img src="classc___output_pixel__coll__graph.png" border="0" usemap="#ac___output_pixel_coll__map" alt="Collaboration graph"/></div>
 <map name="ac___output_pixel_coll__map" id="ac___output_pixel_coll__map">
-<area shape="rect" title=" " alt="" coords="73,198,176,223"/>
-<area shape="rect" href="classc___output_common.html" title=" " alt="" coords="5,109,132,135"/>
-<area shape="poly" title=" " alt="" coords="87,147,119,196,115,199,82,149"/>
-<area shape="rect" href="unionc___output_pixel_1_1_color_offsets__s.html" title=" " alt="" coords="155,109,350,135"/>
-<area shape="poly" title=" " alt="" coords="224,146,144,199,141,195,221,141"/>
-<area shape="rect" href="structc___output_pixel_1_1_color_offsets__s_1_1offsets.html" title=" " alt="" coords="162,5,343,46"/>
-<area shape="poly" title=" " alt="" coords="255,61,255,109,250,109,250,61"/>
+<area shape="rect" title=" " alt="" coords="145,286,247,312"/>
+<area shape="rect" href="classc___output_common.html" title=" " alt="" coords="42,198,169,223"/>
+<area shape="poly" title=" " alt="" coords="131,232,186,284,182,288,127,236"/>
+<area shape="rect" href="struct_o_m___output_port_definition__t.html" title=" " alt="" coords="5,102,182,127"/>
+<area shape="poly" title=" " alt="" coords="100,142,107,197,101,197,94,143"/>
+<area shape="rect" href="struct_o_m___g_p_i_o_s__t.html" title=" " alt="" coords="42,5,145,31"/>
+<area shape="poly" title=" " alt="" coords="96,47,96,101,91,101,91,47"/>
+<area shape="rect" href="unionc___output_pixel_1_1_color_offsets__s.html" title=" " alt="" coords="196,198,391,223"/>
+<area shape="poly" title=" " alt="" coords="270,236,211,288,208,284,267,232"/>
+<area shape="rect" href="structc___output_pixel_1_1_color_offsets__s_1_1offsets.html" title=" " alt="" coords="206,94,386,135"/>
+<area shape="poly" title=" " alt="" coords="298,150,296,198,291,197,293,150"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -143,8 +147,8 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a31a016d8d365e4ffbe17cb4c5696a362" id="r_a31a016d8d365e4ffbe17cb4c5696a362"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a31a016d8d365e4ffbe17cb4c5696a362">c_OutputPixel</a> (<a class="el" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a> <a class="el" href="classc___output_common.html#a3acb3b1b8979ad0a28d525a23d3393eb">OutputChannelId</a>, gpio_num_t outputGpio, uart_port_t uart, <a class="el" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a> outputType)</td></tr>
-<tr class="separator:a31a016d8d365e4ffbe17cb4c5696a362"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5780ef4735ecf28c22dff9f2cf68ed36" id="r_a5780ef4735ecf28c22dff9f2cf68ed36"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5780ef4735ecf28c22dff9f2cf68ed36">c_OutputPixel</a> (<a class="el" href="struct_o_m___output_port_definition__t.html">OM_OutputPortDefinition_t</a> &amp;<a class="el" href="classc___output_common.html#a3b88ff699352934ace1af6d39dbb8cc1">OutputPortDefinition</a>, <a class="el" href="classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce">c_OutputMgr::e_OutputProtocolType</a> outputType)</td></tr>
+<tr class="separator:a5780ef4735ecf28c22dff9f2cf68ed36"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a04e5cde945478f4f3e3b05a3572dd4" id="r_a2a04e5cde945478f4f3e3b05a3572dd4"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2a04e5cde945478f4f3e3b05a3572dd4">~c_OutputPixel</a> ()</td></tr>
 <tr class="separator:a2a04e5cde945478f4f3e3b05a3572dd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba69c60f370711f72ed8d1166e2bec41" id="r_aba69c60f370711f72ed8d1166e2bec41"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba69c60f370711f72ed8d1166e2bec41">SetConfig</a> (ArduinoJson::JsonObject &amp;jsonConfig)</td></tr>
@@ -182,9 +186,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad7b81967a455be24b9f3dc50d2587b04" id="r_ad7b81967a455be24b9f3dc50d2587b04"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad7b81967a455be24b9f3dc50d2587b04">GetPixelCount</a> ()</td></tr>
 <tr class="separator:ad7b81967a455be24b9f3dc50d2587b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classc___output_common"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_classc___output_common')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="classc___output_common.html">c_OutputCommon</a></td></tr>
-<tr class="memitem:a62fe4a63a7cf103685b64cf5e1c22452 inherit pub_methods_classc___output_common" id="r_a62fe4a63a7cf103685b64cf5e1c22452"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a62fe4a63a7cf103685b64cf5e1c22452">c_OutputCommon</a> (<a class="el" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a> <a class="el" href="classc___output_common.html#a3acb3b1b8979ad0a28d525a23d3393eb">OutputChannelId</a>, gpio_num_t outputGpio, uart_port_t uart, <a class="el" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a> outputType)</td></tr>
-<tr class="memdesc:a62fe4a63a7cf103685b64cf5e1c22452 inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">&lt; Start up the driver and put it into a safe mode  <br /></td></tr>
-<tr class="separator:a62fe4a63a7cf103685b64cf5e1c22452 inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a142cc93ea03c961e09437ea4bc271b91 inherit pub_methods_classc___output_common" id="r_a142cc93ea03c961e09437ea4bc271b91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a142cc93ea03c961e09437ea4bc271b91">c_OutputCommon</a> (<a class="el" href="struct_o_m___output_port_definition__t.html">OM_OutputPortDefinition_t</a> &amp;<a class="el" href="classc___output_common.html#a3b88ff699352934ace1af6d39dbb8cc1">OutputPortDefinition</a>, <a class="el" href="classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce">c_OutputMgr::e_OutputProtocolType</a> outputType)</td></tr>
+<tr class="memdesc:a142cc93ea03c961e09437ea4bc271b91 inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">&lt; Start up the driver and put it into a safe mode  <br /></td></tr>
+<tr class="separator:a142cc93ea03c961e09437ea4bc271b91 inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18e0118f2a588c46e467556bab72010f inherit pub_methods_classc___output_common" id="r_a18e0118f2a588c46e467556bab72010f"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a18e0118f2a588c46e467556bab72010f">~c_OutputCommon</a> ()</td></tr>
 <tr class="separator:a18e0118f2a588c46e467556bab72010f inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23ef97415464d74fe780256b6680bfb1 inherit pub_methods_classc___output_common" id="r_a23ef97415464d74fe780256b6680bfb1"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a23ef97415464d74fe780256b6680bfb1">Begin</a> ()</td></tr>
@@ -196,18 +200,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a23228420b2471f0f041c0df0865cc60e inherit pub_methods_classc___output_common" id="r_a23228420b2471f0f041c0df0865cc60e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a23228420b2471f0f041c0df0865cc60e">GetDriverName</a> (String &amp;sDriverName)=0</td></tr>
 <tr class="memdesc:a23228420b2471f0f041c0df0865cc60e inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">get the name for the instantiated driver  <br /></td></tr>
 <tr class="separator:a23228420b2471f0f041c0df0865cc60e inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a195abd2bcb14f630abd61bdd0d33f046 inherit pub_methods_classc___output_common" id="r_a195abd2bcb14f630abd61bdd0d33f046"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">OID_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a195abd2bcb14f630abd61bdd0d33f046">GetOutputChannelId</a> ()</td></tr>
-<tr class="memdesc:a195abd2bcb14f630abd61bdd0d33f046 inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">return the output channel number  <br /></td></tr>
-<tr class="separator:a195abd2bcb14f630abd61bdd0d33f046 inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c21c5392df7c61323283f1b1c53bbb7 inherit pub_methods_classc___output_common" id="r_a4c21c5392df7c61323283f1b1c53bbb7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_output_mgr_port_defs_8hpp.html#adc89d4df16774f59429a3f8742c1cc4d">OM_PortId_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a4c21c5392df7c61323283f1b1c53bbb7">GetOutputPortId</a> ()</td></tr>
+<tr class="memdesc:a4c21c5392df7c61323283f1b1c53bbb7 inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">return the output channel number  <br /></td></tr>
+<tr class="separator:a4c21c5392df7c61323283f1b1c53bbb7 inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83f1ea04a95de1af5ad0e5a5130bdcad inherit pub_methods_classc___output_common" id="r_a83f1ea04a95de1af5ad0e5a5130bdcad"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a83f1ea04a95de1af5ad0e5a5130bdcad">GetBufferAddress</a> ()</td></tr>
 <tr class="memdesc:a83f1ea04a95de1af5ad0e5a5130bdcad inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the address of the buffer into which the E1.31 handler will stuff data.  <br /></td></tr>
 <tr class="separator:a83f1ea04a95de1af5ad0e5a5130bdcad inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7853ec4ed8c3a173cfd3110b0838585 inherit pub_methods_classc___output_common" id="r_ac7853ec4ed8c3a173cfd3110b0838585"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#ac7853ec4ed8c3a173cfd3110b0838585">GetBufferUsedSize</a> ()</td></tr>
 <tr class="memdesc:ac7853ec4ed8c3a173cfd3110b0838585 inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the address of the buffer into which the E1.31 handler will stuff data.  <br /></td></tr>
 <tr class="separator:ac7853ec4ed8c3a173cfd3110b0838585 inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac3bb5b399f1e8473f057cd7a360ff9a5 inherit pub_methods_classc___output_common" id="r_ac3bb5b399f1e8473f057cd7a360ff9a5"><td class="memItemLeft" align="right" valign="top">gpio_num_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#ac3bb5b399f1e8473f057cd7a360ff9a5">GetOutputGpio</a> ()</td></tr>
-<tr class="separator:ac3bb5b399f1e8473f057cd7a360ff9a5 inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad7170942775d16bd0d84c5baf589b51d inherit pub_methods_classc___output_common" id="r_ad7170942775d16bd0d84c5baf589b51d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">OTYPE_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#ad7170942775d16bd0d84c5baf589b51d">GetOutputType</a> ()</td></tr>
+<tr class="memitem:a4cfbdfe1843f316bce368f2436782270 inherit pub_methods_classc___output_common" id="r_a4cfbdfe1843f316bce368f2436782270"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_o_m___g_p_i_o_s__t.html">OM_GPIOS_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a4cfbdfe1843f316bce368f2436782270">GetOutputGpio</a> ()</td></tr>
+<tr class="separator:a4cfbdfe1843f316bce368f2436782270 inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7170942775d16bd0d84c5baf589b51d inherit pub_methods_classc___output_common" id="r_ad7170942775d16bd0d84c5baf589b51d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce">OTYPE_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#ad7170942775d16bd0d84c5baf589b51d">GetOutputType</a> ()</td></tr>
 <tr class="memdesc:ad7170942775d16bd0d84c5baf589b51d inherit pub_methods_classc___output_common"><td class="mdescLeft">&#160;</td><td class="mdescRight">Have the instance report its type.  <br /></td></tr>
 <tr class="separator:ad7170942775d16bd0d84c5baf589b51d inherit pub_methods_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f58ca24d1d37983afab81c9eebf6a85 inherit pub_methods_classc___output_common" id="r_a8f58ca24d1d37983afab81c9eebf6a85"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a8f58ca24d1d37983afab81c9eebf6a85">BaseGetStatus</a> (ArduinoJson::JsonObject &amp;jsonStatus)</td></tr>
@@ -248,14 +252,10 @@ Protected Attributes</h2></td></tr>
 <tr class="memitem:aaf521708c257e1ddf3f535c94373cf96" id="r_aaf521708c257e1ddf3f535c94373cf96"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf521708c257e1ddf3f535c94373cf96">InterFrameGapInMicroSec</a> = 300</td></tr>
 <tr class="separator:aaf521708c257e1ddf3f535c94373cf96"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_classc___output_common"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_classc___output_common')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="classc___output_common.html">c_OutputCommon</a></td></tr>
-<tr class="memitem:ac4ddbbf9943b09880c2fca8892d1a4e3 inherit pro_attribs_classc___output_common" id="r_ac4ddbbf9943b09880c2fca8892d1a4e3"><td class="memItemLeft" align="right" valign="top">gpio_num_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#ac4ddbbf9943b09880c2fca8892d1a4e3">DataPin</a> = gpio_num_t (-1)</td></tr>
-<tr class="separator:ac4ddbbf9943b09880c2fca8892d1a4e3 inherit pro_attribs_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f3d0f71c2d14f8c06db0068215dfccb inherit pro_attribs_classc___output_common" id="r_a6f3d0f71c2d14f8c06db0068215dfccb"><td class="memItemLeft" align="right" valign="top">uart_port_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a6f3d0f71c2d14f8c06db0068215dfccb">UartId</a> = uart_port_t (-1)</td></tr>
-<tr class="separator:a6f3d0f71c2d14f8c06db0068215dfccb inherit pro_attribs_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b9ccc6ceee5ad7033235824b2d87b43 inherit pro_attribs_classc___output_common" id="r_a9b9ccc6ceee5ad7033235824b2d87b43"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">OTYPE_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43">OutputType</a> = OTYPE_t::OutputType_Disabled</td></tr>
+<tr class="memitem:a3b88ff699352934ace1af6d39dbb8cc1 inherit pro_attribs_classc___output_common" id="r_a3b88ff699352934ace1af6d39dbb8cc1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_o_m___output_port_definition__t.html">OM_OutputPortDefinition_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a3b88ff699352934ace1af6d39dbb8cc1">OutputPortDefinition</a></td></tr>
+<tr class="separator:a3b88ff699352934ace1af6d39dbb8cc1 inherit pro_attribs_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b9ccc6ceee5ad7033235824b2d87b43 inherit pro_attribs_classc___output_common" id="r_a9b9ccc6ceee5ad7033235824b2d87b43"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce">OTYPE_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43">OutputType</a> = OTYPE_t::OutputProtocol_Disabled</td></tr>
 <tr class="separator:a9b9ccc6ceee5ad7033235824b2d87b43 inherit pro_attribs_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3acb3b1b8979ad0a28d525a23d3393eb inherit pro_attribs_classc___output_common" id="r_a3acb3b1b8979ad0a28d525a23d3393eb"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">OID_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a3acb3b1b8979ad0a28d525a23d3393eb">OutputChannelId</a> = OID_t::OutputChannelId_End</td></tr>
-<tr class="separator:a3acb3b1b8979ad0a28d525a23d3393eb inherit pro_attribs_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af97445768b8179193e11196de8bdb568 inherit pro_attribs_classc___output_common" id="r_af97445768b8179193e11196de8bdb568"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#af97445768b8179193e11196de8bdb568">HasBeenInitialized</a> = false</td></tr>
 <tr class="separator:af97445768b8179193e11196de8bdb568 inherit pro_attribs_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a731419d5df71e722a8be136e618b39f2 inherit pro_attribs_classc___output_common" id="r_a731419d5df71e722a8be136e618b39f2"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a731419d5df71e722a8be136e618b39f2">FrameDurationInMicroSec</a> = 25000</td></tr>
@@ -388,10 +388,8 @@ Private Attributes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_types_classc___output_common"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_types_classc___output_common')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="classc___output_common.html">c_OutputCommon</a></td></tr>
-<tr class="memitem:a462f6a012ba9e655caadd26949813386 inherit pub_types_classc___output_common" id="r_a462f6a012ba9e655caadd26949813386"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a462f6a012ba9e655caadd26949813386">OID_t</a></td></tr>
-<tr class="separator:a462f6a012ba9e655caadd26949813386 inherit pub_types_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab98d2f91c96c1800a642c8aa4ee3d6c8 inherit pub_types_classc___output_common" id="r_ab98d2f91c96c1800a642c8aa4ee3d6c8"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#ab98d2f91c96c1800a642c8aa4ee3d6c8">OTYPE_t</a></td></tr>
-<tr class="separator:ab98d2f91c96c1800a642c8aa4ee3d6c8 inherit pub_types_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a100b1369ca297f8cc23e1ebcaef6bfe2 inherit pub_types_classc___output_common" id="r_a100b1369ca297f8cc23e1ebcaef6bfe2"><td class="memItemLeft" align="right" valign="top">typedef <a class="el" href="classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce">c_OutputMgr::e_OutputProtocolType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classc___output_common.html#a100b1369ca297f8cc23e1ebcaef6bfe2">OTYPE_t</a></td></tr>
+<tr class="separator:a100b1369ca297f8cc23e1ebcaef6bfe2 inherit pub_types_classc___output_common"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="a6506a1363b425dc32816a233be211e2f" name="a6506a1363b425dc32816a233be211e2f"></a>
@@ -417,8 +415,8 @@ Additional Inherited Members</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a31a016d8d365e4ffbe17cb4c5696a362" name="a31a016d8d365e4ffbe17cb4c5696a362"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a31a016d8d365e4ffbe17cb4c5696a362">&#9670;&#160;</a></span>c_OutputPixel()</h2>
+<a id="a5780ef4735ecf28c22dff9f2cf68ed36" name="a5780ef4735ecf28c22dff9f2cf68ed36"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5780ef4735ecf28c22dff9f2cf68ed36">&#9670;&#160;</a></span>c_OutputPixel()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -426,30 +424,20 @@ Additional Inherited Members</h2></td></tr>
         <tr>
           <td class="memname">c_OutputPixel::c_OutputPixel </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff">c_OutputMgr::e_OutputChannelIds</a></td>          <td class="paramname"><span class="paramname"><em>OutputChannelId</em></span>, </td>
+          <td class="paramtype"><a class="el" href="struct_o_m___output_port_definition__t.html">OM_OutputPortDefinition_t</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>OutputPortDefinition</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">gpio_num_t</td>          <td class="paramname"><span class="paramname"><em>outputGpio</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uart_port_t</td>          <td class="paramname"><span class="paramname"><em>uart</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20">c_OutputMgr::e_OutputType</a></td>          <td class="paramname"><span class="paramname"><em>outputType</em></span>&#160;)</td>
+          <td class="paramtype"><a class="el" href="classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce">c_OutputMgr::e_OutputProtocolType</a></td>          <td class="paramname"><span class="paramname"><em>outputType</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___output_pixel_a31a016d8d365e4ffbe17cb4c5696a362_cgraph.png" border="0" usemap="#aclassc___output_pixel_a31a016d8d365e4ffbe17cb4c5696a362_cgraph" alt=""/></div>
-<map name="aclassc___output_pixel_a31a016d8d365e4ffbe17cb4c5696a362_cgraph" id="aclassc___output_pixel_a31a016d8d365e4ffbe17cb4c5696a362_cgraph">
+<div class="center"><img src="classc___output_pixel_a5780ef4735ecf28c22dff9f2cf68ed36_cgraph.png" border="0" usemap="#aclassc___output_pixel_a5780ef4735ecf28c22dff9f2cf68ed36_cgraph" alt=""/></div>
+<map name="aclassc___output_pixel_a5780ef4735ecf28c22dff9f2cf68ed36_cgraph" id="aclassc___output_pixel_a5780ef4735ecf28c22dff9f2cf68ed36_cgraph">
 <area shape="rect" title=" " alt="" coords="5,85,195,111"/>
 <area shape="rect" href="classc___output_pixel.html#a6df957b821a71e4cad52669034bdb74a" title=" " alt="" coords="252,5,427,31"/>
 <area shape="poly" title=" " alt="" coords="140,82,242,48,283,34,285,39,244,53,142,87"/>
@@ -625,7 +613,7 @@ Here is the caller graph for this function:</div>
 <div class="center"><img src="classc___output_pixel_a6df957b821a71e4cad52669034bdb74a_icgraph.png" border="0" usemap="#aclassc___output_pixel_a6df957b821a71e4cad52669034bdb74a_icgraph" alt=""/></div>
 <map name="aclassc___output_pixel_a6df957b821a71e4cad52669034bdb74a_icgraph" id="aclassc___output_pixel_a6df957b821a71e4cad52669034bdb74a_icgraph">
 <area shape="rect" title=" " alt="" coords="2637,152,2812,177"/>
-<area shape="rect" href="classc___output_pixel.html#a31a016d8d365e4ffbe17cb4c5696a362" title=" " alt="" coords="2386,50,2576,76"/>
+<area shape="rect" href="classc___output_pixel.html#a5780ef4735ecf28c22dff9f2cf68ed36" title=" " alt="" coords="2386,50,2576,76"/>
 <area shape="poly" title=" " alt="" coords="2686,146,2640,121,2588,97,2533,79,2535,74,2590,93,2642,117,2689,141"/>
 <area shape="rect" href="classc___output_pixel.html#a59dface20d963341684730e4817f9904" title=" " alt="" coords="2373,202,2589,228"/>
 <area shape="poly" title=" " alt="" coords="2645,183,2547,204,2545,199,2644,178"/>
@@ -1979,7 +1967,7 @@ Here is the caller graph for this function:</div>
 <div class="center"><img src="classc___output_pixel_a9ba93bde21a6a41d53ad4b5773ad331b_icgraph.png" border="0" usemap="#aclassc___output_pixel_a9ba93bde21a6a41d53ad4b5773ad331b_icgraph" alt=""/></div>
 <map name="aclassc___output_pixel_a9ba93bde21a6a41d53ad4b5773ad331b_icgraph" id="aclassc___output_pixel_a9ba93bde21a6a41d53ad4b5773ad331b_icgraph">
 <area shape="rect" title="Update color order." alt="" coords="243,23,420,64"/>
-<area shape="rect" href="classc___output_pixel.html#a31a016d8d365e4ffbe17cb4c5696a362" title=" " alt="" coords="5,5,195,31"/>
+<area shape="rect" href="classc___output_pixel.html#a5780ef4735ecf28c22dff9f2cf68ed36" title=" " alt="" coords="5,5,195,31"/>
 <area shape="poly" title=" " alt="" coords="227,35,195,31,196,26,228,29"/>
 <area shape="rect" href="classc___output_pixel.html#aba69c60f370711f72ed8d1166e2bec41" title="Set a new config in the driver." alt="" coords="18,55,182,80"/>
 <area shape="poly" title=" " alt="" coords="228,57,183,62,182,56,227,52"/>
@@ -2018,7 +2006,7 @@ Here is the caller graph for this function:</div>
 <div class="center"><img src="classc___output_pixel_ae85f097b7467cb4aeb13a6dce4902127_icgraph.png" border="0" usemap="#aclassc___output_pixel_ae85f097b7467cb4aeb13a6dce4902127_icgraph" alt=""/></div>
 <map name="aclassc___output_pixel_ae85f097b7467cb4aeb13a6dce4902127_icgraph" id="aclassc___output_pixel_ae85f097b7467cb4aeb13a6dce4902127_icgraph">
 <area shape="rect" title="Generate gamma correction table." alt="" coords="243,23,436,64"/>
-<area shape="rect" href="classc___output_pixel.html#a31a016d8d365e4ffbe17cb4c5696a362" title=" " alt="" coords="5,5,195,31"/>
+<area shape="rect" href="classc___output_pixel.html#a5780ef4735ecf28c22dff9f2cf68ed36" title=" " alt="" coords="5,5,195,31"/>
 <area shape="poly" title=" " alt="" coords="227,34,195,31,195,26,227,29"/>
 <area shape="rect" href="classc___output_pixel.html#aba69c60f370711f72ed8d1166e2bec41" title="Set a new config in the driver." alt="" coords="18,55,182,80"/>
 <area shape="poly" title=" " alt="" coords="227,57,183,62,182,57,227,52"/>

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['name_0',['name',['../struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd',1,'InputTypeXlateMap_t::name'],['../struct_output_type_xlate_map__t.html#ab057221cbf20eb7f3effc1a61aa8ac29',1,'OutputTypeXlateMap_t::name'],['../classc___external_input.html#a30ba07c4940b03f0e40e3bdb768514a6',1,'c_ExternalInput::name'],['../structc___input_effect_engine_1_1_effect_descriptor__t.html#a9a8d67997524fb9abf29128795386d2e',1,'c_InputEffectEngine::EffectDescriptor_t::name']]],
+  ['name_0',['name',['../struct_input_type_xlate_map__t.html#a93006abf40948208b0f3b9443e2b0dfd',1,'InputTypeXlateMap_t::name'],['../classc___external_input.html#a30ba07c4940b03f0e40e3bdb768514a6',1,'c_ExternalInput::name'],['../structc___input_effect_engine_1_1_effect_descriptor__t.html#a9a8d67997524fb9abf29128795386d2e',1,'c_InputEffectEngine::EffectDescriptor_t::name']]],
   ['nanosecondsinamicrosecond_1',['NanoSecondsInAMicroSecond',['../_e_s_pixel_stick_8h.html#adc742cd4c34a5cf8027ad01f623d218e',1,'ESPixelStick.h']]],
   ['nanosecondsinamillisecond_2',['NanoSecondsInAMilliSecond',['../_e_s_pixel_stick_8h.html#a2bae0e6b7c8b96bd7e9c2a326e7d8333',1,'ESPixelStick.h']]],
   ['nanosecondsinasecond_3',['NanoSecondsInASecond',['../_e_s_pixel_stick_8h.html#ab73f925aed9ed21d9f3da5037e690023',1,'ESPixelStick.h']]],
@@ -23,8 +23,9 @@ var searchData=
   ['numintensitybytesperpixel_20',['NumIntensityBytesPerPixel',['../classc___output_pixel.html#af8785e24529c85a2d82918f4b9e3c895',1,'c_OutputPixel']]],
   ['numinterintensitybreakbits_21',['NumInterIntensityBreakBits',['../structc___output_uart_1_1_output_uart_config__t.html#a34574521c3842523ba81a0d8e01afea2',1,'c_OutputUart::OutputUartConfig_t']]],
   ['numinterintensitymabbits_22',['NumInterIntensityMABbits',['../structc___output_uart_1_1_output_uart_config__t.html#a18adbfab1fed6c979e4feea916edbe2d',1,'c_OutputUart::OutputUartConfig_t']]],
-  ['numpixelsingroup_23',['NumPixelsInGroup',['../structc___input_effect_engine_1_1_marquee_group__t.html#a2b4dfa210a2b28ba1bc0548624556286',1,'c_InputEffectEngine::MarqueeGroup_t']]],
-  ['numpollssincesync_24',['NumPollsSinceSync',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#a9791f313006fcb00e7737b3e113b13a5',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
-  ['numsparseranges_25',['numSparseRanges',['../struct_f_s_e_q_raw_header.html#aa6dace473482943c077b3079bdb53ec4',1,'FSEQRawHeader::numSparseRanges'],['../struct_f_s_e_q_parsed_header.html#a048cd88b554c82a7e9070ac6263016a4',1,'FSEQParsedHeader::numSparseRanges'],['../fseq_8h.html#a96e54e69946f348e1bff7e3e04203321',1,'numSparseRanges:&#160;fseq.h']]],
-  ['numuartslotsperintensityvalue_26',['NumUartSlotsPerIntensityValue',['../classc___output_uart.html#a7c91bb1969dee4e2a52968088ec63b4c',1,'c_OutputUart']]]
+  ['numoutputports_23',['NumOutputPorts',['../classc___output_mgr.html#a58a51be534451fb96d35c3281bf68ff0',1,'c_OutputMgr']]],
+  ['numpixelsingroup_24',['NumPixelsInGroup',['../structc___input_effect_engine_1_1_marquee_group__t.html#a2b4dfa210a2b28ba1bc0548624556286',1,'c_InputEffectEngine::MarqueeGroup_t']]],
+  ['numpollssincesync_25',['NumPollsSinceSync',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#a9791f313006fcb00e7737b3e113b13a5',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
+  ['numsparseranges_26',['numSparseRanges',['../struct_f_s_e_q_raw_header.html#aa6dace473482943c077b3079bdb53ec4',1,'FSEQRawHeader::numSparseRanges'],['../struct_f_s_e_q_parsed_header.html#a048cd88b554c82a7e9070ac6263016a4',1,'FSEQParsedHeader::numSparseRanges'],['../fseq_8h.html#a96e54e69946f348e1bff7e3e04203321',1,'numSparseRanges:&#160;fseq.h']]],
+  ['numuartslotsperintensityvalue_27',['NumUartSlotsPerIntensityValue',['../classc___output_uart.html#a7c91bb1969dee4e2a52968088ec63b4c',1,'c_OutputUart']]]
 ];

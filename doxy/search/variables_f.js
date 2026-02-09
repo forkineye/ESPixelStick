@@ -8,7 +8,8 @@ var searchData=
   ['rebootonwififailuretoconnect_5',['RebootOnWiFiFailureToConnect',['../classc___wi_fi_driver.html#a53740734d7bafcede27e36f52b927444',1,'c_WiFiDriver']]],
   ['remainingplaycount_6',['RemainingPlayCount',['../structc___input_f_p_p_remote_play_item_1_1_file_control__t.html#afab732064f1162ed86a513660420385e',1,'c_InputFPPRemotePlayItem::FileControl_t']]],
   ['reportediswificonnected_7',['ReportedIsWiFiConnected',['../classc___wi_fi_driver.html#a4d752718b07127ffc3291d7b0e360d9d',1,'c_WiFiDriver']]],
-  ['resetwifi_8',['ResetWiFi',['../main_8cpp.html#a71cd754e8f1472f27fc5b805dfcb4251',1,'ResetWiFi:&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#a71cd754e8f1472f27fc5b805dfcb4251',1,'ResetWiFi:&#160;main.cpp']]],
-  ['responseaddress_9',['ResponseAddress',['../structc___input_d_d_p_1_1_packet_buffer__t.html#afaabcf7bfdf68f8ffcdadbfb1104ff11',1,'c_InputDDP::PacketBuffer_t']]],
-  ['responseport_10',['ResponsePort',['../structc___input_d_d_p_1_1_packet_buffer__t.html#a0fe17b362993358cd7402373774ab977',1,'c_InputDDP::PacketBuffer_t']]]
+  ['requiredporttype_8',['RequiredPortType',['../struct_supported_output_protocol__t.html#af4e7613bd69cbc32aa100f8cb0362f65',1,'SupportedOutputProtocol_t']]],
+  ['resetwifi_9',['ResetWiFi',['../main_8cpp.html#a71cd754e8f1472f27fc5b805dfcb4251',1,'ResetWiFi:&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#a71cd754e8f1472f27fc5b805dfcb4251',1,'ResetWiFi:&#160;main.cpp']]],
+  ['responseaddress_10',['ResponseAddress',['../structc___input_d_d_p_1_1_packet_buffer__t.html#afaabcf7bfdf68f8ffcdadbfb1104ff11',1,'c_InputDDP::PacketBuffer_t']]],
+  ['responseport_11',['ResponsePort',['../structc___input_d_d_p_1_1_packet_buffer__t.html#a0fe17b362993358cd7402373774ab977',1,'c_InputDDP::PacketBuffer_t']]]
 ];

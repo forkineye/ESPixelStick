@@ -8,5 +8,5 @@ var searchData=
   ['gecepixelid_5',['GECEPixelId',['../classc___output_pixel.html#a870505151fbc4865377b0dbbf494662a',1,'c_OutputPixel']]],
   ['globalrebootreason_6',['GlobalRebootReason',['../main_8cpp.html#a7818ecfe960d8847c06bcab42ca97474',1,'main.cpp']]],
   ['gpioid_7',['GpioId',['../classc___external_input.html#a27bb9f5810aa4f6805aa48369f56f453',1,'c_ExternalInput']]],
-  ['gpiopin_8',['GpioPin',['../struct_output_channel_id_to_gpio_and_port_entry__t.html#a686a817d1f29961de5c7cba2e317ad14',1,'OutputChannelIdToGpioAndPortEntry_t::GpioPin'],['../structc___output_mgr_1_1_driver_info__t.html#a1334e1a75b8b247913bf56348f0c4b85',1,'c_OutputMgr::DriverInfo_t::GpioPin']]]
+  ['gpios_8',['gpios',['../struct_o_m___output_port_definition__t.html#a49065eb54d453b8e2f7c5a698bd2645c',1,'OM_OutputPortDefinition_t']]]
 ];

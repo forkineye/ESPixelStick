@@ -1,7 +1,8 @@
 <map id="c_OutputMgr::ReadChannelData" name="c_OutputMgr::ReadChannelData">
-<area shape="rect" id="Node000001" title=" " alt="" coords="374,13,580,38"/>
-<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#a93864b40e9859bbddda93f6a131df97c" title=" " alt="" coords="190,5,326,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="359,28,327,28,327,23,359,23"/>
-<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#ac629335c2536aff5f1e67651d2225aac" title=" " alt="" coords="5,5,142,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="174,28,142,28,142,23,174,23"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="374,29,580,55"/>
+<area shape="poly" id="edge3_Node000001_Node000001" title=" " alt="" coords="515,17,503,10,477,8,454,10,441,15,439,20,445,27,441,31,434,21,438,11,453,5,477,3,504,5,518,12"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#a93864b40e9859bbddda93f6a131df97c" title=" " alt="" coords="190,22,326,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="359,45,327,45,327,40,359,40"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#ac629335c2536aff5f1e67651d2225aac" title=" " alt="" coords="5,22,142,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="174,45,142,45,142,40,174,40"/>
 </map>

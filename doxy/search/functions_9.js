@@ -7,7 +7,7 @@ var searchData=
   ['inputispaused_4',['InputIsPaused',['../classc___input_f_p_p_remote_play_item.html#afeaf66cce65cdfda170cd94f15555b51',1,'c_InputFPPRemotePlayItem']]],
   ['inputtypeisallowedonchannel_5',['InputTypeIsAllowedOnChannel',['../classc___input_mgr.html#a20bc4c894b378f7f4e9acb19ec76b45f',1,'c_InputMgr']]],
   ['instantiatenewinputchannel_6',['InstantiateNewInputChannel',['../classc___input_mgr.html#afe3597df3db9a6deec4140f410f7f1ee',1,'c_InputMgr']]],
-  ['instantiatenewoutputchannel_7',['InstantiateNewOutputChannel',['../classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968',1,'c_OutputMgr']]],
+  ['instantiatenewoutputchannel_7',['InstantiateNewOutputChannel',['../classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794',1,'c_OutputMgr']]],
   ['isalexacallbackvalid_8',['IsAlexaCallbackValid',['../classc___web_mgr.html#a680165d31d7cd22afde779f25e6a4067',1,'c_WebMgr']]],
   ['iscompressed_9',['IsCompressed',['../classc___file_mgr.html#a44931172f6751a91e801c191d9e60fe7',1,'c_FileMgr']]],
   ['isconnected_10',['IsConnected',['../classc___network_mgr.html#adb2bfe0b52822c8b9936696d9d03031d',1,'c_NetworkMgr']]],

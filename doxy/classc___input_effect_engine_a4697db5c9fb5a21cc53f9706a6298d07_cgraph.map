@@ -1,11 +1,12 @@
 <map id="c_InputEffectEngine::effectBreathe" name="c_InputEffectEngine::effectBreathe">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,142,46"/>
-<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#af6c8141b2b5d63e69151cb0f07fe9281" title=" " alt="" coords="190,5,326,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,23,174,23,174,28,142,28"/>
-<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#aff4693217ee5e68868068613b318a281" title=" " alt="" coords="374,5,510,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="326,23,358,23,358,28,326,28"/>
-<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#a4faf62f24ce641ec7999f5e246eb458c" title=" " alt="" coords="558,5,695,46"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="511,23,543,23,543,28,511,28"/>
-<area shape="rect" id="Node000005" href="$classc___output_mgr.html#abe0292b6380f75279c4758c2b2e4e465" title=" " alt="" coords="743,13,949,38"/>
-<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="695,23,727,23,727,28,695,28"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,22,142,62"/>
+<area shape="rect" id="Node000002" href="$classc___input_effect_engine.html#af6c8141b2b5d63e69151cb0f07fe9281" title=" " alt="" coords="190,22,326,62"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,40,174,40,174,45,142,45"/>
+<area shape="rect" id="Node000003" href="$classc___input_effect_engine.html#aff4693217ee5e68868068613b318a281" title=" " alt="" coords="374,22,510,62"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="326,40,358,40,358,45,326,45"/>
+<area shape="rect" id="Node000004" href="$classc___input_effect_engine.html#a4faf62f24ce641ec7999f5e246eb458c" title=" " alt="" coords="558,22,695,62"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="511,40,543,40,543,45,511,45"/>
+<area shape="rect" id="Node000005" href="$classc___output_mgr.html#abe0292b6380f75279c4758c2b2e4e465" title=" " alt="" coords="743,29,949,55"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="695,40,727,40,727,45,695,45"/>
+<area shape="poly" id="edge5_Node000005_Node000005" title=" " alt="" coords="809,31,802,21,806,11,821,5,846,3,873,5,886,12,884,17,871,10,846,8,823,10,810,15,807,20,814,27"/>
 </map>

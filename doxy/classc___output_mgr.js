@@ -1,21 +1,8 @@
 var classc___output_mgr =
 [
     [ "DriverInfo_t", "structc___output_mgr_1_1_driver_info__t.html", "structc___output_mgr_1_1_driver_info__t" ],
-    [ "e_OutputChannelIds", "classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ff", [
-      [ "OutputChannelId_End", "classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ffaabbaa1975289404286507ac2f2180357", null ],
-      [ "OutputChannelId_Start", "classc___output_mgr.html#a07f4eaebe8ab66e698e06a425c31b2ffafa7f831449fc336a17c2631797b2c1e6", null ]
-    ] ],
-    [ "e_OutputType", "classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20", [
-      [ "OutputType_Disabled", "classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20a8c10f510fbe6a9ef9190ea37e4d06a75", null ],
-      [ "OutputType_End", "classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20ad973ad34c41f164f1234fb37e1b18f0a", null ],
-      [ "OutputType_Start", "classc___output_mgr.html#a161cacaceae9b3d67bad54de378fac20ab1c3d373c033fb536571a85621f09a5f", null ]
-    ] ],
-    [ "OM_PortType_t", "classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9", [
-      [ "Uart", "classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9a0d7d932dc2c4279872b476c6ada24d3f", null ],
-      [ "Rmt", "classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9afb1a932142103c9fcad347c899382cbf", null ],
-      [ "Spi", "classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9a67150b88c1fa1742ea618da86b829a7a", null ],
-      [ "Relay", "classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9ac572c651ab04a645468cef2d7510045e", null ],
-      [ "Undefined", "classc___output_mgr.html#a970adc830ccb78bebef75d526c515cc9a17e6bd48a93211095b0f0b6ba780a092", null ]
+    [ "e_OutputProtocolType", "classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce", [
+      [ "OutputProtocol_Disabled", "classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692cea0e3696fb135fb8df5fce3e953c064f98", null ]
     ] ],
     [ "c_OutputMgr", "classc___output_mgr.html#a3785b017fd1890570afd8c1054095b41", null ],
     [ "~c_OutputMgr", "classc___output_mgr.html#a53b2aa00d678f200c871af2db1d44b01", null ],
@@ -25,7 +12,7 @@ var classc___output_mgr =
     [ "CreateJsonConfig", "classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d", null ],
     [ "CreateNewConfig", "classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0", null ],
     [ "DeleteConfig", "classc___output_mgr.html#a697acb245b061406959eacd968eb74d7", null ],
-    [ "FindJsonChannelConfig", "classc___output_mgr.html#a90986e86ff8aa884607ca104560a2b0f", null ],
+    [ "FindJsonChannelConfig", "classc___output_mgr.html#a33e2ed6b4463a8ed5cb5658d28f59240", null ],
     [ "GetBufferAddress", "classc___output_mgr.html#aec62685e8fb4eff73bfefd3ed5321b01", null ],
     [ "GetBufferSize", "classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976", null ],
     [ "GetBufferUsedSize", "classc___output_mgr.html#a9aa129dd6077ad48f807aaab43f67c52", null ],
@@ -33,9 +20,9 @@ var classc___output_mgr =
     [ "GetConfig", "classc___output_mgr.html#a19d05a4eb3324331a50f31797639654f", null ],
     [ "GetDriverName", "classc___output_mgr.html#a17aadd243f3259a99b320652ab624d07", null ],
     [ "GetDriverSize", "classc___output_mgr.html#a9ada6e65bb85cf170a0edd014b7046be", null ],
-    [ "GetPortCounts", "classc___output_mgr.html#a37df24ad4fc6541891e76e7906255b2d", null ],
+    [ "GetNumPorts", "classc___output_mgr.html#a861cf67886d1b3eccab0efc061e89963", null ],
     [ "GetStatus", "classc___output_mgr.html#a56f81964a988693f278fd65cf43277c6", null ],
-    [ "InstantiateNewOutputChannel", "classc___output_mgr.html#a7a2812dee9affa9705178dd19b69e968", null ],
+    [ "InstantiateNewOutputChannel", "classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794", null ],
     [ "LoadConfig", "classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761", null ],
     [ "PauseOutputs", "classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d", null ],
     [ "Poll", "classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925", null ],
@@ -45,6 +32,7 @@ var classc___output_mgr =
     [ "ScheduleLoadConfig", "classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79", null ],
     [ "SetConfig", "classc___output_mgr.html#aee5d29f91c6457ce753d855ba471f315", null ],
     [ "SetConfig", "classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892", null ],
+    [ "SetPortDefnitionDefaults", "classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b", null ],
     [ "SetSerialUart", "classc___output_mgr.html#a943339390f6e515338978cef94a029f3", null ],
     [ "TaskPoll", "classc___output_mgr.html#a325b2eb8b6b86b602e2efb8f50297435", null ],
     [ "UpdateDisplayBufferReferences", "classc___output_mgr.html#a2af1d94181e97f732be0b66be3b944dd", null ],
@@ -56,8 +44,11 @@ var classc___output_mgr =
     [ "ConsoleRxGpio", "classc___output_mgr.html#a1eba5f048cc784124d29208565a71511", null ],
     [ "ConsoleTxGpio", "classc___output_mgr.html#ac9701b8ceebd130258b2bc0a4a53d02d", null ],
     [ "HasBeenInitialized", "classc___output_mgr.html#aff2c5504636afdba4780a62c204969fb", null ],
-    [ "OutputChannelDrivers", "classc___output_mgr.html#ae8316c09c0d04872e1ef067ef2f993ea", null ],
+    [ "NumOutputPorts", "classc___output_mgr.html#a58a51be534451fb96d35c3281bf68ff0", null ],
     [ "OutputIsPaused", "classc___output_mgr.html#affde0fc6a806f815ee874e5cb3d24a03", null ],
+    [ "OutputType_End", "classc___output_mgr.html#abbad6df24191cc99877a8885332b0767", null ],
     [ "pOutputBuffer", "classc___output_mgr.html#a068bba05c9c35db7db26d5516c904f9e", null ],
+    [ "pOutputChannelDrivers", "classc___output_mgr.html#aaacf05b73ebdb85157dd3d691ced89e1", null ],
+    [ "SizeOfTable", "classc___output_mgr.html#a0910e3aaedd527a8eef53ffd9f2a81e8", null ],
     [ "UsedBufferSize", "classc___output_mgr.html#a5484318ee435976c6ab5b9b2c32e53da", null ]
 ];

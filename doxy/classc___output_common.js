@@ -1,8 +1,7 @@
 var classc___output_common =
 [
-    [ "OID_t", "classc___output_common.html#a462f6a012ba9e655caadd26949813386", null ],
-    [ "OTYPE_t", "classc___output_common.html#ab98d2f91c96c1800a642c8aa4ee3d6c8", null ],
-    [ "c_OutputCommon", "classc___output_common.html#a62fe4a63a7cf103685b64cf5e1c22452", null ],
+    [ "OTYPE_t", "classc___output_common.html#a100b1369ca297f8cc23e1ebcaef6bfe2", null ],
+    [ "c_OutputCommon", "classc___output_common.html#a142cc93ea03c961e09437ea4bc271b91", null ],
     [ "~c_OutputCommon", "classc___output_common.html#a18e0118f2a588c46e467556bab72010f", null ],
     [ "BaseGetStatus", "classc___output_common.html#a8f58ca24d1d37983afab81c9eebf6a85", null ],
     [ "Begin", "classc___output_common.html#a23ef97415464d74fe780256b6680bfb1", null ],
@@ -16,8 +15,8 @@ var classc___output_common =
     [ "GetFrameTimeMs", "classc___output_common.html#a5a960482b9b025836df5d6eda4375aaa", null ],
     [ "GetNumOutputBufferBytesNeeded", "classc___output_common.html#ac657725842d075415641e11871bd01f7", null ],
     [ "GetNumOutputBufferChannelsServiced", "classc___output_common.html#a68284ed16932a4f76be6ccddd7871f26", null ],
-    [ "GetOutputChannelId", "classc___output_common.html#a195abd2bcb14f630abd61bdd0d33f046", null ],
-    [ "GetOutputGpio", "classc___output_common.html#ac3bb5b399f1e8473f057cd7a360ff9a5", null ],
+    [ "GetOutputGpio", "classc___output_common.html#a4cfbdfe1843f316bce368f2436782270", null ],
+    [ "GetOutputPortId", "classc___output_common.html#a4c21c5392df7c61323283f1b1c53bbb7", null ],
     [ "GetOutputType", "classc___output_common.html#ad7170942775d16bd0d84c5baf589b51d", null ],
     [ "GetStatus", "classc___output_common.html#ac021e275ea90fcfbdc659918d2b78c03", null ],
     [ "IsPaused", "classc___output_common.html#aa9f90f7b993e5c19fe5d5835abcca575", null ],
@@ -31,15 +30,13 @@ var classc___output_common =
     [ "ValidateGpio", "classc___output_common.html#a4f20044ab63e32ea09bb4140f9d1f933", null ],
     [ "WriteChannelData", "classc___output_common.html#a89a48db3e49b37b61b0049d4c411cded", null ],
     [ "ActualFrameDurationMicroSec", "classc___output_common.html#a1d1342470a0d6346d9e10762f400f573", null ],
-    [ "DataPin", "classc___output_common.html#ac4ddbbf9943b09880c2fca8892d1a4e3", null ],
     [ "FrameCount", "classc___output_common.html#a3490e2a7b2ba343004d367a45faddd3c", null ],
     [ "FrameDurationInMicroSec", "classc___output_common.html#a731419d5df71e722a8be136e618b39f2", null ],
     [ "FrameStartTimeInMicroSec", "classc___output_common.html#a02be67c48c6c853eb05b725bfa0948bd", null ],
     [ "HasBeenInitialized", "classc___output_common.html#af97445768b8179193e11196de8bdb568", null ],
     [ "OutputBufferSize", "classc___output_common.html#a6c6a0c4679e3059f945887fe7eac30aa", null ],
-    [ "OutputChannelId", "classc___output_common.html#a3acb3b1b8979ad0a28d525a23d3393eb", null ],
+    [ "OutputPortDefinition", "classc___output_common.html#a3b88ff699352934ace1af6d39dbb8cc1", null ],
     [ "OutputType", "classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43", null ],
     [ "Paused", "classc___output_common.html#a4c446205cc91c0b16628e5334b7b5c22", null ],
-    [ "pOutputBuffer", "classc___output_common.html#a4a14a3bbbc484b50ff0abf62d4e3e732", null ],
-    [ "UartId", "classc___output_common.html#a6f3d0f71c2d14f8c06db0068215dfccb", null ]
+    [ "pOutputBuffer", "classc___output_common.html#a4a14a3bbbc484b50ff0abf62d4e3e732", null ]
 ];

@@ -1,10 +1,10 @@
 var _output_mgr_8cpp =
 [
-    [ "OutputTypeXlateMap_t", "struct_output_type_xlate_map__t.html", "struct_output_type_xlate_map__t" ],
-    [ "OutputChannelIdToGpioAndPortEntry_t", "struct_output_channel_id_to_gpio_and_port_entry__t.html", "struct_output_channel_id_to_gpio_and_port_entry__t" ],
-    [ "AllocatePort", "_output_mgr_8cpp.html#ada2f9f05bd5a8259bfc35d35eb87d2a5", null ],
+    [ "SupportedOutputProtocol_t", "struct_supported_output_protocol__t.html", "struct_supported_output_protocol__t" ],
+    [ "AllocatePort", "_output_mgr_8cpp.html#aaf82107f89db52969b0ccb0fcff646f2", null ],
+    [ "CLASS_TYPE_NAME", "_output_mgr_8cpp.html#a5f711e1ceca10e1dea23cf86540d0681", null ],
+    [ "CLASS_TYPE_NO_NAME", "_output_mgr_8cpp.html#a136c90426710255bfb9c84315de747b6", null ],
     [ "DEFAULT_RELAY_GPIO", "_output_mgr_8cpp.html#ad828b40b5ce0c37516acd57858300a64", null ],
-    [ "OutputChannelIdToGpioAndPort", "_output_mgr_8cpp.html#af623aa57357bf7d40d2b234379f26d06", null ],
     [ "OutputMgr", "_output_mgr_8cpp.html#af6b50c745df05adfe6f502280127db1f", null ],
-    [ "OutputTypeXlateMap", "_output_mgr_8cpp.html#a5ed825bf1fd2b0279f9009fb1dc0c4f3", null ]
+    [ "SupportedOutputProtocolList", "_output_mgr_8cpp.html#ab0dd6515a18a339a11253af8696e3edb", null ]
 ];
