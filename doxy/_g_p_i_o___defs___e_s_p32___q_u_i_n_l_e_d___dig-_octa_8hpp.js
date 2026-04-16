@@ -24,6 +24,7 @@ var _g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig__octa_8hpp =
     [ "SUPPORT_OutputProtocol_GS8208", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig-_octa_8hpp.html#ad71d400bf3d1b998be16ce4c822a22ec", null ],
     [ "SUPPORT_OutputProtocol_Relay", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig-_octa_8hpp.html#a4cc131f118cd012226ab3667cd2cbb6b", null ],
     [ "SUPPORT_OutputProtocol_Servo_PCA9685", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig-_octa_8hpp.html#a0aa30f0dcce5fa891cff33303c5481ff", null ],
+    [ "SUPPORT_OutputProtocol_TLS3001", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig-_octa_8hpp.html#a52141ff03bfb24abc29ac1916a6a9b06", null ],
     [ "SUPPORT_OutputProtocol_TM1814", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig-_octa_8hpp.html#a13852417ea1c6f73a1969b1108bf9963", null ],
     [ "SUPPORT_OutputProtocol_UCS1903", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig-_octa_8hpp.html#a463bb7058b8a5724a1b0ac3a700edb45", null ],
     [ "SUPPORT_OutputProtocol_UCS8903", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___dig-_octa_8hpp.html#aea53898829210ed1fbac67d4aa855a6e", null ],

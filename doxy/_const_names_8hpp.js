@@ -89,6 +89,7 @@ var _const_names_8hpp =
     [ "CN_FlashMinDur", "_const_names_8hpp.html#a57505831b1fc4abb7976c766634fa183", null ],
     [ "CN_FlashMinInt", "_const_names_8hpp.html#adb4460a2dfa3af324bbeaa2793628007", null ],
     [ "CN_FPPoverride", "_const_names_8hpp.html#a3ec2c678e86b846eefd5589569cbc79e", null ],
+    [ "CN_FramesBetweenResets", "_const_names_8hpp.html#a651d99348c73d262a6e894ffbf71af60", null ],
     [ "CN_Frequency", "_const_names_8hpp.html#a85c67ac3ba2acabbbdf446d44b469d24", null ],
     [ "CN_fseqfilelist", "_const_names_8hpp.html#a7c288156caff740701cc52eeb43d7d30", null ],
     [ "CN_fseqfilename", "_const_names_8hpp.html#a28f1ea5bb496c43c725613dc053bf61c", null ],

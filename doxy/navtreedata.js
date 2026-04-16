@@ -57,21 +57,21 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "_ap_credentials_8cpp.html",
-"_const_names_8cpp.html#af677cd8c5e5971dd98fceae73000e74d",
-"_const_names_8hpp.html#ae3afd847590d80f125e2dc675786c35d",
-"_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#a319d1c078a4ace47775ecd6615a796a7",
-"_g_p_i_o___defs___e_s_p32___m5_stack___atom_8hpp.html#aea53898829210ed1fbac67d4aa855a6e",
-"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h___p5_8hpp.html#aeed05cdd33507563bb8551bc006bc0f1",
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d___e_t_h_8hpp.html#adaf0753131bfc7ffd9f67c5061606ed1",
-"_input_d_d_p_8h.html#aea80a7c46e66f756c8f0c03775a7b747",
-"_safer_string_conversion_8hpp.html#abaa5f3baa5ae9ae6df677674285ab8da",
-"classc___file_mgr.html#aab11aa92f9253ec95ec5b2dc7be1c55e",
-"classc___input_effect_engine.html#afaf6b474467520e248c2e79d3bdc8146",
-"classc___input_mgr.html#ab7a89ecb21bf23364999dedc7e474fc5ac02c03efd74ae5f6fe72e72aa48b9adf",
-"classc___output_uart.html#aa3a0f9697d6b37c7eef0f17923eac717",
-"classfsm___play_list__state.html#a300141836518233b8730e740ccf6c0b0",
-"functions_vars_f.html",
-"structc___input_e131_1_1_universe__t.html"
+"_const_names_8cpp.html#af458cf6ecb90a38ce03476267f7d20e9",
+"_const_names_8hpp.html#ae15dce3de1b4039672f95cb00f8758e0",
+"_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#a0bd4b10e6b6d367188fa744e90d10e76",
+"_g_p_i_o___defs___e_s_p32___m5_stack___atom_8hpp.html#a13852417ea1c6f73a1969b1108bf9963",
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h___p5_8hpp.html#a3caa63f16e3dcb8b7b137a99d926439a",
+"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d_8hpp.html#ad71d400bf3d1b998be16ce4c822a22ec",
+"_g_p_i_o___defs___e_s_p8266___generic_8hpp.html#ad71d400bf3d1b998be16ce4c822a22ec",
+"_output_u_c_s1903_rmt_8cpp.html",
+"classc___file_mgr.html#a44931172f6751a91e801c191d9e60fe7",
+"classc___input_effect_engine.html#a69e94e80d206e30387cd73d257a19605",
+"classc___input_m_q_t_t.html#afbc74dd0e4627273ed59cab493a58567",
+"classc___output_pixel.html#acd55211a883f7d1387aa9e299fc7b37e",
+"classfsm___play_file__state___error.html#ac32f4a47d404993d81d4669321dbd636",
+"functions_func_b.html",
+"structc___f_p_p_discovery_1_1_multi_sync_stats__t.html#a696d35732ec09d9bb00d510ed88deb26"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

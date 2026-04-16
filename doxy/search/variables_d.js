@@ -20,6 +20,5 @@ var searchData=
   ['outputportdefinition_17',['OutputPortDefinition',['../classc___output_common.html#a3b88ff699352934ace1af6d39dbb8cc1',1,'c_OutputCommon']]],
   ['outputportid_18',['OutputPortId',['../structc___output_uart_1_1_output_uart_config__t.html#a9c45128faa8b5c949edffd6a9b28fb10',1,'c_OutputUart::OutputUartConfig_t']]],
   ['outputtype_19',['OutputType',['../classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43',1,'c_OutputCommon']]],
-  ['outputtype_5fend_20',['OutputType_End',['../classc___output_mgr.html#abbad6df24191cc99877a8885332b0767',1,'c_OutputMgr']]],
-  ['outputuartconfig_21',['OutputUartConfig',['../classc___output_uart.html#a2a4d8b90bc76bc72b69a1fc9fc1fa969',1,'c_OutputUart']]]
+  ['outputuartconfig_20',['OutputUartConfig',['../classc___output_uart.html#a2a4d8b90bc76bc72b69a1fc9fc1fa969',1,'c_OutputUart']]]
 ];

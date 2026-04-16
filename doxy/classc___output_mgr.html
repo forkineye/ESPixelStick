@@ -133,6 +133,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a3dec27ef1775dc596e2ce87038b692ce" id="r_a3dec27ef1775dc596e2ce87038b692ce"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> { <a class="el" href="#a3dec27ef1775dc596e2ce87038b692cea0e3696fb135fb8df5fce3e953c064f98">OutputProtocol_Disabled</a> = 0
+, <a class="el" href="#a3dec27ef1775dc596e2ce87038b692ceaca25c36174ee8af00516d4bf75be7805">OutputProtocol_Last</a>
  }</td></tr>
 <tr class="separator:a3dec27ef1775dc596e2ce87038b692ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -201,8 +202,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:abbad6df24191cc99877a8885332b0767" id="r_abbad6df24191cc99877a8885332b0767"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abbad6df24191cc99877a8885332b0767">OutputType_End</a> = uint32_t(-1)</td></tr>
-<tr class="separator:abbad6df24191cc99877a8885332b0767"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0525cd93f5bab5c9dd574ff429f3fd71" id="r_a0525cd93f5bab5c9dd574ff429f3fd71"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0525cd93f5bab5c9dd574ff429f3fd71">NumberOfOutputProtocols</a> = uint32_t(0)</td></tr>
+<tr class="separator:a0525cd93f5bab5c9dd574ff429f3fd71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -218,8 +219,8 @@ Private Member Functions</h2></td></tr>
 <tr class="separator:adc248025f3eafeac3261994673ce96d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a943339390f6e515338978cef94a029f3" id="r_a943339390f6e515338978cef94a029f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a943339390f6e515338978cef94a029f3">SetSerialUart</a> ()</td></tr>
 <tr class="separator:a943339390f6e515338978cef94a029f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a33e2ed6b4463a8ed5cb5658d28f59240" id="r_a33e2ed6b4463a8ed5cb5658d28f59240"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a33e2ed6b4463a8ed5cb5658d28f59240">FindJsonChannelConfig</a> (JsonDocument &amp;jsonConfig, <a class="el" href="_output_mgr_port_defs_8hpp.html#adc89d4df16774f59429a3f8742c1cc4d">OM_PortId_t</a> PortId, <a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> Type, JsonObject &amp;ChanConfig)</td></tr>
-<tr class="separator:a33e2ed6b4463a8ed5cb5658d28f59240"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add5b2de649aeccda7da16178f82aa42f" id="r_add5b2de649aeccda7da16178f82aa42f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#add5b2de649aeccda7da16178f82aa42f">FindJsonChannelConfig</a> (JsonDocument &amp;jsonConfig, <a class="el" href="_output_mgr_port_defs_8hpp.html#adc89d4df16774f59429a3f8742c1cc4d">OM_PortId_t</a> PortId, JsonObject &amp;ChanConfig)</td></tr>
+<tr class="separator:add5b2de649aeccda7da16178f82aa42f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5f037f089c20467b3f86841b46e1f60b" id="r_a5f037f089c20467b3f86841b46e1f60b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f037f089c20467b3f86841b46e1f60b">SetPortDefnitionDefaults</a> (<a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a> &amp;CurrentOutput, <a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> TargetProtocolType)</td></tr>
 <tr class="separator:a5f037f089c20467b3f86841b46e1f60b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -266,6 +267,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a3dec27ef1775dc596e2ce87038b692cea0e3696fb135fb8df5fce3e953c064f98" name="a3dec27ef1775dc596e2ce87038b692cea0e3696fb135fb8df5fce3e953c064f98"></a>OutputProtocol_Disabled&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a3dec27ef1775dc596e2ce87038b692ceaca25c36174ee8af00516d4bf75be7805" name="a3dec27ef1775dc596e2ce87038b692ceaca25c36174ee8af00516d4bf75be7805"></a>OutputProtocol_Last&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
 </div>
@@ -1001,8 +1003,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="a33e2ed6b4463a8ed5cb5658d28f59240" name="a33e2ed6b4463a8ed5cb5658d28f59240"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a33e2ed6b4463a8ed5cb5658d28f59240">&#9670;&#160;</a></span>FindJsonChannelConfig()</h2>
+<a id="add5b2de649aeccda7da16178f82aa42f" name="add5b2de649aeccda7da16178f82aa42f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#add5b2de649aeccda7da16178f82aa42f">&#9670;&#160;</a></span>FindJsonChannelConfig()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1023,11 +1025,6 @@ Here is the caller graph for this function:</div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a></td>          <td class="paramname"><span class="paramname"><em>Type</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">JsonObject &amp;</td>          <td class="paramname"><span class="paramname"><em>ChanConfig</em></span>&#160;)</td>
         </tr>
       </table>
@@ -1040,8 +1037,8 @@ Here is the caller graph for this function:</div>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_cgraph.png" border="0" usemap="#aclassc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_cgraph" alt=""/></div>
-<map name="aclassc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_cgraph" id="aclassc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_cgraph">
+<div class="center"><img src="classc___output_mgr_add5b2de649aeccda7da16178f82aa42f_cgraph.png" border="0" usemap="#aclassc___output_mgr_add5b2de649aeccda7da16178f82aa42f_cgraph" alt=""/></div>
+<map name="aclassc___output_mgr_add5b2de649aeccda7da16178f82aa42f_cgraph" id="aclassc___output_mgr_add5b2de649aeccda7da16178f82aa42f_cgraph">
 <area shape="rect" title=" " alt="" coords="5,5,208,46"/>
 <area shape="rect" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="256,13,361,38"/>
 <area shape="poly" title=" " alt="" coords="208,23,240,23,240,28,208,28"/>
@@ -1052,8 +1049,8 @@ Here is the call graph for this function:</div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_icgraph.png" border="0" usemap="#aclassc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_icgraph" alt=""/></div>
-<map name="aclassc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_icgraph" id="aclassc___output_mgr_a33e2ed6b4463a8ed5cb5658d28f59240_icgraph">
+<div class="center"><img src="classc___output_mgr_add5b2de649aeccda7da16178f82aa42f_icgraph.png" border="0" usemap="#aclassc___output_mgr_add5b2de649aeccda7da16178f82aa42f_icgraph" alt=""/></div>
+<map name="aclassc___output_mgr_add5b2de649aeccda7da16178f82aa42f_icgraph" id="aclassc___output_mgr_add5b2de649aeccda7da16178f82aa42f_icgraph">
 <area shape="rect" title=" " alt="" coords="232,5,434,46"/>
 <area shape="rect" href="classc___output_mgr.html#a33b3e6588cc7639555d7e91b59378540" title=" " alt="" coords="5,5,184,46"/>
 <area shape="poly" title=" " alt="" coords="216,28,184,28,184,23,216,23"/>
@@ -2371,7 +2368,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="184,527,368,540,584,547,1066,547,1134,541,1202,526,1267,504,1329,476,1436,416,1510,366,1513,370,1439,421,1332,481,1269,509,1203,531,1135,547,1066,552,584,552,368,545,184,532"/>
 <area shape="rect" href="classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="506,357,664,382"/>
 <area shape="poly" title=" " alt="" coords="136,498,231,458,374,415,502,384,504,389,375,420,233,463,138,503"/>
-<area shape="rect" href="classc___output_mgr.html#a33e2ed6b4463a8ed5cb5658d28f59240" title=" " alt="" coords="232,637,434,678"/>
+<area shape="rect" href="classc___output_mgr.html#add5b2de649aeccda7da16178f82aa42f" title=" " alt="" coords="232,637,434,678"/>
 <area shape="poly" title=" " alt="" coords="122,540,172,578,233,617,258,629,256,634,230,621,169,582,119,544"/>
 <area shape="rect" href="_e_s_pixel_stick_8h.html#a8295d2ec53bab395bfc5811cfd78ca4d" title=" " alt="" coords="532,616,638,641"/>
 <area shape="poly" title=" " alt="" coords="151,540,232,566,385,598,517,618,517,623,384,603,231,571,149,545"/>
@@ -3253,6 +3250,20 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
+<a id="a0525cd93f5bab5c9dd574ff429f3fd71" name="a0525cd93f5bab5c9dd574ff429f3fd71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0525cd93f5bab5c9dd574ff429f3fd71">&#9670;&#160;</a></span>NumberOfOutputProtocols</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t c_OutputMgr::NumberOfOutputProtocols = uint32_t(0)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="a58a51be534451fb96d35c3281bf68ff0" name="a58a51be534451fb96d35c3281bf68ff0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a58a51be534451fb96d35c3281bf68ff0">&#9670;&#160;</a></span>NumOutputPorts</h2>
 
@@ -3293,20 +3304,6 @@ Here is the caller graph for this function:</div>
 <span class="mlabels"><span class="mlabel">private</span></span>  </td>
   </tr>
 </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="abbad6df24191cc99877a8885332b0767" name="abbad6df24191cc99877a8885332b0767"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abbad6df24191cc99877a8885332b0767">&#9670;&#160;</a></span>OutputType_End</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t c_OutputMgr::OutputType_End = uint32_t(-1)</td>
-        </tr>
-      </table>
 </div><div class="memdoc">
 
 </div>

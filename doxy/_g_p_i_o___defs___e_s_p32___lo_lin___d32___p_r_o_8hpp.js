@@ -15,6 +15,7 @@ var _g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp =
     [ "SUPPORT_OutputProtocol_Renard", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html#a6566dcd940899ee7eafce954ae14e683", null ],
     [ "SUPPORT_OutputProtocol_Serial", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html#a8b387d3500431742534560dca1024387", null ],
     [ "SUPPORT_OutputProtocol_Servo_PCA9685", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html#a0aa30f0dcce5fa891cff33303c5481ff", null ],
+    [ "SUPPORT_OutputProtocol_TLS3001", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html#a52141ff03bfb24abc29ac1916a6a9b06", null ],
     [ "SUPPORT_OutputProtocol_TM1814", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html#a13852417ea1c6f73a1969b1108bf9963", null ],
     [ "SUPPORT_OutputProtocol_UCS1903", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html#a463bb7058b8a5724a1b0ac3a700edb45", null ],
     [ "SUPPORT_OutputProtocol_UCS8903", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o_8hpp.html#aea53898829210ed1fbac67d4aa855a6e", null ],
