@@ -166,7 +166,7 @@ $(function(){initNavTree('_output_t_l_s3001_rmt_fsm_8hpp_source.html',''); initR
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    fsm_RMT_state_SendSync() {}</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">virtual</span> ~fsm_RMT_state_SendSync() {}</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>            IRAM_ATTR <span class="keywordtype">void</span> Init();</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (uint32_t &amp;DataToSend);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (rmt_item32_t &amp;DataToSend);</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a> (String&amp; Name) { Name = <span class="stringliteral">&quot;TLS3001SYN&quot;</span>; }</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keyword">const</span> uint8_t CommandCode = 0b0001;</div>
@@ -179,7 +179,7 @@ $(function(){initNavTree('_output_t_l_s3001_rmt_fsm_8hpp_source.html',''); initR
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    fsm_RMT_state_SendReset() {}</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <span class="keyword">virtual</span> ~fsm_RMT_state_SendReset() {}</div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>            IRAM_ATTR <span class="keywordtype">void</span> Init();</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (uint32_t &amp;DataToSend);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (rmt_item32_t &amp;DataToSend);</div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a> (String&amp; Name) { Name = <span class="stringliteral">&quot;TLS3001RST&quot;</span>; }</div>
 <div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keyword">const</span> uint8_t CommandCode = 0b0100;</div>
@@ -192,7 +192,7 @@ $(function(){initNavTree('_output_t_l_s3001_rmt_fsm_8hpp_source.html',''); initR
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    fsm_RMT_state_SendDataStart() {}</div>
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keyword">virtual</span> ~fsm_RMT_state_SendDataStart() {}</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>            IRAM_ATTR <span class="keywordtype">void</span> Init();</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (uint32_t &amp;DataToSend);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (rmt_item32_t &amp;DataToSend);</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a> (String&amp; Name) { Name = <span class="stringliteral">&quot;TLS3001STR&quot;</span>; }</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keyword">const</span> uint8_t CommandCode = 0b0010;</div>
@@ -206,7 +206,7 @@ $(function(){initNavTree('_output_t_l_s3001_rmt_fsm_8hpp_source.html',''); initR
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    fsm_RMT_state_SendData() {}</div>
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    <span class="keyword">virtual</span> ~fsm_RMT_state_SendData() {}</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>            IRAM_ATTR <span class="keywordtype">void</span> Init();</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (uint32_t &amp;DataToSend);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (rmt_item32_t &amp;DataToSend);</div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_RefreshData ();</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a> (String&amp; Name) { Name = <span class="stringliteral">&quot;TLS3001DAT&quot;</span>; }</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="keyword">private</span>:</div>
@@ -223,7 +223,7 @@ $(function(){initNavTree('_output_t_l_s3001_rmt_fsm_8hpp_source.html',''); initR
 <div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>    fsm_RMT_state_SendDataIdle() {}</div>
 <div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>    <span class="keyword">virtual</span> ~fsm_RMT_state_SendDataIdle() {}</div>
 <div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>            IRAM_ATTR <span class="keywordtype">void</span> Init();</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (uint32_t &amp;DataToSend);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>            IRAM_ATTR <span class="keywordtype">bool</span> ISR_GetNextBitToSend (rmt_item32_t &amp;DataToSend);</div>
 <div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code hl_function" href="main_8cpp.html#a4d11f89c2bddb3507fe402ff80136079">GetDriverName</a> (String&amp; Name) { Name = <span class="stringliteral">&quot;TLS3001IDL&quot;</span>; }</div>
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="keyword">private</span>:</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>}; <span class="comment">// fsm_RMT_state_SendData</span></div>

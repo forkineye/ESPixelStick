@@ -1,8 +1,13 @@
 var searchData=
 [
-  ['take_0',['Take',['../classc___f_p_p_semaphore.html#aa26fb157d9e175038e036aec08511e25',1,'c_FPPSemaphore']]],
-  ['taskpoll_1',['TaskPoll',['../classc___output_mgr.html#a325b2eb8b6b86b602e2efb8f50297435',1,'c_OutputMgr']]],
-  ['terminateserialportoperation_2',['TerminateSerialPortOperation',['../classc___output_uart.html#a487c788f9eb54663920e6b764c59e322',1,'c_OutputUart']]],
-  ['testheap_3',['TestHeap',['../main_8cpp.html#a425a5b292b56daa3d1454e1a8db59933',1,'main.cpp']]],
-  ['timerpollhandler_4',['TimerPollHandler',['../_input_mgr_8cpp.html#acaee0a3ecdf748027dec320e1f7bb64e',1,'InputMgr.cpp']]]
+  ['uart_5fintr_5fhandler_0',['uart_intr_handler',['../_output_uart_8cpp.html#a60e02274aed3d64efd87e7d3ba044122',1,'OutputUart.cpp']]],
+  ['unlocksd_1',['UnLockSd',['../classc___file_mgr.html#a7a43a2cccd3db13e5a6678a2cc087096',1,'c_FileMgr']]],
+  ['updatecolororderoffsets_2',['updateColorOrderOffsets',['../classc___output_pixel.html#a9ba93bde21a6a41d53ad4b5773ad331b',1,'c_OutputPixel']]],
+  ['updatedisplaybufferreferences_3',['UpdateDisplayBufferReferences',['../classc___output_mgr.html#a2af1d94181e97f732be0b66be3b944dd',1,'c_OutputMgr']]],
+  ['updateeffectconfiguration_4',['UpdateEffectConfiguration',['../classc___input_m_q_t_t.html#aae66b8ba9f171ca8ef69547c127d2f1d',1,'c_InputMQTT']]],
+  ['updateelapsedplaytimems_5',['UpdateElapsedPlayTimeMS',['../classc___input_f_p_p_remote_play_file.html#a68edbb2d52a03e900860bc61203bae06',1,'c_InputFPPRemotePlayFile']]],
+  ['updateftp_6',['UpdateFtp',['../classc___file_mgr.html#ad973709189a6ae71111cf897307c7cf0',1,'c_FileMgr']]],
+  ['updategammatable_7',['updateGammaTable',['../classc___output_pixel.html#ae85f097b7467cb4aeb13a6dce4902127',1,'c_OutputPixel']]],
+  ['updateisinprogress_8',['UpdateIsInProgress',['../class_e_f_update.html#a85d676640a316f0129c5275e0514bbbc',1,'EFUpdate']]],
+  ['updatemdns_9',['UpdateMdns',['../classc___network_mgr.html#a4f2bed5aa8b01c9e0471116176e44f2a',1,'c_NetworkMgr']]]
 ];

@@ -101,6 +101,7 @@ var _const_names_8cpp =
     [ "CN_get", "_const_names_8cpp.html#ade9d0c31a16f76900a09357ed6287ad5", null ],
     [ "CN_gid", "_const_names_8cpp.html#a4822d8a5cac44cdcd5bf20e276e87ce4", null ],
     [ "CN_group_size", "_const_names_8cpp.html#afdf31579a1d01b3b40bd491f0af46dfc", null ],
+    [ "CN_groups", "_const_names_8cpp.html#a294f4cb72b2e9ab07e0f2a87396c0602", null ],
     [ "CN_GS8208", "_const_names_8cpp.html#a48710fcb893ec4046cf99ddd3efdf2ed", null ],
     [ "CN_hadisco", "_const_names_8cpp.html#a6fd9f261f2f918452e8e4ef73aa6f26f", null ],
     [ "CN_haprefix", "_const_names_8cpp.html#a35c08c234d9ebd3e92b0d0a555d9e251", null ],

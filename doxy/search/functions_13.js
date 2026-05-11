@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['validate_0',['Validate',['../classc___network_mgr.html#ac656f99b15313118a5f177adf20a819d',1,'c_NetworkMgr']]],
-  ['validate_1',['validate',['../classc___input_m_q_t_t.html#a61e1937ab6f2ed9541d09b60c38ea769',1,'c_InputMQTT::validate()'],['../classc___output_pixel.html#a66f72d19f572047c01268a95d8cadaf0',1,'c_OutputPixel::validate()']]],
-  ['validateconfig_2',['ValidateConfig',['../classc___wi_fi_driver.html#a68047ba7fd51387efcd7929d206d52b3',1,'c_WiFiDriver::ValidateConfig()'],['../classc___web_mgr.html#a02d3fef6b783f26270959e68c8a3c787',1,'c_WebMgr::ValidateConfig()']]],
-  ['validateconfig_3',['validateConfig',['../main_8cpp.html#aa83bf610d4f986357e0ea1274d087680',1,'main.cpp']]],
-  ['validateconfiguration_4',['validateConfiguration',['../classc___input_alexa.html#af1edb325efda96cd2f759f54864018ce',1,'c_InputAlexa::validateConfiguration()'],['../classc___input_artnet.html#ac6bd00a3f820560363715444d2c51acc',1,'c_InputArtnet::validateConfiguration()'],['../classc___input_e131.html#a15895b3f2f8627744022fe5466278491',1,'c_InputE131::validateConfiguration()'],['../classc___input_effect_engine.html#abcbf05e7ca16985fa97382121a08867b',1,'c_InputEffectEngine::validateConfiguration()'],['../classc___input_f_p_p_remote.html#a53758f81562b012890b568958891b58a',1,'c_InputFPPRemote::validateConfiguration()'],['../classc___input_m_q_t_t.html#a39f63bed60eec75c1d7ac5952b092a29',1,'c_InputMQTT::validateConfiguration()']]],
-  ['validategpio_5',['ValidateGpio',['../classc___output_common.html#a4f20044ab63e32ea09bb4140f9d1f933',1,'c_OutputCommon']]]
+  ['webserver_0',['webServer',['../_web_mgr_8cpp.html#af746297775839f25b039311b3bf9db74',1,'WebMgr.cpp']]],
+  ['write16_1',['write16',['../fseq_8h.html#a5d05476d4f29f4fbc1769c4b186d45d3',1,'fseq.h']]],
+  ['write32_2',['write32',['../fseq_8h.html#a3acd03a9c12a4b6126f59bbe3442f141',1,'fseq.h']]],
+  ['writechanneldata_3',['WriteChannelData',['../classc___output_common.html#a89a48db3e49b37b61b0049d4c411cded',1,'c_OutputCommon::WriteChannelData()'],['../classc___output_mgr.html#abe0292b6380f75279c4758c2b2e4e465',1,'c_OutputMgr::WriteChannelData()'],['../classc___output_pixel.html#a3d3b5e86a0a0ffeb89c2509922d870ed',1,'c_OutputPixel::WriteChannelData()']]],
+  ['writesdfile_4',['WriteSdFile',['../classc___file_mgr.html#ab054596c2a512d47606b4f074e3d4064',1,'c_FileMgr::WriteSdFile(const FileId &amp;FileHandle, byte *FileData, uint64_t NumBytesToWrite)'],['../classc___file_mgr.html#a4de33d72c3525339b0908b8f1746c7e2',1,'c_FileMgr::WriteSdFile(const FileId &amp;FileHandle, byte *FileData, uint64_t NumBytesToWrite, uint64_t StartingPosition)']]],
+  ['writesdfilebuf_5',['WriteSdFileBuf',['../classc___file_mgr.html#a8cad2e7ba6f55bc6789ea0ea1d5f572c',1,'c_FileMgr']]]
 ];
