@@ -43,10 +43,46 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput(bool State);
+    bool    ISR_GetNextBitToSend (rmt_item32_t &DataToSend);
+    void    StartNewDataFrame();
 
 private:
 
-    c_OutputRmt Rmt;
+// The adjustments compensate for rounding errors in the calculations
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t ( (TM1814_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0.0)
+#define TM1814_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t ( (TM1814_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 0.0)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t ( (TM1814_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) + 0.0)
+#define TM1814_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (TM1814_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
+#define TM1814_PIXEL_RMT_TICKS_IDLE          uint16_t ( (TM1814_PIXEL_NS_IDLE       / RMT_TickLengthNS) + 1.0)
+
+    rmt_item32_t    ZeroBit = {TM1814_PIXEL_RMT_TICKS_BIT_0_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_0_HIGH, 1};
+    rmt_item32_t    OneBit  = {TM1814_PIXEL_RMT_TICKS_BIT_1_LOW, 0, TM1814_PIXEL_RMT_TICKS_BIT_1_HIGH, 1};
+    rmt_item32_t    IfgBit;
+    uint32_t        IfgBitCount;
+    uint32_t        IfgBitCurrentCount;
+    uint32_t        DataPattern;
+    uint32_t        DataPatternMask;
+
+    // #define TM1814_RMT_DEBUG_COUNTERS
+    #ifdef TM1814_RMT_DEBUG_COUNTERS
+    #define INC_TM1814_RMT_DEBUG_COUNTERS(c) (++RmtDebugCounters.c)
+    struct
+    {
+        uint32_t GetNextBit = 0;
+        uint32_t FrameStarts = 0;
+        uint32_t FrameEnds = 0;
+        uint32_t BreakBits = 0;
+        uint32_t MabBits = 0;
+        uint32_t StartBits = 0;
+        uint32_t DataBits = 0;
+        uint32_t StopBits = 0;
+        uint32_t Underrun = 0;
+    } RmtDebugCounters;
+    #else
+    #define INC_TM1814_RMT_DEBUG_COUNTERS(c)
+    #endif // def TM1814_RMT_DEBUG_COUNTERS
+
+    c_OutputRmt     Rmt;
 
 }; // c_OutputTM1814Rmt
 

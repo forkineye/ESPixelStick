@@ -2,7 +2,7 @@
 * OutputGECERmt.cpp - GECE driver code for ESPixelStick RMT Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2025 Shelby Merrick
+* Copyright (c) 2015, 2026 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -21,26 +21,17 @@
 
 #include "output/OutputGECERmt.hpp"
 
-// The adjustments compensate for rounding errors in the calculations
-#define GECE_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t ( (GECE_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0.0)
-#define GECE_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t ( (GECE_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 0.0)
-#define GECE_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t ( (GECE_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 1.0)
-#define GECE_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (GECE_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
-#define GECE_PIXEL_RMT_TICKS_STOP          uint16_t ( (GECE_PIXEL_STOP_TIME_NS  / RMT_TickLengthNS) + 1.0)
-#define GECE_PIXEL_RMT_TICKS_START         uint16_t ( (GECE_PIXEL_START_TIME_NS  / RMT_TickLengthNS) + 1.0)
-
-static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensityToRmtDataStream[] =
+//----------------------------------------------------------------------------
+static bool IRAM_ATTR ISR_GetNextBitToSendBase (void * arg, rmt_item32_t & DataToSend)
 {
-    // {{.duration0,.level0,.duration1,.level1},Type},
+    return reinterpret_cast<c_OutputGECERmt*>(arg)->ISR_GetNextBitToSend(DataToSend);
+} // ISR_GetNextBitToSend
 
-    {{GECE_PIXEL_RMT_TICKS_BIT_0_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_0_HIGH, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID},
-    {{GECE_PIXEL_RMT_TICKS_BIT_1_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_1_HIGH, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID},
-    {{GECE_PIXEL_RMT_TICKS_START / 2, 0, GECE_PIXEL_RMT_TICKS_START / 2,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID},
-    {{GECE_PIXEL_RMT_TICKS_START / 2, 1, GECE_PIXEL_RMT_TICKS_START / 2,  1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
-    {{GECE_PIXEL_RMT_TICKS_STOP  / 2, 0, GECE_PIXEL_RMT_TICKS_STOP  / 2,  0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
-    {{GECE_PIXEL_RMT_TICKS_STOP,      0, GECE_PIXEL_RMT_TICKS_START,      1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOP_START_BIT_ID},
-    {{                             0, 0,                               0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
-}; // RmtBitDefinitions
+//----------------------------------------------------------------------------
+static void StartNewDataFrameBase(void * arg)
+{
+    return reinterpret_cast<c_OutputGECERmt*>(arg)->StartNewDataFrame();
+}
 
 //----------------------------------------------------------------------------
 c_OutputGECERmt::c_OutputGECERmt(OM_OutputPortDefinition_t & OutputPortDefinition,
@@ -90,13 +81,12 @@ bool c_OutputGECERmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
 
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputPortDefinition.PortId);
+    OutputRmtConfig.RmtChannelId            = uint32_t(OutputPortDefinition.PortId);
     OutputRmtConfig.DataPin                 = gpio_num_t(OutputPortDefinition.gpios.data);
     OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-    OutputRmtConfig.pPixelDataSource        = this;
-    OutputRmtConfig.IntensityDataWidth      = GECE_PACKET_SIZE;
-    OutputRmtConfig.SendInterIntensityBits  = true;
-    OutputRmtConfig.CitrdsArray             = ConvertIntensityToRmtDataStream;
+    OutputRmtConfig.arg                     = this;
+    OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
+    OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
 
     Rmt.Begin(OutputRmtConfig, this);
 
@@ -121,6 +111,19 @@ void c_OutputGECERmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputGECE::GetStatus (jsonStatus);
     Rmt.GetStatus (jsonStatus);
+
+    #ifdef GECE_RMT_DEBUG_COUNTERS
+    JsonObject JsonCounters = jsonStatus["JsonCounters"].to<JsonObject>();
+    JsonWrite(JsonCounters, "GetNextBit",  RmtDebugCounters.GetNextBit);
+    JsonWrite(JsonCounters, "FrameStarts", RmtDebugCounters.FrameStarts);
+    JsonWrite(JsonCounters, "FrameEnds",   RmtDebugCounters.FrameEnds);
+    JsonWrite(JsonCounters, "BreakBits",   RmtDebugCounters.BreakBits);
+    JsonWrite(JsonCounters, "MabBits",     RmtDebugCounters.MabBits);
+    JsonWrite(JsonCounters, "StartBits",   RmtDebugCounters.StartBits);
+    JsonWrite(JsonCounters, "DataBits",    RmtDebugCounters.DataBits);
+    JsonWrite(JsonCounters, "StopBits",    RmtDebugCounters.StopBits);
+    JsonWrite(JsonCounters, "Underrun",    RmtDebugCounters.Underrun);
+    #endif // def GECE_RMT_DEBUG_COUNTERS
 
 } // GetStatus
 
@@ -163,6 +166,66 @@ bool c_OutputGECERmt::RmtPoll ()
     return Response;
 
 } // Poll
+
+//----------------------------------------------------------------------------
+void c_OutputGECERmt::StartNewDataFrame()
+{
+    // DEBUG_START;
+    // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
+    INC_GECE_RMT_DEBUG_COUNTERS(FrameStarts);
+    StartBitCount = 1;
+    StartNewFrame();
+
+    // DEBUG_END;
+} // StartNewDataFrame
+
+//----------------------------------------------------------------------------
+bool IRAM_ATTR c_OutputGECERmt::ISR_GetNextBitToSend (rmt_item32_t & DataToSend)
+{
+    INC_GECE_RMT_DEBUG_COUNTERS(GetNextBit);
+    bool Response = true;
+    if(StartBitCount)
+    {
+        INC_GECE_RMT_DEBUG_COUNTERS(StartBits);
+        StartBitCount = 0;
+        DataToSend = StartBit;
+        // set up for the next data byte
+        c_OutputPixel::ISR_GetNextIntensityToSend(DataPattern);
+        StopBitCount = 1;
+        CurrentDataMask = 0x02000000;
+    }
+    else if(CurrentDataMask)
+    {
+        INC_GECE_RMT_DEBUG_COUNTERS(DataBits);
+        DataToSend = (DataPattern & CurrentDataMask) ? OneBit : ZeroBit ;
+        CurrentDataMask = CurrentDataMask >> 1;
+    }
+    else if(StopBitCount)
+    {
+        INC_GECE_RMT_DEBUG_COUNTERS(StopBits);
+        StopBitCount = 0;
+        DataToSend = StopBit;
+
+        if(c_OutputPixel::ISR_MoreDataToSend())
+        {
+            StartBitCount = 1;
+        }
+        else
+        {
+            INC_GECE_RMT_DEBUG_COUNTERS(FrameEnds);
+            Response = false;
+        }
+    }
+    else
+    {
+        INC_GECE_RMT_DEBUG_COUNTERS(Underrun);
+        // nothing to send
+        DataToSend.val = 0x0;
+        Response = false;
+    }
+
+    return Response;
+} // ISR_GetNextBitToSend
 
 //----------------------------------------------------------------------------
 void c_OutputGECERmt::PauseOutput (bool State)

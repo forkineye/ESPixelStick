@@ -49,7 +49,7 @@ oflag_t XlateFileMode[3] = { O_READ , O_WRITE | O_CREAT, O_WRITE | O_APPEND };
 FtpServer   ftpSrv;
 
 //-----------------------------------------------------------------------------
-void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned int totalSpace)
+void ftp_callback(FtpOperation ftpOperation, uint32_t freeSpace, uint32_t totalSpace)
 {
     FeedWDT();
     switch (ftpOperation)
@@ -84,7 +84,7 @@ void ftp_callback(FtpOperation ftpOperation, unsigned int freeSpace, unsigned in
 };
 
 //-----------------------------------------------------------------------------
-void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, unsigned int transferredSize)
+void ftp_transferCallback(FtpTransferOperation ftpOperation, const char* name, uint32_t transferredSize)
 {
     FeedWDT();
     switch (ftpOperation)

@@ -138,15 +138,15 @@ private:
     SemaphoreHandle_t  WaitFrameDone;
 #endif // defined(ARDUINO_ARCH_ESP32)
 
-    void     IRAM_ATTR      StartNewDataFrame();
+    void     IRAM_ATTR      ISR_StartNewDataFrame();
     void                    CalculateEnableUartInterruptFlags();
-    inline uint32_t IRAM_ATTR   getUartFifoLength();
-    inline bool     IRAM_ATTR   MoreDataToSend();
-    inline bool     IRAM_ATTR   GetNextIntensityToSend(uint32_t &DataToSend);
-    inline void     IRAM_ATTR   enqueueUartData(uint8_t value);
+    inline uint32_t IRAM_ATTR   ISR_getUartFifoLength();
+    inline bool     IRAM_ATTR   ISR_MoreDataToSend();
+    inline bool     IRAM_ATTR   ISR_GetNextIntensityToSend(uint32_t &DataToSend);
+    inline void     IRAM_ATTR   ISR_enqueueUartData(uint8_t value);
     inline void     IRAM_ATTR   EnableUartInterrupts();
-    inline void     IRAM_ATTR   ClearUartInterrupts();
-    inline void     IRAM_ATTR   DisableUartInterrupts();
+    inline void     IRAM_ATTR   ISR_ClearUartInterrupts();
+    inline void     IRAM_ATTR   ISR_DisableUartInterrupts();
 
 // #define USE_UART_DEBUG_COUNTERS
 #ifdef USE_UART_DEBUG_COUNTERS

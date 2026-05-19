@@ -34,7 +34,7 @@ protected:
 
     uint16_t  InterFrameGapInMicroSec = 300;
 
-    void SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize = 1, float BlockDelayUs = 0.0);
+    void SetFrameDurration (float IntensityBitTimeInUs, uint16_t BlockSize = 1, float BlockDelayUs = 0.0, uint OutBitsPerDataBit = 8);
 
 private:
 #define PIXEL_DEFAULT_INTENSITY_BYTES_PER_PIXEL 3
@@ -60,7 +60,7 @@ private:
     uint32_t      PixelPrependDataCurrentIndex = 0;
 
     uint32_t      PixelGroupSize              = 1;
-    uint32_t      PixelGroups                 = 1;
+    uint32_t      PixelGroups                 = 100;
 
     float       IntensityBitTimeInUs        = 0.0;
     uint32_t    BlockSize                   = 1;
@@ -102,18 +102,18 @@ private:
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     // functions used to implement pixel FSM
-    uint32_t IRAM_ATTR FramePrependData();
-    uint32_t IRAM_ATTR PixelPrependNulls();
-    uint32_t IRAM_ATTR PixelSendPrependIntensity();
+    uint32_t IRAM_ATTR ISR_FramePrependData();
+    uint32_t IRAM_ATTR ISR_PixelPrependNulls();
+    uint32_t IRAM_ATTR ISR_PixelSendPrependIntensity();
 #ifdef SUPPORT_OutputProtocol_GECE
-    uint32_t IRAM_ATTR PixelSendGECEIntensity();
+    uint32_t IRAM_ATTR ISR_PixelSendGECEIntensity();
 #endif // def SUPPORT_OutputProtocol_GECE
-    uint32_t IRAM_ATTR PixelSendIntensity();
-    uint32_t IRAM_ATTR PixelAppendNulls();
-    uint32_t IRAM_ATTR FrameAppendData();
-    uint32_t IRAM_ATTR FrameDone();
+    uint32_t IRAM_ATTR ISR_PixelSendIntensity();
+    uint32_t IRAM_ATTR ISR_PixelAppendNulls();
+    uint32_t IRAM_ATTR ISR_FrameAppendData();
+    uint32_t IRAM_ATTR ISR_FrameDone();
 
-    void IRAM_ATTR SetStartingSendPixelState();
+    void IRAM_ATTR ISR_SetStartingSendPixelState();
     uint32_t (c_OutputPixel::* FrameStateFuncPtr) ();
 
     typedef union ColorOffsets_s
@@ -145,7 +145,7 @@ private:
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
     inline uint32_t CalculateIntensityOffset(uint32_t ChannelId);
-    uint32_t IRAM_ATTR GetIntensityData();
+    uint32_t IRAM_ATTR ISR_GetIntensityData();
 
 public:
     c_OutputPixel (OM_OutputPortDefinition_t & OutputPortDefinition,
@@ -164,8 +164,8 @@ public:
     virtual  void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     inline   void         SetIntensityBitTimeInUS (float value) { IntensityBitTimeInUs = value; }
              void         SetIntensityDataWidth(uint32_t value);
-             void         StartNewFrame();
-    inline   bool IRAM_ATTR ISR_MoreDataToSend () {return (&c_OutputPixel::FrameDone != FrameStateFuncPtr);}
+    virtual  void         StartNewFrame();
+    inline   bool IRAM_ATTR ISR_MoreDataToSend () {return (&c_OutputPixel::ISR_FrameDone != FrameStateFuncPtr);}
              bool IRAM_ATTR ISR_GetNextIntensityToSend (uint32_t &DataToSend);
     void                  SetPixelCount(uint32_t value) {pixel_count = value;}
     uint32_t              GetPixelCount() {return pixel_count;}

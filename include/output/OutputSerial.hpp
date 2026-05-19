@@ -67,7 +67,6 @@ protected:
     /* DMX minimum timings per E1.11 */
     const uint32_t  DMX_BREAK_US     = uint32_t(((1.0 / float(BaudRate::BR_DMX)) * 23.0) * float(MicroSecondsInASecond));  // 23 bits = 92us
     const uint32_t  DMX_MAB_US       = uint32_t(((1.0 / float(BaudRate::BR_DMX)) *  3.0) * float(MicroSecondsInASecond));  //  3 bits = 12us
-    uint32_t InterFrameGapInMicroSec = DMX_BREAK_US + DMX_MAB_US;
 
 private:
 
@@ -101,6 +100,7 @@ private:
     const uint8_t FireGodNumMaxControllers = 4;
     const uint8_t FireGodNumChanPerController = 32;
 
+#define USE_SERIAL_DEBUG_COUNTERS
 #ifdef USE_SERIAL_DEBUG_COUNTERS
     uint32_t   IntensityBytesSent = 0;
     uint32_t   IntensityBytesSentLastFrame = 0;

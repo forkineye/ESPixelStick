@@ -47,6 +47,7 @@
 #include "output/OutputGS8208Rmt.hpp"
 #include "output/OutputUCS8903Uart.hpp"
 #include "output/OutputUCS8903Rmt.hpp"
+#include "output/OutputTLS3001Rmt.hpp"
 // needs to be last
 #include "output/OutputMgr.hpp"
 
@@ -162,7 +163,7 @@ c_OutputMgr::c_OutputMgr ()
     memset (pOutputBuffer, 0, GetBufferSize());
 
     uint32_t SizeOfProtocolEntry = uint32_t(&SupportedOutputProtocolList[1]) - uint32_t(&SupportedOutputProtocolList[0]);
-    OutputType_End = uint32_t(sizeof(SupportedOutputProtocolList)) / SizeOfProtocolEntry;
+    NumberOfOutputProtocols = uint32_t(sizeof(SupportedOutputProtocolList)) / SizeOfProtocolEntry;
 
     // find the highest numbered output
     for(auto & CurrentOutputPortDefinition : OM_OutputPortDefinitions)
@@ -260,7 +261,7 @@ void c_OutputMgr::Begin ()
         }
 
         // DEBUG_V("Dump SupportedOutputProtocolList");
-        // DEBUG_V(String("OutputType_End: ") + String(OutputType_End));
+        // DEBUG_V(String("NumberOfOutputProtocols: ") + String(NumberOfOutputProtocols));
         // for (auto x : SupportedOutputProtocolList)
         {
             // DEBUG_V(String("------------"));
@@ -955,6 +956,28 @@ void c_OutputMgr::InstantiateNewOutputChannel(DriverInfo_t & CurrentOutput, e_Ou
             }
             #endif // def SUPPORT_OutputProtocol_UCS8903
 
+            #ifdef SUPPORT_OutputProtocol_TLS3001
+            case e_OutputProtocolType::OutputProtocol_TLS3001:
+            {
+                // DEBUG_V ();
+                if (CurrentOutput.PortDefinition.PortType == OM_PortType_t::OM_SERIAL)
+                {
+                    // DEBUG_V (String((" Starting TLS3001 for port '")) + CurrentOutput.DriverId + "'. " + CN_stars);
+                    AllocatePort(CLASS_TYPE_NAME(c_OutputTLS3001), CurrentOutput, OutputProtocol_TLS3001);
+                    // DEBUG_V ();
+                    break;
+                }
+
+                if (!BuildingNewConfig)
+                {
+                    logcon(CN_stars + String(MN_07) + CN_TLS3001 + MN_08 + CurrentOutput.DriverId + "'. " + CN_stars);
+                }
+                AllocatePort(c_OutputDisabled, CurrentOutput, OutputProtocol_Disabled);
+                // DEBUG_V ();
+                break;
+            }
+            #endif // def SUPPORT_OutputProtocol_TLS3001
+
             default:
             {
                 // DEBUG_V (String((" Starting Disabled as default output for port '")) + CurrentOutput.DriverId + "'. " + CN_stars);
@@ -1125,15 +1148,12 @@ void c_OutputMgr::LoadConfig ()
 //-----------------------------------------------------------------------------
 bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
                                          OM_PortId_t PortId,
-                                         e_OutputProtocolType Type,
                                          JsonObject& ChanConfig)
 {
     // DEBUG_START;
     bool Response = false;
     // DEBUG_V ();
     // DEBUG_V(String("ChanId: ") + String(ChanId));
-    // DEBUG_V(String("  Type: ") + String(Type));
-
     // PrettyPrint(jsonConfig, "FindJsonChannelConfig");
 
     do // once
@@ -1148,7 +1168,6 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
 
         uint8_t TempVersion = !ConstConfig.CurrentConfigVersion;
         setFromJSON (TempVersion, OutputChannelMgrData, CN_cfgver);
-
         // DEBUG_V (String ("TempVersion: ") + String (TempVersion));
         // DEBUG_V (String ("CurrentConfigVersion: ") + String (ConstConfig.CurrentConfigVersion));
         // PrettyPrint (OutputChannelMgrData, "Output Config");
@@ -1178,13 +1197,16 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
         }
         // PrettyPrint(ChanConfig, "ProcessJson Channel Config");
 
+        int32_t type = -1;
+        setFromJSON(type, ChanConfig, CN_type);
         // do we need to go deeper into the config?
-        if(OutputType_End == Type)
+        if(-1 != type)
         {
             // DEBUG_V("only looking for the overall channel config");
             Response = true;
             break;
         }
+
         // go deeper and get the config for the specific channel type
         // PrettyPrint(ChanConfig, "ProcessJson Channel Config");
 
@@ -1193,7 +1215,7 @@ bool c_OutputMgr::FindJsonChannelConfig (JsonDocument& jsonConfig,
         // PrettyPrint (OutputChannelConfig, "Output Channel Config");
 
         // do we have a configuration for the channel type?
-        ChanConfig = OutputChannelConfig[String (Type)];
+        ChanConfig = OutputChannelConfig[String(type)];
         if (!ChanConfig)
         {
             // Not found
@@ -1233,7 +1255,7 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
         {
             DriverInfo_t & CurrentOutput = pOutputChannelDrivers[index];
             JsonObject OutputChannelConfig;
-            if(!FindJsonChannelConfig (jsonConfig, CurrentOutput.DriverId, e_OutputProtocolType(OutputType_End), OutputChannelConfig))
+            if(!FindJsonChannelConfig (jsonConfig, CurrentOutput.DriverId, OutputChannelConfig))
             {
                 // DEBUG_V(String("cant find config for port: ") + String(CurrentOutput.DriverId));
                 continue;
@@ -1243,14 +1265,15 @@ bool c_OutputMgr::ProcessJsonConfig (JsonDocument& jsonConfig)
             // PrettyPrint(OutputChannelConfig, "ProcessJson port Config");
 
             // set a default value for channel type
-            uint32_t OutputPortType = OutputType_End;
+            int OutputPortType = e_OutputProtocolType::OutputProtocol_Disabled;
             setFromJSON (OutputPortType, OutputChannelConfig, CN_type);
             // DEBUG_V ();
 
             // is it a valid / supported channel type
-            if (OutputPortType >= OutputType_End)
+            if (e_OutputProtocolType(OutputPortType) >= e_OutputProtocolType::OutputProtocol_Last)
             {
-                // DEBUG_V (String("OutputType_End: ") + String(OutputType_End));
+                // DEBUG_V (String("OutputProtocol_Last: ") + String(e_OutputProtocolType::OutputProtocol_Last));
+                // DEBUG_V (String("     OutputPortType: ") + String(OutputPortType));
                 // if not, flag an error and move on to the next channel
                 logcon(String(MN_19) + OutputPortType + MN_20 + CurrentOutput.DriverId + MN_03);
                 InstantiateNewOutputChannel(CurrentOutput, e_OutputProtocolType::OutputProtocol_Disabled);

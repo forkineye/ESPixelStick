@@ -116,6 +116,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
 
         // Try to listen to the broadcast port
         bool Failed = true;
+
         if (!udp.listen (FPP_DISCOVERY_PORT))
         {
             logcon (String (F ("FAILED to subscribed to discovery port messages")));
@@ -124,36 +125,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         {
             Failed = false;
             logcon (String (F ("FPPDiscovery subscribed to discovery messages on port:")) + String(FPP_DISCOVERY_PORT));
-        }
-
-        if (!udp.listen (NetworkMgr.GetlocalIP (), FPP_DISCOVERY_PORT))
-        {
-            logcon (String (F ("FAILED to subscribed to local messages")));
-        }
-        else
-        {
-            Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to local messages on ")) + NetworkMgr.GetlocalIP ().toString() + ":" + (FPP_DISCOVERY_PORT));
-        }
-
-        if (!udp.listen (ipBcast, FPP_DISCOVERY_PORT))
-        {
-            logcon (String (F ("FAILED to subscribed to broadcast messages")));
-        }
-        else
-        {
-            Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on ")) + ipBcast.toString() + ":" + (FPP_DISCOVERY_PORT));
-        }
-
-        if (!udp.listen (IPAddress(IPADDR_BROADCAST), FPP_DISCOVERY_PORT))
-        {
-            logcon (String (F ("FAILED to subscribed to broadcast messages")));
-        }
-        else
-        {
-            Failed = false;
-            logcon (String (F ("FPPDiscovery subscribed to broadcast messages on ")) + IPAddress(IPADDR_BROADCAST).toString() + ":" + (FPP_DISCOVERY_PORT));
+            sendPingPacket (IPAddress(IPADDR_BROADCAST));
         }
 
         if (!udp.listenMulticast (MulticastAddress, FPP_DISCOVERY_PORT))
@@ -164,6 +136,7 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
         {
             Failed = false;
             logcon (String (F ("FPPDiscovery subscribed to multicast messages on ")) + MulticastAddress.toString() + ":" + (FPP_DISCOVERY_PORT));
+            sendPingPacket (MulticastAddress);
         }
 
         // did at least one binding work?
@@ -178,10 +151,6 @@ void c_FPPDiscovery::NetworkStateChanged (bool NewNetworkState)
             // DEBUG_V("Process UDP packet");
             ProcessReceivedUdpPacket(packet);
         });
-
-        sendPingPacket (ipBcast);
-        sendPingPacket (MulticastAddress);
-        sendPingPacket (IPAddress(IPADDR_BROADCAST));
 
     } while (false);
 
@@ -417,12 +386,20 @@ void c_FPPDiscovery::ProcessReceivedUdpPacket (AsyncUDPPacket & UDPpacket)
                 {
                     // DEBUG_V (String (F ("FPP Ping discovery packet")));
                     // received a discover ping packet, need to send a ping out
-                    if (UDPpacket.isBroadcast () || UDPpacket.isMulticast ())
+                    if(UDPpacket.isMulticast ())
                     {
-                        // DEBUG_V ("Broadcast Ping Response");
-                        sendPingPacket (ipBcast);
+                        // DEBUG_V ("Multicast Ping Response");
                         sendPingPacket (MulticastAddress);
+                    }
+                    else if(UDPpacket.localIP() == IPAddress(IPADDR_BROADCAST))
+                    {
+                        // DEBUG_V ("IPADDR_BROADCAST Ping Response");
                         sendPingPacket (IPAddress(IPADDR_BROADCAST));
+                    }
+                    else if (UDPpacket.isBroadcast ())
+                    {
+                        // DEBUG_V ("Local Net Broadcast Ping Response");
+                        sendPingPacket (ipBcast);
                     }
                     else
                     {
@@ -621,7 +598,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     SafeStrncpy (packet.hardwareType, FPP_VARIANT_NAME.c_str(), sizeof(packet.hardwareType));
     packet.ranges[0] = 0;
 
-    // DEBUG_V(String("packet.version: '") + String(packet.version) + "'");
+    // DEBUG_V(String("     packet.version: '") + String(packet.version) + "'");
     // DEBUG_V(String("packet.versionMajor: ") + String(packet.versionMajor));
     // DEBUG_V(String("packet.versionMinor: ") + String(packet.versionMinor));
     // DEBUG_V ("Send Ping to " + destination.toString());
@@ -1139,7 +1116,7 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 
     JsonWrite(jsonResponse, CN_rssi, WiFi.RSSI ());
     JsonArray jsonResponseIpAddresses = jsonResponse[F ("IPS")].to<JsonArray> ();
-    jsonResponseIpAddresses.add(WiFi.localIP ().toString ());
+    jsonResponseIpAddresses.add(NetworkMgr.GetlocalIP ().toString ());
 
     // PrettyPrint(jsonResponse, "GetSysInfoJSON");
     // DEBUG_END;

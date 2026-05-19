@@ -250,6 +250,14 @@ void setup()
 #ifdef ARDUINO_ARCH_ESP8266
     // * ((volatile uint32_t*)0x60000900) &= ~(1); // Hardware WDT OFF
     ESP.wdtEnable (2000); // 2 seconds
+#elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    esp_task_wdt_config_t twdt_config =
+    {
+        .timeout_ms = 5000,
+        .idle_core_mask = (1 << CONFIG_FREERTOS_NUMBER_OF_CORES) - 1, // Monitor all cores
+        .trigger_panic = true // Trigger a panic and restart on timeout
+    };
+    esp_task_wdt_init(&twdt_config);
 #else
     esp_task_wdt_init (5, true);
 #endif

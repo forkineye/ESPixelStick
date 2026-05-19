@@ -75,7 +75,7 @@ const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =
 #define DEFAULT_ETH_MDIO_PIN           gpio_num_t::GPIO_NUM_18
 
 // Output Types
-// Not Finished - #define SUPPORT_OutputProtocol_TLS3001
+#define SUPPORT_OutputProtocol_TLS3001          // OM_SERIAL
 #define SUPPORT_OutputProtocol_APA102           // OM_SPI
 #define SUPPORT_OutputProtocol_DMX              // OM_SERIAL
 #define SUPPORT_OutputProtocol_GECE             // OM_SERIAL

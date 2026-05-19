@@ -786,7 +786,7 @@ function RequestConfigFile(FileName)
 {
     // console.debug("RequestConfigFile FileName: " + FileName);
     var url = "conf/" + FileName;
-    // console.info("RequestConfigFile: 'GET' URL: '" + url + "'");
+    // console.debug("RequestConfigFile: 'GET' URL: '" + url + "'");
 
     $.ajaxQueue(
     {
@@ -1434,6 +1434,53 @@ function ProcessInputConfig() {
 
 } // ProcessInputConfig
 
+function ProcessConfigElements(StartingElementId, channelConfig)
+{
+    // console.debug("ProcessConfigElements StartingElementId: " + StartingElementId);
+    // console.debug("Look for loadable children");
+    $(StartingElementId).find('.loadable').map(function ()
+    {
+        let ElementId = $(this).attr('id');
+        // console.debug("Found Element: " + ElementId);
+        let LoadName = ElementId + ".html";
+        // console.debug("LoadName: " + LoadName);
+        let LoadLocation = StartingElementId + " #" + ElementId;
+        // console.debug("LoadLocation: " + LoadLocation);
+        $(LoadLocation).load(LoadName, function()
+        {
+            ProcessConfigElements(LoadLocation, channelConfig);
+        });
+        return $(this).attr('id');
+    }).get();
+
+    // console.debug("Start Processing config elements for: " + StartingElementId);
+    $.each(channelConfig, function (name, value)
+    {
+        // console.debug("name: " + name + " value: " + value);
+        let SearchName = '#' + name;
+        // console.debug("SearchName: " + SearchName);
+
+        if($(StartingElementId).find(SearchName).length)
+        {
+            // console.debug("Found: " + SearchName);
+            let ElementPath = StartingElementId + " " + SearchName;
+            // console.debug("ElementPath: " + ElementPath);
+
+            $(ElementPath).attr("path", StartingElementId);
+            if ($(ElementPath).is(':checkbox'))
+            {
+                // console.debug("ElementPath: " + ElementPath + " is a checkbox");
+                $(ElementPath).prop('checked', value);
+            }
+            else
+            {
+                // console.debug("ElementPath: " + ElementPath + " is a number  / text field");
+                $(ElementPath).val(value);
+            }
+        }
+    });
+} // ProcessConfigElements
+
 function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     // console.debug("ProcessModeConfigurationData: Start");
     // console.debug("channelId: " + channelId);
@@ -1455,7 +1502,6 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
     ChannelTypeName = ChannelTypeName.replace(" ", "_");
     // console.debug("ChannelTypeName: " + ChannelTypeName);
 
-    let elementids = [];
     let modeControlName = '#' + ChannelType + 'mode' + channelId;
     // console.debug("modeControlName: " + modeControlName);
 
@@ -1468,20 +1514,7 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
         $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
     }
 
-    elementids = $(modeControlName + ' *[id]').filter(":input").map(function () {
-        return $(this).attr('id');
-    }).get();
-
-    elementids.forEach(function (elementid) {
-        let SelectedElement = modeControlName + ' #' + elementid;
-        // console.debug("SelectedElement: " + SelectedElement);
-        if ($(SelectedElement).is(':checkbox')) {
-            $(SelectedElement).prop('checked', channelConfig[elementid]);
-        }
-        else {
-            $(SelectedElement).val(channelConfig[elementid]);
-        }
-    });
+    ProcessConfigElements(modeControlName, channelConfig);
 
     // by default, do not show the ECB config data
     $('#ecb').addClass("hidden");
@@ -1536,7 +1569,7 @@ function ProcessReceivedJsonConfigMessage(JsonConfigData) {
     {
         // save the config for later use.
         Output_Config = JsonConfigData.output_config;
-        // console.debug("Got Output Config: " + JSON.stringify(Output_Config) );
+        // console.debug(JSON.stringify(Output_Config) );
         CreateOptionsFromConfig("output", Output_Config);
     }
 
@@ -1678,7 +1711,7 @@ function loadContentSync(url, targetElement, OptionListName, DisplayedChannelId)
         async: false,
         success: function(data)
         {
-            // console.info("Process Received Mode Config file.");
+            // console.debug("Process Received Mode Config file.");
             $(targetElement).html(data);
             if ("input" === OptionListName)
             {
@@ -2142,10 +2175,10 @@ function MonitorServerConnection()
     // console.debug("MonitorServerConnection");
     if(null === ServerTransactionTimer)
     {
-        // console.info("MonitorServerConnection: Expired");
-        // console.info("PreviousMonitorTransactionRequestInProgressId: " + PreviousMonitorTransactionRequestInProgressId);
-        // console.info("        MonitorTransactionRequestInProgressId: " + MonitorTransactionRequestInProgressId);
-        // console.info("            FailedToCompleteServerTransaction: " + FailedToCompleteServerTransaction);
+        // console.debug("MonitorServerConnection: Expired");
+        // console.debug("PreviousMonitorTransactionRequestInProgressId: " + PreviousMonitorTransactionRequestInProgressId);
+        // console.debug("        MonitorTransactionRequestInProgressId: " + MonitorTransactionRequestInProgressId);
+        // console.debug("            FailedToCompleteServerTransaction: " + FailedToCompleteServerTransaction);
 
         if(PreviousMonitorTransactionRequestInProgressId === MonitorTransactionRequestInProgressId)
         {

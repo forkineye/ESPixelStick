@@ -198,6 +198,10 @@ void inline ResetGpio(const gpio_num_t pinId)
         gpio_reset_pin(pinId);
         pinMode(pinId, INPUT);
     }
+    // else
+    // {
+    //     DEBUG_V("GPIO Is not a valid output");
+    // }
 }
 #endif
 

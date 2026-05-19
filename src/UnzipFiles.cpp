@@ -2,7 +2,7 @@
 * UnzipFiles.cpp - Output Management class
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2021, 2025 Shelby Merrick
+* Copyright (c) 2021, 2026 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -132,12 +132,21 @@ void UnzipFiles::ProcessZipFile(String & ArchiveFileName)
             {
                 String ArchiveSubFileName = String(szName);
                 String FinalFileName = String(szName);
+                // DEBUG_V(String("   ArchiveFileName: ") + ArchiveFileName);
+                // DEBUG_V(String("     FinalFileName: ") + FinalFileName);
+                // DEBUG_V(String("IsSpecialxLightsZipFile: ") + String(IsSpecialxLightsZipFile));
                 if(IsSpecialxLightsZipFile)
                 {
                     // DEBUG_V("Modifying File Name");
-                    FinalFileName = ArchiveFileName;
-                    FinalFileName.replace(".xlz", ".fseq");
+                    String Temp = ArchiveFileName;
+                    Temp.replace(".xlz", ".fseq");
+                    // DEBUG_V(String("              Temp: ") + Temp);
+                    if(FinalFileName.equals(Temp))
+                    {
+                        IsSpecialxLightsZipFile = false;
+                    }
                 }
+                // DEBUG_V(String("IsSpecialxLightsZipFile: ") + String(IsSpecialxLightsZipFile));
                 // DEBUG_V(String("ArchiveSubFileName: ") + ArchiveSubFileName);
                 // DEBUG_V(String("     FinalFileName: ") + FinalFileName);
 

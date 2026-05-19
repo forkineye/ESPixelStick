@@ -315,7 +315,7 @@ void c_WebMgr::init ()
                             // DEBUG_V(String("            MaxChunkLen: ") + String(MaxChunkLen));
                             // DEBUG_V(String("      GetBufferUsedSize: ") + String(OutputMgr.GetBufferUsedSize ()));
                             // DEBUG_V(String("                  index: ") + String(index));
-                            size_t NumBytesAvailableToSend = min(MaxChunkLen, (OutputMgr.GetBufferUsedSize () - index));
+                            size_t NumBytesAvailableToSend = min(MaxChunkLen, (size_t(OutputMgr.GetBufferUsedSize ()) - index));
                             // DEBUG_V(String("NumBytesAvailableToSend: ") + String(NumBytesAvailableToSend));
                             if(0 != NumBytesAvailableToSend)
                             {

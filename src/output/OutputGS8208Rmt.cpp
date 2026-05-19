@@ -22,23 +22,17 @@
 
 #include "output/OutputGS8208Rmt.hpp"
 
-// The adjustments compensate for rounding errors in the calculations
-#define GS8208_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t ( (GS8208_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0.0)
-#define GS8208_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t ( (GS8208_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 0.0)
-#define GS8208_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t ( (GS8208_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 1.0)
-#define GS8208_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (GS8208_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
-#define GS8208_PIXEL_RMT_TICKS_IDLE          uint16_t ( (GS8208_PIXEL_IDLE_TIME_NS  / RMT_TickLengthNS) + 1.0)
-
-static const c_OutputRmt::ConvertIntensityToRmtDataStreamEntry_t ConvertIntensityToRmtDataStream[] =
+//----------------------------------------------------------------------------
+static bool IRAM_ATTR ISR_GetNextBitToSendBase (void * arg, rmt_item32_t & DataToSend)
 {
-    // {{.duration0,.level0,.duration1,.level1},Type},
+    return reinterpret_cast<c_OutputGS8208Rmt*>(arg)->ISR_GetNextBitToSend(DataToSend);
+} // ISR_GetNextBitToSend
 
-    {{GS8208_PIXEL_RMT_TICKS_BIT_0_HIGH, 1, GS8208_PIXEL_RMT_TICKS_BIT_0_LOW, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID},
-    {{GS8208_PIXEL_RMT_TICKS_BIT_1_HIGH, 1, GS8208_PIXEL_RMT_TICKS_BIT_1_LOW, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID},
-    {{                                2, 0,                                2, 1}, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID},
-    {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_STOPBIT_ID},
-    {{                                0, 0,                                0, 0}, c_OutputRmt::RmtDataBitIdType_t::RMT_LIST_END},
-}; // ConvertIntensityToRmtDataStream
+//----------------------------------------------------------------------------
+static void StartNewDataFrameBase(void * arg)
+{
+    return reinterpret_cast<c_OutputGS8208Rmt*>(arg)->StartNewDataFrame();
+}
 
 //----------------------------------------------------------------------------
 c_OutputGS8208Rmt::c_OutputGS8208Rmt (OM_OutputPortDefinition_t & OutputPortDefinition,
@@ -85,29 +79,22 @@ bool c_OutputGS8208Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 
     bool response = c_OutputGS8208::SetConfig (jsonConfig);
 
-    uint32_t ifgNS = (InterFrameGapInMicroSec * NanoSecondsInAMicroSecond);
-    uint32_t ifgTicks = ifgNS / RMT_TickLengthNS;
-
     // Default is 100us * 3
-    rmt_item32_t BitValue;
-    // by default there are 6 rmt_item32_t instances replicated for the start of a frame.
-    // 6 instances times 2 time periods per instance = 12
-    BitValue.duration0 = ifgTicks / 12;
-    BitValue.level0 = 0;
-    BitValue.duration1 = ifgTicks / 12;
-    BitValue.level1 = 0;
+    Rmt.SetBitDuration(InterFrameGapInMicroSec * NanoSecondsInAMicroSecond, ifgBit, ifgBitCount);
+    ifgBit.level0 = 0;
+    ifgBit.level1 = 0;
 
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
 
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId     = rmt_channel_t(OutputPortDefinition.PortId);
-    OutputRmtConfig.DataPin          = gpio_num_t(OutputPortDefinition.gpios.data);
-    OutputRmtConfig.idle_level       = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
-    OutputRmtConfig.pPixelDataSource = this;
-    OutputRmtConfig.CitrdsArray      = ConvertIntensityToRmtDataStream;
+    OutputRmtConfig.RmtChannelId            = uint32_t(OutputPortDefinition.PortId);
+    OutputRmtConfig.DataPin                 = gpio_num_t(OutputPortDefinition.gpios.data);
+    OutputRmtConfig.idle_level              = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+    OutputRmtConfig.arg                     = this;
+    OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
+    OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
 
     Rmt.Begin(OutputRmtConfig, this);
-    Rmt.SetIntensity2Rmt (BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
 
     // DEBUG_END;
     return response;
@@ -130,6 +117,19 @@ void c_OutputGS8208Rmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 {
     c_OutputGS8208::GetStatus (jsonStatus);
     Rmt.GetStatus (jsonStatus);
+
+        #ifdef GS8208_RMT_DEBUG_COUNTERS
+    JsonObject JsonCounters = jsonStatus["JsonCounters"].to<JsonObject>();
+    JsonWrite(JsonCounters, "GetNextBit",  RmtDebugCounters.GetNextBit);
+    JsonWrite(JsonCounters, "FrameStarts", RmtDebugCounters.FrameStarts);
+    JsonWrite(JsonCounters, "FrameEnds",   RmtDebugCounters.FrameEnds);
+    JsonWrite(JsonCounters, "BreakBits",   RmtDebugCounters.BreakBits);
+    JsonWrite(JsonCounters, "MabBits",     RmtDebugCounters.MabBits);
+    JsonWrite(JsonCounters, "StartBits",   RmtDebugCounters.StartBits);
+    JsonWrite(JsonCounters, "DataBits",    RmtDebugCounters.DataBits);
+    JsonWrite(JsonCounters, "StopBits",    RmtDebugCounters.StopBits);
+    JsonWrite(JsonCounters, "Underrun",    RmtDebugCounters.Underrun);
+    #endif // def GS8208_RMT_DEBUG_COUNTERS
 
 } // GetStatus
 
@@ -172,6 +172,62 @@ bool c_OutputGS8208Rmt::RmtPoll ()
     return Response;
 
 } // Poll
+
+//----------------------------------------------------------------------------
+void c_OutputGS8208Rmt::StartNewDataFrame()
+{
+    // DEBUG_START;
+    // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
+    INC_GS8208_RMT_DEBUG_COUNTERS(FrameStarts);
+    ifgBitCurrentCount = ifgBitCount;
+    StartNewFrame();
+
+    // DEBUG_END;
+} // StartNewDataFrame
+
+//----------------------------------------------------------------------------
+bool IRAM_ATTR c_OutputGS8208Rmt::ISR_GetNextBitToSend (rmt_item32_t & DataToSend)
+{
+    INC_GS8208_RMT_DEBUG_COUNTERS(GetNextBit);
+    bool Response = true;
+    if(ifgBitCurrentCount)
+    {
+        INC_GS8208_RMT_DEBUG_COUNTERS(StartBits);
+        --ifgBitCurrentCount;
+        DataToSend = ifgBit;
+        // set up for the next data byte
+        c_OutputPixel::ISR_GetNextIntensityToSend(DataPattern);
+        DataPatternMask = 0x80;
+    }
+    else if(DataPatternMask)
+    {
+        INC_GS8208_RMT_DEBUG_COUNTERS(DataBits);
+        DataToSend = (DataPattern & DataPatternMask) ? OneBit : ZeroBit ;
+        DataPatternMask = DataPatternMask >> 1;
+        if(0 == DataPatternMask)
+        {
+            if(c_OutputPixel::ISR_MoreDataToSend())
+            {
+                c_OutputPixel::ISR_GetNextIntensityToSend(DataPattern);
+                DataPatternMask = 0x80;
+            }
+            else
+            {
+                INC_GS8208_RMT_DEBUG_COUNTERS(FrameEnds);
+                Response = false;
+            }
+        }
+    }
+    else
+    {
+        INC_GS8208_RMT_DEBUG_COUNTERS(Underrun);
+        // nothing to send
+        DataToSend.val = 0x0;
+        Response = false;
+    }
+
+    return Response;
+} // ISR_GetNextBitToSend
 
 //----------------------------------------------------------------------------
 void c_OutputGS8208Rmt::PauseOutput (bool State)

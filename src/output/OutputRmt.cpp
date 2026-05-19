@@ -19,7 +19,12 @@
 #include "ESPixelStick.h"
 #ifdef ARDUINO_ARCH_ESP32
 #include "output/OutputRmt.hpp"
-#include <driver/rmt.h>
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    #include <driver/rmt_tx.h>
+#else
+    #include <driver/rmt.h>
+#endif // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 
 // forward declaration for the isr handler
 static void IRAM_ATTR   rmt_intr_handler (void* param);
@@ -35,6 +40,8 @@ static TaskHandle_t SendFrameTaskHandle = NULL;
 static BaseType_t xHigherPriorityTaskWoken = pdTRUE;
 static uint32_t FrameCompletes = 0;
 static uint32_t FrameTimeouts = 0;
+static uint32_t SavedInterruptEnables = 0;
+static uint32_t SavedInterruptStatus = 0;
 
 //----------------------------------------------------------------------------
 void RMT_Task (void *arg)
@@ -83,12 +90,8 @@ c_OutputRmt::c_OutputRmt()
 {
     // DEBUG_START;
 
-    memset((void *)&Intensity2Rmt[0], 0x00, sizeof(Intensity2Rmt));
-    memset((void *)&SendBuffer[0],    0x00, sizeof(SendBuffer));
+    memset((void *)&SendBuffer[0], 0x00, sizeof(SendBuffer));
 
-#ifdef USE_RMT_DEBUG_COUNTERS
-    memset((void *)&BitTypeCounters[0], 0x00, sizeof(BitTypeCounters));
-#endif // def USE_RMT_DEBUG_COUNTERS
 
     // DEBUG_END;
 } // c_OutputRmt
@@ -103,7 +106,7 @@ c_OutputRmt::~c_OutputRmt ()
         String Reason = (F("Shutting down an RMT channel requires a reboot"));
         RequestReboot(Reason, 100000);
 
-        ResetRmtBlockPointers (); // Stop transmitter
+        ISR_ResetRmtBlockPointers (); // Stop transmitter
         DisableRmtInterrupts();
         ClearRmtInterrupts();
         yield();
@@ -130,6 +133,8 @@ static void IRAM_ATTR rmt_intr_handler (void* param)
         // read the current ISR flags
         bool HaveAnInterrupt = false;
         c_OutputRmt::isrTxFlags_t isrTxFlags;
+        // SavedInterruptEnables = RMT.int_ena.val;
+        // WSavedInterruptStatus  = RMT.int_raw.val;
         HaveAnInterrupt |= (0 != (isrTxFlags.End   = rmt_ll_get_tx_end_interrupt_status(&RMT)));
         HaveAnInterrupt |= (0 != (isrTxFlags.Err   = rmt_ll_get_tx_err_interrupt_status(&RMT)));
         HaveAnInterrupt |= (0 != (isrTxFlags.Thres = rmt_ll_get_tx_thres_interrupt_status(&RMT)));
@@ -169,36 +174,22 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         // save the new config
         OutputRmtConfig = config;
 
-        #if defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
-        if ((nullptr == OutputRmtConfig.pPixelDataSource) && (nullptr == OutputRmtConfig.pSerialDataSource))
-        #else
-        if (nullptr == OutputRmtConfig.pPixelDataSource)
-        #endif // defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
+        if (nullptr == OutputRmtConfig.ISR_GetNextIntensityBit ||
+            nullptr == OutputRmtConfig.StartNewDataFrame)
         {
             String Reason = (F("Invalid RMT configuration parameters. Rebooting"));
             RequestReboot(Reason, 10000);
             break;
         }
 
-        NumRmtSlotsPerIntensityValue = OutputRmtConfig.IntensityDataWidth + ((OutputRmtConfig.SendInterIntensityBits) ? 1 : 0);
-        if(OutputRmtConfig_t::DataDirection_t::MSB2LSB == OutputRmtConfig.DataDirection)
-        {
-            TxIntensityDataStartingMask = 1 << (OutputRmtConfig.IntensityDataWidth - 1);
-        }
-        else
-        {
-            TxIntensityDataStartingMask = 1;
-        }
         // DEBUG_V (String("          IntensityDataWidth: ") + String(OutputRmtConfig.IntensityDataWidth));
-        // DEBUG_V (String("NumRmtSlotsPerIntensityValue: ") + String (NumRmtSlotsPerIntensityValue));
-        // DEBUG_V(String("  TxIntensityDataStartingMask: 0x") + String(TxIntensityDataStartingMask, HEX));
         // DEBUG_V (String ("                    DataPin: ") + String (OutputRmtConfig.DataPin));
         // DEBUG_V (String ("               RmtChannelId: ") + String (OutputRmtConfig.RmtChannelId));
 
         // Configure RMT channel
-        rmt_config_t RmtConfig = RMT_DEFAULT_CONFIG_TX(OutputRmtConfig.DataPin, OutputRmtConfig.RmtChannelId);
+        rmt_config_t RmtConfig = RMT_DEFAULT_CONFIG_TX(OutputRmtConfig.DataPin, rmt_channel_t(OutputRmtConfig.RmtChannelId));
+        RmtConfig.channel = rmt_channel_t(OutputRmtConfig.RmtChannelId);
         RmtConfig.rmt_mode = rmt_mode_t::RMT_MODE_TX;
-        RmtConfig.channel = OutputRmtConfig.RmtChannelId;
         RmtConfig.gpio_num = OutputRmtConfig.DataPin;
         RmtConfig.clk_div = RMT_Clock_Divisor;
         RmtConfig.mem_block_num = rmt_reserve_memsize_t::RMT_MEM_64;
@@ -230,14 +221,10 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
         }
 
         // reset the internal and external pointers to the start of the mem block
-        ResetRmtBlockPointers ();
+        ISR_ResetRmtBlockPointers ();
 
         // DEBUG_V();
 
-        UpdateBitXlatTable(OutputRmtConfig.CitrdsArray);
-
-        // DEBUG_V (String ("                Intensity2Rmt[0]: 0x") + String (uint32_t (Intensity2Rmt[0].val), HEX));
-        // DEBUG_V (String ("                Intensity2Rmt[1]: 0x") + String (uint32_t (Intensity2Rmt[1].val), HEX));
         if(!SendFrameTaskHandle)
         {
             // DEBUG_V("Start SendFrameTask");
@@ -254,64 +241,6 @@ void c_OutputRmt::Begin (OutputRmtConfig_t config, c_OutputCommon * _pParent )
     // DEBUG_END;
 
 } // Begin
-
-//----------------------------------------------------------------------------
-void c_OutputRmt::UpdateBitXlatTable(const CitrdsArray_t * CitrdsArray)
-{
-    // DEBUG_START;
-
-    if (nullptr != OutputRmtConfig.CitrdsArray)
-    {
-        // DEBUG_V();
-        // this should be a vector.
-        const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = CitrdsArray;
-        while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
-        {
-            // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
-            SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
-            CurrentTranslation++;
-        }
-    }
-    else
-    {
-        logcon(String(CN_stars) + F(" ERROR: Missing pointer to RMT bit translation values (1) ") + CN_stars);
-    }
-    // DEBUG_END;
-} // UpdateBitXlatTable
-
-//----------------------------------------------------------------------------
-bool c_OutputRmt::ValidateBitXlatTable(const CitrdsArray_t * CitrdsArray)
-{
-    // DEBUG_START;
-    bool Response = false;
-    if (nullptr != OutputRmtConfig.CitrdsArray)
-    {
-        // DEBUG_V();
-        // this should be a vector.
-        const ConvertIntensityToRmtDataStreamEntry_t *CurrentTranslation = CitrdsArray;
-        while (CurrentTranslation->Id != RmtDataBitIdType_t::RMT_LIST_END)
-        {
-            // DEBUG_V(String("CurrentTranslation->Id: ") + String(uint32_t(CurrentTranslation->Id)));
-            SetIntensity2Rmt(CurrentTranslation->Translation, CurrentTranslation->Id);
-
-            if(Intensity2Rmt[CurrentTranslation->Id].val != CurrentTranslation->Translation.val)
-            {
-                logcon(String(CN_stars) + F("ERROR: incorrect bit translation deteced. Chan: ") + String(OutputRmtConfig.RmtChannelId) +
-                        F(" Slot: ") + String(CurrentTranslation->Id) +
-                        F(" Got: 0x") + String(Intensity2Rmt[CurrentTranslation->Id].val, HEX) +
-                        F(" Expected: 0x") + String(CurrentTranslation->Translation.val));
-            }
-
-            CurrentTranslation++;
-        }
-    }
-    else
-    {
-        logcon(String(CN_stars) + F("ERROR: Missing pointer to RMT bit translation values (2)") + CN_stars);
-    }
-    // DEBUG_END;
-    return Response;
-} // ValidateBitXlatTable
 
 //----------------------------------------------------------------------------
 void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
@@ -332,6 +261,9 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["conf0"]                        = "0x" + String(RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf0.val, HEX);
     debugStatus["conf1"]                        = "0x" + String(RMT.conf_ch[OutputRmtConfig.RmtChannelId].conf1.val, HEX);
     debugStatus["tx_lim_ch"]                    = String(RMT.tx_lim_ch[OutputRmtConfig.RmtChannelId].limit);
+    debugStatus["int_ena"]                      = "0x" + String(SavedInterruptEnables, HEX);
+    debugStatus["int_st"]                       = "0x" + String(SavedInterruptStatus, HEX);
+
     #endif // def CONFIG_IDF_TARGET_ESP32S3
 
     debugStatus["ErrorIsr"]                     = ErrorIsr;
@@ -347,11 +279,6 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["IntTxEndIsrCounter"]           = IntTxEndIsrCounter;
     debugStatus["IntTxThrIsrCounter"]           = IntTxThrIsrCounter;
     debugStatus["ISRcounter"]                   = ISRcounter;
-    debugStatus["NumIdleBits"]                  = OutputRmtConfig.NumIdleBits;
-    debugStatus["NumFrameStartBits"]            = OutputRmtConfig.NumFrameStartBits;
-    debugStatus["NumFrameStopBits"]             = OutputRmtConfig.NumFrameStopBits;
-    debugStatus["NumRmtSlotsPerIntensityValue"] = NumRmtSlotsPerIntensityValue;
-    debugStatus["OneBitValue"]                  = "0x" + String (Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID].val,  HEX);
     debugStatus["RanOutOfData"]                 = RanOutOfData;
     debugStatus["RawIsrCounter"]                = RawIsrCounter;
     debugStatus["RMT_INT_BIT"]                  = "0x" + String (RMT_INT_BIT, HEX);
@@ -360,20 +287,9 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     debugStatus["RmtXmtFills"]                  = RmtXmtFills;
     debugStatus["RxIsr"]                        = RxIsr;
     debugStatus["SendBlockIsrCounter"]          = SendBlockIsrCounter;
-    debugStatus["SendInterIntensityBits"]       = OutputRmtConfig.SendInterIntensityBits;
-    debugStatus["SendEndOfFrameBits"]           = OutputRmtConfig.SendEndOfFrameBits;
     debugStatus["UnknownISRcounter"]            = UnknownISRcounter;
-    debugStatus["ZeroBitValue"]                 = "0x" + String (Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID].val, HEX);
 
 #ifdef IncludeBufferData
-    {
-        uint32_t index = 0;
-        for (auto CurrentCounter : BitTypeCounters)
-        {
-            break;
-            debugStatus[String("RMT TYPE used Counter ") + String(index++)] = String(CurrentCounter);
-        }
-    }
     {
         uint32_t index = 0;
         uint32_t * CurrentPointer = (uint32_t*)const_cast<rmt_item32_t*>(&SendBuffer[0]);
@@ -400,87 +316,55 @@ void c_OutputRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
+void c_OutputRmt::SetBitDuration (double BitLenNs, rmt_item32_t & OutputBit, uint32_t & OutputNumBits)
+{
+    // DEBUG_START;
+
+    double NumBitTicks        = BitLenNs / RMT_TickLengthNS;
+    double MaxTicksPerBitHalf = 0b111111111111111;
+    double MaxTicksPerBit     = MaxTicksPerBitHalf * 2;
+           OutputNumBits      = ceil(NumBitTicks / MaxTicksPerBit);
+    if(0 == OutputNumBits) {OutputNumBits = 1;}
+    uint   NumTicksPerbit     = (NumBitTicks / OutputNumBits);
+
+    OutputBit.duration0       = uint(NumTicksPerbit / 2);
+    // OutputBit.level0          = 0;
+    OutputBit.duration1       = OutputBit.duration0;
+    // OutputBit.level1          = 0;
+
+    // DEBUG_V(String("            BitLenNs: ") + String(BitLenNs));
+    // DEBUG_V(String("         NumBitTicks: ") + String(NumBitTicks));
+    // DEBUG_V(String("  MaxTicksPerBitHalf: ") + String(MaxTicksPerBitHalf));
+    // DEBUG_V(String("      MaxTicksPerBit: ") + String(MaxTicksPerBit));
+    // DEBUG_V(String("       OutputNumBits: ") + String(OutputNumBits));
+    // DEBUG_V(String("      NumTicksPerbit: ") + String(NumTicksPerbit));
+    // DEBUG_V(String(" OutputBit.duration0: ") + String(OutputBit.duration0));
+    // DEBUG_V(String(" OutputBit.duration1: ") + String(OutputBit.duration1));
+    // DEBUG_V(String("     OutputBit.Total: ") + String(OutputBit.duration0 + OutputBit.duration1));
+
+    // DEBUG_END;
+} // SetBitDuration
+
+//----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_CreateIntensityData ()
 {
     /// DEBUG_START;
+    // Serial.print('I');
 
-    register uint32_t OneBitValue  = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID].val;
-    register uint32_t ZeroBitValue = Intensity2Rmt[RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID].val;
-
-    uint32_t IntensityValue; // = 0;
     uint32_t NumAvailableBufferSlotsToFill = NumSendBufferSlots - NumUsedEntriesInSendBuffer;
-    while ((NumAvailableBufferSlotsToFill > NumRmtSlotsPerIntensityValue) && ThereIsDataToSend)
+    // Serial.print(String(NumAvailableBufferSlotsToFill));
+    while(ThereIsDataToSend && NumAvailableBufferSlotsToFill)
     {
-        ThereIsDataToSend = ISR_GetNextIntensityToSend(IntensityValue);
-        RMT_DEBUG_COUNTER(IntensityValuesSent++);
-#ifdef USE_RMT_DEBUG_COUNTERS
-        if(200 < IntensityValue)
-        {
-            ++RmtWhiteDetected;
-        }
-#endif // def USE_RMT_DEBUG_COUNTERS
-
-        // convert the intensity data into RMT slot data
-        uint32_t bitmask = TxIntensityDataStartingMask;
-        for (uint32_t BitCount = OutputRmtConfig.IntensityDataWidth; 0 < BitCount; --BitCount)
-        {
-            RMT_DEBUG_COUNTER(IntensityBitsSent++);
-            ISR_WriteToBuffer((IntensityValue & bitmask) ? OneBitValue : ZeroBitValue);
-            if(OutputRmtConfig_t::DataDirection_t::MSB2LSB == OutputRmtConfig.DataDirection)
-            {
-                bitmask >>= 1;
-            }
-            else
-            {
-                bitmask <<= 1;
-            }
-#ifdef USE_RMT_DEBUG_COUNTERS
-            if (IntensityValue & bitmask)
-            {
-                BitTypeCounters[int(RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID)]++;
-            }
-            else
-            {
-                BitTypeCounters[int(RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID)]++;
-            }
-#endif // def USE_RMT_DEBUG_COUNTERS
-        } // end send one intensity value
-
-        if (OutputRmtConfig.SendEndOfFrameBits && !ThereIsDataToSend)
-        {
-            ISR_WriteToBuffer(Intensity2Rmt[RmtDataBitIdType_t::RMT_END_OF_FRAME].val);
-            RMT_DEBUG_COUNTER(BitTypeCounters[int(RmtDataBitIdType_t::RMT_END_OF_FRAME)]++);
-        }
-        else if (OutputRmtConfig.SendInterIntensityBits)
-        {
-            ISR_WriteToBuffer(Intensity2Rmt[RmtDataBitIdType_t::RMT_STOP_START_BIT_ID].val);
-            RMT_DEBUG_COUNTER(BitTypeCounters[int(RmtDataBitIdType_t::RMT_STOP_START_BIT_ID)]++);
-        }
-
-        // recalc how much space is still in the buffer.
-        NumAvailableBufferSlotsToFill = (NumSendBufferSlots - 1) - NumUsedEntriesInSendBuffer;
-    } // end while there is space in the buffer
+        // Serial.print('K');
+        --NumAvailableBufferSlotsToFill;
+        rmt_item32_t Data;
+        ThereIsDataToSend = OutputRmtConfig.ISR_GetNextIntensityBit(OutputRmtConfig.arg, Data);
+        ISR_WriteToBuffer(Data.val);
+    };
 
     ///DEBUG_END;
 
-} // ISR_Handler_SendIntensityData
-
-//----------------------------------------------------------------------------
-inline bool IRAM_ATTR c_OutputRmt::ISR_GetNextIntensityToSend(uint32_t &DataToSend)
-{
-    if (nullptr != OutputRmtConfig.pPixelDataSource)
-    {
-        return OutputRmtConfig.pPixelDataSource->ISR_GetNextIntensityToSend(DataToSend);
-    }
-	#if defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
-    else
-    {
-        return OutputRmtConfig.pSerialDataSource->ISR_GetNextIntensityToSend(DataToSend);
-    }
-	#else
-    return false;
-	#endif // defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
-} // GetNextIntensityToSend
+} // ISR_CreateIntensityData
 
 //----------------------------------------------------------------------------
 void IRAM_ATTR c_OutputRmt::ISR_Handler (isrTxFlags_t isrTxFlags)
@@ -537,7 +421,6 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (isrTxFlags_t isrTxFlags)
 
                 // tell the background task to start the next output
                 vTaskNotifyGiveFromISR( SendFrameTaskHandle, &xHigherPriorityTaskWoken );
-                // portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
             }
         }
         // else ignore the interrupt and let the transmitter stall when it runs out of data
@@ -557,29 +440,19 @@ void IRAM_ATTR c_OutputRmt::ISR_Handler (isrTxFlags_t isrTxFlags)
 } // ISR_Handler
 
 //----------------------------------------------------------------------------
-inline bool IRAM_ATTR c_OutputRmt::ISR_MoreDataToSend()
+inline void IRAM_ATTR c_OutputRmt::ISR_ResetRmtBlockPointers()
 {
-	#if defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
-    if (nullptr != OutputRmtConfig.pPixelDataSource)
-    {
-        return OutputRmtConfig.pPixelDataSource->ISR_MoreDataToSend();
-    }
-    else
-    {
-        return OutputRmtConfig.pSerialDataSource->ISR_MoreDataToSend();
-    }
-	#else
-    return OutputRmtConfig.pPixelDataSource->ISR_MoreDataToSend();
-	#endif // defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
-}
-
-//----------------------------------------------------------------------------
-inline void IRAM_ATTR c_OutputRmt::ResetRmtBlockPointers()
-{
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    rmt_enable(&RMT, OutputRmtConfig.RmtChannelId);
+    rmt_ll_rx_set_mem_owner(&RMT, OutputRmtConfig.RmtChannelId, rmt_ll_mem_owner_t::RMT_LL_MEM_OWNER_SW);
+    rmt_ll_tx_reset_pointer(&RMT, OutputRmtConfig.RmtChannelId);
+    rmt_ll_enable_mem_access(&RMT, RMT_DATA_MODE_MEM);
+#else
     rmt_ll_tx_stop(&RMT, OutputRmtConfig.RmtChannelId);
     rmt_ll_rx_set_mem_owner(&RMT, OutputRmtConfig.RmtChannelId,RMT_MEM_OWNER_TX);
     rmt_ll_tx_reset_pointer(&RMT, OutputRmtConfig.RmtChannelId);
     rmt_ll_enable_mem_access(&RMT, RMT_DATA_MODE_MEM);
+#endif // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 
     memset((void*)&RMTMEM.chan[OutputRmtConfig.RmtChannelId].data32[0], 0x0, sizeof(RMTMEM.chan[0].data32));
 
@@ -592,16 +465,7 @@ inline void IRAM_ATTR c_OutputRmt::ResetRmtBlockPointers()
 //----------------------------------------------------------------------------
 inline void c_OutputRmt::StartNewDataFrame()
 {
-    if (nullptr != OutputRmtConfig.pPixelDataSource)
-    {
-        OutputRmtConfig.pPixelDataSource->StartNewFrame();
-    }
-	#if defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
-    else
-    {
-        OutputRmtConfig.pSerialDataSource->StartNewFrame();
-    }
-	#endif // defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
+    OutputRmtConfig.StartNewDataFrame(OutputRmtConfig.arg);
 } // StartNewDataFrame
 
 //----------------------------------------------------------------------------
@@ -632,7 +496,7 @@ void IRAM_ATTR c_OutputRmt::ISR_TransferIntensityDataToRMT (uint32_t MaxNumEntri
 
     ///DEBUG_END;
 
-} // ISR_Handler_TransferBufferToRMT
+} // ISR_TransferIntensityDataToRMT
 
 //----------------------------------------------------------------------------
 inline void IRAM_ATTR c_OutputRmt::ISR_WriteToBuffer(uint32_t value)
@@ -670,7 +534,7 @@ void c_OutputRmt::PauseOutput(bool PauseOutput)
 //----------------------------------------------------------------------------
 bool c_OutputRmt::StartNewFrame ()
 {
-    /// DEBUG_START;
+    // DEBUG_START;
 
     bool Response = false;
 
@@ -681,7 +545,7 @@ bool c_OutputRmt::StartNewFrame ()
             // DEBUG_V("Paused");
             // Stop the transmitter
             DisableRmtInterrupts ();
-            ResetRmtBlockPointers ();
+            ISR_ResetRmtBlockPointers ();
             break;
         }
 
@@ -692,24 +556,7 @@ bool c_OutputRmt::StartNewFrame ()
 
 		// Stop the transmitter
         DisableRmtInterrupts ();
-        ResetRmtBlockPointers ();
-
-        ///DEBUG_V(String("NumIdleBits: ") + String(OutputRmtConfig.NumIdleBits));
-        uint32_t NumInterFrameRmtSlotsCount = 0;
-        while (NumInterFrameRmtSlotsCount < OutputRmtConfig.NumIdleBits)
-        {
-            ISR_WriteToBuffer (Intensity2Rmt[RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID].val);
-            ++NumInterFrameRmtSlotsCount;
-            RMT_DEBUG_COUNTER(BitTypeCounters[int(RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID)]++);
-        }
-
-        ///DEBUG_V(String("NumFrameStartBits: ") + String(OutputRmtConfig.NumFrameStartBits));
-        uint32_t NumFrameStartRmtSlotsCount = 0;
-        while (NumFrameStartRmtSlotsCount++ < OutputRmtConfig.NumFrameStartBits)
-        {
-            ISR_WriteToBuffer (Intensity2Rmt[RmtDataBitIdType_t::RMT_STARTBIT_ID].val);
-            RMT_DEBUG_COUNTER(BitTypeCounters[int(RmtDataBitIdType_t::RMT_STARTBIT_ID)]++);
-        }
+        ISR_ResetRmtBlockPointers ();
 
         #ifdef USE_RMT_DEBUG_COUNTERS
         FrameStartCounter++;
@@ -719,11 +566,11 @@ bool c_OutputRmt::StartNewFrame ()
         IntensityBitsSent            = 0;
         #endif // def USE_RMT_DEBUG_COUNTERS
 
-        // set up to send a new frame
-        StartNewDataFrame ();
+        ThereIsDataToSend = true;
         // DEBUG_V();
 
-        ThereIsDataToSend = ISR_MoreDataToSend();
+        // set up to send a new frame
+        StartNewDataFrame ();
         // DEBUG_V();
 
         // this fills the send buffer
@@ -760,7 +607,7 @@ bool c_OutputRmt::StartNewFrame ()
         Response = true;
     } while(false);
 
-    ///DEBUG_END;
+    // DEBUG_END;
     return Response;
 
 } // StartNewFrame

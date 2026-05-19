@@ -22,13 +22,24 @@
 #include "output/OutputSerialRmt.hpp"
 
 //----------------------------------------------------------------------------
+static bool IRAM_ATTR ISR_GetNextBitToSendBase (void * arg, rmt_item32_t & DataToSend)
+{
+    return reinterpret_cast<c_OutputSerialRmt*>(arg)->ISR_GetNextBitToSend(DataToSend);
+} // ISR_GetNextBitToSend
+
+//----------------------------------------------------------------------------
+static void StartNewDataFrameBase(void * arg)
+{
+    return reinterpret_cast<c_OutputSerialRmt*>(arg)->StartNewDataFrame();
+}
+
+//----------------------------------------------------------------------------
 c_OutputSerialRmt::c_OutputSerialRmt (OM_OutputPortDefinition_t & OutputPortDefinition,
     c_OutputMgr::e_OutputProtocolType outputType) :
     c_OutputSerial (OutputPortDefinition, outputType)
 {
     // DEBUG_START;
 
-    idle_level = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
     // DEBUG_END;
 
 } // c_OutputSerialRmt
@@ -61,25 +72,15 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    #if defined(SUPPORT_OutputProtocol_FireGod)
-    if (OutputType == c_OutputMgr::e_OutputProtocolType::OutputProtocol_FireGod)
-    {
-        idle_level = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
-    }
-    #endif // defined(SUPPORT_OutputProtocol_FireGod)
-
     bool response = c_OutputSerial::SetConfig (jsonConfig);
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
     c_OutputRmt::OutputRmtConfig_t OutputRmtConfig;
-    OutputRmtConfig.RmtChannelId            = rmt_channel_t(OutputPortDefinition.DeviceId);
+    OutputRmtConfig.RmtChannelId            = uint32_t(OutputPortDefinition.DeviceId);
     OutputRmtConfig.DataPin                 = gpio_num_t(OutputPortDefinition.gpios.data);
     OutputRmtConfig.idle_level              = idle_level;
-    OutputRmtConfig.pSerialDataSource       = this;
-    OutputRmtConfig.SendInterIntensityBits  = true;
-    OutputRmtConfig.SendEndOfFrameBits      = true;
-    OutputRmtConfig.NumFrameStartBits       = 1;
-    OutputRmtConfig.NumIdleBits             = 1;
-    OutputRmtConfig.DataDirection           = c_OutputRmt::OutputRmtConfig_t::DataDirection_t::LSB2MSB;
+    OutputRmtConfig.arg                     = this;
+    OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
+    OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
 
     Rmt.Begin(OutputRmtConfig, this);
     SetUpRmtBitTimes();
@@ -92,107 +93,66 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 //----------------------------------------------------------------------------
 void c_OutputSerialRmt::SetUpRmtBitTimes()
 {
-    rmt_item32_t BitValue;
+    // DEBUG_START;
 
     float BitTimeNS = (1.0 / float(CurrentBaudrate)) * NanoSecondsInASecond;
-    uint32_t OneBitTimeInRmtTicks = uint32_t(BitTimeNS / RMT_TickLengthNS) + 1;
     // DEBUG_V(String(" CurrentBaudrate: ") + String(CurrentBaudrate));
     // DEBUG_V(String("       BitTimeNS: ") + String(BitTimeNS));
+
+    // DEBUG_V(String("BitTimeNS: ") + String(BitTimeNS));
     // DEBUG_V(String("RMT_TickLengthNS: ") + String(RMT_TickLengthNS));
-    // DEBUG_V(String(" BitTimeRmtTicks: ") + String(OneBitTimeInRmtTicks));
 
-    BitValue.duration0 = OneBitTimeInRmtTicks;
-    BitValue.level0 = 1;
-    BitValue.duration1 = OneBitTimeInRmtTicks;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
+    uint32_t BitCount = 0;
 
-    BitValue.duration0 = OneBitTimeInRmtTicks / 2;
-    BitValue.level0 = 0;
-    BitValue.duration1 = OneBitTimeInRmtTicks / 2;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STARTBIT_ID);
+    // one start bit
+    Rmt.SetBitDuration(BitTimeNS, StartBit, BitCount);
+    StartBit.level0 = 0;
+    StartBit.level1 = 0;
+    // DEBUG_V(String("StartBit: ") + String(StartBit.duration0 * 2) + " ticks");
 
-    // ISR will process two bits at a time. This updates the bit durration based on baudrate
-    BitValue.duration0 = OneBitTimeInRmtTicks / 2;
-    BitValue.level0 = 0;
-    BitValue.duration1 = OneBitTimeInRmtTicks / 2;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ZERO_ID);
+    // 00
+    Rmt.SetBitDuration(BitTimeNS * 2, DataBitArray[0], BitCount);
+    DataBitArray[0].level0 = 0;
+    DataBitArray[0].level1 = 0;
+    // DEBUG_V(String("DataBitArray[0]: ") + String(DataBitArray[0].duration0 * 2) + " ticks");
 
-    BitValue.duration0 = OneBitTimeInRmtTicks / 2;
-    BitValue.level0 = 1;
-    BitValue.duration1 = OneBitTimeInRmtTicks / 2;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_ONE_ID);
+    // 01
+    Rmt.SetBitDuration(BitTimeNS * 2, DataBitArray[1], BitCount);
+    DataBitArray[1].level0 = 1;
+    DataBitArray[1].level1 = 0;
+    // DEBUG_V(String("DataBitArray[1]: ") + String(DataBitArray[1].duration0 * 2) + " ticks");
 
-    BitValue.duration0 = OneBitTimeInRmtTicks;
-    BitValue.level0 = 1;
-    BitValue.duration1 = OneBitTimeInRmtTicks;
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_TWO_ID);
+    // 10
+    Rmt.SetBitDuration(BitTimeNS * 2, DataBitArray[2], BitCount);
+    DataBitArray[2].level0 = 0;
+    DataBitArray[2].level1 = 1;
+    // DEBUG_V(String("DataBitArray[2]: ") + String(DataBitArray[2].duration0 * 2) + " ticks");
 
-    BitValue.duration0 = OneBitTimeInRmtTicks;
-    BitValue.level0 = 1;
-    BitValue.duration1 = OneBitTimeInRmtTicks;
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_DATA_BIT_THREE_ID);
+    // 11
+    Rmt.SetBitDuration(BitTimeNS * 2, DataBitArray[3], BitCount);
+    DataBitArray[3].level0 = 1;
+    DataBitArray[3].level1 = 1;
+    // DEBUG_V(String("DataBitArray[3]: ") + String(DataBitArray[3].duration0 * 2) + " ticks");
 
-    BitValue.duration0 = OneBitTimeInRmtTicks * 2; // Two stop bits
-    BitValue.level0 = 1;
-    BitValue.duration1 = OneBitTimeInRmtTicks;     // one start bit
-    BitValue.level1 = 0;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_STOP_START_BIT_ID);
+    // two stop bits
+    Rmt.SetBitDuration(BitTimeNS * 2, StopBit, BitCount);
+    StopBit.level0 = 1;
+    StopBit.level1 = 1;
+    // DEBUG_V(String("StopBit: ") + String(StopBit.duration0 * 2) + " ticks");
 
-    // max number of bits per 25ms frame
-    float NanoSecsPerFrame = 25.0 * NanoSecondsInAMilliSecond;
-    float MaxBitsPerFrame = float(NanoSecsPerFrame / BitTimeNS);
-    // number of bits used in frame
-    float NumBitsUsedInFrame = OutputBufferSize * (1.0 + 8.0 + 2.0);
-    // number of unused frame bits
-    float NumUnusedBitsInFrame = MaxBitsPerFrame - NumBitsUsedInFrame;
+    // Break bits
+    Rmt.SetBitDuration((DMX_BREAK_US * NanoSecondsInAMicroSecond), BreakBit, BitCount);
+    BreakBit.level0 = 0;
+    BreakBit.level1 = 0;
+    // DEBUG_V(String("BreakBit: ") + String(BreakBit.duration0 * 2) + " ticks");
 
-    if(NumBitsUsedInFrame >= MaxBitsPerFrame)
-    {
-        // frame is bigger than min frame size set minimum idle time
-        NumUnusedBitsInFrame = 40;
-    }
-    float NumUnusedRmtTicksInFrame = min(float(65535.0), (OneBitTimeInRmtTicks * NumUnusedBitsInFrame));
-    // DEBUG_V(String("        NanoSecsPerFrame: ") + String(NanoSecsPerFrame));
-    // DEBUG_V(String("         MaxBitsPerFrame: ") + String(MaxBitsPerFrame));
-    // DEBUG_V(String("      NumBitsUsedInFrame: ") + String(NumBitsUsedInFrame));
-    // DEBUG_V(String("    NumUnusedBitsInFrame: ") + String(NumUnusedBitsInFrame));
-    // DEBUG_V(String("    OneBitTimeInRmtTicks: ") + String(OneBitTimeInRmtTicks));
-    // DEBUG_V(String("NumUnusedRmtTicksInFrame: ") + String(OneBitTimeInRmtTicks * NumUnusedBitsInFrame));
-    // DEBUG_V(String("NumUnusedRmtTicksInFrame: ") + String(NumUnusedRmtTicksInFrame));
+    // Break bits
+    Rmt.SetBitDuration((DMX_MAB_US * NanoSecondsInAMicroSecond), MabBit, BitCount);
+    MabBit.level0 = 1;
+    MabBit.level1 = 1;
+    // DEBUG_V(String("MabBit: ") + String(MabBit.duration0 * 2) + " ticks");
 
-    BitValue.duration0 = uint16_t(NumUnusedRmtTicksInFrame/2.0);
-    BitValue.level0 = 1;
-    BitValue.duration1 = uint16_t(NumUnusedRmtTicksInFrame/2.0);
-    BitValue.level1 = 1;
-    Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_END_OF_FRAME);
-
-#if defined(SUPPORT_OutputProtocol_DMX)
-    if (c_OutputMgr::e_OutputProtocolType::OutputProtocol_DMX == OutputType)
-    {
-        // turn it into a break signal
-        BitValue.duration0 = (DMX_BREAK_US * NanoSecondsInAMicroSecond) / RMT_TickLengthNS;
-        BitValue.level0 = 0;
-        BitValue.duration1 = 2 * ((DMX_MAB_US   * NanoSecondsInAMicroSecond) / RMT_TickLengthNS);
-        BitValue.level1 = 1;
-        Rmt.SetIntensity2Rmt(BitValue, c_OutputRmt::RmtDataBitIdType_t::RMT_INTERFRAME_GAP_ID);
-    }
-#endif // defined(SUPPORT_OutputProtocol_DMX)
-
-#if defined(SUPPORT_OutputProtocol_Serial)
-#endif // defined(SUPPORT_OutputProtocol_Serial)
-
-#if defined(SUPPORT_OutputProtocol_Renard)
-#endif // defined(SUPPORT_OutputProtocol_Renard)
-
-#if defined(SUPPORT_OutputProtocol_FireGod)
-#endif // defined(SUPPORT_OutputProtocol_Serial)
-
+    // DEBUG_END;
 } // SetUpRmtBitTimes
 
 //----------------------------------------------------------------------------
@@ -214,6 +174,19 @@ void c_OutputSerialRmt::GetStatus (ArduinoJson::JsonObject& jsonStatus)
 
     c_OutputSerial::GetStatus(jsonStatus);
     Rmt.GetStatus(jsonStatus);
+
+    #ifdef SERIAL_RMT_DEBUG_COUNTERS
+    JsonObject JsonCounters = jsonStatus["JsonCounters"].to<JsonObject>();
+    JsonWrite(JsonCounters, "GetNextBit",  RmtDebugCounters.GetNextBit);
+    JsonWrite(JsonCounters, "FrameStarts", RmtDebugCounters.FrameStarts);
+    JsonWrite(JsonCounters, "FrameEnds",   RmtDebugCounters.FrameEnds);
+    JsonWrite(JsonCounters, "BreakBits",   RmtDebugCounters.BreakBits);
+    JsonWrite(JsonCounters, "MabBits",     RmtDebugCounters.MabBits);
+    JsonWrite(JsonCounters, "StartBits",   RmtDebugCounters.StartBits);
+    JsonWrite(JsonCounters, "DataBits",    RmtDebugCounters.DataBits);
+    JsonWrite(JsonCounters, "StopBits",    RmtDebugCounters.StopBits);
+    JsonWrite(JsonCounters, "Underrun",    RmtDebugCounters.Underrun);
+    #endif // def SERIAL_RMT_DEBUG_COUNTERS
 
     // DEBUG_END;
 } // GetStatus
@@ -254,6 +227,87 @@ bool c_OutputSerialRmt::RmtPoll ()
     return Response;
 
 } // Poll
+
+//----------------------------------------------------------------------------
+void c_OutputSerialRmt::StartNewDataFrame()
+{
+    // DEBUG_START;
+    // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
+    INC_SERIAL_RMT_DEBUG_COUNTERS(FrameStarts);
+    #if defined(SUPPORT_OutputProtocol_DMX)
+    if(OutputType == c_OutputMgr::e_OutputProtocolType::OutputProtocol_DMX)
+    {
+        BreakBitCount = 1;
+    }
+    #endif //  defined(SUPPORT_OutputProtocol_DMX)
+    StartBitCount = 1;
+    StartNewFrame();
+
+    // DEBUG_END;
+} // StartNewDataFrame
+
+//----------------------------------------------------------------------------
+bool IRAM_ATTR c_OutputSerialRmt::ISR_GetNextBitToSend (rmt_item32_t & DataToSend)
+{
+    INC_SERIAL_RMT_DEBUG_COUNTERS(GetNextBit);
+    bool Response = true;
+    if(BreakBitCount)
+    {
+        INC_SERIAL_RMT_DEBUG_COUNTERS(BreakBits);
+        BreakBitCount = 0;
+        DataToSend = BreakBit;
+        MabBitCount = 1;
+    }
+    else if(MabBitCount)
+    {
+        INC_SERIAL_RMT_DEBUG_COUNTERS(MabBits);
+        MabBitCount = 0;
+        DataToSend = MabBit;
+        StartBitCount = 1;
+    }
+    else if(StartBitCount)
+    {
+        INC_SERIAL_RMT_DEBUG_COUNTERS(StartBits);
+        StartBitCount = 0;
+        DataToSend = StartBit;
+        // set up for the next data byte
+        c_OutputSerial::ISR_GetNextIntensityToSend(DataPattern);
+        CurrentDataPairId = 4;
+        StopBitCount = 1;
+    }
+    else if(CurrentDataPairId)
+    {
+        INC_SERIAL_RMT_DEBUG_COUNTERS(DataBits);
+        --CurrentDataPairId;
+        DataToSend = DataBitArray[DataPattern & 0x3];
+        DataPattern = DataPattern >> 2;
+    }
+    else if(StopBitCount)
+    {
+        INC_SERIAL_RMT_DEBUG_COUNTERS(StopBits);
+        StopBitCount = 0;
+        DataToSend = StopBit;
+
+        if(c_OutputSerial::ISR_MoreDataToSend())
+        {
+            StartBitCount = 1;
+        }
+        else
+        {
+            INC_SERIAL_RMT_DEBUG_COUNTERS(FrameEnds);
+            Response = false;
+        }
+    }
+    else
+    {
+        INC_SERIAL_RMT_DEBUG_COUNTERS(Underrun);
+        // nothing to send
+        DataToSend.val = 0x0;
+        Response = false;
+    }
+
+    return Response;
+} // ISR_GetNextBitToSend
 
 //----------------------------------------------------------------------------
 void c_OutputSerialRmt::PauseOutput (bool State)

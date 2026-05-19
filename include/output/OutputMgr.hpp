@@ -131,7 +131,7 @@ public:
         #endif // def SUPPORT_OutputProtocol_UCS8903
 
         #ifdef SUPPORT_OutputProtocol_TLS3001
-        OutputType_TLS3001 = 14,
+        OutputProtocol_TLS3001 = 14,
         #endif // def SUPPORT_OutputProtocol_TLS3001
 
         #ifdef SUPPORT_OutputProtocol_GRINCH
@@ -143,11 +143,15 @@ public:
         #endif // def SUPPORT_OutputProtocol_FireGod
 
         // Add new types here
+
+        // Must be last
+        OutputProtocol_Last,
     };
-    uint32_t OutputType_End = uint32_t(-1);
+    uint32_t NumberOfOutputProtocols = uint32_t(0);
 
     // must be 16 byte aligned. Determined by upshifting the max size of all drivers
-    #define OutputDriverMemorySize 1200
+    // #define OutputDriverMemorySize 1200
+    #define OutputDriverMemorySize 1400
     uint32_t GetDriverSize() {return OutputDriverMemorySize;}
 private:
     struct alignas(16) DriverInfo_t
@@ -185,7 +189,7 @@ private:
     void InstantiateNewOutputChannel(DriverInfo_t &ChannelIndex, e_OutputProtocolType NewChannelType, bool StartDriver = true);
     void CreateNewConfig();
     void SetSerialUart();
-    bool FindJsonChannelConfig (JsonDocument& jsonConfig, OM_PortId_t PortId, e_OutputProtocolType Type, JsonObject& ChanConfig);
+    bool FindJsonChannelConfig (JsonDocument& jsonConfig, OM_PortId_t PortId, JsonObject& ChanConfig);
     bool SetPortDefnitionDefaults(DriverInfo_t & CurrentOutput, e_OutputProtocolType TargetProtocolType);
 
     String ConfigFileName;

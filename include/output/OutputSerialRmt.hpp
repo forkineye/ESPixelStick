@@ -43,12 +43,45 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput(bool State);
+    void    StartNewDataFrame();
+    bool    ISR_GetNextBitToSend(rmt_item32_t & DataToSend);
 
 private:
-    void SetUpRmtBitTimes();
+    void    SetUpRmtBitTimes();
+    rmt_idle_level_t idle_level = rmt_idle_level_t::RMT_IDLE_LEVEL_HIGH;
 
     c_OutputRmt Rmt;
-    rmt_idle_level_t idle_level = rmt_idle_level_t::RMT_IDLE_LEVEL_LOW;
+
+    rmt_item32_t    BreakBit;
+    uint32_t        BreakBitCount = 0;
+    rmt_item32_t    MabBit;
+    uint32_t        MabBitCount = 0;
+    rmt_item32_t    StartBit;
+    uint32_t        StartBitCount = 0;
+    rmt_item32_t    DataBitArray[4]; // 00 / 01 / 10 / 11
+    uint32_t        CurrentDataPairId = 0;
+    rmt_item32_t    StopBit;
+    uint32_t        StopBitCount = 0;
+    uint32_t        DataPattern;
+
+    // #define SERIAL_RMT_DEBUG_COUNTERS
+    #ifdef SERIAL_RMT_DEBUG_COUNTERS
+    #define INC_SERIAL_RMT_DEBUG_COUNTERS(c) (++SerialRmtDebugCounters.c)
+    struct
+    {
+        uint32_t GetNextBit = 0;
+        uint32_t FrameStarts = 0;
+        uint32_t FrameEnds = 0;
+        uint32_t BreakBits = 0;
+        uint32_t MabBits = 0;
+        uint32_t StartBits = 0;
+        uint32_t DataBits = 0;
+        uint32_t StopBits = 0;
+        uint32_t Underrun = 0;
+    } SerialRmtDebugCounters;
+    #else
+    #define INC_SERIAL_RMT_DEBUG_COUNTERS(c)
+    #endif // def SERIAL_RMT_DEBUG_COUNTERS
 
 }; // c_OutputSerialRmt
 

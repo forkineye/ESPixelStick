@@ -45,8 +45,46 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput (bool State);
+    void    StartNewDataFrame();
+    bool    ISR_GetNextBitToSend (rmt_item32_t & DataToSend);
 
 private:
+// The adjustments compensate for rounding errors in the calculations
+#define GECE_PIXEL_RMT_TICKS_BIT_0_HIGH    uint16_t ( (GECE_PIXEL_NS_BIT_0_HIGH / RMT_TickLengthNS) + 0.0)
+#define GECE_PIXEL_RMT_TICKS_BIT_0_LOW     uint16_t ( (GECE_PIXEL_NS_BIT_0_LOW  / RMT_TickLengthNS) + 0.0)
+#define GECE_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t ( (GECE_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 1.0)
+#define GECE_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (GECE_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)
+#define GECE_PIXEL_RMT_TICKS_STOP          uint16_t ( (GECE_PIXEL_STOP_TIME_NS  / RMT_TickLengthNS) + 1.0)
+#define GECE_PIXEL_RMT_TICKS_START         uint16_t ( (GECE_PIXEL_START_TIME_NS  / RMT_TickLengthNS) + 1.0)
+
+    rmt_item32_t ZeroBit  {GECE_PIXEL_RMT_TICKS_BIT_0_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_0_HIGH, 1};
+    rmt_item32_t OneBit   {GECE_PIXEL_RMT_TICKS_BIT_1_LOW, 0, GECE_PIXEL_RMT_TICKS_BIT_1_HIGH, 1};
+    rmt_item32_t IfgBit   {GECE_PIXEL_RMT_TICKS_START / 2, 0, GECE_PIXEL_RMT_TICKS_START / 2,  0};
+    rmt_item32_t StartBit {GECE_PIXEL_RMT_TICKS_START / 2, 1, GECE_PIXEL_RMT_TICKS_START / 2,  1};
+    uint32_t StartBitCount = 0;
+    rmt_item32_t StopBit  {GECE_PIXEL_RMT_TICKS_STOP  / 2, 0, GECE_PIXEL_RMT_TICKS_STOP  / 2,  0};
+    uint32_t StopBitCount = 0;
+    uint32_t DataPattern = 0;
+    uint32_t CurrentDataMask = 0;
+
+    // #define GECE_RMT_DEBUG_COUNTERS
+    #ifdef GECE_RMT_DEBUG_COUNTERS
+    #define INC_GECE_RMT_DEBUG_COUNTERS(c) (++RmtDebugCounters.c)
+    struct
+    {
+        uint32_t GetNextBit = 0;
+        uint32_t FrameStarts = 0;
+        uint32_t FrameEnds = 0;
+        uint32_t BreakBits = 0;
+        uint32_t MabBits = 0;
+        uint32_t StartBits = 0;
+        uint32_t DataBits = 0;
+        uint32_t StopBits = 0;
+        uint32_t Underrun = 0;
+    } RmtDebugCounters;
+    #else
+    #define INC_GECE_RMT_DEBUG_COUNTERS(c)
+    #endif // def GECE_RMT_DEBUG_COUNTERS
 
     c_OutputRmt Rmt;
 

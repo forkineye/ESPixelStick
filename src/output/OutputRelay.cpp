@@ -167,8 +167,12 @@ bool c_OutputRelay::validate ()
             {
                 // DEBUG_V("Init GPIO as a PWM output");
                 // assign GPIO to a channel and set the pwm 12 Khz frequency, 8 bit
+				#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+                ledcAttach(currentRelay.GpioId, currentRelay.ChannelIndex, 8);
+                #else
                 ledcAttachPin(currentRelay.GpioId, currentRelay.ChannelIndex);
                 ledcSetup(currentRelay.ChannelIndex, currentRelay.PwmFrequency, 8);
+				#endif // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
             }
             #endif
         }

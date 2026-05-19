@@ -305,7 +305,7 @@ void c_OutputSerial::SetFrameDurration ()
     float IntensityBitTimeInUs     = (1.0 / float(CurrentBaudrate)) * float(MicroSecondsInASecond);
     float TotalIntensitiesPerFrame = float(Num_Channels + 1) + SerialHeaderSize + SerialFooterSize;
     float TotalBitsPerFrame        = float(NumBitsPerIntensity) * TotalIntensitiesPerFrame;
-    ActualFrameDurationMicroSec    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame) + InterFrameGapInMicroSec;
+    ActualFrameDurationMicroSec    = uint32_t(IntensityBitTimeInUs * TotalBitsPerFrame);
     FrameDurationInMicroSec        = max(uint32_t(25000), ActualFrameDurationMicroSec);
 
     // DEBUG_V (String ("           CurrentBaudrate: ") + String (CurrentBaudrate));

@@ -19,7 +19,7 @@
 */
 
 // Output Manager
-// MAX 8 Serial port on ESP32
+// MAX 4 Serial port on ESP32S3
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =
 {
     {OM_PortId_t(0), OM_PortType_t::OM_SERIAL, {gpio_num_t::GPIO_NUM_1}},
@@ -42,7 +42,7 @@ const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =
 #define SD_CARD_CS_PIN          gpio_num_t::GPIO_NUM_43
 
 // Output Types
-// Not Finished - #define SUPPORT_OutputProtocol_TLS3001
+#define SUPPORT_OutputProtocol_TLS3001          // OM_SERIAL
 // #define SUPPORT_OutputProtocol_APA102           // OM_SPI
 #define SUPPORT_OutputProtocol_DMX              // OM_SERIAL
 #define SUPPORT_OutputProtocol_GECE             // OM_SERIAL
