@@ -123,10 +123,11 @@ var searchData=
   ['gpio_5fdefs_5fesp32_5fwt32eth01_2ehpp_120',['GPIO_Defs_ESP32_WT32ETH01.hpp',['../_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01_8hpp.html',1,'']]],
   ['gpio_5fdefs_5fesp32_5fwt32eth01_5fwasatch_2ehpp_121',['GPIO_Defs_ESP32_WT32ETH01_Wasatch.hpp',['../_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01___wasatch_8hpp.html',1,'']]],
   ['gpio_5fdefs_5fesp32s3_5fdevkitc_2ehpp_122',['GPIO_Defs_ESP32S3_DevkitC.hpp',['../_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html',1,'']]],
-  ['gpio_5fdefs_5fesp32s3_5fseed_5fxiao_2ehpp_123',['GPIO_Defs_ESP32S3_seed_XIAO.hpp',['../_g_p_i_o___defs___e_s_p32_s3__seed___x_i_a_o_8hpp.html',1,'']]],
-  ['gpio_5fdefs_5fesp8266_5fesp01s_2ehpp_124',['GPIO_Defs_ESP8266_ESP01S.hpp',['../_g_p_i_o___defs___e_s_p8266___e_s_p01_s_8hpp.html',1,'']]],
-  ['gpio_5fdefs_5fesp8266_5fesps_5fv3_2ehpp_125',['GPIO_Defs_ESP8266_ESPS_V3.hpp',['../_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html',1,'']]],
-  ['gpio_5fdefs_5fesp8266_5fgeneric_2ehpp_126',['GPIO_Defs_ESP8266_Generic.hpp',['../_g_p_i_o___defs___e_s_p8266___generic_8hpp.html',1,'']]],
-  ['gpioid_127',['GpioId',['../classc___external_input.html#a27bb9f5810aa4f6805aa48369f56f453',1,'c_ExternalInput']]],
-  ['gpios_128',['gpios',['../struct_o_m___output_port_definition__t.html#a49065eb54d453b8e2f7c5a698bd2645c',1,'OM_OutputPortDefinition_t']]]
+  ['gpio_5fdefs_5fesp32s3_5ffh4r2_2ehpp_123',['GPIO_Defs_ESP32S3_FH4R2.hpp',['../_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html',1,'']]],
+  ['gpio_5fdefs_5fesp32s3_5fseed_5fxiao_2ehpp_124',['GPIO_Defs_ESP32S3_seed_XIAO.hpp',['../_g_p_i_o___defs___e_s_p32_s3__seed___x_i_a_o_8hpp.html',1,'']]],
+  ['gpio_5fdefs_5fesp8266_5fesp01s_2ehpp_125',['GPIO_Defs_ESP8266_ESP01S.hpp',['../_g_p_i_o___defs___e_s_p8266___e_s_p01_s_8hpp.html',1,'']]],
+  ['gpio_5fdefs_5fesp8266_5fesps_5fv3_2ehpp_126',['GPIO_Defs_ESP8266_ESPS_V3.hpp',['../_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html',1,'']]],
+  ['gpio_5fdefs_5fesp8266_5fgeneric_2ehpp_127',['GPIO_Defs_ESP8266_Generic.hpp',['../_g_p_i_o___defs___e_s_p8266___generic_8hpp.html',1,'']]],
+  ['gpioid_128',['GpioId',['../classc___external_input.html#a27bb9f5810aa4f6805aa48369f56f453',1,'c_ExternalInput']]],
+  ['gpios_129',['gpios',['../struct_o_m___output_port_definition__t.html#a49065eb54d453b8e2f7c5a698bd2645c',1,'OM_OutputPortDefinition_t']]]
 ];

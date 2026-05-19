@@ -218,17 +218,19 @@ $(function(){initNavTree('_g_p_i_o___defs_8hpp_source.html',''); initResizable(t
 <div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span><span class="preprocessor">#   include &quot;<a class="code" href="_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html">platforms/GPIO_Defs_ESP32_BreakDanceV2.hpp</a>&quot;</span></div>
 <div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span><span class="preprocessor">#elif defined(BOARD_ESP32_DEVKITV_ETH)</span></div>
 <div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span><span class="preprocessor">#   include &quot;<a class="code" href="_g_p_i_o___defs___e_s_p32___devkit_v___e_t_h_8hpp.html">platforms/GPIO_Defs_ESP32_DevkitV_ETH.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#elif defined (ARDUINO_ARCH_ESP32)</span></div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#   include &quot;<a class="code" href="_g_p_i_o___defs___e_s_p32__generic_8hpp.html">platforms/GPIO_Defs_ESP32_generic.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#elif defined (ARDUINO_ARCH_ESP8266)</span></div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">#   include &quot;<a class="code" href="_g_p_i_o___defs___e_s_p8266___generic_8hpp.html">platforms/GPIO_Defs_ESP8266_Generic.hpp</a>&quot;</span></div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#   error &quot;No valid platform definition&quot;</span></div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#endif </span><span class="comment">// ndef platform specific GPIO definitions</span></div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#if defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)</span></div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span><span class="preprocessor">#   define SUPPORT_FPP</span></div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)</span></div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span><span class="preprocessor">#elif defined(BOARD_ESP32S3_FH4R2)</span></div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span><span class="preprocessor">#   include &quot;<a class="code" href="_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html">platforms/GPIO_Defs_ESP32S3_FH4R2.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span><span class="preprocessor">#elif defined (ARDUINO_ARCH_ESP32)</span></div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span><span class="preprocessor">#   include &quot;<a class="code" href="_g_p_i_o___defs___e_s_p32__generic_8hpp.html">platforms/GPIO_Defs_ESP32_generic.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span><span class="preprocessor">#elif defined (ARDUINO_ARCH_ESP8266)</span></div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span><span class="preprocessor">#   include &quot;<a class="code" href="_g_p_i_o___defs___e_s_p8266___generic_8hpp.html">platforms/GPIO_Defs_ESP8266_Generic.hpp</a>&quot;</span></div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="preprocessor">#   error &quot;No valid platform definition&quot;</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span><span class="preprocessor">#endif </span><span class="comment">// ndef platform specific GPIO definitions</span></div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span><span class="preprocessor">#if defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)</span></div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span><span class="preprocessor">#   define SUPPORT_FPP</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span><span class="preprocessor">#endif </span><span class="comment">// defined(SUPPORT_SD) || defined(SUPPORT_SD_MMC)</span></div>
 <div class="ttc" id="a_e_s_pixel_stick_8h_html"><div class="ttname"><a href="_e_s_pixel_stick_8h.html">ESPixelStick.h</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32___bong69_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32___bong69_8hpp.html">GPIO_Defs_ESP32_Bong69.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32___break_dance_v2_8hpp.html">GPIO_Defs_ESP32_BreakDanceV2.hpp</a></div></div>
@@ -269,6 +271,7 @@ $(function(){initNavTree('_g_p_i_o___defs_8hpp_source.html',''); initResizable(t
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32__generic_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32__generic_8hpp.html">GPIO_Defs_ESP32_generic.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32__kr__lights__msm_8hpp.html">GPIO_Defs_ESP32_kr_lights_msm.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html">GPIO_Defs_ESP32S3_DevkitC.hpp</a></div></div>
+<div class="ttc" id="a_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html">GPIO_Defs_ESP32S3_FH4R2.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p32_s3__seed___x_i_a_o_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p32_s3__seed___x_i_a_o_8hpp.html">GPIO_Defs_ESP32S3_seed_XIAO.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p8266___e_s_p01_s_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p8266___e_s_p01_s_8hpp.html">GPIO_Defs_ESP8266_ESP01S.hpp</a></div></div>
 <div class="ttc" id="a_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp_html"><div class="ttname"><a href="_g_p_i_o___defs___e_s_p8266___e_s_p_s___v3_8hpp.html">GPIO_Defs_ESP8266_ESPS_V3.hpp</a></div></div>

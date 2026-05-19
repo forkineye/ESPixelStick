@@ -6,7 +6,7 @@ var searchData=
   ['efupdate_5ferror_5frec_3',['EFUPDATE_ERROR_REC',['../_e_f_update_8h.html#a7ffb8b7fa237e7b1eaa227778aecee80',1,'EFUpdate.h']]],
   ['efupdate_5ferror_5fsig_4',['EFUPDATE_ERROR_SIG',['../_e_f_update_8h.html#a5519e9a36a9d5ec98bb6f1b3333dcdee',1,'EFUpdate.h']]],
   ['elapsed_5fplay_5ftimer_5finterval_5fms_5',['ELAPSED_PLAY_TIMER_INTERVAL_MS',['../_input_f_p_p_remote_play_file_8hpp.html#a9ce0196b79688b4722fd374e0d54bb6c',1,'InputFPPRemotePlayFile.hpp']]],
-  ['enable_5fdedicated_5fspi_6',['ENABLE_DEDICATED_SPI',['../_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#a3ceb23f14263a17c56eac40e484cbbbb',1,'GPIO_Defs_ESP32S3_DevkitC.hpp']]],
+  ['enable_5fdedicated_5fspi_6',['ENABLE_DEDICATED_SPI',['../_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#a3ceb23f14263a17c56eac40e484cbbbb',1,'ENABLE_DEDICATED_SPI:&#160;GPIO_Defs_ESP32S3_DevkitC.hpp'],['../_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#a3ceb23f14263a17c56eac40e484cbbbb',1,'ENABLE_DEDICATED_SPI:&#160;GPIO_Defs_ESP32S3_FH4R2.hpp']]],
   ['esp_5fintr_5fflag_5firam_7',['ESP_INTR_FLAG_IRAM',['../_output_uart_8hpp.html#a3fb8d6fa8b5e33b3503e86917bc8367b',1,'OutputUart.hpp']]],
   ['esp_5fsd_8',['ESP_SD',['../_file_mgr_8hpp.html#a209cd1d1d956fc0f1215f653f7082820',1,'FileMgr.hpp']]],
   ['esp_5fsdfs_9',['ESP_SDFS',['../_file_mgr_8hpp.html#a085af9b4229d5ea32585a531a1d9bb0f',1,'FileMgr.hpp']]],
