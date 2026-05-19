@@ -136,6 +136,9 @@ jobs:
           # Seeed Studio XIAO ESP32-S3
           - target: "esp32s3_seeed_xiao"
             chip: "esp32s3"
+          # ESP32-S3FH4R2
+          - target: "esp32s3_fh4r2"
+            chip: "esp32s3"
           #
           - target: "esp32_devkitv_eth"
             chip: "esp32"
