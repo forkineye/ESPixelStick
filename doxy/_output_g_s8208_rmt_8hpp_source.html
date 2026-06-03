@@ -175,8 +175,8 @@ $(function(){initNavTree('_output_g_s8208_rmt_8hpp_source.html',''); initResizab
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span><span class="preprocessor">    #define GS8208_PIXEL_RMT_TICKS_BIT_1_HIGH    uint16_t ( (GS8208_PIXEL_NS_BIT_1_HIGH / RMT_TickLengthNS) - 1.0)</span></div>
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">    #define GS8208_PIXEL_RMT_TICKS_BIT_1_LOW     uint16_t ( (GS8208_PIXEL_NS_BIT_1_LOW  / RMT_TickLengthNS) + 1.0)</span></div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">    #define GS8208_PIXEL_RMT_TICKS_IDLE          uint16_t ( (GS8208_PIXEL_IDLE_TIME_NS  / RMT_TickLengthNS) + 1.0)</span></div>
-<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    rmt_item32_t ZeroBit = {GS8208_PIXEL_RMT_TICKS_BIT_0_HIGH, 1, GS8208_PIXEL_RMT_TICKS_BIT_0_LOW, 0};</div>
-<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    rmt_item32_t OneBit  = {GS8208_PIXEL_RMT_TICKS_BIT_1_HIGH, 1, GS8208_PIXEL_RMT_TICKS_BIT_1_LOW, 0};</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>    rmt_item32_t ZeroBit;</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>    rmt_item32_t OneBit;</div>
 <div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
 <div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    rmt_item32_t ifgBit;</div>
 <div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    uint32_t ifgBitCount;</div>

@@ -2,7 +2,6 @@ var _g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp =
 [
     [ "DEFAULT_CONSOLE_RX_GPIO", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#a412688b6020bceb2940c433f7924f79e", null ],
     [ "DEFAULT_CONSOLE_TX_GPIO", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#a6dc4c220baec42d8411386cda27ceae4", null ],
-    [ "DEFAULT_RELAY_GPIO", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#ad828b40b5ce0c37516acd57858300a64", null ],
     [ "ENABLE_DEDICATED_SPI", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#a3ceb23f14263a17c56eac40e484cbbbb", null ],
     [ "SD_CARD_CLK_PIN", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#aebe2eeabee8a8434bc5edf81a88f90e4", null ],
     [ "SD_CARD_CS_PIN", "_g_p_i_o___defs___e_s_p32_s3___devkit_c_8hpp.html#a7b3ca01a31109575d4bd2bf82e692d0b", null ],

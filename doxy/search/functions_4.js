@@ -10,7 +10,6 @@ var searchData=
   ['deserializecorehandler_7',['deserializeCoreHandler',['../main_8cpp.html#a23e7afe154bda4f1d2e44818ed09843e',1,'deserializeCoreHandler(JsonDocument &amp;jsonDoc):&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#a23e7afe154bda4f1d2e44818ed09843e',1,'deserializeCoreHandler(JsonDocument &amp;jsonDoc):&#160;main.cpp']]],
   ['disable_8',['Disable',['../classc___wi_fi_driver.html#a2ba738a27bef8bb98603e808f233eb33',1,'c_WiFiDriver::Disable()'],['../classc___f_p_p_discovery.html#abd09ea00b6e680a8e55283ec47c3dcdf',1,'c_FPPDiscovery::Disable()']]],
   ['disconnectfrommqtt_9',['disconnectFromMqtt',['../classc___input_m_q_t_t.html#a54511768dafc3f9b45fd17199f4a8ea1',1,'c_InputMQTT']]],
-  ['driverissendingintensitydata_10',['DriverIsSendingIntensityData',['../classc___output_common.html#a6b5a27c4548473466e0832698401a489',1,'c_OutputCommon']]],
-  ['dsdevice_11',['dsDevice',['../main_8cpp.html#ae3fa381b4975543d1b331c6aa0d4526a',1,'dsDevice(JsonObject &amp;json):&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#ae3fa381b4975543d1b331c6aa0d4526a',1,'dsDevice(JsonObject &amp;json):&#160;main.cpp']]],
-  ['dsnetwork_12',['dsNetwork',['../_e_s_pixel_stick_8h.html#a0b66f59517303936e5ecb82ddf4c8780',1,'ESPixelStick.h']]]
+  ['dsdevice_10',['dsDevice',['../main_8cpp.html#ae3fa381b4975543d1b331c6aa0d4526a',1,'dsDevice(JsonObject &amp;json):&#160;main.cpp'],['../_e_s_pixel_stick_8h.html#ae3fa381b4975543d1b331c6aa0d4526a',1,'dsDevice(JsonObject &amp;json):&#160;main.cpp']]],
+  ['dsnetwork_11',['dsNetwork',['../_e_s_pixel_stick_8h.html#a0b66f59517303936e5ecb82ddf4c8780',1,'ESPixelStick.h']]]
 ];

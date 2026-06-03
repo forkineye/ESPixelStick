@@ -195,14 +195,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:adbf439d37fe45012612f47c83012f6fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f20044ab63e32ea09bb4140f9d1f933" id="r_a4f20044ab63e32ea09bb4140f9d1f933"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4f20044ab63e32ea09bb4140f9d1f933">ValidateGpio</a> (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio)</td></tr>
 <tr class="separator:a4f20044ab63e32ea09bb4140f9d1f933"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b5a27c4548473466e0832698401a489" id="r_a6b5a27c4548473466e0832698401a489"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6b5a27c4548473466e0832698401a489">DriverIsSendingIntensityData</a> ()</td></tr>
-<tr class="separator:a6b5a27c4548473466e0832698401a489"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5a960482b9b025836df5d6eda4375aaa" id="r_a5a960482b9b025836df5d6eda4375aaa"><td class="memItemLeft" align="right" valign="top">virtual uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a960482b9b025836df5d6eda4375aaa">GetFrameTimeMs</a> ()</td></tr>
 <tr class="separator:a5a960482b9b025836df5d6eda4375aaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa9f90f7b993e5c19fe5d5835abcca575" id="r_aa9f90f7b993e5c19fe5d5835abcca575"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa9f90f7b993e5c19fe5d5835abcca575">IsPaused</a> ()</td></tr>
 <tr class="separator:aa9f90f7b993e5c19fe5d5835abcca575"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a509f339ec701c5554a9ab1a7c169f915" id="r_a509f339ec701c5554a9ab1a7c169f915"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a509f339ec701c5554a9ab1a7c169f915">ClearStatistics</a> (void)</td></tr>
 <tr class="separator:a509f339ec701c5554a9ab1a7c169f915"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cf279a20e4bcf1aa41c0fd85c8a4e4e" id="r_a9cf279a20e4bcf1aa41c0fd85c8a4e4e"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9cf279a20e4bcf1aa41c0fd85c8a4e4e">GetFrameStartTimeInMicroSec</a> ()</td></tr>
+<tr class="separator:a9cf279a20e4bcf1aa41c0fd85c8a4e4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -428,31 +428,6 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="a6b5a27c4548473466e0832698401a489" name="a6b5a27c4548473466e0832698401a489"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6b5a27c4548473466e0832698401a489">&#9670;&#160;</a></span>DriverIsSendingIntensityData()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual bool c_OutputCommon::DriverIsSendingIntensityData </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
 <a id="a83f1ea04a95de1af5ad0e5a5130bdcad" name="a83f1ea04a95de1af5ad0e5a5130bdcad"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a83f1ea04a95de1af5ad0e5a5130bdcad">&#9670;&#160;</a></span>GetBufferAddress()</h2>
 
@@ -588,6 +563,31 @@ Here is the caller graph for this function:</div>
 <p>get the name for the instantiated driver </p>
 
 <p>Implemented in <a class="el" href="classc___output_disabled.html#acdb17900a1a643dc2776d475f0139b4b">c_OutputDisabled</a>.</p>
+
+</div>
+</div>
+<a id="a9cf279a20e4bcf1aa41c0fd85c8a4e4e" name="a9cf279a20e4bcf1aa41c0fd85c8a4e4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9cf279a20e4bcf1aa41c0fd85c8a4e4e">&#9670;&#160;</a></span>GetFrameStartTimeInMicroSec()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint32_t c_OutputCommon::GetFrameStartTimeInMicroSec </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
