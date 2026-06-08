@@ -84,7 +84,9 @@ void c_NetworkMgr::Begin ()
     // Make sure the local config is valid
     Validate ();
 
+#ifdef SUPPORT_WIFI
     WiFiDriver.Begin ();
+#endif // def SUPPORT_WIFI
 
 #ifdef SUPPORT_ETHERNET
     EthernetDriver.Begin ();
@@ -103,8 +105,10 @@ void c_NetworkMgr::GetConfig (JsonObject & json)
 
     JsonWrite(NetworkConfig, CN_hostname, hostname);
 
+#ifdef SUPPORT_WIFI
     JsonObject NetworkWiFiConfig = NetworkConfig[(char*)CN_wifi].to<JsonObject> ();
     WiFiDriver.GetConfig (NetworkWiFiConfig);
+#endif // def SUPPORT_WIFI
 
 #ifdef SUPPORT_ETHERNET
     JsonWrite(NetworkConfig, CN_weus, AllowWiFiAndEthUpSimultaneously);
@@ -120,7 +124,26 @@ void c_NetworkMgr::GetConfig (JsonObject & json)
 //-----------------------------------------------------------------------------
 IPAddress c_NetworkMgr::GetlocalIP ()
 {
+#ifdef SUPPORT_WIFI
+    if (IsWiFiConnected)
+    {
+        return WiFiDriver.getIpAddress();
+    }
+#endif // def SUPPORT_WIFI
+
+#ifdef SUPPORT_ETHERNET
+    if (IsEthernetConnected)
+    {
+        return EthernetDriver.GetIpAddress();
+    }
+#endif // def SUPPORT_ETHERNET
+
+#ifdef SUPPORT_WIFI
+    // Not connected: fall back to whatever the WiFi driver reports (AP IP etc.)
     return WiFiDriver.getIpAddress();
+#else
+    return IPAddress(INADDR_NONE);
+#endif // def SUPPORT_WIFI
 } // GetlocalIP
 
 //-----------------------------------------------------------------------------
@@ -133,8 +156,10 @@ void c_NetworkMgr::GetStatus (JsonObject & json)
     GetHostname (name);
     JsonWrite(NetworkStatus, CN_hostname, name);
 
+#ifdef SUPPORT_WIFI
     JsonObject NetworkWiFiStatus = NetworkStatus[(char*)CN_wifi].to<JsonObject> ();
     WiFiDriver.GetStatus (NetworkWiFiStatus);
+#endif // def SUPPORT_WIFI
 
 #ifdef SUPPORT_ETHERNET
     JsonObject NetworkEthStatus = NetworkStatus[(char*)CN_eth].to<JsonObject> ();
@@ -152,7 +177,9 @@ void c_NetworkMgr::Poll ()
 
     do // once
     {
+#ifdef SUPPORT_WIFI
         WiFiDriver.Poll ();
+#endif // def SUPPORT_WIFI
 
 #ifdef SUPPORT_ETHERNET
         EthernetDriver.Poll ();
@@ -185,6 +212,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
         HostnameChanged = setFromJSON (hostname, network, CN_hostname);
         // DEBUG_V("");
 
+#ifdef SUPPORT_WIFI
         JsonObject networkWiFi = network[(char*)CN_wifi];
         if (networkWiFi)
         {
@@ -208,6 +236,7 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
                 logcon (String (F ("No network WiFi settings found. Using default WiFi Settings")));
             }
         }
+#endif // def SUPPORT_WIFI
 
 #ifdef SUPPORT_ETHERNET
         ConfigChanged = setFromJSON (AllowWiFiAndEthUpSimultaneously, network, CN_weus);
@@ -238,7 +267,9 @@ bool c_NetworkMgr::SetConfig (JsonObject & json)
     {
         // DEBUG_V(String("hostname: ") + hostname);
         String temp = String(hostname);
+#ifdef SUPPORT_WIFI
         WiFiDriver.SetHostname (temp);
+#endif // def SUPPORT_WIFI
 #ifdef SUPPORT_ETHERNET
         EthernetDriver.SetHostname (temp);
 #endif // def SUPPORT_ETHERNET
@@ -297,6 +328,7 @@ void c_NetworkMgr::SetWiFiEnable ()
 {
     // DEBUG_START;
 
+#ifdef SUPPORT_WIFI
     if (!AllowWiFiAndEthUpSimultaneously)
     {
         // DEBUG_V ("!AllowWiFiAndEthUpSimultaneously");
@@ -316,6 +348,7 @@ void c_NetworkMgr::SetWiFiEnable ()
         // DEBUG_V ("AllowWiFiAndEthUpSimultaneously");
         WiFiDriver.Enable ();
     }
+#endif // def SUPPORT_WIFI
     // DEBUG_END;
 
 } // SetWiFiEnabled

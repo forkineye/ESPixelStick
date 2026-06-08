@@ -1,6 +1,11 @@
 
 # Changelog
 
+### Unreleased
+
+- Added support for the Waveshare ESP32-P4-ETH board (Ethernet-only, no WiFi radio). This build uses the pioarduino platform (arduino-esp32 v3.x / IDF 5.x) and the existing IDF 5.x RMT output driver.
+- Made the WiFi driver optional (`SUPPORT_WIFI`) so radio-less boards build Ethernet-only.
+
 ### 4.0-beta5
 
 Numerous fixes have occurred since beta4, most notably web frontend stability (websockets removed) and FPP / xLights compatibility and synchronization.  You will need to be on a current release of xLights in order for input/output uploading to work.  MacOS libraries for the flash tool have been updated as well, but you will still have to execute the flash tool from the command line and jump through Apple's security hoops to allow mklittlefs to run.  Numerous 3rd party ESP32 platforms have been added for those that like to roll their own controllers.

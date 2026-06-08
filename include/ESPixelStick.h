@@ -32,6 +32,12 @@
 #	error "Unsupported CPU type"
 #endif
 
+// Most targets have a WiFi radio. Boards that do not (e.g. the ESP32-P4, which
+// has no native radio) define WIFI_NOT_SUPPORTED and build Ethernet-only.
+#ifndef WIFI_NOT_SUPPORTED
+#   define SUPPORT_WIFI
+#endif // ndef WIFI_NOT_SUPPORTED
+
 #ifdef BOARD_HAS_PSRAM
 #   error "PSRAM is not supported by ESPixelStick"
 #endif // def BOARD_HAS_PSRAM

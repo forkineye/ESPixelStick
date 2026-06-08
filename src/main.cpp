@@ -58,7 +58,11 @@ extern "C"
 #   include <Update.h>
 #   include <esp_task_wdt.h>
 #   include "soc/soc.h"
-#   include "soc/rtc_cntl_reg.h"
+    // The RTC control register layout differs on the ESP32-P4; this header is
+    // absent there, so only pull it in when it actually exists.
+#   if !defined(__has_include) || __has_include("soc/rtc_cntl_reg.h")
+#       include "soc/rtc_cntl_reg.h"
+#   endif
 #else
 #	error "Unsupported CPU type."
 #endif
@@ -176,8 +180,11 @@ void setup()
 
     config.BlankDelay = 5;
 #ifdef ARDUINO_ARCH_ESP32
-    // disable brownout detector
+    // disable brownout detector (the register is named differently on the
+    // ESP32-P4, where this workaround is simply skipped)
+#ifdef RTC_CNTL_BROWN_OUT_REG
     WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+#endif // def RTC_CNTL_BROWN_OUT_REG
     heap_caps_register_failed_alloc_callback(esp_alloc_failed_hook_callback);
 #endif // def ARDUINO_ARCH_ESP32
 
@@ -696,7 +703,11 @@ void _logcon (String & DriverName, String Message)
 
 #ifdef ARDUINO_ARCH_ESP32
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-#include <rtc_wdt.h>
+    // The ESP32-P4 uses a different (LP) watchdog API and does not declare the
+    // rtc_wdt_* helpers, so this header / those calls are skipped there.
+#   if !defined(CONFIG_IDF_TARGET_ESP32P4)
+#       include <rtc_wdt.h>
+#   endif // !defined(CONFIG_IDF_TARGET_ESP32P4)
 #endif // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #endif // def ARDUINO_ARCH_ESP32
 
@@ -705,8 +716,10 @@ void FeedWDT ()
 #ifdef ARDUINO_ARCH_ESP32
     #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
         // esp_task_wdt_reset ();
+        #if !defined(CONFIG_IDF_TARGET_ESP32P4)
         rtc_wdt_protect_off();
         rtc_wdt_disable();
+        #endif // rtc_wdt_* are not provided on the ESP32-P4
         esp_task_wdt_deinit();
     #else
         esp_task_wdt_reset ();

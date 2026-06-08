@@ -120,6 +120,8 @@
 #   include "platforms/GPIO_Defs_ESP32S3_FH4R2.hpp"
 #elif defined(BOARD_ESP32_RELAY_BOARD_X8)
 #   include "platforms/GPIO_Defs_ESP32_Relay_Board_x8.hpp"
+#elif defined(BOARD_ESP32_P4_ETH)
+#   include "platforms/GPIO_Defs_ESP32_P4_ETH.hpp"
 #elif defined (ARDUINO_ARCH_ESP32)
 #   include "platforms/GPIO_Defs_ESP32_generic.hpp"
 #elif defined (ARDUINO_ARCH_ESP8266)
