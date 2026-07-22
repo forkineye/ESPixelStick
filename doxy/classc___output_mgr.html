@@ -98,7 +98,6 @@ $(function(){initNavTree('classc___output_mgr.html',''); initResizable(true); })
 
 <div class="header">
   <div class="summary">
-<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
@@ -110,26 +109,7 @@ $(function(){initNavTree('classc___output_mgr.html',''); initResizable(true); })
 <div class="contents">
 
 <p><code>#include &lt;<a class="el" href="_output_mgr_8hpp_source.html">OutputMgr.hpp</a>&gt;</code></p>
-<div class="dynheader">
-Collaboration diagram for c_OutputMgr:</div>
-<div class="dyncontent">
-<div class="center"><img src="classc___output_mgr__coll__graph.png" border="0" usemap="#ac___output_mgr_coll__map" alt="Collaboration graph"/></div>
-<map name="ac___output_mgr_coll__map" id="ac___output_mgr_coll__map">
-<area shape="rect" title=" " alt="" coords="45,271,142,297"/>
-<area shape="rect" href="structc___output_mgr_1_1_driver_info__t.html" title=" " alt="" coords="9,183,178,208"/>
-<area shape="poly" title=" " alt="" coords="96,224,96,271,91,271,91,224"/>
-<area shape="rect" href="struct_o_m___output_port_definition__t.html" title=" " alt="" coords="5,94,182,120"/>
-<area shape="poly" title=" " alt="" coords="96,135,96,182,91,182,91,135"/>
-<area shape="rect" href="struct_o_m___g_p_i_o_s__t.html" title=" " alt="" coords="42,5,145,31"/>
-<area shape="poly" title=" " alt="" coords="96,47,96,94,91,94,91,47"/>
-</map>
-<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
 <tr class="memitem:a3dec27ef1775dc596e2ce87038b692ce" id="r_a3dec27ef1775dc596e2ce87038b692ce"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> { <a class="el" href="#a3dec27ef1775dc596e2ce87038b692cea0e3696fb135fb8df5fce3e953c064f98">OutputProtocol_Disabled</a> = 0
@@ -197,8 +177,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a39f709257037d896bd685d38ec66f9af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a861cf67886d1b3eccab0efc061e89963" id="r_a861cf67886d1b3eccab0efc061e89963"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a861cf67886d1b3eccab0efc061e89963">GetNumPorts</a> ()</td></tr>
 <tr class="separator:a861cf67886d1b3eccab0efc061e89963"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9ada6e65bb85cf170a0edd014b7046be" id="r_a9ada6e65bb85cf170a0edd014b7046be"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9ada6e65bb85cf170a0edd014b7046be">GetDriverSize</a> ()</td></tr>
-<tr class="separator:a9ada6e65bb85cf170a0edd014b7046be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -213,25 +191,21 @@ Private Member Functions</h2></td></tr>
 <tr class="separator:a1e460ab7d570adbbb53dd0e4c6651f6d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2af1d94181e97f732be0b66be3b944dd" id="r_a2af1d94181e97f732be0b66be3b944dd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2af1d94181e97f732be0b66be3b944dd">UpdateDisplayBufferReferences</a> (void)</td></tr>
 <tr class="separator:a2af1d94181e97f732be0b66be3b944dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7f11cdb7957ceba01ff6081016afc794" id="r_a7f11cdb7957ceba01ff6081016afc794"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7f11cdb7957ceba01ff6081016afc794">InstantiateNewOutputChannel</a> (<a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a> &amp;ChannelIndex, <a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> NewChannelType, bool StartDriver=true)</td></tr>
-<tr class="separator:a7f11cdb7957ceba01ff6081016afc794"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a660afde38f78610d503499bf8b7adcd6" id="r_a660afde38f78610d503499bf8b7adcd6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a660afde38f78610d503499bf8b7adcd6">InstantiateNewOutputChannel</a> (uint32_t PortIndex, <a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> NewChannelType, bool StartDriver=true)</td></tr>
+<tr class="separator:a660afde38f78610d503499bf8b7adcd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc248025f3eafeac3261994673ce96d0" id="r_adc248025f3eafeac3261994673ce96d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adc248025f3eafeac3261994673ce96d0">CreateNewConfig</a> ()</td></tr>
 <tr class="separator:adc248025f3eafeac3261994673ce96d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a943339390f6e515338978cef94a029f3" id="r_a943339390f6e515338978cef94a029f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a943339390f6e515338978cef94a029f3">SetSerialUart</a> ()</td></tr>
 <tr class="separator:a943339390f6e515338978cef94a029f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add5b2de649aeccda7da16178f82aa42f" id="r_add5b2de649aeccda7da16178f82aa42f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#add5b2de649aeccda7da16178f82aa42f">FindJsonChannelConfig</a> (JsonDocument &amp;jsonConfig, <a class="el" href="_output_mgr_port_defs_8hpp.html#adc89d4df16774f59429a3f8742c1cc4d">OM_PortId_t</a> PortId, JsonObject &amp;ChanConfig)</td></tr>
 <tr class="separator:add5b2de649aeccda7da16178f82aa42f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5f037f089c20467b3f86841b46e1f60b" id="r_a5f037f089c20467b3f86841b46e1f60b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5f037f089c20467b3f86841b46e1f60b">SetPortDefnitionDefaults</a> (<a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a> &amp;CurrentOutput, <a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> TargetProtocolType)</td></tr>
-<tr class="separator:a5f037f089c20467b3f86841b46e1f60b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82324ece57adefe7c2a344cd765c59e5" id="r_a82324ece57adefe7c2a344cd765c59e5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82324ece57adefe7c2a344cd765c59e5">SetPortDefnitionDefaults</a> (uint32_t PortIndex, <a class="el" href="#a3dec27ef1775dc596e2ce87038b692ce">e_OutputProtocolType</a> TargetProtocolType)</td></tr>
+<tr class="separator:a82324ece57adefe7c2a344cd765c59e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:aaacf05b73ebdb85157dd3d691ced89e1" id="r_aaacf05b73ebdb85157dd3d691ced89e1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaacf05b73ebdb85157dd3d691ced89e1">pOutputChannelDrivers</a> = nullptr</td></tr>
-<tr class="separator:aaacf05b73ebdb85157dd3d691ced89e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a58a51be534451fb96d35c3281bf68ff0" id="r_a58a51be534451fb96d35c3281bf68ff0"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58a51be534451fb96d35c3281bf68ff0">NumOutputPorts</a> = 0</td></tr>
+<tr class="memitem:a58a51be534451fb96d35c3281bf68ff0" id="r_a58a51be534451fb96d35c3281bf68ff0"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a58a51be534451fb96d35c3281bf68ff0">NumOutputPorts</a></td></tr>
 <tr class="separator:a58a51be534451fb96d35c3281bf68ff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0910e3aaedd527a8eef53ffd9f2a81e8" id="r_a0910e3aaedd527a8eef53ffd9f2a81e8"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0910e3aaedd527a8eef53ffd9f2a81e8">SizeOfTable</a> = 0</td></tr>
-<tr class="separator:a0910e3aaedd527a8eef53ffd9f2a81e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aff2c5504636afdba4780a62c204969fb" id="r_aff2c5504636afdba4780a62c204969fb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff2c5504636afdba4780a62c204969fb">HasBeenInitialized</a> = false</td></tr>
 <tr class="separator:aff2c5504636afdba4780a62c204969fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a81a032051fb4a0f82c385701e0eb09f8" id="r_a81a032051fb4a0f82c385701e0eb09f8"><td class="memItemLeft" align="right" valign="top">time_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81a032051fb4a0f82c385701e0eb09f8">ConfigLoadNeeded</a> = <a class="el" href="_output_mgr_8hpp.html#a45b6758583c33d0a16c97e1389e8f155">NO_CONFIG_NEEDED</a></td></tr>
@@ -355,7 +329,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" title="set up the operating environment based on the current config (or defaults)" alt="" coords="5,151,141,176"/>
 <area shape="rect" href="classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8" title=" " alt="" coords="189,56,356,82"/>
 <area shape="poly" title=" " alt="" coords="95,148,188,98,218,85,220,90,190,103,98,152"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="678,111,841,152"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="678,111,841,152"/>
 <area shape="poly" title=" " alt="" coords="141,163,394,155,662,140,662,145,395,160,141,169"/>
 <area shape="rect" href="classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761" title="Read the current configuration data from nvram." alt="" coords="189,181,356,207"/>
 <area shape="poly" title=" " alt="" coords="141,171,174,176,173,182,141,177"/>
@@ -370,7 +344,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="678,132,417,141,156,156,156,151,417,136,677,127"/>
 <area shape="rect" href="classc___output_mgr.html#a17aadd243f3259a99b320652ab624d07" title=" " alt="" coords="912,125,1104,151"/>
 <area shape="poly" title=" " alt="" coords="842,131,897,133,897,138,842,136"/>
-<area shape="rect" href="classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b" title=" " alt="" coords="910,60,1107,101"/>
+<area shape="rect" href="classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5" title=" " alt="" coords="910,60,1107,101"/>
 <area shape="poly" title=" " alt="" coords="841,112,894,101,895,107,842,117"/>
 <area shape="rect" href="classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="405,181,608,207"/>
 <area shape="poly" title=" " alt="" coords="357,192,390,192,390,197,357,197"/>
@@ -405,7 +379,7 @@ Here is the caller graph for this function:</div>
 <div class="center"><img src="classc___output_mgr_a90fb3f0faa9e11adcade9b0aee1525f3_icgraph.png" border="0" usemap="#aclassc___output_mgr_a90fb3f0faa9e11adcade9b0aee1525f3_icgraph" alt=""/></div>
 <map name="aclassc___output_mgr_a90fb3f0faa9e11adcade9b0aee1525f3_icgraph" id="aclassc___output_mgr_a90fb3f0faa9e11adcade9b0aee1525f3_icgraph">
 <area shape="rect" title="set up the operating environment based on the current config (or defaults)" alt="" coords="960,42,1095,68"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="749,5,912,46"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="749,5,912,46"/>
 <area shape="poly" title=" " alt="" coords="944,54,911,49,912,44,945,49"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="804,70,857,96"/>
 <area shape="poly" title=" " alt="" coords="945,69,858,82,857,77,944,64"/>
@@ -480,7 +454,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="3107,432,3061,498,3028,532,2991,561,2968,572,2965,567,2988,557,3025,529,3057,495,3102,429"/>
 <area shape="rect" href="classc___input_common.html#aa12aa6b031d2b37ed2009b56f8bf6bc4" title=" " alt="" coords="2765,620,2989,645"/>
 <area shape="poly" title=" " alt="" coords="3112,433,3095,473,3070,521,3035,570,3014,592,2991,611,2971,621,2969,616,2988,606,3010,588,3031,566,3065,518,3090,471,3107,431"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="2533,37,2696,78"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="2533,37,2696,78"/>
 <area shape="poly" title=" " alt="" coords="2793,108,2675,81,2676,76,2795,103"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="1294,229,1347,254"/>
 <area shape="poly" title=" " alt="" coords="2794,131,2598,155,2481,165,2363,168,1835,168,1763,171,1690,177,1549,196,1429,219,1348,238,1347,232,1428,214,1548,191,1689,171,1762,165,1834,163,2363,163,2481,159,2598,150,2794,125"/>
@@ -746,7 +720,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="611,100,579,100,579,94,611,94"/>
 <area shape="rect" href="classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="448,29,573,55"/>
 <area shape="poly" title=" " alt="" coords="645,82,560,58,561,53,647,77"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="232,123,395,164"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="232,123,395,164"/>
 <area shape="poly" title=" " alt="" coords="467,117,396,136,395,130,466,112"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="287,73,340,99"/>
 <area shape="poly" title=" " alt="" coords="427,95,340,90,340,85,427,90"/>
@@ -793,7 +767,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="166,139,284,112,285,117,167,144"/>
 <area shape="rect" href="classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="981,18,1164,44"/>
 <area shape="poly" title=" " alt="" coords="126,140,182,105,218,86,256,70,350,43,447,24,545,11,642,5,822,6,966,16,965,21,822,11,643,10,546,17,448,29,351,48,258,75,220,91,185,109,128,144"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="277,135,440,176"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="277,135,440,176"/>
 <area shape="poly" title=" " alt="" coords="209,153,262,153,262,158,209,158"/>
 <area shape="rect" href="classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="280,281,438,307"/>
 <area shape="poly" title=" " alt="" coords="134,166,322,271,319,276,131,171"/>
@@ -806,7 +780,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="441,136,524,120,525,125,442,142"/>
 <area shape="rect" href="classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="540,142,675,168"/>
 <area shape="poly" title=" " alt="" coords="441,161,525,161,525,166,441,166"/>
-<area shape="rect" href="classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b" title=" " alt="" coords="509,192,706,233"/>
+<area shape="rect" href="classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5" title=" " alt="" coords="509,192,706,233"/>
 <area shape="poly" title=" " alt="" coords="442,171,502,186,501,191,441,177"/>
 <area shape="poly" title=" " alt="" coords="540,150,456,149,456,144,540,144"/>
 <area shape="rect" href="classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8" title=" " alt="" coords="755,93,921,119"/>
@@ -849,7 +823,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="611,100,579,100,579,94,611,94"/>
 <area shape="rect" href="classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="448,29,573,55"/>
 <area shape="poly" title=" " alt="" coords="645,82,560,58,561,53,647,77"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="232,123,395,164"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="232,123,395,164"/>
 <area shape="poly" title=" " alt="" coords="467,117,396,136,395,130,466,112"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="287,73,340,99"/>
 <area shape="poly" title=" " alt="" coords="427,95,340,90,340,85,427,90"/>
@@ -1120,7 +1094,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="2415,260,2397,215,2368,161,2330,107,2307,83,2282,62,2263,51,2265,47,2285,57,2311,79,2334,103,2373,158,2401,213,2420,257"/>
 <area shape="rect" href="classc___input_common.html#aa12aa6b031d2b37ed2009b56f8bf6bc4" title=" " alt="" coords="2059,171,2283,196"/>
 <area shape="poly" title=" " alt="" coords="2393,267,2342,237,2282,210,2248,199,2249,194,2284,205,2344,233,2395,262"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="1827,104,1990,145"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="1827,104,1990,145"/>
 <area shape="poly" title=" " alt="" coords="2088,235,2058,223,2042,212,2033,201,2023,189,2010,178,1978,161,1946,148,1948,143,1980,157,2012,173,2027,185,2037,197,2046,208,2060,218,2090,230"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="588,247,641,272"/>
 <area shape="poly" title=" " alt="" coords="2088,236,1657,236,1129,235,984,238,843,245,641,260,641,255,842,240,984,233,1128,230,1657,230,2088,230"/>
@@ -1284,7 +1258,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="2817,295,2791,281,2775,265,2767,249,2759,233,2743,219,2705,200,2707,195,2747,214,2763,230,2771,246,2780,262,2795,277,2819,290"/>
 <area shape="rect" href="classc___input_common.html#aa12aa6b031d2b37ed2009b56f8bf6bc4" title=" " alt="" coords="2521,273,2745,298"/>
 <area shape="poly" title=" " alt="" coords="2800,304,2745,299,2746,294,2801,299"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="2288,488,2452,529"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="2288,488,2452,529"/>
 <area shape="poly" title=" " alt="" coords="2585,471,2453,502,2451,496,2584,466"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="1049,352,1102,377"/>
 <area shape="poly" title=" " alt="" coords="2549,441,2353,416,2236,407,2119,403,1590,403,1445,399,1304,390,1102,370,1103,365,1304,384,1446,394,1590,398,2119,398,2237,401,2354,411,2550,435"/>
@@ -1540,7 +1514,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="611,90,579,90,579,84,611,84"/>
 <area shape="rect" href="classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="448,148,573,173"/>
 <area shape="poly" title=" " alt="" coords="659,108,549,149,547,144,658,103"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="232,44,395,85"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="232,44,395,85"/>
 <area shape="poly" title=" " alt="" coords="427,89,395,85,396,80,428,84"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="287,198,340,224"/>
 <area shape="poly" title=" " alt="" coords="453,109,444,113,379,158,330,200,327,196,376,154,442,109,451,104"/>
@@ -1688,7 +1662,7 @@ Here is the caller graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="1345,181,1538,207"/>
 <area shape="rect" href="classc___output_mgr.html#a1e460ab7d570adbbb53dd0e4c6651f6d" title=" " alt="" coords="1093,156,1297,182"/>
 <area shape="poly" title=" " alt="" coords="1330,185,1297,182,1298,177,1330,180"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="232,149,395,189"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="232,149,395,189"/>
 <area shape="poly" title=" " alt="" coords="1330,206,1149,217,945,222,709,222,625,219,541,211,395,188,396,183,541,205,625,214,709,217,945,217,1149,211,1330,200"/>
 <area shape="rect" href="classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="842,131,1045,156"/>
 <area shape="poly" title=" " alt="" coords="1077,160,1045,156,1046,151,1078,154"/>
@@ -1711,31 +1685,6 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="433,69,336,66,337,60,433,64"/>
 </map>
 </div>
-
-</div>
-</div>
-<a id="a9ada6e65bb85cf170a0edd014b7046be" name="a9ada6e65bb85cf170a0edd014b7046be"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9ada6e65bb85cf170a0edd014b7046be">&#9670;&#160;</a></span>GetDriverSize()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t c_OutputMgr::GetDriverSize </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
 
 </div>
 </div>
@@ -1889,8 +1838,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="a7f11cdb7957ceba01ff6081016afc794" name="a7f11cdb7957ceba01ff6081016afc794"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7f11cdb7957ceba01ff6081016afc794">&#9670;&#160;</a></span>InstantiateNewOutputChannel()</h2>
+<a id="a660afde38f78610d503499bf8b7adcd6" name="a660afde38f78610d503499bf8b7adcd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a660afde38f78610d503499bf8b7adcd6">&#9670;&#160;</a></span>InstantiateNewOutputChannel()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1901,7 +1850,7 @@ Here is the caller graph for this function:</div>
         <tr>
           <td class="memname">void c_OutputMgr::InstantiateNewOutputChannel </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>ChannelIndex</em></span>, </td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>PortIndex</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1923,14 +1872,14 @@ Here is the caller graph for this function:</div>
 <div class="dynheader">
 Here is the call graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_cgraph.png" border="0" usemap="#aclassc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_cgraph" alt=""/></div>
-<map name="aclassc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_cgraph" id="aclassc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_cgraph">
+<div class="center"><img src="classc___output_mgr_a660afde38f78610d503499bf8b7adcd6_cgraph.png" border="0" usemap="#aclassc___output_mgr_a660afde38f78610d503499bf8b7adcd6_cgraph" alt=""/></div>
+<map name="aclassc___output_mgr_a660afde38f78610d503499bf8b7adcd6_cgraph" id="aclassc___output_mgr_a660afde38f78610d503499bf8b7adcd6_cgraph">
 <area shape="rect" title=" " alt="" coords="5,246,169,286"/>
 <area shape="rect" href="classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="248,253,383,279"/>
 <area shape="poly" title=" " alt="" coords="169,272,232,272,232,278,169,278"/>
 <area shape="rect" href="classc___output_mgr.html#a17aadd243f3259a99b320652ab624d07" title=" " alt="" coords="1183,271,1375,296"/>
 <area shape="poly" title=" " alt="" coords="147,285,224,309,323,335,433,355,489,361,544,364,781,364,960,364,1037,357,1134,338,1189,321,1237,301,1239,306,1191,326,1136,343,1037,362,960,369,781,369,544,369,489,367,432,361,322,340,223,314,145,290"/>
-<area shape="rect" href="classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b" title=" " alt="" coords="217,403,414,444"/>
+<area shape="rect" href="classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5" title=" " alt="" coords="217,403,414,444"/>
 <area shape="poly" title=" " alt="" coords="108,285,156,333,186,359,218,383,239,394,237,399,215,387,182,364,152,337,105,289"/>
 <area shape="poly" title=" " alt="" coords="247,261,184,260,184,255,247,255"/>
 <area shape="rect" href="classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8" title=" " alt="" coords="462,303,629,328"/>
@@ -1975,8 +1924,8 @@ Here is the call graph for this function:</div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_icgraph.png" border="0" usemap="#aclassc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_icgraph" alt=""/></div>
-<map name="aclassc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_icgraph" id="aclassc___output_mgr_a7f11cdb7957ceba01ff6081016afc794_icgraph">
+<div class="center"><img src="classc___output_mgr_a660afde38f78610d503499bf8b7adcd6_icgraph.png" border="0" usemap="#aclassc___output_mgr_a660afde38f78610d503499bf8b7adcd6_icgraph" alt=""/></div>
+<map name="aclassc___output_mgr_a660afde38f78610d503499bf8b7adcd6_icgraph" id="aclassc___output_mgr_a660afde38f78610d503499bf8b7adcd6_icgraph">
 <area shape="rect" title=" " alt="" coords="768,30,931,70"/>
 <area shape="rect" href="classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,5,242,31"/>
 <area shape="poly" title=" " alt="" coords="752,55,490,45,242,30,243,24,491,39,752,49"/>
@@ -2033,7 +1982,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="379,160,502,131,503,136,380,165"/>
 <area shape="rect" href="classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="1196,86,1379,112"/>
 <area shape="poly" title=" " alt="" coords="341,161,397,124,471,89,568,54,651,29,727,13,799,4,872,4,950,9,1138,39,1196,55,1247,77,1245,81,1194,60,1136,44,949,15,872,9,800,10,728,18,653,35,569,59,473,93,400,129,344,165"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="492,156,656,197"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="492,156,656,197"/>
 <area shape="poly" title=" " alt="" coords="425,174,477,174,477,179,425,179"/>
 <area shape="rect" href="classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="495,275,653,301"/>
 <area shape="poly" title=" " alt="" coords="354,187,530,266,528,271,352,192"/>
@@ -2046,7 +1995,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="656,154,751,131,752,136,657,159"/>
 <area shape="rect" href="classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="755,218,891,244"/>
 <area shape="poly" title=" " alt="" coords="635,195,741,219,739,224,634,200"/>
-<area shape="rect" href="classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b" title=" " alt="" coords="724,153,922,194"/>
+<area shape="rect" href="classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5" title=" " alt="" coords="724,153,922,194"/>
 <area shape="poly" title=" " alt="" coords="656,173,709,172,709,178,656,178"/>
 <area shape="poly" title=" " alt="" coords="755,238,624,249,472,266,314,290,175,315,174,309,313,284,472,260,624,244,755,233"/>
 <area shape="poly" title=" " alt="" coords="789,220,670,191,672,186,790,215"/>
@@ -2079,7 +2028,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="916,115,792,59,794,54,918,110"/>
 <area shape="rect" href="classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="700,120,824,145"/>
 <area shape="poly" title=" " alt="" coords="862,135,825,135,825,130,862,130"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="483,5,646,46"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="483,5,646,46"/>
 <area shape="poly" title=" " alt="" coords="678,47,647,44,647,39,679,42"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="538,70,591,96"/>
 <area shape="poly" title=" " alt="" coords="681,62,592,80,591,75,680,57"/>
@@ -2208,7 +2157,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="2921,427,2910,361,2886,273,2869,226,2846,180,2819,137,2786,99,2756,80,2759,76,2789,95,2823,133,2851,177,2874,223,2891,271,2915,360,2926,427"/>
 <area shape="poly" title=" " alt="" coords="2122,396,1982,413,1903,430,1826,454,1789,471,1754,491,1699,530,1696,525,1751,487,1786,466,1824,449,1902,425,1981,408,2121,391"/>
 <area shape="poly" title=" " alt="" coords="2620,446,2595,454,2571,465,2547,474,2422,500,2294,519,2167,532,2045,540,1837,546,1707,544,1707,539,1837,540,2045,535,2166,527,2293,514,2421,495,2545,469,2569,460,2593,449,2618,441"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="2364,419,2527,460"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="2364,419,2527,460"/>
 <area shape="poly" title=" " alt="" coords="2607,442,2528,446,2527,441,2607,436"/>
 <area shape="poly" title=" " alt="" coords="2349,460,2297,467,2154,479,2025,484,2025,479,2153,474,2296,462,2348,455"/>
 <area shape="poly" title=" " alt="" coords="2543,423,2622,419,2623,424,2543,428"/>
@@ -2283,7 +2232,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="597,241,629,237,629,242,597,246"/>
 <area shape="rect" href="classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="1369,100,1551,125"/>
 <area shape="poly" title=" " alt="" coords="579,239,595,229,608,214,614,199,618,167,622,134,629,117,642,100,673,73,702,53,730,40,758,31,819,22,896,11,970,4,1045,5,1119,12,1191,25,1319,58,1413,91,1411,96,1317,63,1190,30,1118,18,1044,10,970,9,897,16,820,27,759,37,732,45,704,58,676,77,646,104,634,119,627,135,624,168,620,200,612,217,598,233,582,244"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="665,263,828,303"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="665,263,828,303"/>
 <area shape="poly" title=" " alt="" coords="597,264,650,270,649,275,597,269"/>
 <area shape="rect" href="classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="667,114,826,140"/>
 <area shape="poly" title=" " alt="" coords="566,239,595,229,713,147,716,152,598,233,568,244"/>
@@ -2296,7 +2245,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="828,262,921,240,922,245,829,267"/>
 <area shape="rect" href="classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="928,328,1063,353"/>
 <area shape="poly" title=" " alt="" coords="805,301,913,327,912,333,804,307"/>
-<area shape="rect" href="classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b" title=" " alt="" coords="897,263,1094,303"/>
+<area shape="rect" href="classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5" title=" " alt="" coords="897,263,1094,303"/>
 <area shape="poly" title=" " alt="" coords="829,280,881,280,881,286,829,286"/>
 <area shape="poly" title=" " alt="" coords="927,343,361,343,361,338,927,338"/>
 <area shape="poly" title=" " alt="" coords="962,330,843,299,844,294,964,324"/>
@@ -2362,7 +2311,7 @@ Here is the call graph for this function:</div>
 <area shape="rect" title=" " alt="" coords="5,501,184,542"/>
 <area shape="rect" href="classc___output_mgr.html#adc248025f3eafeac3261994673ce96d0" title=" " alt="" coords="232,246,435,272"/>
 <area shape="poly" title=" " alt="" coords="112,499,230,368,308,282,312,285,234,371,116,503"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="504,63,667,103"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="504,63,667,103"/>
 <area shape="poly" title=" " alt="" coords="98,500,112,448,138,377,176,300,201,264,230,232,289,185,356,148,425,120,488,101,489,106,426,125,359,153,292,189,233,236,205,267,181,303,143,379,117,449,103,502"/>
 <area shape="rect" href="classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d" title=" " alt="" coords="1449,333,1635,358"/>
 <area shape="poly" title=" " alt="" coords="184,527,368,540,584,547,1066,547,1134,541,1202,526,1267,504,1329,476,1436,416,1510,366,1513,370,1439,421,1332,481,1269,509,1203,531,1135,547,1066,552,584,552,368,545,184,532"/>
@@ -2391,7 +2340,7 @@ Here is the call graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="639,102,787,163,785,168,636,106"/>
 <area shape="rect" href="classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="766,70,902,96"/>
 <area shape="poly" title=" " alt="" coords="667,89,751,89,751,94,667,94"/>
-<area shape="rect" href="classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b" title=" " alt="" coords="735,5,933,46"/>
+<area shape="rect" href="classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5" title=" " alt="" coords="735,5,933,46"/>
 <area shape="poly" title=" " alt="" coords="667,62,728,47,729,53,668,67"/>
 <area shape="poly" title=" " alt="" coords="766,78,683,77,683,72,766,72"/>
 <area shape="rect" href="classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8" title=" " alt="" coords="981,172,1148,197"/>
@@ -2712,7 +2661,7 @@ Here is the caller graph for this function:</div>
 <area shape="rect" href="classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="448,622,573,648"/>
 <area shape="poly" title=" " alt="" coords="681,765,624,712,602,684,577,661,557,651,559,646,580,657,606,681,628,708,685,761"/>
 <area shape="poly" title=" " alt="" coords="442,771,340,744,341,739,444,766"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="232,791,395,831"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="232,791,395,831"/>
 <area shape="poly" title=" " alt="" coords="451,804,396,812,395,807,450,799"/>
 <area shape="poly" title=" " alt="" coords="411,812,841,830,841,835,410,818"/>
 <area shape="poly" title=" " alt="" coords="410,787,442,783,443,789,411,792"/>
@@ -2802,7 +2751,7 @@ Here is the caller graph for this function:</div>
 <area shape="poly" title=" " alt="" coords="659,116,577,86,549,75,550,70,579,80,661,111"/>
 <area shape="rect" href="classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925" title="Call from loop(), renders output data." alt="" coords="448,120,573,145"/>
 <area shape="poly" title=" " alt="" coords="611,135,573,135,573,130,611,130"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="232,5,395,46"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="232,5,395,46"/>
 <area shape="poly" title=" " alt="" coords="427,56,386,49,387,44,428,51"/>
 <area shape="rect" href="main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="287,70,340,96"/>
 <area shape="poly" title=" " alt="" coords="428,72,341,82,340,77,427,66"/>
@@ -2817,8 +2766,8 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
-<a id="a5f037f089c20467b3f86841b46e1f60b" name="a5f037f089c20467b3f86841b46e1f60b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f037f089c20467b3f86841b46e1f60b">&#9670;&#160;</a></span>SetPortDefnitionDefaults()</h2>
+<a id="a82324ece57adefe7c2a344cd765c59e5" name="a82324ece57adefe7c2a344cd765c59e5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82324ece57adefe7c2a344cd765c59e5">&#9670;&#160;</a></span>SetPortDefnitionDefaults()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2829,7 +2778,7 @@ Here is the caller graph for this function:</div>
         <tr>
           <td class="memname">bool c_OutputMgr::SetPortDefnitionDefaults </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>CurrentOutput</em></span>, </td>
+          <td class="paramtype">uint32_t</td>          <td class="paramname"><span class="paramname"><em>PortIndex</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -2846,10 +2795,10 @@ Here is the caller graph for this function:</div>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
-<div class="center"><img src="classc___output_mgr_a5f037f089c20467b3f86841b46e1f60b_icgraph.png" border="0" usemap="#aclassc___output_mgr_a5f037f089c20467b3f86841b46e1f60b_icgraph" alt=""/></div>
-<map name="aclassc___output_mgr_a5f037f089c20467b3f86841b46e1f60b_icgraph" id="aclassc___output_mgr_a5f037f089c20467b3f86841b46e1f60b_icgraph">
+<div class="center"><img src="classc___output_mgr_a82324ece57adefe7c2a344cd765c59e5_icgraph.png" border="0" usemap="#aclassc___output_mgr_a82324ece57adefe7c2a344cd765c59e5_icgraph" alt=""/></div>
+<map name="aclassc___output_mgr_a82324ece57adefe7c2a344cd765c59e5_icgraph" id="aclassc___output_mgr_a82324ece57adefe7c2a344cd765c59e5_icgraph">
 <area shape="rect" title=" " alt="" coords="979,30,1176,70"/>
-<area shape="rect" href="classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="768,30,931,70"/>
+<area shape="rect" href="classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="768,30,931,70"/>
 <area shape="poly" title=" " alt="" coords="963,53,932,53,932,48,963,48"/>
 <area shape="rect" href="classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="107,5,242,31"/>
 <area shape="poly" title=" " alt="" coords="752,55,490,45,242,30,243,24,491,39,752,49"/>
@@ -3274,7 +3223,7 @@ Here is the caller graph for this function:</div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t c_OutputMgr::NumOutputPorts = 0</td>
+          <td class="memname">uint8_t c_OutputMgr::NumOutputPorts</td>
         </tr>
       </table>
   </td>
@@ -3319,50 +3268,6 @@ Here is the caller graph for this function:</div>
       <table class="memname">
         <tr>
           <td class="memname">uint8_t* c_OutputMgr::pOutputBuffer = nullptr</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="aaacf05b73ebdb85157dd3d691ced89e1" name="aaacf05b73ebdb85157dd3d691ced89e1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaacf05b73ebdb85157dd3d691ced89e1">&#9670;&#160;</a></span>pOutputChannelDrivers</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="structc___output_mgr_1_1_driver_info__t.html">DriverInfo_t</a>* c_OutputMgr::pOutputChannelDrivers = nullptr</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a0910e3aaedd527a8eef53ffd9f2a81e8" name="a0910e3aaedd527a8eef53ffd9f2a81e8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0910e3aaedd527a8eef53ffd9f2a81e8">&#9670;&#160;</a></span>SizeOfTable</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint32_t c_OutputMgr::SizeOfTable = 0</td>
         </tr>
       </table>
   </td>

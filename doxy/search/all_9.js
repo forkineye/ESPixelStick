@@ -78,7 +78,7 @@ var searchData=
   ['inputtypexlatemap_5ft_75',['InputTypeXlateMap_t',['../struct_input_type_xlate_map__t.html',1,'']]],
   ['inputvalue_5ft_76',['InputValue_t',['../classc___external_input.html#a4f30c6d7f324be6effcb32758afc7ef3',1,'c_ExternalInput']]],
   ['instantiatenewinputchannel_77',['InstantiateNewInputChannel',['../classc___input_mgr.html#afe3597df3db9a6deec4140f410f7f1ee',1,'c_InputMgr']]],
-  ['instantiatenewoutputchannel_78',['InstantiateNewOutputChannel',['../classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794',1,'c_OutputMgr']]],
+  ['instantiatenewoutputchannel_78',['InstantiateNewOutputChannel',['../classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6',1,'c_OutputMgr']]],
   ['intensity2uart_79',['Intensity2Uart',['../classc___output_uart.html#a97004f8936377ef587858b461d744d6b',1,'c_OutputUart']]],
   ['intensitybittimeinus_80',['IntensityBitTimeInUs',['../classc___output_pixel.html#ae5cff5b491f941dd4c2167e3a6de7b30',1,'c_OutputPixel']]],
   ['intensitydatawidth_81',['IntensityDataWidth',['../structc___output_uart_1_1_output_uart_config__t.html#a15ebb4c889658c0d5ed19d7129c9ae41',1,'c_OutputUart::OutputUartConfig_t']]],

@@ -10,7 +10,7 @@
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="379,160,502,131,503,136,380,165"/>
 <area shape="rect" id="Node000007" href="$classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="1196,86,1379,112"/>
 <area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="341,161,397,124,471,89,568,54,651,29,727,13,799,4,872,4,950,9,1138,39,1196,55,1247,77,1245,81,1194,60,1136,44,949,15,872,9,800,10,728,18,653,35,569,59,473,93,400,129,344,165"/>
-<area shape="rect" id="Node000008" href="$classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="492,156,656,197"/>
+<area shape="rect" id="Node000008" href="$classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="492,156,656,197"/>
 <area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="425,174,477,174,477,179,425,179"/>
 <area shape="rect" id="Node000017" href="$classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892" title="Save the current configuration data to nvram." alt="" coords="495,275,653,301"/>
 <area shape="poly" id="edge20_Node000002_Node000017" title=" " alt="" coords="354,187,530,266,528,271,352,192"/>
@@ -23,7 +23,7 @@
 <area shape="poly" id="edge18_Node000008_Node000006" title=" " alt="" coords="656,154,751,131,752,136,657,159"/>
 <area shape="rect" id="Node000009" href="$classc___output_mgr.html#a90fb3f0faa9e11adcade9b0aee1525f3" title="set up the operating environment based on the current config (or defaults)" alt="" coords="755,218,891,244"/>
 <area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="635,195,741,219,739,224,634,200"/>
-<area shape="rect" id="Node000016" href="$classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b" title=" " alt="" coords="724,153,922,194"/>
+<area shape="rect" id="Node000016" href="$classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5" title=" " alt="" coords="724,153,922,194"/>
 <area shape="poly" id="edge19_Node000008_Node000016" title=" " alt="" coords="656,173,709,172,709,178,656,178"/>
 <area shape="poly" id="edge13_Node000009_Node000001" title=" " alt="" coords="755,238,624,249,472,266,314,290,175,315,174,309,313,284,472,260,624,244,755,233"/>
 <area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="789,220,670,191,672,186,790,215"/>

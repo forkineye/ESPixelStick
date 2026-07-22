@@ -61,17 +61,18 @@ var NAVTREEINDEX =
 "_const_names_8hpp.html#ae083a5e9def6af78cb69e46ab533599a",
 "_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html#a0aa30f0dcce5fa891cff33303c5481ff",
 "_g_p_i_o___defs___e_s_p32___m5_stack___atom_8hpp.html#a13852417ea1c6f73a1969b1108bf9963",
-"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h___p5_8hpp.html#a3caa63f16e3dcb8b7b137a99d926439a",
-"_g_p_i_o___defs___e_s_p32___t_w_i_l_i_g_h_t_l_o_r_d_8hpp.html#a4cc131f118cd012226ab3667cd2cbb6b",
-"_g_p_i_o___defs___e_s_p8266___e_s_p01_s_8hpp.html#ad71d400bf3d1b998be16ce4c822a22ec",
-"_output_serial_rmt_8cpp.html",
-"classc___f_p_p_discovery.html#af1c41bd502e6a8bed521a01cfa655795",
-"classc___input_effect_engine.html#a054251f6f3f1c337c8742c05e5ad6563",
-"classc___input_m_q_t_t.html#a61e1937ab6f2ed9541d09b60c38ea769",
-"classc___output_pixel.html#a5780ef4735ecf28c22dff9f2cf68ed36",
-"classfsm___play_effect__state___idle.html#a61b7c76b8f48a9bb5ff988131d133d9f",
-"fseq_8h.html#aa0f0acd37a1403c67b86fb03c23898f1",
-"struct_input_type_xlate_map__t.html"
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___e_t_h_8hpp.html#a319d1c078a4ace47775ecd6615a796a7",
+"_g_p_i_o___defs___e_s_p32___solo2go_8hpp.html#aca6c98b14a61849654e93ee35fd1d1ab",
+"_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01___wasatch_8hpp.html#aac8484c1f4cc7cb788c03e1c3c1faade",
+"_input_m_q_t_t_8cpp.html#ad9d40c5231b61de4ecc53164041204f8",
+"class_e_f_update.html#a85d676640a316f0129c5275e0514bbbc",
+"classc___input_artnet.html#a79d16153a8b4a8e1b17e9faa53217b84",
+"classc___input_f_p_p_remote_play_effect.html#aa0a2b271e77ed90a7db836e2032068e3",
+"classc___output_common.html#a3490e2a7b2ba343004d367a45faddd3c",
+"classc___web_mgr.html#ab4b98e04e2eb85420450597c7c692b2c",
+"classfsm___wi_fi__state.html#a2c842ba4749d28414d3b14c87e02215c",
+"globals_type.html",
+"structc___input_effect_engine_1_1d_c_h_s_v.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

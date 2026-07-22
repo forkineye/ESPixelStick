@@ -28,6 +28,7 @@ var annotated_dup =
     [ "c_WebMgr", "classc___web_mgr.html", "classc___web_mgr" ],
     [ "c_WiFiDriver", "classc___wi_fi_driver.html", "classc___wi_fi_driver" ],
     [ "config_t", "structconfig__t.html", "structconfig__t" ],
+    [ "DriverInfo_t", "struct_driver_info__t.html", "struct_driver_info__t" ],
     [ "EFUpdate", "class_e_f_update.html", "class_e_f_update" ],
     [ "FastTimer", "class_fast_timer.html", "class_fast_timer" ],
     [ "FPPMultiSyncPacket", "union_f_p_p_multi_sync_packet.html", "union_f_p_p_multi_sync_packet" ],
@@ -71,5 +72,6 @@ var annotated_dup =
     [ "InputTypeXlateMap_t", "struct_input_type_xlate_map__t.html", "struct_input_type_xlate_map__t" ],
     [ "OM_GPIOS_t", "struct_o_m___g_p_i_o_s__t.html", "struct_o_m___g_p_i_o_s__t" ],
     [ "OM_OutputPortDefinition_t", "struct_o_m___output_port_definition__t.html", "struct_o_m___output_port_definition__t" ],
+    [ "OutputProtocolClasses_t", "union_output_protocol_classes__t.html", "union_output_protocol_classes__t" ],
     [ "SupportedOutputProtocol_t", "struct_supported_output_protocol__t.html", "struct_supported_output_protocol__t" ]
 ];

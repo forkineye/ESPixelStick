@@ -49,7 +49,7 @@ var searchData=
   ['setpixelcount_46',['SetPixelCount',['../classc___output_pixel.html#a29981b330185e79f12baabab7bc143da',1,'c_OutputPixel']]],
   ['setpixelprependinformation_47',['SetPixelPrependInformation',['../classc___output_pixel.html#a06ab1ebc8065127d149e41bf902f8945',1,'c_OutputPixel']]],
   ['setplayedfilecount_48',['SetPlayedFileCount',['../classc___input_f_p_p_remote_play_item.html#a841d46c07f3ff61d388960ca00dc4fb3',1,'c_InputFPPRemotePlayItem']]],
-  ['setportdefnitiondefaults_49',['SetPortDefnitionDefaults',['../classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b',1,'c_OutputMgr']]],
+  ['setportdefnitiondefaults_49',['SetPortDefnitionDefaults',['../classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5',1,'c_OutputMgr']]],
   ['setrange_50',['setRange',['../classc___input_effect_engine.html#aff4693217ee5e68868068613b318a281',1,'c_InputEffectEngine']]],
   ['setsdspeed_51',['SetSdSpeed',['../classc___file_mgr.html#a0de9d08e1f9782c5fabddbfd410e36dc',1,'c_FileMgr']]],
   ['setsendfppsync_52',['SetSendFppSync',['../classc___input_f_p_p_remote_play_item.html#a3b82ae5fac0050235ff7bb8f6a193761',1,'c_InputFPPRemotePlayItem']]],

@@ -262,6 +262,10 @@ Include dependency graph for OutputMgr.cpp:</div>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_supported_output_protocol__t.html">SupportedOutputProtocol_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">union &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="union_output_protocol_classes__t.html">OutputProtocolClasses_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_driver_info__t.html">DriverInfo_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
 Macros</h2></td></tr>
@@ -271,15 +275,40 @@ Macros</h2></td></tr>
 <tr class="separator:a136c90426710255bfb9c84315de747b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf82107f89db52969b0ccb0fcff646f2" id="r_aaf82107f89db52969b0ccb0fcff646f2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf82107f89db52969b0ccb0fcff646f2">AllocatePort</a>(ClassType,  Output,  OutputType)</td></tr>
 <tr class="separator:aaf82107f89db52969b0ccb0fcff646f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd2e60fd6f919217f95b222f2c16721f" id="r_acd2e60fd6f919217f95b222f2c16721f"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd2e60fd6f919217f95b222f2c16721f">AddUartRmtToProtocolClassList</a>(name)</td></tr>
+<tr class="separator:acd2e60fd6f919217f95b222f2c16721f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:ab0dd6515a18a339a11253af8696e3edb" id="r_ab0dd6515a18a339a11253af8696e3edb"><td class="memItemLeft" align="right" valign="top">static const <a class="el" href="struct_supported_output_protocol__t.html">SupportedOutputProtocol_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab0dd6515a18a339a11253af8696e3edb">SupportedOutputProtocolList</a> []</td></tr>
 <tr class="separator:ab0dd6515a18a339a11253af8696e3edb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a51001349ecf5080d706f65c4cc81e1f4" id="r_a51001349ecf5080d706f65c4cc81e1f4"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="struct_driver_info__t.html">DriverInfo_t</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a51001349ecf5080d706f65c4cc81e1f4">pOutputChannelDrivers</a> = nullptr</td></tr>
+<tr class="separator:a51001349ecf5080d706f65c4cc81e1f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad89e9ed015ab4c14e1a762fbde86d39c" id="r_ad89e9ed015ab4c14e1a762fbde86d39c"><td class="memItemLeft" align="right" valign="top">static uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad89e9ed015ab4c14e1a762fbde86d39c">OutputBuffer</a> [<a class="el" href="_output_mgr_8hpp.html#a2950110c970b04d476d45273635a5d85">OM_MAX_NUM_CHANNELS</a>]</td></tr>
+<tr class="separator:ad89e9ed015ab4c14e1a762fbde86d39c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af6b50c745df05adfe6f502280127db1f" id="r_af6b50c745df05adfe6f502280127db1f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classc___output_mgr.html">c_OutputMgr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af6b50c745df05adfe6f502280127db1f">OutputMgr</a></td></tr>
 <tr class="separator:af6b50c745df05adfe6f502280127db1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="acd2e60fd6f919217f95b222f2c16721f" name="acd2e60fd6f919217f95b222f2c16721f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd2e60fd6f919217f95b222f2c16721f">&#9670;&#160;</a></span>AddUartRmtToProtocolClassList</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define AddUartRmtToProtocolClassList</td>
+          <td>(</td>
+          <td class="paramtype"></td>          <td class="paramname"><span class="paramname"><em>name</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Value:</b><div class="fragment"><div class="line">    c_ ## name ## Uart name ## Uart; \</div>
+<div class="line">    c_ ## name ## Uart name ## Rmt;</div>
+</div><!-- fragment -->
+</div>
+</div>
 <a id="aaf82107f89db52969b0ccb0fcff646f2" name="aaf82107f89db52969b0ccb0fcff646f2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aaf82107f89db52969b0ccb0fcff646f2">&#9670;&#160;</a></span>AllocatePort</h2>
 
@@ -304,7 +333,6 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">{ \</div>
-<div class="line">    static_assert(<span class="keyword">sizeof</span>(Output.OutputDriver) &gt;= <span class="keyword">sizeof</span>(ClassType)); \</div>
 <div class="line">    new(&amp;Output.OutputDriver) ClassType(Output.PortDefinition, OutputType); \</div>
 <div class="line">    Output.OutputDriverInUse = true; \</div>
 <div class="line">}</div>
@@ -348,6 +376,28 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a id="ad89e9ed015ab4c14e1a762fbde86d39c" name="ad89e9ed015ab4c14e1a762fbde86d39c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad89e9ed015ab4c14e1a762fbde86d39c">&#9670;&#160;</a></span>OutputBuffer</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t OutputBuffer[<a class="el" href="_output_mgr_8hpp.html#a2950110c970b04d476d45273635a5d85">OM_MAX_NUM_CHANNELS</a>]</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="af6b50c745df05adfe6f502280127db1f" name="af6b50c745df05adfe6f502280127db1f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af6b50c745df05adfe6f502280127db1f">&#9670;&#160;</a></span>OutputMgr</h2>
 
@@ -358,6 +408,28 @@ Variables</h2></td></tr>
           <td class="memname"><a class="el" href="classc___output_mgr.html">c_OutputMgr</a> OutputMgr</td>
         </tr>
       </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a51001349ecf5080d706f65c4cc81e1f4" name="a51001349ecf5080d706f65c4cc81e1f4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51001349ecf5080d706f65c4cc81e1f4">&#9670;&#160;</a></span>pOutputChannelDrivers</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_driver_info__t.html">DriverInfo_t</a>* pOutputChannelDrivers = nullptr</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 </div>

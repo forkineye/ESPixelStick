@@ -1,0 +1,11 @@
+<map id="OutputProtocolClasses_t" name="OutputProtocolClasses_t">
+<area shape="rect" id="Node000001" title=" " alt="" coords="10,346,177,372"/>
+<area shape="rect" id="Node000002" href="$classc___output_disabled.html" title=" " alt="" coords="31,258,156,283"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,299,96,346,91,346,91,299"/>
+<area shape="rect" id="Node000003" href="$classc___output_common.html" title=" " alt="" coords="30,183,157,208"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="96,224,96,257,91,257,91,224"/>
+<area shape="rect" id="Node000004" href="$struct_o_m___output_port_definition__t.html" title=" " alt="" coords="5,94,182,120"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="96,135,96,182,91,182,91,135"/>
+<area shape="rect" id="Node000005" href="$struct_o_m___g_p_i_o_s__t.html" title=" " alt="" coords="42,5,145,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="96,47,96,94,91,94,91,47"/>
+</map>

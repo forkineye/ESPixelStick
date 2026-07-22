@@ -25,7 +25,7 @@ var searchData=
   ['disconnectreason6_22',['DisconnectReason6',['../_input_m_q_t_t_8cpp.html#aaf23ccbdb1f9fef1f203a3a35ef64b39',1,'InputMQTT.cpp']]],
   ['disconnectreason7_23',['DisconnectReason7',['../_input_m_q_t_t_8cpp.html#af549924b09857e90d439453fdc56529c',1,'InputMQTT.cpp']]],
   ['disconnectreasons_24',['DisconnectReasons',['../_input_m_q_t_t_8cpp.html#a0d8fd104c9a1cd15b25dc3dd48ea8789',1,'InputMQTT.cpp']]],
-  ['driverid_25',['DriverId',['../structc___input_mgr_1_1_driver_info__t.html#a1f45a367b0aa71fbebe813c0121e75f0',1,'c_InputMgr::DriverInfo_t::DriverId'],['../structc___output_mgr_1_1_driver_info__t.html#a210bdcb580361aea53acc5148b6f4cec',1,'c_OutputMgr::DriverInfo_t::DriverId']]],
+  ['driverid_25',['DriverId',['../struct_driver_info__t.html#a5e768cd431939d79a55835456a14f385',1,'DriverInfo_t::DriverId'],['../structc___input_mgr_1_1_driver_info__t.html#a1f45a367b0aa71fbebe813c0121e75f0',1,'c_InputMgr::DriverInfo_t::DriverId']]],
   ['driverinuse_26',['DriverInUse',['../structc___input_mgr_1_1_driver_info__t.html#a14765d7fa7e8464a52291058a491f45a',1,'c_InputMgr::DriverInfo_t']]],
   ['durationms_27',['DurationMS',['../class_fast_timer.html#a2d26dbf18a49e2e148c2bf55222e9d95',1,'FastTimer']]],
   ['durationtimer_28',['durationtimer',['../structc___input_effect_engine_1_1_flash_info__t.html#aa63e048acc200fc2950a8bc99e879ce6',1,'c_InputEffectEngine::FlashInfo_t']]]

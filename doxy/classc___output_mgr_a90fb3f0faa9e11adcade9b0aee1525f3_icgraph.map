@@ -1,6 +1,6 @@
 <map id="c_OutputMgr::Begin" name="c_OutputMgr::Begin">
 <area shape="rect" id="Node000001" title="set up the operating environment based on the current config (or defaults)" alt="" coords="960,42,1095,68"/>
-<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794" title=" " alt="" coords="749,5,912,46"/>
+<area shape="rect" id="Node000002" href="$classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6" title=" " alt="" coords="749,5,912,46"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="944,54,911,49,912,44,945,49"/>
 <area shape="rect" id="Node000008" href="$main_8cpp.html#a4fc01d736fe50cf5b977f755b675f11d" title="Arduino Setup." alt="" coords="804,70,857,96"/>
 <area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="945,69,858,82,857,77,944,64"/>

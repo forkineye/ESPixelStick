@@ -1,6 +1,5 @@
 var classc___output_mgr =
 [
-    [ "DriverInfo_t", "structc___output_mgr_1_1_driver_info__t.html", "structc___output_mgr_1_1_driver_info__t" ],
     [ "e_OutputProtocolType", "classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ce", [
       [ "OutputProtocol_Disabled", "classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692cea0e3696fb135fb8df5fce3e953c064f98", null ],
       [ "OutputProtocol_Last", "classc___output_mgr.html#a3dec27ef1775dc596e2ce87038b692ceaca25c36174ee8af00516d4bf75be7805", null ]
@@ -20,10 +19,9 @@ var classc___output_mgr =
     [ "GetConfig", "classc___output_mgr.html#a520a6f7c6d810b254b71f3712d6f9710", null ],
     [ "GetConfig", "classc___output_mgr.html#a19d05a4eb3324331a50f31797639654f", null ],
     [ "GetDriverName", "classc___output_mgr.html#a17aadd243f3259a99b320652ab624d07", null ],
-    [ "GetDriverSize", "classc___output_mgr.html#a9ada6e65bb85cf170a0edd014b7046be", null ],
     [ "GetNumPorts", "classc___output_mgr.html#a861cf67886d1b3eccab0efc061e89963", null ],
     [ "GetStatus", "classc___output_mgr.html#a56f81964a988693f278fd65cf43277c6", null ],
-    [ "InstantiateNewOutputChannel", "classc___output_mgr.html#a7f11cdb7957ceba01ff6081016afc794", null ],
+    [ "InstantiateNewOutputChannel", "classc___output_mgr.html#a660afde38f78610d503499bf8b7adcd6", null ],
     [ "LoadConfig", "classc___output_mgr.html#a18f0345656b0c2795b7c925f6d797761", null ],
     [ "PauseOutputs", "classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d", null ],
     [ "Poll", "classc___output_mgr.html#afb3a7a9024cae09c4f6c8613a47e4925", null ],
@@ -33,7 +31,7 @@ var classc___output_mgr =
     [ "ScheduleLoadConfig", "classc___output_mgr.html#ac9742371ff3eae19bc7f0ece84ea6c79", null ],
     [ "SetConfig", "classc___output_mgr.html#aee5d29f91c6457ce753d855ba471f315", null ],
     [ "SetConfig", "classc___output_mgr.html#a63b3162a5ec5fe39859401b4b817b892", null ],
-    [ "SetPortDefnitionDefaults", "classc___output_mgr.html#a5f037f089c20467b3f86841b46e1f60b", null ],
+    [ "SetPortDefnitionDefaults", "classc___output_mgr.html#a82324ece57adefe7c2a344cd765c59e5", null ],
     [ "SetSerialUart", "classc___output_mgr.html#a943339390f6e515338978cef94a029f3", null ],
     [ "TaskPoll", "classc___output_mgr.html#a325b2eb8b6b86b602e2efb8f50297435", null ],
     [ "UpdateDisplayBufferReferences", "classc___output_mgr.html#a2af1d94181e97f732be0b66be3b944dd", null ],
@@ -49,7 +47,5 @@ var classc___output_mgr =
     [ "NumOutputPorts", "classc___output_mgr.html#a58a51be534451fb96d35c3281bf68ff0", null ],
     [ "OutputIsPaused", "classc___output_mgr.html#affde0fc6a806f815ee874e5cb3d24a03", null ],
     [ "pOutputBuffer", "classc___output_mgr.html#a068bba05c9c35db7db26d5516c904f9e", null ],
-    [ "pOutputChannelDrivers", "classc___output_mgr.html#aaacf05b73ebdb85157dd3d691ced89e1", null ],
-    [ "SizeOfTable", "classc___output_mgr.html#a0910e3aaedd527a8eef53ffd9f2a81e8", null ],
     [ "UsedBufferSize", "classc___output_mgr.html#a5484318ee435976c6ab5b9b2c32e53da", null ]
 ];
