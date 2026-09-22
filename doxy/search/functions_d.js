@@ -1,7 +1,7 @@
 var searchData=
 [
   ['parsefseqfile_0',['ParseFseqFile',['../classc___input_f_p_p_remote_play_file.html#a588e1c419a88dc3536d9867f25f074cd',1,'c_InputFPPRemotePlayFile']]],
-  ['pauseoutput_1',['PauseOutput',['../classc___output_common.html#a827738159d56992021250d85905782b7',1,'c_OutputCommon::PauseOutput()'],['../classc___output_uart.html#a47cb277fcf5ebbaeaf93a9683114adc5',1,'c_OutputUart::PauseOutput()']]],
+  ['pauseoutput_1',['PauseOutput',['../classc___output_common.html#a827738159d56992021250d85905782b7',1,'c_OutputCommon']]],
   ['pauseoutputs_2',['PauseOutputs',['../classc___output_mgr.html#aa5fa47aab179e25649aa61acd159586d',1,'c_OutputMgr']]],
   ['playeffect_3',['PlayEffect',['../classc___input_m_q_t_t.html#a3868e04d5b087dc00ec90f0e52fce304',1,'c_InputMQTT']]],
   ['playfile_4',['PlayFile',['../classc___f_p_p_discovery.html#adb57db644991837b6c7d9eb53caf902d',1,'c_FPPDiscovery']]],

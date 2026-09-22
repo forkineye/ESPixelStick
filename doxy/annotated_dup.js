@@ -24,7 +24,6 @@ var annotated_dup =
     [ "c_OutputDisabled", "classc___output_disabled.html", "classc___output_disabled" ],
     [ "c_OutputMgr", "classc___output_mgr.html", "classc___output_mgr" ],
     [ "c_OutputPixel", "classc___output_pixel.html", "classc___output_pixel" ],
-    [ "c_OutputUart", "classc___output_uart.html", "classc___output_uart" ],
     [ "c_WebMgr", "classc___web_mgr.html", "classc___web_mgr" ],
     [ "c_WiFiDriver", "classc___wi_fi_driver.html", "classc___wi_fi_driver" ],
     [ "config_t", "structconfig__t.html", "structconfig__t" ],

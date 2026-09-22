@@ -1,9 +1,9 @@
 <map id="c_OutputPixel::WriteChannelData" name="c_OutputPixel::WriteChannelData">
 <area shape="rect" id="Node000001" title=" " alt="" coords="5,70,218,96"/>
-<area shape="rect" id="Node000002" href="$classc___output_pixel.html#a96bafc94f784719059dba54b3f81d107" title=" " alt="" coords="287,5,450,46"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="172,67,271,44,273,50,173,72"/>
-<area shape="rect" id="Node000003" href="$classc___output_mgr.html#aec62685e8fb4eff73bfefd3ed5321b01" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="266,70,471,96"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,80,250,80,250,86,218,86"/>
-<area shape="rect" id="Node000004" href="$classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="277,120,460,145"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="183,94,283,113,282,119,182,99"/>
+<area shape="rect" id="Node000002" href="$classc___output_pixel.html#a96bafc94f784719059dba54b3f81d107" title=" " alt="" coords="278,5,440,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="170,67,262,45,263,50,171,72"/>
+<area shape="rect" id="Node000003" href="$classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="268,70,450,96"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="218,80,252,80,252,86,218,86"/>
+<area shape="rect" id="Node000004" href="$classc___output_mgr.html#a69daf5bf1409e257fa1164981903c04e" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="266,120,452,161"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="171,94,254,113,253,118,170,99"/>
 </map>

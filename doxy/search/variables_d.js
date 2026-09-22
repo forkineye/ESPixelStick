@@ -17,10 +17,8 @@ var searchData=
   ['outputdisabled_14',['OutputDisabled',['../union_output_protocol_classes__t.html#ae8ceb7fd2322c02c1fbf6b1dfeb19729',1,'OutputProtocolClasses_t']]],
   ['outputdriver_15',['OutputDriver',['../struct_driver_info__t.html#a16eabc0ab762aac204a9ffd386dcce8c',1,'DriverInfo_t']]],
   ['outputdriverinuse_16',['OutputDriverInUse',['../struct_driver_info__t.html#ad490bdd80dee624eb4e3f33358c64b8c',1,'DriverInfo_t']]],
-  ['outputispaused_17',['OutputIsPaused',['../classc___output_mgr.html#affde0fc6a806f815ee874e5cb3d24a03',1,'c_OutputMgr::OutputIsPaused'],['../classc___output_uart.html#a6105c8cbc70466ad6e2152f6020a210e',1,'c_OutputUart::OutputIsPaused']]],
+  ['outputispaused_17',['OutputIsPaused',['../classc___output_mgr.html#affde0fc6a806f815ee874e5cb3d24a03',1,'c_OutputMgr']]],
   ['outputmgr_18',['OutputMgr',['../_output_mgr_8cpp.html#af6b50c745df05adfe6f502280127db1f',1,'OutputMgr:&#160;OutputMgr.cpp'],['../_output_mgr_8hpp.html#af6b50c745df05adfe6f502280127db1f',1,'OutputMgr:&#160;OutputMgr.cpp']]],
   ['outputportdefinition_19',['OutputPortDefinition',['../classc___output_common.html#a3b88ff699352934ace1af6d39dbb8cc1',1,'c_OutputCommon']]],
-  ['outputportid_20',['OutputPortId',['../structc___output_uart_1_1_output_uart_config__t.html#a9c45128faa8b5c949edffd6a9b28fb10',1,'c_OutputUart::OutputUartConfig_t']]],
-  ['outputtype_21',['OutputType',['../classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43',1,'c_OutputCommon']]],
-  ['outputuartconfig_22',['OutputUartConfig',['../classc___output_uart.html#a2a4d8b90bc76bc72b69a1fc9fc1fa969',1,'c_OutputUart']]]
+  ['outputtype_20',['OutputType',['../classc___output_common.html#a9b9ccc6ceee5ad7033235824b2d87b43',1,'c_OutputCommon']]]
 ];

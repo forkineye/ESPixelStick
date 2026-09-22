@@ -24,11 +24,9 @@ var searchData=
   ['c_5foutputdisabled_21',['c_OutputDisabled',['../classc___output_disabled.html',1,'']]],
   ['c_5foutputmgr_22',['c_OutputMgr',['../classc___output_mgr.html',1,'']]],
   ['c_5foutputpixel_23',['c_OutputPixel',['../classc___output_pixel.html',1,'']]],
-  ['c_5foutputuart_24',['c_OutputUart',['../classc___output_uart.html',1,'']]],
-  ['c_5fwebmgr_25',['c_WebMgr',['../classc___web_mgr.html',1,'']]],
-  ['c_5fwifidriver_26',['c_WiFiDriver',['../classc___wi_fi_driver.html',1,'']]],
-  ['coloroffsets_5fs_27',['ColorOffsets_s',['../unionc___output_pixel_1_1_color_offsets__s.html',1,'c_OutputPixel']]],
-  ['config_5ft_28',['config_t',['../structconfig__t.html',1,'']]],
-  ['convertintensitytouartdatastreamentry_5ft_29',['ConvertIntensityToUartDataStreamEntry_t',['../structc___output_uart_1_1_convert_intensity_to_uart_data_stream_entry__t.html',1,'c_OutputUart']]],
-  ['crgb_30',['CRGB',['../structc___input_effect_engine_1_1_c_r_g_b.html',1,'c_InputEffectEngine']]]
+  ['c_5fwebmgr_24',['c_WebMgr',['../classc___web_mgr.html',1,'']]],
+  ['c_5fwifidriver_25',['c_WiFiDriver',['../classc___wi_fi_driver.html',1,'']]],
+  ['coloroffsets_5fs_26',['ColorOffsets_s',['../unionc___output_pixel_1_1_color_offsets__s.html',1,'c_OutputPixel']]],
+  ['config_5ft_27',['config_t',['../structconfig__t.html',1,'']]],
+  ['crgb_28',['CRGB',['../structc___input_effect_engine_1_1_c_r_g_b.html',1,'c_InputEffectEngine']]]
 ];

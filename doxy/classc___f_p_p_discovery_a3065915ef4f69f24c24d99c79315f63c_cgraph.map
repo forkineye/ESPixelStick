@@ -20,10 +20,10 @@
 <area shape="rect" id="Node000008" href="$classc___output_mgr.html#a7471954d6a26b6894c4066a424d8aec8" title=" " alt="" coords="530,910,697,935"/>
 <area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="409,833,568,901,566,906,407,838"/>
 <area shape="poly" id="edge11_Node000007_Node000011" title=" " alt="" coords="460,810,501,809,501,815,460,815"/>
-<area shape="rect" id="Node000009" href="$classc___output_mgr.html#aec62685e8fb4eff73bfefd3ed5321b01" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="770,910,976,935"/>
-<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="697,920,755,920,755,925,697,925"/>
-<area shape="rect" id="Node000010" href="$classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="782,959,964,985"/>
-<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="686,933,787,953,786,958,685,938"/>
+<area shape="rect" id="Node000009" href="$classc___output_mgr.html#abc896c708fce43b559a42ba4e67c9976" title="Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data." alt="" coords="782,910,964,935"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="697,920,766,920,766,925,697,925"/>
+<area shape="rect" id="Node000010" href="$classc___output_mgr.html#a69daf5bf1409e257fa1164981903c04e" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="780,959,966,1000"/>
+<area shape="poly" id="edge10_Node000008_Node000010" title=" " alt="" coords="676,933,765,953,764,958,675,938"/>
 <area shape="poly" id="edge12_Node000011_Node000002" title=" " alt="" coords="678,821,766,840,765,845,677,826"/>
 <area shape="rect" id="Node000012" href="$classc___input_f_p_p_remote.html#a7b84b8b1119182f7a2c6a72c00d1d1da" title=" " alt="" coords="1037,795,1247,821"/>
 <area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="711,807,1021,806,1021,811,711,813"/>

@@ -13,6 +13,7 @@ var dir_28ea8e66f7bbbd0bcb5bade88239d5de =
     [ "OutputGS8208.hpp", "_output_g_s8208_8hpp.html", null ],
     [ "OutputGS8208Rmt.hpp", "_output_g_s8208_rmt_8hpp.html", null ],
     [ "OutputGS8208Uart.hpp", "_output_g_s8208_uart_8hpp.html", null ],
+    [ "OutputI2S.hpp", "_output_i2_s_8hpp.html", null ],
     [ "OutputMgr.hpp", "_output_mgr_8hpp.html", "_output_mgr_8hpp" ],
     [ "OutputMgrPortDefs.hpp", "_output_mgr_port_defs_8hpp.html", "_output_mgr_port_defs_8hpp" ],
     [ "OutputPixel.hpp", "_output_pixel_8hpp.html", "_output_pixel_8hpp" ],
@@ -29,7 +30,7 @@ var dir_28ea8e66f7bbbd0bcb5bade88239d5de =
     [ "OutputTM1814.hpp", "_output_t_m1814_8hpp.html", null ],
     [ "OutputTM1814Rmt.hpp", "_output_t_m1814_rmt_8hpp.html", null ],
     [ "OutputTM1814Uart.hpp", "_output_t_m1814_uart_8hpp.html", null ],
-    [ "OutputUart.hpp", "_output_uart_8hpp.html", "_output_uart_8hpp" ],
+    [ "OutputUart.hpp", "_output_uart_8hpp.html", null ],
     [ "OutputUCS1903.hpp", "_output_u_c_s1903_8hpp.html", null ],
     [ "OutputUCS1903Rmt.hpp", "_output_u_c_s1903_rmt_8hpp.html", null ],
     [ "OutputUCS1903Uart.hpp", "_output_u_c_s1903_uart_8hpp.html", null ],
@@ -39,6 +40,7 @@ var dir_28ea8e66f7bbbd0bcb5bade88239d5de =
     [ "OutputWS2801.hpp", "_output_w_s2801_8hpp.html", null ],
     [ "OutputWS2801Spi.hpp", "_output_w_s2801_spi_8hpp.html", null ],
     [ "OutputWS2811.hpp", "_output_w_s2811_8hpp.html", null ],
+    [ "OutputWS2811I2S.hpp", "_output_w_s2811_i2_s_8hpp.html", null ],
     [ "OutputWS2811Rmt.hpp", "_output_w_s2811_rmt_8hpp.html", null ],
     [ "OutputWS2811Uart.hpp", "_output_w_s2811_uart_8hpp.html", null ]
 ];

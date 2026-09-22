@@ -164,9 +164,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4c21c5392df7c61323283f1b1c53bbb7" id="r_a4c21c5392df7c61323283f1b1c53bbb7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="_output_mgr_port_defs_8hpp.html#adc89d4df16774f59429a3f8742c1cc4d">OM_PortId_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4c21c5392df7c61323283f1b1c53bbb7">GetOutputPortId</a> ()</td></tr>
 <tr class="memdesc:a4c21c5392df7c61323283f1b1c53bbb7"><td class="mdescLeft">&#160;</td><td class="mdescRight">return the output channel number  <br /></td></tr>
 <tr class="separator:a4c21c5392df7c61323283f1b1c53bbb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83f1ea04a95de1af5ad0e5a5130bdcad" id="r_a83f1ea04a95de1af5ad0e5a5130bdcad"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a83f1ea04a95de1af5ad0e5a5130bdcad">GetBufferAddress</a> ()</td></tr>
-<tr class="memdesc:a83f1ea04a95de1af5ad0e5a5130bdcad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the address of the buffer into which the E1.31 handler will stuff data.  <br /></td></tr>
-<tr class="separator:a83f1ea04a95de1af5ad0e5a5130bdcad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bbaa07dd3901ef702fc8c9e04518428" id="r_a8bbaa07dd3901ef702fc8c9e04518428"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8bbaa07dd3901ef702fc8c9e04518428">ISR_GetBufferAddress</a> ()</td></tr>
+<tr class="memdesc:a8bbaa07dd3901ef702fc8c9e04518428"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the address of the buffer into which the E1.31 handler will stuff data.  <br /></td></tr>
+<tr class="separator:a8bbaa07dd3901ef702fc8c9e04518428"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac7853ec4ed8c3a173cfd3110b0838585" id="r_ac7853ec4ed8c3a173cfd3110b0838585"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac7853ec4ed8c3a173cfd3110b0838585">GetBufferUsedSize</a> ()</td></tr>
 <tr class="memdesc:ac7853ec4ed8c3a173cfd3110b0838585"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the address of the buffer into which the E1.31 handler will stuff data.  <br /></td></tr>
 <tr class="separator:ac7853ec4ed8c3a173cfd3110b0838585"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,8 +206,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:ae4db3605be43e71dbd0b4f929b69aa85" id="r_ae4db3605be43e71dbd0b4f929b69aa85"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae4db3605be43e71dbd0b4f929b69aa85">ReportNewFrame</a> ()</td></tr>
-<tr class="separator:ae4db3605be43e71dbd0b4f929b69aa85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0396af9438fb6ddc2afcb50fbd4735bd" id="r_a0396af9438fb6ddc2afcb50fbd4735bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0396af9438fb6ddc2afcb50fbd4735bd">ISR_ReportNewFrame</a> ()</td></tr>
+<tr class="separator:a0396af9438fb6ddc2afcb50fbd4735bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a571adc45a6ceab09aaad36802507cc69" id="r_a571adc45a6ceab09aaad36802507cc69"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a571adc45a6ceab09aaad36802507cc69">canRefresh</a> ()</td></tr>
 <tr class="separator:a571adc45a6ceab09aaad36802507cc69"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -279,7 +279,7 @@ Here is the call graph for this function:</div>
 <div class="center"><img src="classc___output_common_a142cc93ea03c961e09437ea4bc271b91_cgraph.png" border="0" usemap="#aclassc___output_common_a142cc93ea03c961e09437ea4bc271b91_cgraph" alt=""/></div>
 <map name="aclassc___output_common_a142cc93ea03c961e09437ea4bc271b91_cgraph" id="aclassc___output_common_a142cc93ea03c961e09437ea4bc271b91_cgraph">
 <area shape="rect" title="&lt; Start up the driver and put it into a safe mode" alt="" coords="5,5,191,46"/>
-<area shape="rect" href="classc___output_mgr.html#aec62685e8fb4eff73bfefd3ed5321b01" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="239,13,444,38"/>
+<area shape="rect" href="classc___output_mgr.html#a69daf5bf1409e257fa1164981903c04e" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="239,5,425,46"/>
 <area shape="poly" title=" " alt="" coords="191,23,223,23,223,28,191,28"/>
 </map>
 </div>
@@ -425,47 +425,6 @@ Here is the caller graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<a id="a83f1ea04a95de1af5ad0e5a5130bdcad" name="a83f1ea04a95de1af5ad0e5a5130bdcad"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83f1ea04a95de1af5ad0e5a5130bdcad">&#9670;&#160;</a></span>GetBufferAddress()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t * c_OutputCommon::GetBufferAddress </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Get the address of the buffer into which the E1.31 handler will stuff data. </p>
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph.png" border="0" usemap="#aclassc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph" alt=""/></div>
-<map name="aclassc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph" id="aclassc___output_common_a83f1ea04a95de1af5ad0e5a5130bdcad_icgraph">
-<area shape="rect" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="736,5,924,46"/>
-<area shape="rect" href="classc___output_pixel.html#a65dc26d4fe491978858f65fc21b549f1" title=" " alt="" coords="488,13,688,38"/>
-<area shape="poly" title=" " alt="" coords="721,28,689,28,689,23,721,23"/>
-<area shape="rect" href="classc___output_uart.html#a590f7793a4c9d7d2b03633cd056a92ab" title=" " alt="" coords="251,5,440,46"/>
-<area shape="poly" title=" " alt="" coords="472,28,441,28,441,23,472,23"/>
-<area shape="rect" href="classc___output_uart.html#ad201cf8c69ead52acf4a885f90a91a3b" title=" " alt="" coords="5,13,203,38"/>
-<area shape="poly" title=" " alt="" coords="235,28,203,28,203,23,235,23"/>
-</map>
-</div>
 
 </div>
 </div>
@@ -801,6 +760,78 @@ Here is the caller graph for this function:</div>
 
 </div>
 </div>
+<a id="a8bbaa07dd3901ef702fc8c9e04518428" name="a8bbaa07dd3901ef702fc8c9e04518428"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8bbaa07dd3901ef702fc8c9e04518428">&#9670;&#160;</a></span>ISR_GetBufferAddress()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t * c_OutputCommon::ISR_GetBufferAddress </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the address of the buffer into which the E1.31 handler will stuff data. </p>
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="classc___output_common_a8bbaa07dd3901ef702fc8c9e04518428_icgraph.png" border="0" usemap="#aclassc___output_common_a8bbaa07dd3901ef702fc8c9e04518428_icgraph" alt=""/></div>
+<map name="aclassc___output_common_a8bbaa07dd3901ef702fc8c9e04518428_icgraph" id="aclassc___output_common_a8bbaa07dd3901ef702fc8c9e04518428_icgraph">
+<area shape="rect" title="Get the address of the buffer into which the E1.31 handler will stuff data." alt="" coords="184,5,338,46"/>
+<area shape="rect" href="classc___output_pixel.html#aefd87767c1c0026414413dacb2509625" title=" " alt="" coords="5,5,136,46"/>
+<area shape="poly" title=" " alt="" coords="168,28,136,28,136,23,168,23"/>
+</map>
+</div>
+
+</div>
+</div>
+<a id="a0396af9438fb6ddc2afcb50fbd4735bd" name="a0396af9438fb6ddc2afcb50fbd4735bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0396af9438fb6ddc2afcb50fbd4735bd">&#9670;&#160;</a></span>ISR_ReportNewFrame()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void IRAM_ATTR c_OutputCommon::ISR_ReportNewFrame </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<div class="dynheader">
+Here is the caller graph for this function:</div>
+<div class="dyncontent">
+<div class="center"><img src="classc___output_common_a0396af9438fb6ddc2afcb50fbd4735bd_icgraph.png" border="0" usemap="#aclassc___output_common_a0396af9438fb6ddc2afcb50fbd4735bd_icgraph" alt=""/></div>
+<map name="aclassc___output_common_a0396af9438fb6ddc2afcb50fbd4735bd_icgraph" id="aclassc___output_common_a0396af9438fb6ddc2afcb50fbd4735bd_icgraph">
+<area shape="rect" title=" " alt="" coords="184,5,338,46"/>
+<area shape="rect" href="classc___output_pixel.html#aefd87767c1c0026414413dacb2509625" title=" " alt="" coords="5,5,136,46"/>
+<area shape="poly" title=" " alt="" coords="168,28,136,28,136,23,168,23"/>
+</map>
+</div>
+
+</div>
+</div>
 <a id="a827738159d56992021250d85905782b7" name="a827738159d56992021250d85905782b7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a827738159d56992021250d85905782b7">&#9670;&#160;</a></span>PauseOutput()</h2>
 
@@ -888,45 +919,6 @@ Here is the caller graph for this function:</div>
 </div><div class="memdoc">
 
 <p>Reimplemented in <a class="el" href="classc___output_pixel.html#a839093278c6d78c5a78fff1e6febd217">c_OutputPixel</a>.</p>
-
-</div>
-</div>
-<a id="ae4db3605be43e71dbd0b4f929b69aa85" name="ae4db3605be43e71dbd0b4f929b69aa85"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae4db3605be43e71dbd0b4f929b69aa85">&#9670;&#160;</a></span>ReportNewFrame()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void c_OutputCommon::ReportNewFrame </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<div class="dynheader">
-Here is the caller graph for this function:</div>
-<div class="dyncontent">
-<div class="center"><img src="classc___output_common_ae4db3605be43e71dbd0b4f929b69aa85_icgraph.png" border="0" usemap="#aclassc___output_common_ae4db3605be43e71dbd0b4f929b69aa85_icgraph" alt=""/></div>
-<map name="aclassc___output_common_ae4db3605be43e71dbd0b4f929b69aa85_icgraph" id="aclassc___output_common_ae4db3605be43e71dbd0b4f929b69aa85_icgraph">
-<area shape="rect" title=" " alt="" coords="736,5,934,46"/>
-<area shape="rect" href="classc___output_pixel.html#a65dc26d4fe491978858f65fc21b549f1" title=" " alt="" coords="488,13,688,38"/>
-<area shape="poly" title=" " alt="" coords="721,28,689,28,689,23,721,23"/>
-<area shape="rect" href="classc___output_uart.html#a590f7793a4c9d7d2b03633cd056a92ab" title=" " alt="" coords="251,5,440,46"/>
-<area shape="poly" title=" " alt="" coords="472,28,441,28,441,23,472,23"/>
-<area shape="rect" href="classc___output_uart.html#ad201cf8c69ead52acf4a885f90a91a3b" title=" " alt="" coords="5,13,203,38"/>
-<area shape="poly" title=" " alt="" coords="235,28,203,28,203,23,235,23"/>
-</map>
-</div>
 
 </div>
 </div>
