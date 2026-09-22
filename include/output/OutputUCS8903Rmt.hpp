@@ -23,7 +23,7 @@
 */
 #include "ESPixelStick.h"
 #ifdef SUPPORT_OutputProtocol_UCS8903
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SUPPORT_RMT
 
 #include "OutputUCS8903.hpp"
 #include "OutputRmt.hpp"
@@ -45,7 +45,7 @@ public:
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput(bool State);
     bool    ISR_GetNextBitToSend (rmt_item32_t &DataToSend);
-    void    StartNewDataFrame();
+    void    ISR_StartNewDataFrame();
 
 private:
     // The adjustments compensate for rounding errors in the calculations
@@ -86,5 +86,5 @@ private:
 
 }; // c_OutputUCS8903Rmt
 
-#endif // def ARDUINO_ARCH_ESP32
+#endif // def SUPPORT_RMT
 #endif // def SUPPORT_OutputProtocol_UCS8903

@@ -84,7 +84,7 @@ void c_OutputServoPCA9685::ClearBuffer ()
     // memset(GetBufferAddress(), 0x00, GetBufferUsedSize());
     for (ServoPCA9685Channel_t & currentServoPCA9685Channel : OutputList)
     {
-        GetBufferAddress()[currentServoPCA9685Channel.Id] =
+        ISR_GetBufferAddress()[currentServoPCA9685Channel.Id] =
             currentServoPCA9685Channel.HomeValue;
     }
 
@@ -233,7 +233,7 @@ uint32_t c_OutputServoPCA9685::Poll ()
         yield();
     }
 */
-    ReportNewFrame ();
+    ISR_ReportNewFrame ();
 
     for (ServoPCA9685Channel_t & currentServoPCA9685 : OutputList)
     {

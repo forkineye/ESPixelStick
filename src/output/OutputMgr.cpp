@@ -41,6 +41,7 @@
 #include "output/OutputUCS1903Rmt.hpp"
 #include "output/OutputUCS1903Uart.hpp"
 #include "output/OutputWS2801Spi.hpp"
+#include "output/OutputWS2811I2S.hpp"
 #include "output/OutputWS2811Rmt.hpp"
 #include "output/OutputWS2811Uart.hpp"
 #include "output/OutputGS8208Uart.hpp"
@@ -53,11 +54,21 @@
 
 #include "input/InputMgr.hpp"
 
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SUPPORT_I2S
+    #define CLASS_TYPE_NAME(n)      n ## I2S
+    #define AddToProtocolClassList(name) \
+            c_ ## name ## I2S ClassList_ ## name;
+#elif defined(SUPPORT_RMT)
     #define CLASS_TYPE_NAME(n)      n ## Rmt
-#else
+    #define AddToProtocolClassList(name) \
+            c_ ## name ## Rmt ClassList_ ## name;
+#elif defined(SUPPORT_UART)
     #define CLASS_TYPE_NAME(n)      n ## Uart
-#endif // def ARDUINO_ARCH_ESP32
+    #define AddToProtocolClassList(name) \
+            c_ ## name ## Uart ClassList_ ## name;
+#else
+    #error "No Output Driver has been selected. Update Platform IO to select an output driver"
+#endif
     #define CLASS_TYPE_NO_NAME(n)   n
 
 #define AllocatePort(ClassType, Output, OutputType) \
@@ -145,34 +156,23 @@ static const SupportedOutputProtocol_t SupportedOutputProtocolList[] =
     #endif // def SUPPORT_OutputProtocol_FireGod
 };
 
-
-
-#ifdef ARDUINO_ARCH_ESP8266
-#define AddUartRmtToProtocolClassList(name) \
-    c_ ## name ## Uart name ## Uart;
-#else
-#define AddUartRmtToProtocolClassList(name) \
-    c_ ## name ## Uart name ## Uart; \
-    c_ ## name ## Uart name ## Rmt;
-#endif // def ARDUINO_ARCH_ESP32
-
 union alignas(32) OutputProtocolClasses_t
 {
     c_OutputDisabled OutputDisabled;
 
     #ifdef SUPPORT_OutputProtocol_WS2811
-    AddUartRmtToProtocolClassList(OutputWS2811);
+    AddToProtocolClassList(OutputWS2811);
     #endif // def SUPPORT_OutputProtocol_WS2811
 
     #ifdef SUPPORT_OutputProtocol_GECE
-    AddUartRmtToProtocolClassList(OutputGECE);
+    AddToProtocolClassList(OutputGECE);
     #endif // def SUPPORT_OutputProtocol_GECE
 
     #if defined(SUPPORT_OutputProtocol_DMX) || \
         defined(SUPPORT_OutputProtocol_Renard) || \
         defined(SUPPORT_OutputProtocol_Serial) || \
         defined(SUPPORT_OutputProtocol_FireGod)
-    AddUartRmtToProtocolClassList(OutputSerial);
+    AddToProtocolClassList(OutputSerial);
     #endif
 
     #ifdef SUPPORT_OutputProtocol_Relay
@@ -184,11 +184,11 @@ union alignas(32) OutputProtocolClasses_t
     #endif // def SUPPORT_OutputProtocol_Servo_PCA9685
 
     #ifdef SUPPORT_OutputProtocol_UCS1903
-    AddUartRmtToProtocolClassList(OutputUCS1903);
+    AddToProtocolClassList(OutputUCS1903);
     #endif // def SUPPORT_OutputProtocol_UCS1903
 
     #ifdef SUPPORT_OutputProtocol_TM1814
-    AddUartRmtToProtocolClassList(OutputTM1814);
+    AddToProtocolClassList(OutputTM1814);
     #endif // def SUPPORT_OutputProtocol_TM1814
 
     #ifdef SUPPORT_OutputProtocol_WS2801
@@ -200,11 +200,11 @@ union alignas(32) OutputProtocolClasses_t
     #endif // def SUPPORT_OutputProtocol_APA102
 
     #ifdef SUPPORT_OutputProtocol_GS8208
-    AddUartRmtToProtocolClassList(OutputGS8208);
+    AddToProtocolClassList(OutputGS8208);
     #endif // def SUPPORT_OutputProtocol_GS8208
 
     #ifdef SUPPORT_OutputProtocol_UCS8903
-    AddUartRmtToProtocolClassList(OutputUCS8903);
+    AddToProtocolClassList(OutputUCS8903);
     #endif // def SUPPORT_OutputProtocol_UCS8903
 
     #ifdef SUPPORT_OutputProtocol_TLS3001
@@ -240,6 +240,7 @@ struct alignas(32) DriverInfo_t
 static DriverInfo_t * pOutputChannelDrivers  = nullptr;;
 
 static uint8_t OutputBuffer[OM_MAX_NUM_CHANNELS];
+
 //-----------------------------------------------------------------------------
 // Methods
 //-----------------------------------------------------------------------------
@@ -352,6 +353,10 @@ void c_OutputMgr::Begin ()
         digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
         #endif // def LED_FLASH_GPIO
 
+    #ifdef SUPPORT_I2S
+        OutputI2S.Begin();
+    #endif // def SUPPORT_I2S
+    
         // make sure the pointers are set up properly
         for (uint8_t index = 0; index < NumOutputPorts; ++index)
         {
@@ -601,9 +606,9 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 {
     // DEBUG_START;
 
-#if defined(ARDUINO_ARCH_ESP32)
-    // jsonStatus["PollCount"] = PollCount;
-#endif // defined(ARDUINO_ARCH_ESP32)
+    #if defined(SUPPORT_I2S)
+    OutputI2S.GetStatus(jsonStatus);
+    #endif // defined(SUPPORT_I2S)
 
     JsonArray OutputStatus = jsonStatus[(char*)CN_output].to<JsonArray> ();
     for (uint8_t index = 0; index < NumOutputPorts; ++index)
@@ -622,10 +627,6 @@ void c_OutputMgr::GetStatus (JsonObject & jsonStatus)
 void c_OutputMgr::ClearStatistics ()
 {
     // DEBUG_START;
-
-#if defined(ARDUINO_ARCH_ESP32)
-    // PollCount = 0;
-#endif // defined(ARDUINO_ARCH_ESP32)
 
     for (uint8_t index = 0; index < NumOutputPorts; ++index)
     {
@@ -1821,7 +1822,7 @@ void c_OutputMgr::ClearBuffer()
 {
     // DEBUG_START;
 
-    memset(GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
+    memset(ISR_GetBufferAddress(), 0x00, OutputMgr.GetBufferSize());
 
     // DEBUG_END;
 

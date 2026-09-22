@@ -319,7 +319,7 @@ void c_WebMgr::init ()
                             // DEBUG_V(String("NumBytesAvailableToSend: ") + String(NumBytesAvailableToSend));
                             if(0 != NumBytesAvailableToSend)
                             {
-                                memcpy(buffer, OutputMgr.GetBufferAddress () + index, NumBytesAvailableToSend);
+                                memcpy(buffer, OutputMgr.ISR_GetBufferAddress () + index, NumBytesAvailableToSend);
                             }
                             return NumBytesAvailableToSend;
                         });

@@ -22,7 +22,7 @@
 *
 */
 #include "ESPixelStick.h"
-#if defined(SUPPORT_OutputProtocol_GECE) && defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_GECE) && defined(SUPPORT_RMT)
 
 #include "OutputGECE.hpp"
 #include "OutputRmt.hpp"
@@ -45,7 +45,7 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput (bool State);
-    void    StartNewDataFrame();
+    void    ISR_StartNewDataFrame();
     bool    ISR_GetNextBitToSend (rmt_item32_t & DataToSend);
 
 private:
@@ -90,4 +90,4 @@ private:
 
 }; // c_OutputGECERmt
 
-#endif // defined(SUPPORT_OutputProtocol_GECE) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_GECE) && defined(SUPPORT_RMT)

@@ -99,6 +99,9 @@ private:
     uint32_t   GetNextIntensityToSendFailedCounter = 0;
     uint32_t   LastGECEdataSent                    = uint32_t(-1);
     uint32_t   NumGECEdataSent                     = 0;
+#define INC_PIXEL_DEBUG_COUNTER(c) ++c
+#else
+#define INC_PIXEL_DEBUG_COUNTER(c)
 #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     // functions used to implement pixel FSM
@@ -164,8 +167,8 @@ public:
     virtual  void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     inline   void         SetIntensityBitTimeInUS (float value) { IntensityBitTimeInUs = value; }
              void         SetIntensityDataWidth(uint32_t value);
-    virtual  void         StartNewFrame();
-    inline   bool IRAM_ATTR ISR_MoreDataToSend () {return (&c_OutputPixel::ISR_FrameDone != FrameStateFuncPtr);}
+             void         ISR_StartNewFrame();
+    inline   bool         ISR_MoreDataToSend () {return (&c_OutputPixel::ISR_FrameDone != FrameStateFuncPtr);}
              bool         ISR_GetNextIntensityToSend (uint32_t &DataToSend);
              void         SetPixelCount(uint32_t value) {pixel_count = value;}
     inline   uint32_t     GetPixelCount() {return pixel_count;}

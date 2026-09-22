@@ -19,7 +19,7 @@
 
 #include "ESPixelStick.h"
 
-#if defined(SUPPORT_OutputProtocol_GS8208)
+#if defined(SUPPORT_OutputProtocol_GS8208) && defined(SUPPORT_UART)
 
 #include "output/OutputGS8208Uart.hpp"
 
@@ -186,4 +186,4 @@ void c_OutputGS8208Uart::PauseOutput(bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputProtocol_GS8208)
+#endif // defined(SUPPORT_OutputProtocol_GS8208) && defined(SUPPORT_UART)

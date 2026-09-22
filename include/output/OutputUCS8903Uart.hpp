@@ -24,7 +24,7 @@
 
 #include "OutputCommon.hpp"
 
-#if defined(SUPPORT_OutputProtocol_UCS8903)
+#if defined(SUPPORT_OutputProtocol_UCS8903) && defined(SUPPORT_UART)
 
 #include "OutputUCS8903.hpp"
 #include "OutputUart.hpp"
@@ -40,9 +40,6 @@ public:
     // functions to be provided by the derived class
     void    Begin ();
     uint32_t Poll ();
-#if defined(ARDUINO_ARCH_ESP32)
-    bool     RmtPoll () {return false;}
-#endif // defined(ARDUINO_ARCH_ESP32)
     void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
@@ -58,4 +55,4 @@ private:
 
 }; // c_OutputUCS8903Uart
 
-#endif // defined(SUPPORT_OutputProtocol_UCS8903)
+#endif // defined(SUPPORT_OutputProtocol_UCS8903) && defined(SUPPORT_UART)

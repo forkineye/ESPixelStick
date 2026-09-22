@@ -19,8 +19,9 @@
  */
 
 #include "ESPixelStick.h"
+#if defined(SUPPORT_UART)
 
-#ifdef ARDUINO_ARCH_ESP32
+#if defined(ARDUINO_ARCH_ESP32)
 #   include <soc/uart_reg.h>
 #   include <driver/uart.h>
 #   include <driver/gpio.h>
@@ -117,7 +118,7 @@ private:
     void set_pin                        ();
     void TerminateSerialPortOperation   ();
     void RestoreSerialPortOperation     ();
-    void ReportNewFrame                 ();
+    void ISR_ReportNewFrame                 ();
     void StartBreak                     ();
     void EndBreak                       ();
     void GenerateBreak                  (uint32_t DurationInUs, uint32_t MarkDurationInUs);
@@ -223,3 +224,4 @@ private:
 
 #endif // defined(ARDUINO_ARCH_ESP8266)
 };
+#endif // defined(SUPPORT_UART)

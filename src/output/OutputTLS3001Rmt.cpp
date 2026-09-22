@@ -17,7 +17,7 @@
 *
 */
 #include "ESPixelStick.h"
-#if defined(SUPPORT_OutputProtocol_TLS3001) && defined (ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_TLS3001) && defined (SUPPORT_RMT)
 
 #include "output/OutputTLS3001Rmt.hpp"
 
@@ -97,7 +97,7 @@ bool c_OutputTLS3001Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.arg                     = this;
     OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
     OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
-    OutputRmtConfig.BufferStart             = GetBufferAddress();
+    OutputRmtConfig.BufferStart             = ISR_GetBufferAddress();
     OutputRmtConfig.NumBytesInFrame         = OM_MAX_NUM_CHANNELS;
 
     // DEBUG_V();
@@ -226,7 +226,7 @@ uint32_t c_OutputTLS3001Rmt::Poll ()
 } // Poll
 
 //----------------------------------------------------------------------------
-void c_OutputTLS3001Rmt::StartNewDataFrame()
+void IRAM_ATTR c_OutputTLS3001Rmt::StartNewDataFrame()
 {
     // DEBUG_START;
     // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
@@ -240,7 +240,7 @@ void c_OutputTLS3001Rmt::StartNewDataFrame()
     {
         fsm_RMT_state_SendDataStart_imp.Init();
     }
-    c_OutputTLS3001::StartNewFrame();
+    c_OutputTLS3001::ISR_StartNewFrame();
 
     // DEBUG_END;
 } // StartNewDataFrame
@@ -583,4 +583,4 @@ bool IRAM_ATTR fsm_RMT_state_SendDataIdle::ISR_GetNextBitToSend (rmt_item32_t &D
     return false;
 } // fsm_RMT_state_SendDataIdle
 
-#endif // defined(SUPPORT_OutputProtocol_TLS3001) && defined (ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_TLS3001) && defined (SUPPORT_RMT)

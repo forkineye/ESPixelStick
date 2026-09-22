@@ -18,7 +18,7 @@
 */
 
 #include "ESPixelStick.h"
-#if defined (SUPPORT_OutputProtocol_TM1814) && defined (ARDUINO_ARCH_ESP32)
+#if defined (SUPPORT_OutputProtocol_TM1814) && defined (SUPPORT_RMT)
 
 #include "output/OutputTM1814Rmt.hpp"
 
@@ -31,7 +31,7 @@ static bool IRAM_ATTR ISR_GetNextBitToSendBase (void * arg, rmt_item32_t & DataT
 //----------------------------------------------------------------------------
 static void StartNewDataFrameBase(void * arg)
 {
-    return reinterpret_cast<c_OutputTM1814Rmt*>(arg)->StartNewDataFrame();
+    return reinterpret_cast<c_OutputTM1814Rmt*>(arg)->ISR_StartNewDataFrame();
 }
 
 //----------------------------------------------------------------------------
@@ -96,7 +96,7 @@ bool c_OutputTM1814Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.arg                     = this;
     OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
     OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
-    OutputRmtConfig.BufferStart             = GetBufferAddress();
+    OutputRmtConfig.BufferStart             = ISR_GetBufferAddress();
     OutputRmtConfig.NumBytesInFrame         = OM_MAX_NUM_CHANNELS;
 
     Rmt.Begin(OutputRmtConfig, this);
@@ -182,13 +182,13 @@ bool c_OutputTM1814Rmt::RmtPoll ()
 } // Poll
 
 //----------------------------------------------------------------------------
-void c_OutputTM1814Rmt::StartNewDataFrame()
+void IRAM_ATTR c_OutputTM1814Rmt::ISR_StartNewDataFrame()
 {
     // DEBUG_START;
     // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
     INC_TM1814_RMT_DEBUG_COUNTERS(FrameStarts);
     IfgBitCurrentCount = IfgBitCount;
-    StartNewFrame();
+    ISR_StartNewFrame();
 
     // DEBUG_END;
 } // StartNewDataFrame
@@ -248,4 +248,4 @@ void c_OutputTM1814Rmt::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined (SUPPORT_OutputProtocol_TM1814) && defined (ARDUINO_ARCH_ESP32)
+#endif // defined (SUPPORT_OutputProtocol_TM1814) && defined (SUPPORT_RMT)

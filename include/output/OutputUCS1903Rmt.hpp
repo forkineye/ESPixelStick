@@ -23,7 +23,7 @@
 */
 #include "ESPixelStick.h"
 
-#if defined(SUPPORT_OutputProtocol_UCS1903) && defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_UCS1903) && defined(SUPPORT_RMT)
 
 #include "OutputUCS1903.hpp"
 #include "OutputRmt.hpp"
@@ -89,4 +89,4 @@ private:
 
 }; // c_OutputUCS1903Rmt
 
-#endif // defined(SUPPORT_OutputProtocol_UCS1903) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_UCS1903) && defined(SUPPORT_RMT)

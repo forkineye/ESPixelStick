@@ -18,7 +18,7 @@
 */
 
 #include "ESPixelStick.h"
-#if defined(SUPPORT_OutputProtocol_TM1814)
+#if defined(SUPPORT_OutputProtocol_TM1814) && defined(SUPPORT_UART)
 
 #include "output/OutputTM1814Uart.hpp"
 
@@ -167,4 +167,4 @@ void c_OutputTM1814Uart::PauseOutput(bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputProtocol_TM1814)
+#endif // defined(SUPPORT_OutputProtocol_TM1814) && defined(SUPPORT_UART)

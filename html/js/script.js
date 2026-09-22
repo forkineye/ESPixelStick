@@ -11,6 +11,10 @@ var System_Config = null;
 var Fseq_File_List = [];
 var selector = [];
 var ajaxQueue = $({}); // Create an empty jQuery object to act as a queue
+/**
+ * @type {string[]}
+ */
+var ListOfLoadedOutputElements = [];
 
 var SdCardIsInstalled = false;
 var FseqFileTransferStartTime = new Date();
@@ -621,14 +625,38 @@ function UpdateAdvancedOptionsMode(){
     let am = $('#AdvancedOptions');
     let AdvancedModeState = am.prop("checked");
 
-    $(".AdvancedMode").each(function () {
-        if (true === AdvancedModeState) {
-            $(this).removeClass("hidden");
+    const collection = document.getElementsByClassName('AdvancedMode');
+    $(collection).each(function (p, element)
+    {
+        // console.debug("Processing element: ", element);
+        if (true === AdvancedModeState)
+        {
+            $(element).removeClass("hidden");
         }
-        else {
-            $(this).addClass("hidden");
+        else
+        {
+            $(element).addClass("hidden");
         }
     });
+
+    $(ListOfLoadedOutputElements).each(function (p, element)
+    {
+        // console.debug("Processing loaded output element: ", element);
+        const subElements = $(element).find('.AdvancedMode');
+        $(subElements).each(function (p, element)
+        {
+            // console.debug("Processing loaded output element: ", element);
+            if (true === AdvancedModeState)
+            {
+                $(element).removeClass("hidden");
+            }
+            else
+            {
+                $(element).addClass("hidden");
+            }
+        });
+    });
+
 } // UpdateAdvancedOptionsMode
 
 function UpdateChannelCounts() {
@@ -1448,7 +1476,9 @@ function ProcessConfigElements(StartingElementId, channelConfig)
         // console.debug("LoadLocation: " + LoadLocation);
         $(LoadLocation).load(LoadName, function()
         {
+            ListOfLoadedOutputElements.push(LoadLocation);
             ProcessConfigElements(LoadLocation, channelConfig);
+            UpdateAdvancedOptionsMode();
         });
         return $(this).attr('id');
     }).get();
@@ -1513,7 +1543,10 @@ function ProcessModeConfigurationData(channelId, ChannelType, JsonConfig) {
         // console.debug("ModeDisplayName: " + ModeDisplayName);
         $(modeControlName + ' #Title')[0].innerHTML = ModeDisplayName;
     }
-
+    if("output" === ChannelType)
+    {
+        ListOfLoadedOutputElements = [];
+    }
     ProcessConfigElements(modeControlName, channelConfig);
 
     // by default, do not show the ECB config data

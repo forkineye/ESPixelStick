@@ -22,8 +22,8 @@
 *
 */
 
+#if defined(SUPPORT_OutputProtocol_UCS1903) && defined(SUPPORT_UART)
 #include "OutputCommon.hpp"
-#if defined(SUPPORT_OutputProtocol_UCS1903)
 
 #include "OutputUCS1903.hpp"
 #include "OutputUart.hpp"
@@ -39,9 +39,6 @@ public:
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     uint32_t Poll ();                                        ///< Call from loop(),  renders output data
-#if defined(ARDUINO_ARCH_ESP32)
-    bool     RmtPoll () {return false;}
-#endif // defined(ARDUINO_ARCH_ESP32)
     void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
@@ -55,4 +52,4 @@ private:
 
 }; // c_OutputUCS1903Uart
 
-#endif // defined(SUPPORT_OutputProtocol_UCS1903)
+#endif // defined(SUPPORT_OutputProtocol_UCS1903) && defined(SUPPORT_UART)

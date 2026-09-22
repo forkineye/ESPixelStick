@@ -43,10 +43,10 @@ public:
             uint32_t    GetNumOutputBufferChannelsServiced () { return OutputBufferSize; };
             void        SetOutputBufferSize (uint32_t NumChannelsAvailable);
             uint32_t    Poll = 0;
-            void        StartNewFrame();
+            void        ISR_StartNewFrame();
 
-    bool IRAM_ATTR   ISR_GetNextIntensityToSend(uint32_t &DataToSend);
-    bool IRAM_ATTR   ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
+            bool        ISR_GetNextIntensityToSend(uint32_t &DataToSend);
+    IRAM_ATTR bool      ISR_MoreDataToSend() { return (SerialFrameState_t::SerialIdle != SerialFrameState); }
 
 protected:
     void SetFrameDurration();

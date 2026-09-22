@@ -19,7 +19,7 @@
 */
 
 #include "ESPixelStick.h"
-#ifdef ARDUINO_ARCH_ESP32
+#ifdef SUPPORT_RMT
 #include "OutputPixel.hpp"
 #include "OutputSerial.hpp"
 
@@ -214,4 +214,4 @@ inline void WriteToBuffer(rmt_item32_t value)
 } // WriteToBuffer
 
 };
-#endif // def #ifdef ARDUINO_ARCH_ESP32
+#endif // def #ifdef SUPPORT_RMT

@@ -180,6 +180,7 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     // DEBUG_START;
 
     // PrettyPrint(jsonConfig, "SetConfig");
+    c_OutputCommon::SetConfig (jsonConfig);
 
     // enums need to be converted to uints for json
     setFromJSON (color_order,             jsonConfig, CN_color_order);
@@ -194,8 +195,6 @@ bool c_OutputPixel::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     setFromJSON (InterFrameGapInMicroSec, jsonConfig, CN_interframetime);
     setFromJSON (PrependNullPixelCount,   jsonConfig, CN_prependnullcount);
     setFromJSON (AppendNullPixelCount,    jsonConfig, CN_appendnullcount);
-
-    c_OutputCommon::SetConfig (jsonConfig);
 
     // DEBUG_V (String (                "gamma: ") + String (gamma));
     // DEBUG_V (String ("PrependNullPixelCount: ") + String (PrependNullPixelCount));
@@ -382,7 +381,7 @@ void IRAM_ATTR c_OutputPixel::ISR_SetStartingSendPixelState()
     }
     else
     {
-#ifdef SUPPORT_OutputProtocol_GECE
+        #ifdef SUPPORT_OutputProtocol_GECE
         if (OutputType == OTYPE_t::OutputProtocol_GECE)
         {
             FrameStateFuncPtr = &c_OutputPixel::ISR_PixelSendGECEIntensity;
@@ -391,27 +390,25 @@ void IRAM_ATTR c_OutputPixel::ISR_SetStartingSendPixelState()
         {
             FrameStateFuncPtr = &c_OutputPixel::ISR_PixelSendIntensity;
         }
-#else
+        #else
         FrameStateFuncPtr = &c_OutputPixel::ISR_PixelSendIntensity;
-#endif // def SUPPORT_OutputProtocol_GECE
+        #endif // def SUPPORT_OutputProtocol_GECE
     }
     // DEBUG_END;
 } // SetStartingSendPixelState
 
 //----------------------------------------------------------------------------
-void c_OutputPixel::StartNewFrame ()
+void IRAM_ATTR c_OutputPixel::ISR_StartNewFrame ()
 {
     // DEBUG_START;
 
-#ifdef USE_PIXEL_DEBUG_COUNTERS
     if (ISR_MoreDataToSend ())
     {
-        AbortFrameCounter++;
+        INC_PIXEL_DEBUG_COUNTER(AbortFrameCounter);
     }
-    FrameStartCounter++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(FrameStartCounter);
 
-    NextPixelToSend = GetBufferAddress();
+    NextPixelToSend = ISR_GetBufferAddress();
     FramePrependDataCurrentIndex    = 0;
     FrameAppendDataCurrentIndex     = 0;
     SentPixelsCount                 = 0;
@@ -435,14 +432,14 @@ void c_OutputPixel::StartNewFrame ()
         ISR_SetStartingSendPixelState ();
     }
 
-#ifdef USE_PIXEL_DEBUG_COUNTERS
+    #ifdef USE_PIXEL_DEBUG_COUNTERS
     SentPixels         = SentPixelsCount;
     PixelsToSend       = pixel_count;
     IntensityBytesSent = 0;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    #endif // def USE_PIXEL_DEBUG_COUNTERS
 
     // NumIntensityBytesPerPixel = 1;
-    ReportNewFrame();
+    c_OutputCommon::ISR_ReportNewFrame();
 
     // DEBUG_END;
 } // StartNewFrame
@@ -458,9 +455,7 @@ void c_OutputPixel::SetIntensityDataWidth(uint32_t DataWidth)
 //----------------------------------------------------------------------------
 uint32_t IRAM_ATTR c_OutputPixel::ISR_FramePrependData()
 {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-    FramePrependDataCounter++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(FramePrependDataCounter);
 
     uint32_t response = pFramePrependData[FramePrependDataCurrentIndex];
     if (++FramePrependDataCurrentIndex >= FramePrependDataSize)
@@ -488,9 +483,7 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelPrependNulls()
     uint32_t response = 0x00;
     do // once
     {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-        PixelPrependNullsCounter++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+        INC_PIXEL_DEBUG_COUNTER(PixelPrependNullsCounter);
 
         if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
         {
@@ -526,10 +519,8 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelPrependNulls()
 //----------------------------------------------------------------------------
 uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelSendPrependIntensity()
 {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-        PixelSendIntensityCounter++;
-        IntensityBytesSent++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(PixelSendIntensityCounter);
+    INC_PIXEL_DEBUG_COUNTER(IntensityBytesSent);
 
     uint32_t response = PixelPrependData[PixelPrependDataCurrentIndex++];
 
@@ -542,10 +533,10 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelSendPrependIntensity()
 #ifdef SUPPORT_OutputProtocol_GECE
             if (OutputType == OTYPE_t::OutputProtocol_GECE)
             {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
+                #ifdef USE_PIXEL_DEBUG_COUNTERS
                 LastGECEdataSent = response;
-                NumGECEdataSent++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+                #endif // def USE_PIXEL_DEBUG_COUNTERS
+                INC_PIXEL_DEBUG_COUNTER(NumGECEdataSent);
                 FrameStateFuncPtr = &c_OutputPixel::ISR_PixelSendGECEIntensity;
             }
             else
@@ -566,10 +557,8 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelSendGECEIntensity()
 {
     uint32_t response = 0x00;
 
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-        PixelSendIntensityCounter++;
-        IntensityBytesSent++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(PixelSendIntensityCounter);
+    INC_PIXEL_DEBUG_COUNTER(IntensityBytesSent);
 
     // build a GECE intensity frame
     response = GECEBrightness;
@@ -579,8 +568,8 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelSendGECEIntensity()
     response |= GECE_SET_BLUE(ISR_GetIntensityData());
 #ifdef USE_PIXEL_DEBUG_COUNTERS
     LastGECEdataSent = response;
-    NumGECEdataSent++;
 #endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(NumGECEdataSent);
 
     return response;
 }
@@ -589,10 +578,8 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelSendGECEIntensity()
 //----------------------------------------------------------------------------
 uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelSendIntensity()
 {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-    PixelSendIntensityCounter++;
-    IntensityBytesSent++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(PixelSendIntensityCounter);
+    INC_PIXEL_DEBUG_COUNTER(IntensityBytesSent);
 
     return ISR_GetIntensityData();
 } // fPixelSendIntensity
@@ -603,10 +590,9 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelAppendNulls()
     uint32_t response = 0x00;
     do // once
     {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-        PixelAppendNullsCounter++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
-// pixel prepend goes here
+        INC_PIXEL_DEBUG_COUNTER(PixelAppendNullsCounter);
+        
+        // pixel prepend goes here
         if (PixelPrependDataCurrentIndex < PixelPrependDataSize)
         {
             response = PixelPrependData[PixelPrependDataCurrentIndex++];
@@ -643,9 +629,7 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_PixelAppendNulls()
 //----------------------------------------------------------------------------
 uint32_t IRAM_ATTR c_OutputPixel::ISR_FrameAppendData()
 {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-    FrameAppendDataCounter++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(FrameAppendDataCounter)
 
     uint32_t response = pFrameAppendData[FrameAppendDataCurrentIndex];
 
@@ -660,23 +644,18 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_FrameAppendData()
 //----------------------------------------------------------------------------
 uint32_t IRAM_ATTR c_OutputPixel::ISR_FrameDone()
 {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-    FrameDoneCounter++;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+    INC_PIXEL_DEBUG_COUNTER(FrameDoneCounter);
     return 0x00;
 }
 
 //----------------------------------------------------------------------------
 bool IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 {
-
-#ifdef USE_PIXEL_DEBUG_COUNTERS
-    GetNextIntensityToSendCounter++;
+    INC_PIXEL_DEBUG_COUNTER(GetNextIntensityToSendCounter);
     if(!ISR_MoreDataToSend())
     {
-        GetNextIntensityToSendFailedCounter++;
+        INC_PIXEL_DEBUG_COUNTER(GetNextIntensityToSendFailedCounter);
     }
-#endif // def USE_PIXEL_DEBUG_COUNTERS
 
     DataToSend = (this->*FrameStateFuncPtr)();
 
@@ -715,9 +694,9 @@ uint32_t IRAM_ATTR c_OutputPixel::ISR_GetIntensityData()
         }
         else
         {
-#ifdef USE_PIXEL_DEBUG_COUNTERS
+            #ifdef USE_PIXEL_DEBUG_COUNTERS
             IntensityBytesSentLastFrame = IntensityBytesSent;
-#endif // def USE_PIXEL_DEBUG_COUNTERS
+            #endif // def USE_PIXEL_DEBUG_COUNTERS
 
             FrameStateFuncPtr = &c_OutputPixel::ISR_FrameDone;
         }
@@ -829,7 +808,7 @@ void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCo
                 break;
             }
 
-            if(uint32_t(pBuffer) >= uint32_t(&(OutputMgr.GetBufferAddress()[OutputMgr.GetBufferSize()])))
+            if(uint32_t(pBuffer) >= uint32_t(&(OutputMgr.ISR_GetBufferAddress()[OutputMgr.GetBufferSize()])))
             {
                 // DEBUG_V("This write is beyond the end of the Global Output buffer");
                 // DEBUG_V(String("      CalculatedChannelId: ") + String(CalculatedChannelId));

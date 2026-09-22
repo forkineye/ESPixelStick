@@ -17,7 +17,7 @@
 *
 */
 #include "ESPixelStick.h"
-#if defined(SUPPORT_OutputProtocol_WS2811) && defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_WS2811) && defined(SUPPORT_RMT)
 
 #include "output/OutputWS2811Rmt.hpp"
 
@@ -95,7 +95,7 @@ bool c_OutputWS2811Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.arg                     = this;
     OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
     OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
-    OutputRmtConfig.BufferStart             = GetBufferAddress();
+    OutputRmtConfig.BufferStart             = ISR_GetBufferAddress();
     OutputRmtConfig.NumBytesInFrame         = OM_MAX_NUM_CHANNELS;
 
     // DEBUG_V();
@@ -195,7 +195,7 @@ void c_OutputWS2811Rmt::StartNewDataFrame()
 {
     // DEBUG_START;
 
-    StartNewFrame();
+    ISR_StartNewFrame();
 
     // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
     INC_WS2811_RMT_DEBUG_COUNTERS(FrameStarts);
@@ -262,4 +262,4 @@ void c_OutputWS2811Rmt::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputProtocol_WS2811) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_WS2811) && defined(SUPPORT_RMT)

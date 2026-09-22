@@ -22,7 +22,7 @@
 *
 */
 #include "ESPixelStick.h"
-#if (defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(ARDUINO_ARCH_ESP32)
+#if (defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(SUPPORT_RMT)
 
 #include "OutputSerial.hpp"
 #include "OutputRmt.hpp"
@@ -43,7 +43,7 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput(bool State);
-    void    StartNewDataFrame();
+    void    ISR_StartNewDataFrame();
     bool    ISR_GetNextBitToSend(rmt_item32_t & DataToSend);
 
 private:
@@ -85,4 +85,4 @@ private:
 
 }; // c_OutputSerialRmt
 
-#endif // defined(SUPPORT_OutputProtocol_FireGod) || (defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_FireGod) || (defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(SUPPORT_RMT)

@@ -329,7 +329,7 @@ uint32_t c_OutputRelay::Poll ()
         OutputValue(pOutputBuffer[0]);
     }
 
-    ReportNewFrame ();
+    ISR_ReportNewFrame ();
 
     // DEBUG_END;
     return 0;

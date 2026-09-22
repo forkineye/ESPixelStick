@@ -17,7 +17,7 @@
 *
 */
 #include "ESPixelStick.h"
-#if (defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(ARDUINO_ARCH_ESP32)
+#if (defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(SUPPORT_RMT)
 
 #include "output/OutputSerialRmt.hpp"
 
@@ -30,7 +30,7 @@ static bool IRAM_ATTR ISR_GetNextBitToSendBase (void * arg, rmt_item32_t & DataT
 //----------------------------------------------------------------------------
 static void StartNewDataFrameBase(void * arg)
 {
-    return reinterpret_cast<c_OutputSerialRmt*>(arg)->StartNewDataFrame();
+    return reinterpret_cast<c_OutputSerialRmt*>(arg)->ISR_StartNewDataFrame();
 }
 
 //----------------------------------------------------------------------------
@@ -81,7 +81,7 @@ bool c_OutputSerialRmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.arg                     = this;
     OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
     OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
-    OutputRmtConfig.BufferStart             = GetBufferAddress();
+    OutputRmtConfig.BufferStart             = ISR_GetBufferAddress();
     OutputRmtConfig.NumBytesInFrame         = OM_MAX_NUM_CHANNELS;
 
     Rmt.Begin(OutputRmtConfig, this);
@@ -231,7 +231,7 @@ bool c_OutputSerialRmt::RmtPoll ()
 } // Poll
 
 //----------------------------------------------------------------------------
-void c_OutputSerialRmt::StartNewDataFrame()
+void IRAM_ATTR c_OutputSerialRmt::ISR_StartNewDataFrame()
 {
     // DEBUG_START;
     // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
@@ -243,7 +243,7 @@ void c_OutputSerialRmt::StartNewDataFrame()
     }
     #endif //  defined(SUPPORT_OutputProtocol_DMX)
     StartBitCount = 1;
-    StartNewFrame();
+    ISR_StartNewFrame();
 
     // DEBUG_END;
 } // StartNewDataFrame
@@ -322,4 +322,4 @@ void c_OutputSerialRmt::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // (defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(ARDUINO_ARCH_ESP32)
+#endif // (defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(SUPPORT_RMT)

@@ -23,7 +23,7 @@
 */
 
 #include "ESPixelStick.h"
-#if defined(SUPPORT_OutputProtocol_TM1814)
+#if defined(SUPPORT_OutputProtocol_TM1814) && defined(SUPPORT_UART)
 
 #include "OutputTM1814.hpp"
 #include "OutputUart.hpp"
@@ -40,9 +40,6 @@ public:
     // functions to be provided by the derived class
     void    Begin ();                                         ///< set up the operating environment based on the current config (or defaults)
     uint32_t Poll ();                                        ///< Call from loop(),  renders output data
-#if defined(ARDUINO_ARCH_ESP32)
-    bool     RmtPoll () {return false;}
-#endif // defined(ARDUINO_ARCH_ESP32)
     void    PauseOutput (bool State);
     bool    SetConfig (ArduinoJson::JsonObject& jsonConfig);
     void    GetConfig (ArduinoJson::JsonObject& jsonConfig);
@@ -59,4 +56,4 @@ private:
 
 }; // c_OutputTM1814Uart
 
-#endif // defined(SUPPORT_OutputProtocol_TM1814)
+#endif // defined(SUPPORT_OutputProtocol_TM1814) && defined(SUPPORT_UART)

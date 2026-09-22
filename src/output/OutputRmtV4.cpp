@@ -17,7 +17,7 @@
 *
 */
 #include "ESPixelStick.h"
-#if defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_RMT)
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
 
 #include "output/OutputRmt.hpp"
@@ -604,4 +604,4 @@ bool c_OutputRmt::StartNewFrame ()
 } // StartNewFrame
 
 #endif // ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
-#endif // defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_RMT)

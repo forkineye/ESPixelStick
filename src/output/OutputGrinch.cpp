@@ -129,7 +129,7 @@ void c_OutputGrinch::StartNewFrame()
 
     // build the data frame
     uint32_t    NumChannelsToProcess = GetNumOutputBufferBytesNeeded();
-    uint8_t     * pInputData = GetBufferAddress();
+    uint8_t     * pInputData = ISR_GetBufferAddress();
     uint8_t     OutputData = 0;
     uint8_t     OutputDataByteIndex = 0;
     uint8_t     bitCounter = 0;
@@ -156,7 +156,7 @@ void c_OutputGrinch::StartNewFrame()
     }
 
     SpiOutputDataByteIndex = NumberOfGrinchDataBytes;
-    ReportNewFrame();
+    ISR_ReportNewFrame();
 
     // DEBUG_END;
 } // StartNewFrame

@@ -23,7 +23,7 @@ GNU General Public License for more details.
 */
 #include "ESPixelStick.h"
 
-#if defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
+#if (defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)) && defined(SUPPORT_UART)
 
 #include "OutputSerial.hpp"
 #include "OutputUart.hpp"
@@ -42,9 +42,6 @@ public:
     virtual void    GetConfig(ArduinoJson::JsonObject &jsonConfig); ///< Set a new config in the driver
     virtual void    GetStatus(ArduinoJson::JsonObject &jsonStatus);
     uint32_t        Poll();
-#if defined(ARDUINO_ARCH_ESP32)
-    bool            RmtPoll () {return false;}
-#endif // defined(ARDUINO_ARCH_ESP32)
     void            PauseOutput (bool NewState);
 
 private:
@@ -52,4 +49,4 @@ private:
 
 }; // c_OutputSerialUart
 
-#endif // defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard)
+#endif // defined(SUPPORT_OutputProtocol_FireGod) || defined(SUPPORT_OutputProtocol_DMX) || defined(SUPPORT_OutputProtocol_Serial) || defined(SUPPORT_OutputProtocol_Renard) && defined(SUPPORT_UART)

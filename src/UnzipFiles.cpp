@@ -117,6 +117,8 @@ void UnzipFiles::ProcessZipFile(String & ArchiveFileName)
     if (returnCode == UNZ_OK)
     {
         bool IsSpecialxLightsZipFile = (-1 != ArchiveFileName.indexOf(".xlz"));
+        // DEBUG_V(String("IsSpecialxLightsZipFile: ") + String(IsSpecialxLightsZipFile));
+
         // logcon(String("Opened zip file: '") + FileName + "'");
 
         // Display the global comment and all of the FileNames within
@@ -140,15 +142,19 @@ void UnzipFiles::ProcessZipFile(String & ArchiveFileName)
                     // DEBUG_V("Modifying File Name");
                     String Temp = ArchiveFileName;
                     Temp.replace(".xlz", ".fseq");
-                    // DEBUG_V(String("              Temp: ") + Temp);
+                    // DEBUG_V(String("                   Temp: ") + Temp);
                     if(FinalFileName.equals(Temp))
                     {
                         IsSpecialxLightsZipFile = false;
                     }
+                    else
+                    {
+                        FinalFileName = Temp;
+                    }
                 }
                 // DEBUG_V(String("IsSpecialxLightsZipFile: ") + String(IsSpecialxLightsZipFile));
-                // DEBUG_V(String("ArchiveSubFileName: ") + ArchiveSubFileName);
-                // DEBUG_V(String("     FinalFileName: ") + FinalFileName);
+                // DEBUG_V(String("     ArchiveSubFileName: ") + ArchiveSubFileName);
+                // DEBUG_V(String("          FinalFileName: ") + FinalFileName);
 
                 c_FileMgr::SdInfo info;
                 FileMgr.GetSdInfo(info);

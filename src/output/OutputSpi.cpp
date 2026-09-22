@@ -292,7 +292,7 @@ void c_OutputSpi::StartNewFrame()
 
     if(OutputPixel)
     {
-        OutputPixel->StartNewFrame ();
+        OutputPixel->ISR_StartNewFrame ();
     }
 #if defined(SUPPORT_OutputProtocol_GRINCH)
     else if(OutputGrinch)

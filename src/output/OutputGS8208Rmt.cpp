@@ -18,7 +18,7 @@
 */
 #include "ESPixelStick.h"
 
-#if defined(SUPPORT_OutputProtocol_GS8208) && defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_GS8208) && defined(SUPPORT_RMT)
 
 #include "output/OutputGS8208Rmt.hpp"
 
@@ -31,7 +31,7 @@ static bool IRAM_ATTR ISR_GetNextBitToSendBase (void * arg, rmt_item32_t & DataT
 //----------------------------------------------------------------------------
 static void StartNewDataFrameBase(void * arg)
 {
-    return reinterpret_cast<c_OutputGS8208Rmt*>(arg)->StartNewDataFrame();
+    return reinterpret_cast<c_OutputGS8208Rmt*>(arg)->ISR_StartNewDataFrame();
 }
 
 //----------------------------------------------------------------------------
@@ -96,7 +96,7 @@ bool c_OutputGS8208Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.arg                     = this;
     OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
     OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
-    OutputRmtConfig.BufferStart             = GetBufferAddress();
+    OutputRmtConfig.BufferStart             = ISR_GetBufferAddress();
     OutputRmtConfig.NumBytesInFrame         = OM_MAX_NUM_CHANNELS;
 
     Rmt.Begin(OutputRmtConfig, this);
@@ -179,13 +179,13 @@ bool c_OutputGS8208Rmt::RmtPoll ()
 } // Poll
 
 //----------------------------------------------------------------------------
-void c_OutputGS8208Rmt::StartNewDataFrame()
+void IRAM_ATTR c_OutputGS8208Rmt::ISR_StartNewDataFrame()
 {
     // DEBUG_START;
     // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
     INC_GS8208_RMT_DEBUG_COUNTERS(FrameStarts);
     ifgBitCurrentCount = ifgBitCount;
-    StartNewFrame();
+    ISR_StartNewFrame();
 
     // DEBUG_END;
 } // StartNewDataFrame
@@ -245,4 +245,4 @@ void c_OutputGS8208Rmt::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputProtocol_GS8208) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_GS8208) && defined(SUPPORT_RMT)

@@ -23,7 +23,7 @@
 */
 #include "ESPixelStick.h"
 
-#if defined(SUPPORT_OutputProtocol_GS8208) && defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_GS8208) && defined(SUPPORT_RMT)
 
 #include "OutputGS8208.hpp"
 #include "OutputRmt.hpp"
@@ -44,7 +44,7 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput (bool State);
-    void    StartNewDataFrame();
+    void    ISR_StartNewDataFrame();
     bool    ISR_GetNextBitToSend (rmt_item32_t & DataToSend);
 
 private:
@@ -87,4 +87,4 @@ private:
 
 }; // c_OutputGS8208Rmt
 
-#endif // defined(SUPPORT_OutputProtocol_GS8208) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_GS8208) && defined(SUPPORT_RMT)

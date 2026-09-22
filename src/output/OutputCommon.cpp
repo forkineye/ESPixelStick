@@ -32,8 +32,10 @@ c_OutputCommon::c_OutputCommon (OM_OutputPortDefinition_t & _OutputPortDefinitio
 	HasBeenInitialized       = false;
 	OutputPortDefinition     = _OutputPortDefinition;
     OutputType               = outputProtocol;
-    pOutputBuffer            = OutputMgr.GetBufferAddress ();
+    pOutputBuffer            = OutputMgr.ISR_GetBufferAddress ();
+    #ifndef SUPPORT_I2S
     FrameStartTimeInMicroSec = 0;
+    #endif // ndef SUPPORT_I2S
 
 	// logcon (String ("UartId:          '") + UartId + "'");
     // logcon (String ("OutputPortId: '") + OutputPortId + "'");
@@ -63,16 +65,18 @@ void c_OutputCommon::BaseGetStatus (JsonObject & jsonStatus)
 } // GetStatus
 
 //----------------------------------------------------------------------------
-void c_OutputCommon::ReportNewFrame ()
+void IRAM_ATTR c_OutputCommon::ISR_ReportNewFrame ()
 {
     // DEBUG_START;
 
+    #ifndef SUPPORT_I2S
     FrameStartTimeInMicroSec = micros ();
+    #endif // ndef SUPPORT_I2S
     FrameCount++;
 
     // DEBUG_END;
 
-} // ReportNewFrame
+} // ISR_ReportNewFrame
 
 //----------------------------------------------------------------------------
 bool c_OutputCommon::SetConfig (JsonObject & jsonConfig)
@@ -111,9 +115,9 @@ void c_OutputCommon::WriteChannelData (uint32_t StartChannelId, uint32_t Channel
 
     if((StartChannelId + ChannelCount) > OutputBufferSize)
     {
-        DEBUG_V("ERROR: Writting beyond the end of the output buffer");
-        DEBUG_V(String("StartChannelId: 0x") + String(StartChannelId, HEX));
-        DEBUG_V(String("  ChannelCount: 0x") + String(ChannelCount));
+        // DEBUG_V("ERROR: Writting beyond the end of the output buffer");
+        // DEBUG_V(String("StartChannelId: 0x") + String(StartChannelId, HEX));
+        // DEBUG_V(String("  ChannelCount: 0x") + String(ChannelCount));
     }
     else
     {

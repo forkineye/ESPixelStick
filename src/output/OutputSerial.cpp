@@ -322,7 +322,7 @@ void c_OutputSerial::SetFrameDurration ()
 } // SetFrameDurration
 
 //----------------------------------------------------------------------------
-void c_OutputSerial::StartNewFrame ()
+void IRAM_ATTR c_OutputSerial::ISR_StartNewFrame ()
 {
     // DEBUG_START;
 
@@ -334,7 +334,7 @@ void c_OutputSerial::StartNewFrame ()
     FrameStartCounter++;
 #endif // def USE_SERIAL_DEBUG_COUNTERS
 
-    NextIntensityToSend = GetBufferAddress();
+    NextIntensityToSend = ISR_GetBufferAddress();
     intensity_count     = Num_Channels;
     SentIntensityCount  = 0;
     SerialHeaderIndex   = 0;
@@ -385,7 +385,7 @@ void c_OutputSerial::StartNewFrame ()
 
     } // end switch (OutputType)
 
-    ReportNewFrame();
+    ISR_ReportNewFrame();
 
     // DEBUG_END;
 

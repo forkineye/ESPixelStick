@@ -46,11 +46,11 @@ public:
     virtual bool         RmtPoll () = 0;                                        ///< Call from loop(),  renders output data
 #endif // def ARDUINO_ARCH_ESP32
     virtual void         GetDriverName (String & sDriverName) = 0;             ///< get the name for the instantiated driver
-            OM_PortId_t  GetOutputPortId ()    { return OutputPortDefinition.PortId; }     ///< return the output channel number
-            uint8_t    * GetBufferAddress ()   { return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            uint32_t     GetBufferUsedSize ()  { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
-            OM_GPIOS_t   GetOutputGpio ()      { return OutputPortDefinition.gpios; }
-            OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
+    inline  OM_PortId_t  GetOutputPortId ()    { return OutputPortDefinition.PortId; }     ///< return the output channel number
+    inline  uint8_t    * ISR_GetBufferAddress(){ return pOutputBuffer;}        ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    inline  uint32_t     GetBufferUsedSize ()  { return OutputBufferSize;}     ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    inline  OM_GPIOS_t   GetOutputGpio ()      { return OutputPortDefinition.gpios; }
+    inline  OTYPE_t      GetOutputType ()      { return OutputType; }          ///< Have the instance report its type.
     virtual void         GetStatus (ArduinoJson::JsonObject & jsonStatus) = 0;
     virtual void         BaseGetStatus (ArduinoJson::JsonObject & jsonStatus);
             void         SetOutputBufferAddress (uint8_t* pNewOutputBuffer) { pOutputBuffer = pNewOutputBuffer; }
@@ -62,7 +62,7 @@ public:
     virtual void         ReadChannelData (uint32_t StartChannelId, uint32_t ChannelCount, byte *pTargetData);
     virtual bool         ValidateGpio (gpio_num_t ConsoleTxGpio, gpio_num_t ConsoleRxGpio);
     virtual uint32_t     GetFrameTimeMs() {return 1 + (ActualFrameDurationMicroSec / 1000); }
-            bool         IsPaused() {return Paused;}
+    inline  bool         IsPaused() {return Paused;}
     virtual void         ClearStatistics (void);
 
 protected:
@@ -77,8 +77,8 @@ protected:
     uint32_t    FrameCount                  = 0;
     bool        Paused = false;
 
-    virtual void ReportNewFrame ();
-
+    void ISR_ReportNewFrame ();
+#ifndef SUPPORT_I2S
     inline bool canRefresh ()
     {
         uint32_t Now = micros ();
@@ -95,4 +95,5 @@ protected:
 
     private:   uint32_t FrameStartTimeInMicroSec = 0;
     public:    uint32_t GetFrameStartTimeInMicroSec() {return FrameStartTimeInMicroSec;}
+#endif // ndef SUPPORT_I2S
 }; // c_OutputCommon

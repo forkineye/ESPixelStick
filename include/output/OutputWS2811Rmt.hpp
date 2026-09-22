@@ -22,7 +22,7 @@
 *
 */
 #include "ESPixelStick.h"
-#if defined(SUPPORT_OutputProtocol_WS2811) && defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_WS2811) && defined(SUPPORT_RMT)
 
 #include "OutputWS2811.hpp"
 #include "OutputRmt.hpp"
@@ -88,4 +88,4 @@ private:
 
 }; // c_OutputWS2811Rmt
 
-#endif // defined(SUPPORT_OutputProtocol_WS2811) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_WS2811) && defined(SUPPORT_RMT)

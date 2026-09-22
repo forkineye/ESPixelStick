@@ -18,7 +18,7 @@
 */
 #include "ESPixelStick.h"
 
-#if defined(SUPPORT_OutputProtocol_UCS1903) && defined(ARDUINO_ARCH_ESP32)
+#if defined(SUPPORT_OutputProtocol_UCS1903) && defined(SUPPORT_RMT)
 
 #include "output/OutputUCS1903Rmt.hpp"
 
@@ -95,7 +95,7 @@ bool c_OutputUCS1903Rmt::SetConfig (ArduinoJson::JsonObject& jsonConfig)
     OutputRmtConfig.arg                     = this;
     OutputRmtConfig.ISR_GetNextIntensityBit = ISR_GetNextBitToSendBase;
     OutputRmtConfig.StartNewDataFrame       = StartNewDataFrameBase;
-    OutputRmtConfig.BufferStart             = GetBufferAddress();
+    OutputRmtConfig.BufferStart             = ISR_GetBufferAddress();
     OutputRmtConfig.NumBytesInFrame         = OM_MAX_NUM_CHANNELS;
 
     Rmt.Begin(OutputRmtConfig, this);
@@ -177,13 +177,13 @@ bool c_OutputUCS1903Rmt::RmtPoll ()
 } // Poll
 
 //----------------------------------------------------------------------------
-void c_OutputUCS1903Rmt::StartNewDataFrame()
+void IRAM_ATTR c_OutputUCS1903Rmt::StartNewDataFrame()
 {
     // DEBUG_START;
     // DEBUG_V(String("frame started on ") + String(OutputPortDefinition.gpios.data));
     INC_UCS1903_RMT_DEBUG_COUNTERS(FrameStarts);
     IfgBitCurrentCount = IfgBitCount;
-    StartNewFrame();
+    ISR_StartNewFrame();
 
     // DEBUG_END;
 } // StartNewDataFrame
@@ -243,4 +243,4 @@ void c_OutputUCS1903Rmt::PauseOutput (bool State)
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined(SUPPORT_OutputProtocol_UCS1903) && defined(ARDUINO_ARCH_ESP32)
+#endif // defined(SUPPORT_OutputProtocol_UCS1903) && defined(SUPPORT_RMT)

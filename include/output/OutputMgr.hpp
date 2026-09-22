@@ -28,6 +28,10 @@
 #include "FileMgr.hpp"
 #include <TimeLib.h>
 
+#ifdef SUPPORT_I2S
+    #include "output/OutputI2S.hpp"
+#endif // def SUPPORT_I2S
+
 class c_OutputCommon; ///< forward declaration to the pure virtual output class that will be defined later.
 
 #ifdef UART_LAST
@@ -44,6 +48,9 @@ private:
     #else // ARDUINO_ARCH_ESP32
     #define OM_MAX_NUM_CHANNELS  (3000 * 3)
     #endif // !def ARDUINO_ARCH_ESP32
+#ifdef SUPPORT_I2S
+    c_OutputI2S OutputI2S;
+#endif // def SUPPORT_I2S
 
 public:
     c_OutputMgr ();
@@ -58,7 +65,7 @@ public:
     void      SetConfig         (const char * NewConfig);  ///< Save the current configuration data to nvram
     void      SetConfig         (ArduinoJson::JsonDocument & NewConfig);  ///< Save the current configuration data to nvram
     void      GetStatus         (JsonObject & jsonStatus);
-    uint8_t*  GetBufferAddress  () { return pOutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
+    IRAM_ATTR uint8_t * ISR_GetBufferAddress  () { return pOutputBuffer; } ///< Get the address of the buffer into which the E1.31 handler will stuff data
     uint32_t  GetBufferUsedSize () { return UsedBufferSize; } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     uint32_t  GetBufferSize     () { return uint32_t(OM_MAX_NUM_CHANNELS); } ///< Get the size (in intensities) of the buffer into which the E1.31 handler will stuff data
     void      DeleteConfig      () { FileMgr.DeleteFlashFile (ConfigFileName); }
@@ -71,8 +78,11 @@ public:
     void      RelayUpdate       (uint8_t RelayId, String & NewValue, String & Response);
     void      ClearStatistics   (void);
     uint8_t   GetNumPorts       () {return NumOutputPorts;}
+	#ifdef SUPPORT_I2S
+	c_OutputI2S * GetI2sDriver  () {return &OutputI2S;}
+	#endif // def SUPPORT_I2S
 
-    // do NOT insert into the middle of this list. Always add new types to the end of the list
+// do NOT insert into the middle of this list. Always add new types to the end of the list
     enum e_OutputProtocolType
     {
         OutputProtocol_Disabled = 0,

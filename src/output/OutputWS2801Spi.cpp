@@ -94,7 +94,7 @@ uint32_t c_OutputWS2801Spi::Poll ()
     {
         if (Spi.Poll ())
             {
-            ReportNewFrame ();
+            ISR_ReportNewFrame ();
             }
     }
     else

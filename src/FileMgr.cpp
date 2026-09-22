@@ -1625,7 +1625,7 @@ void c_FileMgr::CloseSdFile (FileId& FileHandle)
 
         if (nullptr != FileList[FileListIndex].buffer.DataBuffer)
         {
-            if(FileList[FileListIndex].buffer.DataBuffer != OutputMgr.GetBufferAddress())
+            if(FileList[FileListIndex].buffer.DataBuffer != OutputMgr.ISR_GetBufferAddress())
             {
                 // only free the buffer if it is not malloc'd
                 free(FileList[FileListIndex].buffer.DataBuffer);
@@ -2368,7 +2368,7 @@ void c_FileMgr::handleFileUploadNewFile (const String & filename)
         // DEBUG_V("Use the output buffer as a data buffer");
         FileList[FileListIndex].buffer.offset = 0;
         FileList[FileListIndex].buffer.size = min(uint32_t(OutputMgr.GetBufferSize() & ~(SD_BLOCK_SIZE - 1)), uint32_t(MAX_SD_BUFFER_SIZE));
-        FileList[FileListIndex].buffer.DataBuffer = OutputMgr.GetBufferAddress();
+        FileList[FileListIndex].buffer.DataBuffer = OutputMgr.ISR_GetBufferAddress();
         OutputMgr.PauseOutputs(true);
         InputMgr.SetOperationalState(false);
         OutputMgr.ClearBuffer();
