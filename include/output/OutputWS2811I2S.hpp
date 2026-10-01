@@ -3,7 +3,7 @@
 * OutputWS2811I2S.h - WS2811 driver code for ESPixelStick I2S Channel
 *
 * Project: ESPixelStick - An ESP8266 / ESP32 and E1.31 based pixel driver
-* Copyright (c) 2015, 2025 Shelby Merrick
+* Copyright (c) 2015, 2026 Shelby Merrick
 * http://www.forkineye.com
 *
 *  This program is provided free for you to use in any way that you wish,
@@ -41,15 +41,16 @@ public:
     uint32_t Poll () {return 0;}                             ///< Call from loop (),  renders output data
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
-    void    PauseOutput(bool State);
+    void    PauseOutput (bool State);
     void    ISR_GetNextDataSlicesToSend (c_OutputI2S::I2S_Item_t * DataToSend, uint32_t numSlices);
-    void    ISR_StartNewDataFrame();
 
     // to be removed when the I2S driver is fully implemented
     virtual bool RmtPoll() {return false;}
 
 private:
     void    CalculateFrameBitSlices ();
+    void    ISR_SetUpNextDataBitToSend ();
+    void    ISR_StartNewDataFrame ();
 
     // The adjustments compensate for rounding errors in the calculations
     c_OutputI2S     *I2Sdriver;
@@ -75,9 +76,9 @@ private:
     uint32_t        DataPattern;
     uint32_t        DataPatternMask;
 
-    #define WS2811_I2S_DEBUG_COUNTERS
+    // #define WS2811_I2S_DEBUG_COUNTERS
     #ifdef WS2811_I2S_DEBUG_COUNTERS
-    #define INC_WS2811_I2S_DEBUG_COUNTERS(c) (++I2SDebugCounters.c)
+    #define INC_WS2811_I2S_DEBUG_COUNTER(c) (I2SDebugCounters.c++)
     struct
     {
         uint32_t GetDataSlices;
@@ -93,11 +94,22 @@ private:
         uint32_t DataBits;
         uint32_t DataBitEnd;
         uint32_t DataByteEnd;
+        uint32_t UnKnownFrameState;
     } I2SDebugCounters;
     #else
-    #define INC_WS2811_I2S_DEBUG_COUNTERS(c)
+    #define INC_WS2811_I2S_DEBUG_COUNTER(c)
     #endif // def WS2811_I2S_DEBUG_COUNTERS
 
+    enum OutputWS2811I2S_FSM_States
+    {
+        _OutputWS2811I2S_FSM_State_FrameStart,
+        _OutputWS2811I2S_FSM_State_Ifg,
+        _OutputWS2811I2S_FSM_State_FrameReset,
+        _OutputWS2811I2S_FSM_State_DataHigh,
+        _OutputWS2811I2S_FSM_State_DataLow
+    };
+    OutputWS2811I2S_FSM_States volatile OutputWS2811I2S_FSM_State = OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Ifg;
+    
 }; // c_OutputWS2811I2S
 
 #endif // defined(SUPPORT_OutputProtocol_WS2811) && defined(SUPPORT_I2S)

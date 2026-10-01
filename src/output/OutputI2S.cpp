@@ -228,6 +228,9 @@ void c_OutputI2S::RemoveSlotDevice  (uint32_t I2SChannelId)
             logcon (F ("Invalid I2S channel ID"));
             break;
         }
+
+        DEBUG_V (String ("I2SChannelId: ") + String (I2SChannelId));
+
         auto & currentConfig = OutputI2SSlotConfigs[I2SChannelId];
 
         // must be first
@@ -298,10 +301,10 @@ uint32_t c_OutputI2S::GetNumTimeSlicesForTargetTimeNS (uint32_t TargetTimeInNano
     // DEBUG_START;
 
     uint32_t Result = 0;
-    double I2S_TickTimeInNS = i2sParallel.get_clockNS ();
+    uint32_t I2S_TickTimeInNS = (uint32_t) (i2sParallel.get_clockNS ());
 
     // round up
-    Result = ( (TargetTimeInNanoSec + int (I2S_TickTimeInNS)) - 1) / int (I2S_TickTimeInNS);
+    Result = (TargetTimeInNanoSec + I2S_TickTimeInNS - 1) / I2S_TickTimeInNS;
     if (0 == Result) Result = 1;
 
     // DEBUG_V (String ("TargetTimeInNanoSec: ") + String (TargetTimeInNanoSec));

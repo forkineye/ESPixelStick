@@ -438,7 +438,6 @@ void IRAM_ATTR c_OutputPixel::ISR_StartNewFrame ()
     IntensityBytesSent = 0;
     #endif // def USE_PIXEL_DEBUG_COUNTERS
 
-    // NumIntensityBytesPerPixel = 1;
     c_OutputCommon::ISR_ReportNewFrame();
 
     // DEBUG_END;

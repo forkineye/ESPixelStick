@@ -272,12 +272,12 @@ c_OutputMgr::c_OutputMgr ()
 
     // allocate a port driver control space
     // DriverInfo_t is an aligned structure
-    size_t alignment = alignof(DriverInfo_t);
-    uint32_t SizeOfTable = sizeof(DriverInfo_t) * NumOutputPorts;
-    // Ensure total_size is a multiple of alignment (which it should be if sizeof(AlignedObject) is used)
-    byte * raw_mem = (((byte*)malloc(SizeOfTable + (2*alignment))) + alignment);
+    uint32_t StartOfDriverArray = uint32_t(&pOutputChannelDrivers[0]);
+    uint32_t EndOfDriverArray = uint32_t(&pOutputChannelDrivers[NumOutputPorts]);
+    uint32_t SizeOfDriverArray = EndOfDriverArray - StartOfDriverArray;
+    byte * raw_mem = (byte*)malloc(SizeOfDriverArray);
     pOutputChannelDrivers = static_cast<DriverInfo_t*>((void*)raw_mem);
-    memset((void*)pOutputChannelDrivers, 0x00, SizeOfTable);
+    memset((void*)pOutputChannelDrivers, 0x00, SizeOfDriverArray);
 
     // Init the driver memory
     for (uint8_t index = 0; index < NumOutputPorts; ++index)
@@ -295,6 +295,10 @@ c_OutputMgr::c_OutputMgr ()
         CurrentOutput.DriverId = index;
         CurrentOutput.OutputDriverInUse = false;
     }
+
+    #ifdef SUPPORT_I2S
+    OutputI2S.Begin();
+    #endif // def SUPPORT_I2S
 
 } // c_OutputMgr
 
@@ -353,10 +357,6 @@ void c_OutputMgr::Begin ()
         digitalWrite (LED_FLASH_GPIO, LED_FLASH_OFF);
         #endif // def LED_FLASH_GPIO
 
-    #ifdef SUPPORT_I2S
-        OutputI2S.Begin();
-    #endif // def SUPPORT_I2S
-    
         // make sure the pointers are set up properly
         for (uint8_t index = 0; index < NumOutputPorts; ++index)
         {

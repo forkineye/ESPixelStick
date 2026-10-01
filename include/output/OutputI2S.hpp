@@ -31,7 +31,8 @@ public:
     // a slot is one bit in the output item
     #define I2S_NUM_SLOTA i2s_bits_per_chan_t::I2S_BITS_PER_CHAN_8BIT
     #define I2S_MAX_NUM_PORTS 8
-    typedef uint8_t I2S_Item_t;
+
+    typedef byte I2S_Item_t;
 
     struct OutputI2SChannelConfig_t
     {
@@ -42,8 +43,8 @@ public:
         bool        IsActive;
     };
 
-    // must be a multiple of 32
-    #define I2S_NumSendBufferItems 1024
+    // must be a multiple of 32 bits (aka 4 bytes)
+    #define I2S_NumSendBufferItems (256 * sizeof(uint32_t))
 
     struct TransmitDmaBuffer_t
     {
@@ -107,5 +108,6 @@ public:
 
 #endif // def USE_I2S_DEBUG_COUNTERS
 
-};
+}; // c_OutputI2S
+
 #endif // def #ifdef SUPPORT_I2S
