@@ -41,13 +41,15 @@
 
 #include <Ticker.h>
 #include <ArduinoJson.h>
+#ifdef ARDUINO_ARCH_ESP8266
+#   include <coredecls.h> // can_yield()
+#endif // def ARDUINO_ARCH_ESP8266
 
 #include "memdebug.h"
 #include "ConstNames.hpp"
 #include "GPIO_Defs.hpp"
 #include "FastTimer.hpp"
 
-#define REBOOT_DELAY    100     ///< Delay for rebooting once reboot flag is set
 #define LOG_PORT        Serial  ///< Serial port for console logging
 #define CLIENT_TIMEOUT  15      ///< In station/client mode try to connection for 15 seconds
 #define AP_TIMEOUT      120     ///< In AP mode, wait 120 seconds for a connection or reboot
@@ -97,6 +99,17 @@ extern ConstConfig_t ConstConfig;
 extern  bool IsBooting;
 extern  bool ResetWiFi;
 extern  void FeedWDT ();
+
+// Use this instead of delay() in code that the SDK runs outside of loop(): UDP, web and timer callbacks.
+// On the ESP8266, delay() cannot wait there and it corrupts the SDK timer list when loop() is in delay()
+// at the same time. This only waits when called from the loop() context.
+inline void SafeDelay (uint32_t ms)
+{
+#ifdef ARDUINO_ARCH_ESP8266
+    if (!can_yield ()) { return; }
+#endif // def ARDUINO_ARCH_ESP8266
+    delay (ms);
+} // SafeDelay
 extern  uint32_t DiscardedRxData;
 
 extern void PrettyPrint (JsonObject& jsonStuff, String Name);

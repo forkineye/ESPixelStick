@@ -675,7 +675,7 @@ void c_InputFPPRemote::FppStopRemoteFilePlay ()
         pInputFPPRemotePlayItem->Poll ();
 
         FeedWDT();
-        delay(5);
+        SafeDelay(5);
     }
 
     // DEBUG_END;

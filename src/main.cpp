@@ -633,7 +633,9 @@ void loop()
         if(0 == --RebootCount)
         {
             logcon (String(CN_stars) + CN_minussigns + F ("Internal Reboot Requested: '") + GlobalRebootReason + F("' Rebooting Now"));
-            delay (REBOOT_DELAY);
+            // Let the log line leave the UART, then restart. Not delay(): a delay() in an SDK callback while
+            // loop() is in delay() corrupts the SDK timer list and the restart ends in an exception instead.
+            LOG_PORT.flush ();
             ESP.restart ();
         }
     }
