@@ -236,18 +236,18 @@ jobs:
           merge-multiple: true
 
       # Install Node
-      - name: Setup Node.js
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: 'npm'       # Automatically caches your npm dependencies
       - run: npm install
-
-      # Build and move the web pages
+      - run: npm install -g gulp-cli
+        
+        # Build and move the web pages
       - name: Compile Web Pages
         run: |
-          npx gulp
-          npx gulp md
+          gulp
+          gulp md
           if [ -z "$ESPS_RELEASE" ]; then
           gulp ci
           fi
