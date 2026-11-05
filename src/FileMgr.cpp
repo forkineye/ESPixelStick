@@ -1903,19 +1903,28 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
 
         FeedWDT();
 
-        JsonDocument jsonDoc;
-        jsonDoc.to<JsonObject>();
+        uint32_t StartTime = millis();
 
-        JsonWrite(jsonDoc, "totalBytes", SdCardSize);
-        JsonArray jsonDocFileList = jsonDoc["files"].to<JsonArray> ();
+        // The list is streamed to the flash file one entry at a time so the
+        // memory needed does not grow with the number of files on the card.
+        String TempFileName  = String(CN_fseqfilelist) + F(".tmp");
+        String FinalFileName = String(CN_fseqfilelist) + F(".json");
+        fs::File ListFile = LittleFS.open(TempFileName.c_str(), CN_w);
+        if(!ListFile)
+        {
+            logcon(F("ERROR: Could not open the FSEQ list file for writing."));
+            break;
+        }
 
-        uint32_t FileIndex = 0;
+        ListFile.print(F("{\"totalBytes\":"));
+        ListFile.print(int64String(SdCardSize));
+        ListFile.print(F(",\"files\":["));
+
         uint64_t usedBytes = 0;
         uint32_t numFiles = 0;
 
         LockSd();
 #ifdef SIMULATE_SD
-        JsonWrite(jsonDoc, "usedBytes", ESP_SD.usedBytes());
         File InputDir = ESP_SD.open (CN_slashsd, CN_r);
 #else
         ESP_SD.chdir();
@@ -1925,85 +1934,34 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
         if(!InputDir)
         {
             UnLockSd();
+            ListFile.close();
+            LittleFS.remove(TempFileName.c_str());
             logcon(F("ERROR: Could not open SD card for Reading FSEQ List."));
             break;
         }
-
-        // DEBUG_V(String("InputDir Name: ") + String(InputDir.name()));
 
 #ifdef SIMULATE_SD
         String CurrentEntryName = InputDir.getNextFileName();
         while (!CurrentEntryName.isEmpty())
         {
-            // DEBUG_V("Process a file entry");
-            // DEBUG_V(String("CurrentEntryName: ") + CurrentEntryName);
-
             FeedWDT();
 
             File CurrentEntry = ESP_SD.open(CurrentEntryName, CN_r);
-            if(CurrentEntry.isDirectory())
+            if(!CurrentEntry.isDirectory())
             {
-                // DEBUG_V("Skip embedded directory and hidden files");
-                CurrentEntry.close();
-                continue;
-            }
-
-            String EntryName = String (CurrentEntry.name());
-            // DEBUG_V (          "EntryName: " + EntryName);
-            // DEBUG_V (" EntryName.length(): " + String(EntryName.length ()));
-            // DEBUG_V ("CurrentEntry.size(): " + String(CurrentEntry.size ()));
-
-            if ((!EntryName.isEmpty ()) && (0 != CurrentEntry.size ()))
-            {
-                FoundZipFile |= IsCompressed(EntryName);
-
-                usedBytes += CurrentEntry.size ();
-                ++numFiles;
-
-                if(DisplayFileNames)
+                String EntryName = String (CurrentEntry.name());
+                if (AddFseqListEntry(ListFile, EntryName, CurrentEntry.size (), 0, 0, numFiles, DisplayFileNames))
                 {
-                    logcon (String(F("SD File: '")) + EntryName + "'   " + String(CurrentEntry.size ()));
+                    usedBytes += CurrentEntry.size ();
                 }
-                uint16_t Date;
-                uint16_t Time;
-                // CurrentEntry.getCreateDateTime (&Date, &Time);
-                // DEBUG_V(String("Date: ") + String(Date));
-                // DEBUG_V(String("Year: ") + String(FS_YEAR(Date)));
-                // DEBUG_V(String("Day: ") + String(FS_DAY(Date)));
-                // DEBUG_V(String("Month: ") + String(FS_MONTH(Date)));
-
-                // DEBUG_V(String("Time: ") + String(Time));
-                // DEBUG_V(String("Hours: ") + String(FS_HOUR(Time)));
-                // DEBUG_V(String("Minutes: ") + String(FS_MINUTE(Time)));
-                // DEBUG_V(String("Seconds: ") + String(FS_SECOND(Time)));
-
-                tmElements_t tm;
-                tm.Year = FS_YEAR(Date) - 1970;
-                tm.Month = FS_MONTH(Date);
-                tm.Day = FS_DAY(Date);
-                tm.Hour = FS_HOUR(Time);
-                tm.Minute = FS_MINUTE(Time);
-                tm.Second = FS_SECOND(Time);
-
-                // DEBUG_V(String("tm: ") + String(time_t(makeTime(tm))));
-                jsonDocFileList[FileIndex]["name"] = EntryName;
-                jsonDocFileList[FileIndex]["date"] = makeTime(tm);
-                jsonDocFileList[FileIndex]["length"] = CurrentEntry.size ();
-                ++FileIndex;
-            }
-            else
-            {
-                // DEBUG_V("Skipping File");
             }
             CurrentEntry.close();
             CurrentEntryName = InputDir.getNextFileName ();
-
-        } // end while true
-    #else
+        } // end while
+#else
         FsFile CurrentEntry;
         while (CurrentEntry.openNext (&InputDir, O_READ))
-                {
-            // DEBUG_V("Process a file entry");
+        {
             FeedWDT();
 
             if(CurrentEntry.isDirectory() || CurrentEntry.isHidden())
@@ -2016,78 +1974,75 @@ void c_FileMgr::BuildFseqList(bool DisplayFileNames)
             memset(entryName, 0x0, sizeof(entryName));
             CurrentEntry.getName (entryName, sizeof(entryName)-1);
             String EntryName = String (entryName);
-            // DEBUG_V (         "EntryName: " + EntryName);
-            // DEBUG_V ("EntryName.length(): " + String(EntryName.length ()));
-            // DEBUG_V ("      entry.size(): " + int64String(CurrentEntry.size ()));
-
-            if ((!EntryName.isEmpty ()) &&
-                (0 != CurrentEntry.size ())
-               )
+            uint16_t Date = 0;
+            uint16_t Time = 0;
+            CurrentEntry.getCreateDateTime (&Date, &Time);
+            if (AddFseqListEntry(ListFile, EntryName, CurrentEntry.size (), Date, Time, numFiles, DisplayFileNames))
             {
-                FoundZipFile |= IsCompressed(EntryName);
-
                 usedBytes += CurrentEntry.size ();
-                ++numFiles;
-
-                if(DisplayFileNames)
-                {
-                    logcon (String(F("SD File: '")) + EntryName + "'   " + String(CurrentEntry.size ()));
-                }
-                uint16_t Date;
-                uint16_t Time;
-                CurrentEntry.getCreateDateTime (&Date, &Time);
-                // DEBUG_V(String("Date: ") + String(Date));
-                // DEBUG_V(String("Year: ") + String(FS_YEAR(Date)));
-                // DEBUG_V(String("Day: ") + String(FS_DAY(Date)));
-                // DEBUG_V(String("Month: ") + String(FS_MONTH(Date)));
-
-                // DEBUG_V(String("Time: ") + String(Time));
-                // DEBUG_V(String("Hours: ") + String(FS_HOUR(Time)));
-                // DEBUG_V(String("Minutes: ") + String(FS_MINUTE(Time)));
-                // DEBUG_V(String("Seconds: ") + String(FS_SECOND(Time)));
-
-                tmElements_t tm;
-                tm.Year = FS_YEAR(Date) - 1970;
-                tm.Month = FS_MONTH(Date);
-                tm.Day = FS_DAY(Date);
-                tm.Hour = FS_HOUR(Time);
-                tm.Minute = FS_MINUTE(Time);
-                tm.Second = FS_SECOND(Time);
-
-                // DEBUG_V(String("tm: ") + String(time_t(makeTime(tm))));
-                jsonDocFileList[FileIndex]["name"] = EntryName;
-                jsonDocFileList[FileIndex]["date"] = makeTime(tm);
-                jsonDocFileList[FileIndex]["length"] = CurrentEntry.size ();
-                ++FileIndex;
-            }
-            else
-            {
-                // DEBUG_V("Skipping File");
             }
             CurrentEntry.close();
-        } // end while true
-
-        JsonWrite(jsonDoc, "usedBytes", usedBytes);
-
-    #endif // ndef SIMULATE_SD
+        } // end while
+#endif // ndef SIMULATE_SD
 
         InputDir.close();
         UnLockSd();
 
-        // close the array and add the descriptive data
-        JsonWrite(jsonDoc, "numFiles", numFiles);
-        JsonWrite(jsonDoc, "SdCardPresent", true);
-        // PrettyPrint (jsonDoc, String ("FSEQ File List"));
-        SaveFlashFile(String(CN_fseqfilelist) + F(".json"), jsonDoc);
-    } while(false);
+        ListFile.print(F("],\"usedBytes\":"));
+        ListFile.print(int64String(usedBytes));
+        ListFile.print(F(",\"numFiles\":"));
+        ListFile.print(numFiles);
+        ListFile.print(F(",\"SdCardPresent\":true}"));
+        ListFile.close();
 
-    // String Temp;
-    // ReadFlashFile(FSEQFILELIST, Temp);
-    // xDEBUG_V(Temp);
+        LittleFS.remove(FinalFileName.c_str());
+        LittleFS.rename(TempFileName.c_str(), FinalFileName.c_str());
+
+        logcon (String(F("FSEQ file list: ")) + String(numFiles) + F(" files in ") + String(millis() - StartTime) + F(" ms"));
+    } while(false);
 
     // DEBUG_END;
 
 } // BuildFseqList
+
+//-----------------------------------------------------------------------------
+// Append one file entry to the streamed FSEQ list. Returns true when an entry was written.
+bool c_FileMgr::AddFseqListEntry(fs::File & ListFile, const String & EntryName, uint64_t EntrySize, uint16_t Date, uint16_t Time, uint32_t & numFiles, bool DisplayFileNames)
+{
+    if (EntryName.isEmpty () || (0 == EntrySize))
+    {
+        return false;
+    }
+
+    FoundZipFile |= IsCompressed(EntryName);
+
+    if(DisplayFileNames)
+    {
+        logcon (String(F("SD File: '")) + EntryName + "'   " + int64String(EntrySize));
+    }
+
+    tmElements_t tm;
+    tm.Year   = FS_YEAR(Date) - 1970;
+    tm.Month  = FS_MONTH(Date);
+    tm.Day    = FS_DAY(Date);
+    tm.Hour   = FS_HOUR(Time);
+    tm.Minute = FS_MINUTE(Time);
+    tm.Second = FS_SECOND(Time);
+
+    JsonDocument EntryDoc;
+    JsonObject Entry = EntryDoc.to<JsonObject>();
+    Entry["name"]   = EntryName;
+    Entry["date"]   = makeTime(tm);
+    Entry["length"] = EntrySize;
+
+    if (numFiles)
+    {
+        ListFile.print(',');
+    }
+    serializeJson(EntryDoc, ListFile);
+    ++numFiles;
+    return true;
+} // AddFseqListEntry
 
 //-----------------------------------------------------------------------------
 void c_FileMgr::FindFirstZipFile(String &FileName)

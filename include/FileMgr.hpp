@@ -159,6 +159,7 @@ private:
 
 
     void StartSdCard ();
+    bool AddFseqListEntry (fs::File & ListFile, const String & EntryName, uint64_t EntrySize, uint16_t Date, uint16_t Time, uint32_t & numFiles, bool DisplayFileNames);
     void listDir (fs::FS& fs, String dirname, uint8_t levels);
     void DescribeSdCardToUser ();
     void handleFileUploadNewFile (const String & filename);
