@@ -155,7 +155,7 @@ jobs:
           - target: "esp32_devkitv_eth"
             chip: "esp32"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       # Checkout ESPixelStick
       - uses: actions/checkout@v4
@@ -239,7 +239,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: 'npm'       # Automatically caches your npm dependencies
       - run: npm install
       - run: npm install -g gulp-cli
         
@@ -273,7 +272,7 @@ jobs:
 
   release:
     needs: package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download Package
