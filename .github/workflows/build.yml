@@ -218,7 +218,7 @@ jobs:
 
   package:
     needs: firmware
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       # Checkout ESPixelStick
       - uses: actions/checkout@v4
@@ -236,16 +236,18 @@ jobs:
           merge-multiple: true
 
       # Install Node
+      - name: Setup Node.js
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
+          cache: 'npm'       # Automatically caches your npm dependencies
       - run: npm install
 
       # Build and move the web pages
       - name: Compile Web Pages
         run: |
-          gulp
-          gulp md
+          npx gulp
+          npx gulp md
           if [ -z "$ESPS_RELEASE" ]; then
           gulp ci
           fi
