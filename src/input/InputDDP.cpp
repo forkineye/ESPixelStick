@@ -21,15 +21,6 @@
 #include "service/FPPDiscovery.h"
 #include <string.h>
 
-#ifdef ARDUINO_ARCH_ESP32
-#   define FPP_TYPE_ID          0xC3
-#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP32")
-
-#else
-#   define FPP_TYPE_ID          0xC2
-#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP8266")
-#endif
-
 //-----------------------------------------------------------------------------
 c_InputDDP::c_InputDDP (c_InputMgr::e_InputChannelIds NewInputChannelId,
                         c_InputMgr::e_InputType       NewChannelType,
