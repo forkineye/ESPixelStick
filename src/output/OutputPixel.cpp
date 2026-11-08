@@ -654,11 +654,6 @@ bool IRAM_ATTR c_OutputPixel::ISR_GetNextIntensityToSend (uint32_t &DataToSend)
 
     DataToSend = (this->*FrameStateFuncPtr)();
 
-    if (InvertData)
-    {
-        DataToSend = ~DataToSend;
-    }
-
     return ISR_MoreDataToSend();
 
 } // NextIntensityToSend
@@ -784,6 +779,12 @@ void c_OutputPixel::WriteChannelData(uint32_t StartChannelId, uint32_t ChannelCo
         uint32_t CurrentIntensityData = gamma_table[pSourceData[SourceDataIndex]];
         // DEBUG_V(String("              CurrentIntensityData: ") + String(CurrentIntensityData));
         CurrentIntensityData = uint8_t((uint32_t(CurrentIntensityData) * AdjustedBrightness) >> 8);
+
+        if (InvertData)
+        {
+            CurrentIntensityData = ~CurrentIntensityData;
+        }
+    
         // DEBUG_V(String("              CurrentIntensityData: ") + String(CurrentIntensityData));
         uint32_t CalculatedChannelId = CalculateIntensityOffset(currentChannelId);
         uint8_t *pBuffer = &pOutputBuffer[CalculatedChannelId];
@@ -837,6 +838,10 @@ void c_OutputPixel::ReadChannelData(uint32_t StartChannelId, uint32_t ChannelCou
         uint8_t CurrentIntensityData = pOutputBuffer[CalculateIntensityOffset(currentChannelId)];
         // CurrentIntensityData = gamma_table[CurrentIntensityData];
         CurrentIntensityData = uint8_t((uint32_t(CurrentIntensityData << 8) / AdjustedBrightness));
+        if (InvertData)
+        {
+            CurrentIntensityData = ~CurrentIntensityData;
+        }
         pTargetData[SourceDataIndex] = CurrentIntensityData;
     }
 
