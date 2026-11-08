@@ -53,7 +53,7 @@ void c_FPPSemaphore::Take ()
     {
         // DEBUG_V("Previous Operation In Progress. Ignore this request");
         // LOG_PORT.print("1");
-        delay(10);
+        SafeDelay(10);
     }
     ProcessingWebRequest = true;
 #endif // def ARDUINO_ARCH_ESP32
@@ -65,7 +65,7 @@ void c_FPPSemaphore::Give ()
 #ifdef ARDUINO_ARCH_ESP32
     xSemaphoreGive( xSemaphore );
 #else
-    delay(5);
+    SafeDelay(5);
     ProcessingWebRequest = false;
 #endif // def foo
 } // c_FPPSemaphore
@@ -1015,7 +1015,7 @@ void c_FPPDiscovery::ProcessFile (
             InputMgr.SetOperationalState(true);
             OutputMgr.PauseOutputs(false);
             FeedWDT();
-            delay(1000);
+            SafeDelay(1000);
             FeedWDT();
             // DEBUG_V("Allow file to play");
             String temp = String(UploadFileName);

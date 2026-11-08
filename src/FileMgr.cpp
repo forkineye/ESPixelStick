@@ -1672,7 +1672,7 @@ uint64_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, uint6
         }
 
         // DEBUG_V (String("FileListIndex: ") + String(FileListIndex));
-        delay(10);
+        SafeDelay(10);
         FeedWDT();
         LockSd();
         // DEBUG_V();
@@ -1682,7 +1682,7 @@ uint64_t c_FileMgr::WriteSdFile (const FileId& FileHandle, byte* FileData, uint6
         // DEBUG_V();
         UnLockSd();
         FeedWDT();
-        delay(10);
+        SafeDelay(10);
         // DEBUG_V (String (" FileHandle: ") + String (FileHandle));
         // DEBUG_V (String ("File.Handle: ") + String (FileList[FileListIndex].handle));
 
@@ -1724,7 +1724,7 @@ uint64_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, ui
         // are we using a buffer in front of the SD card?
         if(nullptr == FileList[FileListIndex].buffer.DataBuffer)
         {
-            delay(10);
+            SafeDelay(10);
             FeedWDT();
 
             // DEBUG_V("Not using buffers");
@@ -1733,7 +1733,7 @@ uint64_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, ui
             FileList[FileListIndex].fsFile.flush();
             UnLockSd();
 
-            delay(20);
+            SafeDelay(20);
             FeedWDT();
         }
         else // buffered mode
@@ -1755,7 +1755,7 @@ uint64_t c_FileMgr::WriteSdFileBuf (const FileId& FileHandle, byte* FileData, ui
                 uint64_t WroteToSdSize = FileList[FileListIndex].fsFile.write(FileList[FileListIndex].buffer.DataBuffer, FileList[FileListIndex].buffer.offset);
                 FileList[FileListIndex].fsFile.flush();
                 UnLockSd();
-                delay(30);
+                SafeDelay(30);
                 FeedWDT();
                 // DEBUG_V(String("                     offset: ") + String(FileList[FileListIndex].buffer.offset));
                 // DEBUG_V(String("              WroteToSdSize: ") + String(WroteToSdSize));
@@ -2210,7 +2210,7 @@ bool c_FileMgr::handleFileUpload (
                 CloseSdFile (fsUploadFileHandle);
                 // DEBUG_V(String("fsUploadFileName: ") + fsUploadFileName);
                 DeleteSdFile (fsUploadFileName);
-                delay(100);
+                SafeDelay(100);
                 BuildFseqList(false);
                 expectedIndex = 0;
                 fsUploadFileName.clear();
@@ -2271,7 +2271,7 @@ bool c_FileMgr::handleFileUpload (
         FeedWDT();
         expectedIndex = 0;
 
-        delay(100);
+        SafeDelay(100);
         BuildFseqList(false);
 
         OutputMgr.ClearBuffer();
