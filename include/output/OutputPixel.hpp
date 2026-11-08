@@ -148,7 +148,7 @@ private:
     void updateColorOrderOffsets(); ///< Update color order
     bool validate ();        ///< confirm that the current configuration is valid
     inline uint32_t CalculateIntensityOffset(uint32_t ChannelId);
-    uint32_t ISR_GetIntensityData();
+    // uint32_t ISR_GetIntensityData();
 
 public:
     c_OutputPixel (OM_OutputPortDefinition_t & OutputPortDefinition,

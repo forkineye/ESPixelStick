@@ -18,6 +18,8 @@
 *
 */
 
+#define FPP_VARIANT_NAME "MH_ET_LIVE_MiniKit"
+
 // Output Manager
 // MAX 8 Serial port on ESP32
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =

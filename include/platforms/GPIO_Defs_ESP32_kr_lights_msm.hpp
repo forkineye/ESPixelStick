@@ -18,6 +18,8 @@
  *
  */
 
+#define FPP_VARIANT_NAME "kr_lights_msm"
+
 // #define SUPPORT_ETHERNET
 // #define SUPPORT_ETHERNET_KSZ8863
 

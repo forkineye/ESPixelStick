@@ -42,15 +42,15 @@ public:
     void    GetStatus (ArduinoJson::JsonObject& jsonStatus);
     void    SetOutputBufferSize (uint32_t NumChannelsAvailable);
     void    PauseOutput (bool State);
-    void    ISR_GetNextDataSlicesToSend (c_OutputI2S::I2S_Item_t * DataToSend, uint32_t numSlices);
+    bool    ISR_GetNextDataSlicesToSend (c_OutputI2S::I2S_Item_t * DataToSend, uint32_t numSlices, c_OutputI2S::I2S_Item_t DefaultIntensitySliceData);
+    void    ISR_StartNewDataFrame ();
 
     // to be removed when the I2S driver is fully implemented
     virtual bool RmtPoll() {return false;}
 
 private:
     void    CalculateFrameBitSlices ();
-    void    ISR_SetUpNextDataBitToSend ();
-    void    ISR_StartNewDataFrame ();
+    bool    ISR_SetUpNextDataToSend ();
 
     // The adjustments compensate for rounding errors in the calculations
     c_OutputI2S     *I2Sdriver;
@@ -76,7 +76,7 @@ private:
     uint32_t        DataPattern;
     uint32_t        DataPatternMask;
 
-    // #define WS2811_I2S_DEBUG_COUNTERS
+    #define WS2811_I2S_DEBUG_COUNTERS
     #ifdef WS2811_I2S_DEBUG_COUNTERS
     #define INC_WS2811_I2S_DEBUG_COUNTER(c) (I2SDebugCounters.c++)
     struct
@@ -102,13 +102,12 @@ private:
 
     enum OutputWS2811I2S_FSM_States
     {
-        _OutputWS2811I2S_FSM_State_FrameStart,
-        _OutputWS2811I2S_FSM_State_Ifg,
         _OutputWS2811I2S_FSM_State_FrameReset,
         _OutputWS2811I2S_FSM_State_DataHigh,
-        _OutputWS2811I2S_FSM_State_DataLow
+        _OutputWS2811I2S_FSM_State_DataLow,
+        _OutputWS2811I2S_FSM_State_Idle
     };
-    OutputWS2811I2S_FSM_States volatile OutputWS2811I2S_FSM_State = OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Ifg;
+    OutputWS2811I2S_FSM_States volatile OutputWS2811I2S_FSM_State = OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Idle;
     
 }; // c_OutputWS2811I2S
 
