@@ -28,12 +28,6 @@
 #include <umm_malloc/umm_malloc_cfg.h>
 #endif // def ARDUINO_ARCH_ESP8266
 
-#ifdef ARDUINO_ARCH_ESP32
-#   define FPP_TYPE_ID          0xC3
-#else
-#   define FPP_TYPE_ID          0xC2
-#endif
-
 #define FPP_DISCOVERY_PORT 32320
 static const String ulrCommand  = "command";
 static const String ulrPath     = "path";

@@ -33,6 +33,12 @@
 #	error Platform not supported
 #endif
 
+#ifdef ARDUINO_ARCH_ESP32
+#   define  FPP_TYPE_ID          0xC3
+#else
+#   define  FPP_TYPE_ID          0xC2
+#endif
+
 #include <ESPAsyncWebServer.h>
 
 class c_FPPSemaphore
