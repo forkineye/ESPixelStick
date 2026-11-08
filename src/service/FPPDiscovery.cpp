@@ -27,11 +27,8 @@
 
 #ifdef ARDUINO_ARCH_ESP32
 #   define FPP_TYPE_ID          0xC3
-#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP32")
-
 #else
 #   define FPP_TYPE_ID          0xC2
-#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP8266")
 #endif
 
 #define FPP_DISCOVERY_PORT 32320
@@ -595,7 +592,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     NetworkMgr.GetHostname (Hostname);
     SafeStrncpy (packet.hostName, Hostname.c_str (), sizeof(packet.hostName));
     SafeStrncpy (packet.version, ConstConfig.Version, sizeof(packet.version));
-    SafeStrncpy (packet.hardwareType, FPP_VARIANT_NAME.c_str(), sizeof(packet.hardwareType));
+    SafeStrncpy (packet.hardwareType, FPP_VARIANT_NAME, sizeof(packet.hardwareType));
     packet.ranges[0] = 0;
 
     // DEBUG_V(String("     packet.version: '") + String(packet.version) + "'");

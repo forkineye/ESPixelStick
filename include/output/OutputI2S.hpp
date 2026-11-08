@@ -39,8 +39,10 @@ public:
         uint32_t    I2SChannelId;
         gpio_num_t  DataPin;
         void        *arg;
-        void        (*GetNextIntensityBitSlices) (void*arg, I2S_Item_t * data, uint32_t numSlices) = nullptr;
+        bool        (*GetNextIntensityBitSlices) (void*arg, I2S_Item_t * data, uint32_t numSlices, I2S_Item_t DefaultIntensitySliceData) = nullptr;
+        void        (*StartNewFrame) (void*arg) = nullptr;
         bool        IsActive;
+        bool        IdleLevelIsHigh;
     };
 
     // must be a multiple of 32 bits (aka 4 bytes)
@@ -59,12 +61,16 @@ public:
 private:
     // array of configuration settings
     OutputI2SChannelConfig_t OutputI2SSlotConfigs[I2S_MAX_NUM_PORTS];
+    OutputI2SChannelConfig_t * pCurrentPort = OutputI2SSlotConfigs;
+
+    void ISR_MoveToNextPort();
 
     // must be more than zero
     #define I2S_NumSendBuffers 4
 
     // Class to manage the io device
     esp_i2s_parallel    i2sParallel;
+    I2S_Item_t          DefaultIntensitySliceData = I2S_Item_t(-1);
 
 public:
     c_OutputI2S ();

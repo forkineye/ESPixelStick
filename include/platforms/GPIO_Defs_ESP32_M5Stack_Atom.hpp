@@ -18,6 +18,8 @@
 *
 */
 
+#define FPP_VARIANT_NAME "M5Stack_Atom"
+
 /*
 * M5Stack Atom driver, boards are ESP32-PICO-D4 based, no PSRAM
 *
