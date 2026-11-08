@@ -18,6 +18,8 @@
 *
 */
 
+#define FPP_VARIANT_NAME "KA_4"
+
 // Output Manager
 // MAX 8 Serial port on ESP32
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =

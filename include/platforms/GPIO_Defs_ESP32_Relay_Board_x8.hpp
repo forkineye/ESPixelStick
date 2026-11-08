@@ -18,6 +18,8 @@
 *
 */
 
+#define FPP_VARIANT_NAME "RELAY_BOARD_x8"
+
 // Output Manager
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =
 {
