@@ -850,6 +850,14 @@ bool c_FileMgr::SaveFlashFile(const String &FileName, JsonDocument &FileData)
     // delay(100);
     // DEBUG_V("");
 
+    // A document that ran out of memory while it was being built is incomplete.
+    // Writing it would replace a good configuration file with a broken one, so keep the old file.
+    if (FileData.overflowed() || FileData.isNull())
+    {
+        logcon(String(CN_stars) + CfgFileMessagePrefix + String(F("not saved: the configuration document is incomplete (out of memory).")) + CN_stars);
+        return Response;
+    }
+
     fs::File file = LittleFS.open(FileName.c_str(), CN_w);
     // DEBUG_V("");
 
