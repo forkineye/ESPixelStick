@@ -18,6 +18,8 @@
 *
 */
 
+#define FPP_VARIANT_NAME "seed_XIAO"
+
 // Output Manager
 // MAX 4 Serial port on ESP32S3
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =

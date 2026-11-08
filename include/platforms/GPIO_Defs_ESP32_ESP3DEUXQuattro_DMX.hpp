@@ -19,6 +19,8 @@
  * BOARD_ESPS_ESP3DEUXQUATRO_DMX
  */
 
+ #define FPP_VARIANT_NAME "DEUXQuattro_DMX"
+
  // Output Manager
 // MAX 8 Serial port on ESP32
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =

@@ -18,6 +18,8 @@
 *
 */
 
+#define FPP_VARIANT_NAME "ESP01S"
+
 //Output Manager
 // MAX 1 Serial port on ESP8266
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =

@@ -18,6 +18,9 @@
  *
  */
 
+#undef FPP_VARIANT_NAME
+#define FPP_VARIANT_NAME "LoLin_D32_PRO"
+
 // MAX 8 Serial port on ESP32
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =
 {

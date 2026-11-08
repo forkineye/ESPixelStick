@@ -24,14 +24,14 @@
 #include "network/NetworkMgr.hpp"
 #include <Int64String.h>
 #include <time.h>
+#ifdef ARDUINO_ARCH_ESP8266
+#include <umm_malloc/umm_malloc_cfg.h>
+#endif // def ARDUINO_ARCH_ESP8266
 
 #ifdef ARDUINO_ARCH_ESP32
 #   define FPP_TYPE_ID          0xC3
-#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP32")
-
 #else
 #   define FPP_TYPE_ID          0xC2
-#   define FPP_VARIANT_NAME     (String(CN_ESPixelStick) + "-ESP8266")
 #endif
 
 #define FPP_DISCOVERY_PORT 32320
@@ -595,7 +595,7 @@ void c_FPPDiscovery::sendPingPacket (IPAddress destination)
     NetworkMgr.GetHostname (Hostname);
     SafeStrncpy (packet.hostName, Hostname.c_str (), sizeof(packet.hostName));
     SafeStrncpy (packet.version, ConstConfig.Version, sizeof(packet.version));
-    SafeStrncpy (packet.hardwareType, FPP_VARIANT_NAME.c_str(), sizeof(packet.hardwareType));
+    SafeStrncpy (packet.hardwareType, FPP_VARIANT_NAME, sizeof(packet.hardwareType));
     packet.ranges[0] = 0;
 
     // DEBUG_V(String("     packet.version: '") + String(packet.version) + "'");
@@ -1172,7 +1172,16 @@ void c_FPPDiscovery::GetSysInfoJSON (JsonObject & jsonResponse)
 #endif // def SUPPORT_UNZIP
 
     JsonObject jsonResponseUtilization = jsonResponse[F ("Utilization")].to<JsonObject> ();
-    JsonWrite(jsonResponseUtilization, F ("Memory"), ESP.getFreeHeap ());
+    // FPP shows this field as the percentage of memory in use
+#ifdef ARDUINO_ARCH_ESP8266
+    uint32_t HeapSize = UMM_MALLOC_CFG_HEAP_SIZE;
+#else
+    uint32_t HeapSize = ESP.getHeapSize ();
+#endif // def ARDUINO_ARCH_ESP8266
+    uint32_t FreeHeap = ESP.getFreeHeap ();
+    double   MemoryUsedPercent = (HeapSize > FreeHeap) ? (100.0 * double(HeapSize - FreeHeap)) / double(HeapSize) : 0.0;
+    JsonWrite(jsonResponseUtilization, F ("Memory"), MemoryUsedPercent);
+    JsonWrite(jsonResponseUtilization, F ("MemoryFree"), FreeHeap);
 
     double   uptimeMS  = millis ();
     double   UpSeconds = uptimeMS / 1000.0;

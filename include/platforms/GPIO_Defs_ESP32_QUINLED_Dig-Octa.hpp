@@ -18,6 +18,8 @@
  *
  */
 
+ #define FPP_VARIANT_NAME "QUINLED_Dig-Octa"
+
 //Output Manager
 // MAX 8 Serial ports on ESP32
 const OM_OutputPortDefinition_t OM_OutputPortDefinitions[] =

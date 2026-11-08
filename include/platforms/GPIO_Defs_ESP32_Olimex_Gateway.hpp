@@ -18,6 +18,8 @@
 *
 */
 
+#define FPP_VARIANT_NAME "Olimex_Gateway"
+
 /*
  * Pinout for Olimex ESP32-GATEWAY
  * https://www.olimex.com/Products/IoT/ESP32/ESP32-GATEWAY/open-source-hardware
