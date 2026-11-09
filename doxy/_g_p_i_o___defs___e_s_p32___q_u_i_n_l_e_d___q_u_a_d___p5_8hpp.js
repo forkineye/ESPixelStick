@@ -1,5 +1,6 @@
 var _g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___p5_8hpp =
 [
+    [ "FPP_VARIANT_NAME", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___p5_8hpp.html#a026446f1360e0a3b8fd62986b687b5cf", null ],
     [ "ONEWIRE_PIN", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___p5_8hpp.html#ad5e649aa028bd3be75964322c1cc6ed0", null ],
     [ "SD_CARD_CLK_PIN", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___p5_8hpp.html#aebe2eeabee8a8434bc5edf81a88f90e4", null ],
     [ "SD_CARD_CS_PIN", "_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___p5_8hpp.html#a7b3ca01a31109575d4bd2bf82e692d0b", null ],

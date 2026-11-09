@@ -4,6 +4,7 @@ var _g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp =
     [ "DEFAULT_CONSOLE_TX_GPIO", "_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#a6dc4c220baec42d8411386cda27ceae4", null ],
     [ "DEFAULT_RELAY_GPIO", "_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#ad828b40b5ce0c37516acd57858300a64", null ],
     [ "ENABLE_DEDICATED_SPI", "_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#a3ceb23f14263a17c56eac40e484cbbbb", null ],
+    [ "FPP_VARIANT_NAME", "_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#a026446f1360e0a3b8fd62986b687b5cf", null ],
     [ "SD_CARD_CLK_PIN", "_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#aebe2eeabee8a8434bc5edf81a88f90e4", null ],
     [ "SD_CARD_CS_PIN", "_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#a7b3ca01a31109575d4bd2bf82e692d0b", null ],
     [ "SD_CARD_MISO_PIN", "_g_p_i_o___defs___e_s_p32_s3___f_h4_r2_8hpp.html#a1683e2f1e1a3fb629bd7c17dfd8d1e58", null ],

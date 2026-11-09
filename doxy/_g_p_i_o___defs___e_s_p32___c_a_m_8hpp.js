@@ -1,5 +1,6 @@
 var _g_p_i_o___defs___e_s_p32___c_a_m_8hpp =
 [
+    [ "FPP_VARIANT_NAME", "_g_p_i_o___defs___e_s_p32___c_a_m_8hpp.html#a026446f1360e0a3b8fd62986b687b5cf", null ],
     [ "LED_FLASH_GPIO", "_g_p_i_o___defs___e_s_p32___c_a_m_8hpp.html#acaa3af53294f66e34284862a6bc411aa", null ],
     [ "LED_FLASH_OFF", "_g_p_i_o___defs___e_s_p32___c_a_m_8hpp.html#a8409318a80454d0c4aba375ddffb2f6a", null ],
     [ "SD_CARD_CLK_PIN", "_g_p_i_o___defs___e_s_p32___c_a_m_8hpp.html#aebe2eeabee8a8434bc5edf81a88f90e4", null ],

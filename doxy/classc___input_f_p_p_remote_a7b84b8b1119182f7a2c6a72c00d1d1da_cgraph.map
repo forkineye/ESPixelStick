@@ -1,22 +1,24 @@
 <map id="c_InputFPPRemote::StopPlaying" name="c_InputFPPRemote::StopPlaying">
-<area shape="rect" id="Node000001" title=" " alt="" coords="5,353,216,378"/>
-<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html#a2f11845f9b3c3b91cc8c276981062b2f" title=" " alt="" coords="264,251,454,291"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,350,288,295,290,300,147,355"/>
-<area shape="rect" id="Node000008" href="$classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="502,446,706,472"/>
-<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="183,377,518,440,517,445,182,382"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,378,216,404"/>
+<area shape="rect" id="Node000002" href="$classc___input_f_p_p_remote.html#a2f11845f9b3c3b91cc8c276981062b2f" title=" " alt="" coords="264,284,454,325"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,375,283,328,285,333,151,380"/>
+<area shape="rect" id="Node000008" href="$classc___input_f_p_p_remote.html#a7cba6247fa182067f09371d891c53adb" title=" " alt="" coords="502,496,706,521"/>
+<area shape="poly" id="edge11_Node000001_Node000008" title=" " alt="" coords="169,402,533,489,531,494,168,407"/>
 <area shape="rect" id="Node000003" href="$classc___input_f_p_p_remote.html#a49952f48c45c1d31ffb14a18a030a853" title=" " alt="" coords="510,5,698,46"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="366,249,385,209,414,157,453,103,500,57,508,52,511,56,504,61,457,107,418,160,390,211,371,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="364,283,381,236,409,176,449,112,473,83,500,57,507,52,510,56,504,61,477,86,453,115,414,178,386,238,369,284"/>
 <area shape="rect" id="Node000004" href="$classc___input_f_p_p_remote_play_item.html#ac3dab9ea5afed487d175d3dca6dc7b23" title=" " alt="" coords="511,71,697,111"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="373,248,424,186,460,151,501,121,508,116,511,121,503,125,464,155,428,189,377,252"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="369,282,389,247,418,204,456,159,500,121,507,117,510,121,504,125,460,163,423,207,393,250,373,285"/>
 <area shape="rect" id="Node000005" href="$main_8cpp.html#ace03924f16faf7e0c24590ede39ae2f2" title=" " alt="" coords="564,136,644,161"/>
-<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="383,248,435,209,501,171,549,155,550,161,503,176,438,213,386,252"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="375,282,427,227,462,197,501,171,549,154,550,159,503,176,465,201,430,230,379,286"/>
 <area shape="rect" id="Node000006" href="$classc___input_f_p_p_remote_play_item.html#a3baea76df7eb2bc86512e8252d711961" title=" " alt="" coords="511,185,697,226"/>
-<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="437,247,510,228,511,233,439,253"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="401,281,501,237,521,229,523,234,503,241,404,286"/>
 <area shape="rect" id="Node000007" href="$classc___input_f_p_p_remote_play_item.html#a635e6efe611a2c4219289de24b93c585" title=" " alt="" coords="511,251,697,291"/>
-<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="454,268,495,268,495,274,454,274"/>
-<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="382,290,456,373,478,406,488,419,503,431,514,437,512,442,501,436,484,422,473,409,452,377,378,294"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="454,289,495,283,496,288,455,294"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="385,323,420,357,456,399,470,423,477,444,486,463,504,481,512,486,509,491,500,485,482,466,472,446,465,425,452,402,416,361,382,327"/>
 <area shape="rect" id="Node000009" href="$classc___input_f_p_p_remote_play_item.html#ad62453249e91e547582ea77cd6db6c04" title=" " alt="" coords="511,316,697,357"/>
-<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="439,289,511,309,510,314,437,295"/>
-<area shape="rect" id="Node000010" href="$classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="511,381,697,422"/>
-<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="387,289,439,328,503,366,518,373,516,378,501,371,436,332,384,294"/>
+<area shape="poly" id="edge8_Node000002_Node000009" title=" " alt="" coords="455,314,496,320,495,325,454,319"/>
+<area shape="rect" id="Node000010" href="$_e_s_pixel_stick_8h.html#a974d7976caba9cd2c06c1f9a21fabc39" title=" " alt="" coords="564,381,644,406"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="402,323,503,366,550,379,548,385,501,371,400,328"/>
+<area shape="rect" id="Node000011" href="$classc___input_f_p_p_remote_play_item.html#a380f107fc7811c931aa4fa63cd8c1ac0" title=" " alt="" coords="511,431,697,471"/>
+<area shape="poly" id="edge10_Node000002_Node000011" title=" " alt="" coords="382,323,435,370,468,395,503,417,513,422,511,427,501,421,465,399,431,374,379,327"/>
 </map>

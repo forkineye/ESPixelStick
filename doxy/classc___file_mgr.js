@@ -13,6 +13,7 @@ var classc___file_mgr =
     [ "~c_FileMgr", "classc___file_mgr.html#a7996698d27e5bd8d874b519c09c82f0a", null ],
     [ "__attribute__", "classc___file_mgr.html#a461b0bc1d63b33272cbf342d96544355", null ],
     [ "AbortSdFileUpload", "classc___file_mgr.html#ad2545a2e9a8e22194d4bf3e712528645", null ],
+    [ "AddFseqListEntry", "classc___file_mgr.html#a57c7dbd42a8b38d77e4d9d5e8f878af8", null ],
     [ "Begin", "classc___file_mgr.html#a2e86f9c538a117790a96317890d68a55", null ],
     [ "BuildDefaultFseqList", "classc___file_mgr.html#a1baff36dda7c5f8949cdac8945e4ee93", null ],
     [ "BuildFseqList", "classc___file_mgr.html#a8b9e4f29a70fd6c831f07349a9c32ab0", null ],

@@ -1,5 +1,6 @@
 var _g_p_i_o___defs___e_s_p32___t_t_g_o___t8_8hpp =
 [
+    [ "FPP_VARIANT_NAME", "_g_p_i_o___defs___e_s_p32___t_t_g_o___t8_8hpp.html#a026446f1360e0a3b8fd62986b687b5cf", null ],
     [ "LED_SDA", "_g_p_i_o___defs___e_s_p32___t_t_g_o___t8_8hpp.html#ab215995ad1873ad69c64716cd0f49e65", null ],
     [ "SD_CARD_CLK_PIN", "_g_p_i_o___defs___e_s_p32___t_t_g_o___t8_8hpp.html#aebe2eeabee8a8434bc5edf81a88f90e4", null ],
     [ "SD_CARD_CS_PIN", "_g_p_i_o___defs___e_s_p32___t_t_g_o___t8_8hpp.html#a7b3ca01a31109575d4bd2bf82e692d0b", null ],

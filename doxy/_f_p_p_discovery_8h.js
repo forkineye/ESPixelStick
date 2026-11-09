@@ -11,6 +11,7 @@ var _f_p_p_discovery_8h =
     [ "CTRL_PKT_PING", "_f_p_p_discovery_8h.html#abb98c26b42ca9557a0b4e9528367ee05", null ],
     [ "CTRL_PKT_PLUGIN", "_f_p_p_discovery_8h.html#a6fe35a8d9dd7ae46b869873e2206b67a", null ],
     [ "CTRL_PKT_SYNC", "_f_p_p_discovery_8h.html#a8f4516815aa55ef1e2d53e11c8d9040c", null ],
+    [ "FPP_TYPE_ID", "_f_p_p_discovery_8h.html#a8d85630f3a17ae4e79064891af9b7520", null ],
     [ "SYNC_FILE_MEDIA", "_f_p_p_discovery_8h.html#a36423b0dcaf49be3037c10caaa89c1b9", null ],
     [ "SYNC_FILE_SEQ", "_f_p_p_discovery_8h.html#a3da42cf7ab803665ca792ea6c66e3573", null ],
     [ "SYNC_PKT_OPEN", "_f_p_p_discovery_8h.html#a036d8b52bbc9e2c00b9ea0caaed91ed5", null ],

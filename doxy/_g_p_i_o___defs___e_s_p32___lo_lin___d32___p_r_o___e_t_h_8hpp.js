@@ -15,5 +15,6 @@ var _g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp =
     [ "DEFAULT_ETH_TYPE", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp.html#a639c3538a0fd379beffa18dacae31fb7", null ],
     [ "ETH_ADDR_PHY_LAN8720", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp.html#a03a909b01ab18eaa867c51c31695efc9", null ],
     [ "ETH_ADDR_PHY_TLK110", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp.html#a7bd4c535d5902197ec0068b6f1e38a57", null ],
+    [ "FPP_VARIANT_NAME", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp.html#a026446f1360e0a3b8fd62986b687b5cf", null ],
     [ "SUPPORT_ETHERNET", "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp.html#a3caa63f16e3dcb8b7b137a99d926439a", null ]
 ];

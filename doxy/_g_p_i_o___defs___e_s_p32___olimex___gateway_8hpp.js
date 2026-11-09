@@ -15,6 +15,7 @@ var _g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp =
     [ "DEFAULT_ETH_TYPE", "_g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp.html#a639c3538a0fd379beffa18dacae31fb7", null ],
     [ "ETH_ADDR_PHY_LAN8720", "_g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp.html#a03a909b01ab18eaa867c51c31695efc9", null ],
     [ "ETH_ADDR_PHY_TLK110", "_g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp.html#a7bd4c535d5902197ec0068b6f1e38a57", null ],
+    [ "FPP_VARIANT_NAME", "_g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp.html#a026446f1360e0a3b8fd62986b687b5cf", null ],
     [ "SD_CARD_CLK_PIN", "_g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp.html#aebe2eeabee8a8434bc5edf81a88f90e4", null ],
     [ "SD_CARD_CS_PIN", "_g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp.html#a7b3ca01a31109575d4bd2bf82e692d0b", null ],
     [ "SD_CARD_MISO_PIN", "_g_p_i_o___defs___e_s_p32___olimex___gateway_8hpp.html#a1683e2f1e1a3fb629bd7c17dfd8d1e58", null ],
