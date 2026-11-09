@@ -19,6 +19,8 @@
 */
 
 #include "GPIO_Defs_ESP32_LoLin_D32_PRO.hpp"
+#undef FPP_VARIANT_NAME
+#define FPP_VARIANT_NAME "LoLin_D32_PRO_ETH"
 
 #define SUPPORT_ETHERNET
 #include <ETH.h>

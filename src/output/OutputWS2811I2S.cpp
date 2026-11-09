@@ -23,9 +23,33 @@
 #include "output/OutputMgr.hpp"
 
 //----------------------------------------------------------------------------
-static void IRAM_ATTR GetDataSlicesToSendBase (void * arg, c_OutputI2S::I2S_Item_t * DataToSend, uint32_t numSlices)
+#ifdef WS2811_I2S_DEBUG_COUNTERS
+uint32_t StartNewFrameBaseCount = 0;
+#endif // def WS2811_I2S_DEBUG_COUNTERS
+// return false if there are no more data slices to send
+static void IRAM_ATTR StartNewFrameBase (void * arg)
 {
-    reinterpret_cast<c_OutputWS2811I2S*> (arg)->ISR_GetNextDataSlicesToSend (DataToSend, numSlices);
+    #ifdef WS2811_I2S_DEBUG_COUNTERS
+    StartNewFrameBaseCount++;
+    #endif // def WS2811_I2S_DEBUG_COUNTERS
+    
+    reinterpret_cast<c_OutputWS2811I2S*> (arg)->ISR_StartNewDataFrame ();
+} // StartNewFrameBase
+
+//----------------------------------------------------------------------------
+#ifdef WS2811_I2S_DEBUG_COUNTERS
+uint32_t GetDataSlicesToSendBaseCount = 0;
+#endif // def WS2811_I2S_DEBUG_COUNTERS
+
+//----------------------------------------------------------------------------
+// return false if there are no more data slices to send
+static bool IRAM_ATTR GetDataSlicesToSendBase (void * arg, c_OutputI2S::I2S_Item_t * DataToSend, uint32_t numSlices, c_OutputI2S::I2S_Item_t DefaultIntensitySliceData)
+{
+    #ifdef WS2811_I2S_DEBUG_COUNTERS
+    ++GetDataSlicesToSendBaseCount;
+    #endif // def WS2811_I2S_DEBUG_COUNTERS
+
+    return reinterpret_cast<c_OutputWS2811I2S*> (arg)->ISR_GetNextDataSlicesToSend (DataToSend, numSlices, DefaultIntensitySliceData);
 } // ISR_GetNextBitToSend
 
 //----------------------------------------------------------------------------
@@ -40,6 +64,8 @@ c_OutputWS2811I2S::c_OutputWS2811I2S (OM_OutputPortDefinition_t & OutputPortDefi
     // DEBUG_V (String ("WS2811_PIXEL_I2S_TICKS_BIT_1_H: 0x") + String (WS2811_PIXEL_I2S_TICKS_BIT_1_HIGH, HEX));
     // DEBUG_V (String ("WS2811_PIXEL_I2S_TICKS_BIT_1_L: 0x") + String (WS2811_PIXEL_I2S_TICKS_BIT_1_LOW,  HEX));
 
+    OutputWS2811I2S_FSM_State = OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Idle;
+
     // DEBUG_END;
 
 } // c_OutputWS2811I2S
@@ -48,8 +74,10 @@ c_OutputWS2811I2S::c_OutputWS2811I2S (OM_OutputPortDefinition_t & OutputPortDefi
 c_OutputWS2811I2S::~c_OutputWS2811I2S ()
 {
     // DEBUG_START;
-
-    I2Sdriver->RemoveSlotDevice(OutputPortDefinition.PortId);
+    if (HasBeenInitialized)
+    {
+        I2Sdriver->RemoveSlotDevice (OutputPortDefinition.PortId);
+    }
 
     // DEBUG_END;
 } // ~c_OutputWS2811I2S
@@ -63,12 +91,17 @@ void c_OutputWS2811I2S::Begin ()
 
     c_OutputWS2811::Begin ();
 
+    // make sure we are in the paused state
+    PauseOutput (true);
+
     // DEBUG_V (String ("DataPin: ") + String (DataPin));
 
     ZeroHighBitSliceCount = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (WS2811_PIXEL_NS_BIT_0_HIGH);
     ZeroLowBitSliceCount  = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (WS2811_PIXEL_NS_BIT_0_LOW);
-    OneHighBitSliceCount  = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (WS2811_PIXEL_NS_BIT_1_HIGH);
-    OneLowBitSliceCount   = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (WS2811_PIXEL_NS_BIT_1_LOW);
+    // OneHighBitSliceCount  = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (WS2811_PIXEL_NS_BIT_1_HIGH);
+    // OneLowBitSliceCount   = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (WS2811_PIXEL_NS_BIT_1_LOW);
+    OneHighBitSliceCount  = ZeroLowBitSliceCount;
+    OneLowBitSliceCount   = ZeroHighBitSliceCount;
 
     // DEBUG_V (String ("ZeroHighBitSliceCount: ") + String (ZeroHighBitSliceCount));
     // DEBUG_V (String (" ZeroLowBitSliceCount: ") + String (ZeroLowBitSliceCount));
@@ -79,17 +112,14 @@ void c_OutputWS2811I2S::Begin ()
     FrameResetCurrentSliceCount = 0;
     HighBitCurrentSliceCount    = 0;
     LowBitCurrentSliceCount     = 0;
-    IdleSliceCount              = 0;
-    IdleCurrentSliceCount       = 0;
-
-    DataBit = 0; // no data bit assigned yet
-    DataBitMask = ~DataBit;
 
     c_OutputI2S::OutputI2SChannelConfig_t OutputI2SConfig;
     OutputI2SConfig.I2SChannelId              = uint32_t (OutputPortDefinition.PortId);
     OutputI2SConfig.DataPin                   = gpio_num_t (OutputPortDefinition.gpios.data);
     OutputI2SConfig.arg                       = this;
+    OutputI2SConfig.StartNewFrame             = StartNewFrameBase;
     OutputI2SConfig.GetNextIntensityBitSlices = GetDataSlicesToSendBase;
+    OutputI2SConfig.IdleLevelIsHigh           = true; // idle is low
     OutputI2SConfig.IsActive                  = false; // do not output data
 
     I2Sdriver->RegisterSlotDevice (OutputI2SConfig, &DataBit, &DataBitMask);
@@ -106,24 +136,24 @@ void c_OutputWS2811I2S::Begin ()
 //----------------------------------------------------------------------------
 void c_OutputWS2811I2S::CalculateFrameBitSlices ()
 {
-    DEBUG_START;
+    // DEBUG_START;
 
     uint32_t MinFrameLenNS = 25 * NanoSecondsInAMilliSecond;
-    uint32_t FrameDurationInNanoSec = ActualFrameDurationMicroSec * NanoSecondsInAMicroSecond;
+    uint32_t FrameDurationInNS = ActualFrameDurationMicroSec * NanoSecondsInAMicroSecond;
     // DEBUG_V (String (" ActualFrameDurationMicroSec: ") + String (ActualFrameDurationMicroSec));
-    // DEBUG_V (String ("      FrameDurationInNanoSec: ") + String (FrameDurationInNanoSec));
+    // DEBUG_V (String ("           FrameDurationInNS: ") + String (FrameDurationInNS));
     // DEBUG_V (String ("     InterFrameGapInMicroSec: ") + String (InterFrameGapInMicroSec));
 
-    FrameDurationInNanoSec -= (InterFrameGapInMicroSec * NanoSecondsInAMicroSecond);
-    // DEBUG_V (String ("  new FrameDurationInNanoSec: ") + String (FrameDurationInNanoSec));
+    uint32_t InterFrameGapInNS = InterFrameGapInMicroSec * NanoSecondsInAMicroSecond;
+    // DEBUG_V (String ("           InterFrameGapInNS: ") + String (InterFrameGapInNS));
+
+    FrameDurationInNS += InterFrameGapInNS;
+    // DEBUG_V (String ("       new FrameDurationInNS: ") + String (FrameDurationInNS));
     // DEBUG_V (String ("               MinFrameLenNS: ") + String (MinFrameLenNS));
     
-    uint32_t IdleLenNS = (MinFrameLenNS > FrameDurationInNanoSec) ? MinFrameLenNS - FrameDurationInNanoSec : NanoSecondsInAMicroSecond; 
+    uint32_t IdleLenNS = (MinFrameLenNS > FrameDurationInNS) ? MinFrameLenNS - FrameDurationInNS : 2 *NanoSecondsInAMicroSecond; 
     // DEBUG_V (String ("                   IdleLenNS: ") + String (IdleLenNS));
     
-    IdleSliceCount = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (IdleLenNS);
-    // DEBUG_V (String ("              IdleSliceCount: ") + String (IdleSliceCount));
-
     FrameResetSliceCount = I2Sdriver->GetNumTimeSlicesForTargetTimeNS (InterFrameGapInMicroSec * NanoSecondsInAMicroSecond);
     // DEBUG_V (String ("        FrameResetSliceCount: ") + String (FrameResetSliceCount));
 
@@ -136,23 +166,22 @@ bool c_OutputWS2811I2S::SetConfig (ArduinoJson::JsonObject& jsonConfig)
 {
     // DEBUG_START;
 
-    PauseOutput(true);
+    PauseOutput (true);
 
     bool response = c_OutputWS2811::SetConfig (jsonConfig);
 
     // update the output GPIO
     I2Sdriver->SetGpio (OutputPortDefinition.PortId, OutputPortDefinition.gpios.data);
 
-    if(OutputBufferSize)
+    if (OutputBufferSize)
     {
-        // DEBUG_V("start the transmiter");
+        // DEBUG_V ("start the transmiter");
         CalculateFrameBitSlices ();
-        ISR_StartNewDataFrame ();
         PauseOutput (false);
     }
     else
     {
-        // DEBUG_V("stop the transmiter");
+        // DEBUG_V ("stop the transmiter");
         PauseOutput (true);
     }
 
@@ -169,16 +198,16 @@ void c_OutputWS2811I2S::SetOutputBufferSize (uint32_t NumChannelsToOutput)
     // DEBUG_V (String ("NumChannelsToOutput: ") + String (NumChannelsToOutput));
     c_OutputWS2811::SetOutputBufferSize (NumChannelsToOutput);
 
-    if(OutputBufferSize)
+    if (OutputBufferSize)
     {
-        // DEBUG_V("start the transmiter");
+        // DEBUG_V ("start the transmiter");
+        PauseOutput (true);
         CalculateFrameBitSlices ();
-        ISR_StartNewDataFrame ();
         PauseOutput (false);
     }
     else
     {
-        // DEBUG_V("stop the transmiter");
+        // DEBUG_V ("stop the transmiter");
         PauseOutput (true);
     }
 
@@ -197,8 +226,11 @@ void c_OutputWS2811I2S::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     #endif // def USE_I2S_DEBUG_COUNTERS
 
     #ifdef WS2811_I2S_DEBUG_COUNTERS
-    JsonObject JsonCounters = jsonStatus["JsonCounters"].to<JsonObject> ();
-    JsonWrite (JsonCounters, "GetDataSlices",                  I2SDebugCounters.GetDataSlices);
+    JsonObject JsonCounters = jsonStatus["WS2811_I2S_DEBUG_COUNTERS"].to<JsonObject> ();
+    
+    JsonWrite (JsonCounters, "GetDataSlicesToSendBaseCount",GetDataSlicesToSendBaseCount);
+    JsonWrite (JsonCounters, "StartNewFrameBaseCount",      StartNewFrameBaseCount);
+    JsonWrite (JsonCounters, "GetDataSlices",               I2SDebugCounters.GetDataSlices);
     JsonWrite (JsonCounters, "FrameStarts",                 I2SDebugCounters.FrameStarts);
     JsonWrite (JsonCounters, "FrameEnds",                   I2SDebugCounters.FrameEnds);
     JsonWrite (JsonCounters, "FrameResetBitSlices",         I2SDebugCounters.FrameResetBitSlices);
@@ -210,10 +242,10 @@ void c_OutputWS2811I2S::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     JsonWrite (JsonCounters, "BitSliceLow",                 I2SDebugCounters.BitSliceLow);
     JsonWrite (JsonCounters, "DataBitEnd",                  I2SDebugCounters.DataBitEnd);
     JsonWrite (JsonCounters, "DataByteEnd",                 I2SDebugCounters.DataByteEnd);
-    JsonWrite (JsonCounters, "IdleSliceCount",              IdleSliceCount);
+    JsonWrite (JsonCounters, "UnKnownFrameState",           I2SDebugCounters.UnKnownFrameState);
 
-    JsonWrite (JsonCounters, "DataBitMask",                 String(DataBitMask,HEX));
-    JsonWrite (JsonCounters, "DataBit",                     String(DataBit,HEX));
+    JsonWrite (JsonCounters, "DataBitMask",                 String (DataBitMask,HEX));
+    JsonWrite (JsonCounters, "DataBit",                     String (DataBit,HEX));
     JsonWrite (JsonCounters, "ZeroHighBitSliceCount",       ZeroHighBitSliceCount);
     JsonWrite (JsonCounters, "ZeroLowBitSliceCount",        ZeroLowBitSliceCount);
     JsonWrite (JsonCounters, "OneHighBitSliceCount",        OneHighBitSliceCount);
@@ -222,10 +254,8 @@ void c_OutputWS2811I2S::GetStatus (ArduinoJson::JsonObject& jsonStatus)
     JsonWrite (JsonCounters, "LowBitCurrentSliceCount",     LowBitCurrentSliceCount);
     JsonWrite (JsonCounters, "FrameResetSliceCount",        FrameResetSliceCount);
     JsonWrite (JsonCounters, "FrameResetCurrentSliceCount", FrameResetCurrentSliceCount);
-    JsonWrite (JsonCounters, "IdleSliceCount",              IdleSliceCount);
-    JsonWrite (JsonCounters, "IdleCurrentSliceCount",       IdleCurrentSliceCount);
-    JsonWrite (JsonCounters, "DataPattern",                 String(DataPattern, HEX));
-    JsonWrite (JsonCounters, "DataPatternMask",             String(DataPatternMask, HEX));
+    JsonWrite (JsonCounters, "DataPattern",                 String (DataPattern, HEX));
+    JsonWrite (JsonCounters, "DataPatternMask",             String (DataPatternMask, HEX));
 
     #endif // def WS2811_I2S_DEBUG_COUNTERS
 
@@ -240,111 +270,140 @@ void IRAM_ATTR c_OutputWS2811I2S::ISR_StartNewDataFrame ()
     c_OutputWS2811::ISR_StartNewFrame ();
 
     // DEBUG_V (String ("frame started on ") + String (OutputPortDefinition.gpios.data));
-    INC_WS2811_I2S_DEBUG_COUNTERS (FrameStarts);
+    INC_WS2811_I2S_DEBUG_COUNTER (FrameStarts);
 
-    IdleCurrentSliceCount = IdleSliceCount;
     FrameResetCurrentSliceCount  = FrameResetSliceCount;
+    OutputWS2811I2S_FSM_State = c_OutputWS2811I2S::OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_FrameReset;
 
     // set up for the next data byte
-    INC_WS2811_I2S_DEBUG_COUNTERS (DataBytes);
+    INC_WS2811_I2S_DEBUG_COUNTER (DataBytes);
 
-    // restore c_OutputPixel::ISR_GetNextIntensityToSend (DataPattern);
-    DataPatternMask = 0x80;
+    c_OutputPixel::ISR_GetNextIntensityToSend (DataPattern);
+    DataPatternMask = 0x100; // one bit past the valid data.
 
-    if (DataPattern & DataPatternMask)
-    {
-        // send a one bit
-        HighBitCurrentSliceCount = OneHighBitSliceCount;
-        LowBitCurrentSliceCount  = OneLowBitSliceCount;
-    }
-    else // send a zero bit
-    {
-        HighBitCurrentSliceCount = ZeroHighBitSliceCount;
-        LowBitCurrentSliceCount  = ZeroLowBitSliceCount;
-    }
+    ISR_SetUpNextDataToSend ();
 
     // DEBUG_END;
 } // StartNewDataFrame
 
 //----------------------------------------------------------------------------
-void IRAM_ATTR c_OutputWS2811I2S::ISR_GetNextDataSlicesToSend (c_OutputI2S::I2S_Item_t * pDataToSend, uint32_t numSlices)
+bool IRAM_ATTR c_OutputWS2811I2S::ISR_GetNextDataSlicesToSend (c_OutputI2S::I2S_Item_t * pDataToSend, uint32_t numSlices, c_OutputI2S::I2S_Item_t DefaultIntensitySliceData)
 {
-    INC_WS2811_I2S_DEBUG_COUNTERS (GetDataSlices);
+    bool MoreDataToSend = true;
+    INC_WS2811_I2S_DEBUG_COUNTER (GetDataSlices);
 
-    for (int CurrentSliceId = 0; CurrentSliceId < numSlices; ++CurrentSliceId, ++pDataToSend)
+    // Place to build the next data slices to send
+    c_OutputI2S::I2S_Item_t CurrentData;
+    CurrentData = DefaultIntensitySliceData;
+
+    while (numSlices > 0)
     {
-        if (IdleCurrentSliceCount)
+        switch (OutputWS2811I2S_FSM_State)
         {
-            INC_WS2811_I2S_DEBUG_COUNTERS (IdleBitSlices);
-            *pDataToSend |= uint8_t(DataBit); // output high
-            --IdleCurrentSliceCount;
-            continue;
-        }
-
-        if (FrameResetCurrentSliceCount)
-        {
-            INC_WS2811_I2S_DEBUG_COUNTERS (FrameResetBitSlices);
-            *pDataToSend &= uint8_t(DataBitMask); // output low
-            --FrameResetCurrentSliceCount;
-            continue;
-        }
-
-        INC_WS2811_I2S_DEBUG_COUNTERS (DataBitSlices);
-
-        if (HighBitCurrentSliceCount)
-        {
-            INC_WS2811_I2S_DEBUG_COUNTERS (BitSliceHigh);
-
-            --HighBitCurrentSliceCount;
-            *pDataToSend |= uint8_t(DataBit); // output high
-            continue;
-        }
-
-        if (LowBitCurrentSliceCount)
-        {
-            INC_WS2811_I2S_DEBUG_COUNTERS (BitSliceLow);
-            *pDataToSend &= uint8_t(DataBitMask); // output low
-            --LowBitCurrentSliceCount;
-            if (LowBitCurrentSliceCount)
+            case OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_FrameReset:
             {
-                // more low bits to send
-                continue;
+                INC_WS2811_I2S_DEBUG_COUNTER (FrameResetBitSlices);
+
+                if (--FrameResetCurrentSliceCount == 0)
+                {
+                    OutputWS2811I2S_FSM_State = c_OutputWS2811I2S::OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_DataHigh;
+                }
+                
+                // send a low bit
+                CurrentData &= DataBitMask;
+                break;
             }
-        }
 
-        INC_WS2811_I2S_DEBUG_COUNTERS (DataBitEnd);
+            case OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_DataHigh:
+            {
+                INC_WS2811_I2S_DEBUG_COUNTER (BitSliceHigh);
+                if (--HighBitCurrentSliceCount == 0)
+                {
+                    OutputWS2811I2S_FSM_State = c_OutputWS2811I2S::OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_DataLow;
+                }
 
-        // 1 bit of data has completed
-        DataPatternMask = DataPatternMask >> 1;
+                // send a high bit
+                CurrentData |= DataBit;
+                break;
+            }
 
+            case OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_DataLow:
+            {
+                INC_WS2811_I2S_DEBUG_COUNTER (BitSliceLow);
+                if (--LowBitCurrentSliceCount == 0)
+                {
+                    OutputWS2811I2S_FSM_State = OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_DataHigh;
+                    MoreDataToSend = ISR_SetUpNextDataToSend ();
+                }
+
+                CurrentData &= DataBitMask;
+                break;
+            }
+
+            case OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Idle:
+            {
+                CurrentData = DefaultIntensitySliceData;
+                MoreDataToSend = false;
+                break;
+            }
+
+            default:
+            {
+                CurrentData = DefaultIntensitySliceData;
+                OutputWS2811I2S_FSM_State = c_OutputWS2811I2S::OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Idle;
+
+                INC_WS2811_I2S_DEBUG_COUNTER (UnKnownFrameState);
+                break;
+            }
+        } // switch (CurrentFsmState)
+
+        // byte order in the data buffer is 2 3 0 1
+        * ( (c_OutputI2S::I2S_Item_t*) ( ( (uint32_t) (pDataToSend)) ^ 0x2)) = CurrentData;
+
+        --numSlices;
+        ++pDataToSend;
+    } // while (numSlices > 0)
+
+    return MoreDataToSend;
+} // ISR_GetNextDataSlicesToSend
+
+//----------------------------------------------------------------------------
+bool IRAM_ATTR c_OutputWS2811I2S::ISR_SetUpNextDataToSend ()
+{
+    // 1 bit of data has completed move to the next bit of data
+    DataPatternMask = DataPatternMask >> 1;
+    bool MoreDataToSend = true;
+
+    do // once
+    {
         // do we need to set up the next data byte to send?
         if (0 == DataPatternMask)
         {
             // entire data byte has been sent
-            INC_WS2811_I2S_DEBUG_COUNTERS (DataByteEnd);
+            INC_WS2811_I2S_DEBUG_COUNTER (DataByteEnd);
 
             // is there another data byte to send?
-            if (c_OutputPixel::ISR_MoreDataToSend ())
+            if (false == c_OutputPixel::ISR_MoreDataToSend ())
             {
-                INC_WS2811_I2S_DEBUG_COUNTERS (FrameEnds);
-
-                ISR_StartNewDataFrame ();
-
-                // force a huge idle gap
-                // IdleCurrentSliceCount = -1;
-                continue;
+                // Frame is complete, set up for the next frame
+                INC_WS2811_I2S_DEBUG_COUNTER (FrameEnds);
+                MoreDataToSend = false;
+    
+                OutputWS2811I2S_FSM_State = OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Idle;
+                break;
             }
-
-            // there is more data to send
-            INC_WS2811_I2S_DEBUG_COUNTERS (DataBytes);
-
+    
+            // there is more data to send in the current frame
+            INC_WS2811_I2S_DEBUG_COUNTER (DataBytes);
+    
             // set up to output the next data byte
             c_OutputPixel::ISR_GetNextIntensityToSend (DataPattern);
+            // next bit is MSBit
             DataPatternMask = 0x80;
-        }
-
+        } // End of byte sent processing
+    
         // more bits to send in the current data byte
-        INC_WS2811_I2S_DEBUG_COUNTERS (DataBits);
+        INC_WS2811_I2S_DEBUG_COUNTER (DataBits);
         if (DataPattern & DataPatternMask)
         {
             // send a one bit
@@ -356,11 +415,12 @@ void IRAM_ATTR c_OutputWS2811I2S::ISR_GetNextDataSlicesToSend (c_OutputI2S::I2S_
             // send a zero bit
             HighBitCurrentSliceCount = ZeroHighBitSliceCount;
             LowBitCurrentSliceCount  = ZeroLowBitSliceCount;
-        }
-    };
+        } // End set up next bit to write to buffer
 
-    return;
-} // ISR_GetNextBitToSend
+    } while (false); // do once
+
+    return MoreDataToSend;
+} // ISR_SetUpNextDataToSend
 
 //----------------------------------------------------------------------------
 void c_OutputWS2811I2S::PauseOutput (bool State)
@@ -368,12 +428,17 @@ void c_OutputWS2811I2S::PauseOutput (bool State)
     // DEBUG_START;
 
     // DEBUG_V (String ("PortId: ") + String (OutputPortDefinition.PortId));
-    // DEBUG_V (String (" State: ") + String (State));
-
+    // DEBUG_V (String (" New State: ") + String (State));
+    // DEBUG_V (String (" Old State: ") + String (IsPaused ()));
+    if (IsPaused ())
+    {
+        // DEBUG_V ("Currently Paused, Make sure we are ready to start at the beginning of the next frame");
+        OutputWS2811I2S_FSM_State = OutputWS2811I2S_FSM_States::_OutputWS2811I2S_FSM_State_Idle;
+    }
     c_OutputWS2811::PauseOutput (State);
     I2Sdriver->SetOutputState (OutputPortDefinition.PortId, !State);
 
     // DEBUG_END;
 } // PauseOutput
 
-#endif // defined (SUPPORT_OutputProtocol_WS2811) && defined (ARDUINO_ARCH_ESP32)
+#endif // defined (SUPPORT_OutputProtocol_WS2811) && defined (SUPPORT_I2S)

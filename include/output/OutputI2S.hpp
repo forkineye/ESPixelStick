@@ -31,19 +31,22 @@ public:
     // a slot is one bit in the output item
     #define I2S_NUM_SLOTA i2s_bits_per_chan_t::I2S_BITS_PER_CHAN_8BIT
     #define I2S_MAX_NUM_PORTS 8
-    typedef uint8_t I2S_Item_t;
+
+    typedef byte I2S_Item_t;
 
     struct OutputI2SChannelConfig_t
     {
         uint32_t    I2SChannelId;
         gpio_num_t  DataPin;
         void        *arg;
-        void        (*GetNextIntensityBitSlices) (void*arg, I2S_Item_t * data, uint32_t numSlices) = nullptr;
+        bool        (*GetNextIntensityBitSlices) (void*arg, I2S_Item_t * data, uint32_t numSlices, I2S_Item_t DefaultIntensitySliceData) = nullptr;
+        void        (*StartNewFrame) (void*arg) = nullptr;
         bool        IsActive;
+        bool        IdleLevelIsHigh;
     };
 
-    // must be a multiple of 32
-    #define I2S_NumSendBufferItems 1024
+    // must be a multiple of 32 bits (aka 4 bytes)
+    #define I2S_NumSendBufferItems (256 * sizeof(uint32_t))
 
     struct TransmitDmaBuffer_t
     {
@@ -58,12 +61,16 @@ public:
 private:
     // array of configuration settings
     OutputI2SChannelConfig_t OutputI2SSlotConfigs[I2S_MAX_NUM_PORTS];
+    OutputI2SChannelConfig_t * pCurrentPort = OutputI2SSlotConfigs;
+
+    void ISR_MoveToNextPort();
 
     // must be more than zero
     #define I2S_NumSendBuffers 4
 
     // Class to manage the io device
     esp_i2s_parallel    i2sParallel;
+    I2S_Item_t          DefaultIntensitySliceData = I2S_Item_t(-1);
 
 public:
     c_OutputI2S ();
@@ -107,5 +114,6 @@ public:
 
 #endif // def USE_I2S_DEBUG_COUNTERS
 
-};
+}; // c_OutputI2S
+
 #endif // def #ifdef SUPPORT_I2S
