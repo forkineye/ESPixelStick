@@ -155,7 +155,7 @@ jobs:
           - target: "esp32_devkitv_eth"
             chip: "esp32"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       # Checkout ESPixelStick
       - uses: actions/checkout@v7
@@ -218,7 +218,7 @@ jobs:
 
   package:
     needs: firmware
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       # Checkout ESPixelStick
       - uses: actions/checkout@v7
@@ -272,7 +272,7 @@ jobs:
 
   release:
     needs: package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - name: Download Package
