@@ -1596,11 +1596,11 @@ uint64_t c_FileMgr::ReadSdFile (const FileId& FileHandle, byte* FileData, uint64
         // DEBUG_V(String("ActualBytesToRead: ") + String(ActualBytesToRead));
         LockSd();
         FileList[FileListIndex].fsFile.seek(StartingPosition);
-        #ifdef SIMULATE_SD
-        response = FileList[FileListIndex].fsFile.readBytes((char*)FileData, ActualBytesToRead);
-        #else
-        response = FileList[FileListIndex].fsFile.readBytes(FileData, ActualBytesToRead);
-        #endif // def SIMULATE_SD
+        // One block read through the file system. Stream::readBytes() would fetch the data one byte at a
+        // time through timedRead(), which costs about 25 ms for a 555 channel frame on the ESP8266 and runs
+        // inside the input manager's 25 ms ticker, where it starves the network stack and the main loop.
+        int BytesRead = FileList[FileListIndex].fsFile.read(FileData, size_t(ActualBytesToRead));
+        response = (BytesRead > 0) ? uint64_t(BytesRead) : 0;
         UnLockSd();
         // DEBUG_V(String("         response: ") + String64(response));
     }
