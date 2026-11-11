@@ -61,18 +61,18 @@ var NAVTREEINDEX =
 "_const_names_8hpp.html#ae083a5e9def6af78cb69e46ab533599a",
 "_g_p_i_o___defs___e_s_p32___d1___m_i_n_i___e_t_h_8hpp.html",
 "_g_p_i_o___defs___e_s_p32___lo_lin___d32___p_r_o___e_t_h_8hpp.html#a639c3538a0fd379beffa18dacae31fb7",
-"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___a_e___plus__8_8hpp_source.html",
-"_g_p_i_o___defs___e_s_p32___relay___board__x8_8hpp.html#aebe2eeabee8a8434bc5edf81a88f90e4",
-"_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01_8hpp.html#aeed05cdd33507563bb8551bc006bc0f1",
-"_input_f_p_p_remote_play_effect_8hpp.html",
-"_wi_fi_driver_8cpp.html",
-"classc___input_alexa.html#a00ff050d19b35c8ce8b8d383d346ec6a",
-"classc___input_f_p_p_remote.html#a6a886de7757f92e890fe1b64c8bfc660",
-"classc___network_mgr.html#a1aec189a4006416d95097292a5be5610",
-"classc___wi_fi_driver.html#a4957b3cc3db8f59af3909ccd9d9f45bd",
-"classfsm___wi_fi__state___connecting_as_a_p.html",
-"main_8cpp.html#a067b67c856af5452506085e83cdb2b01",
-"structc___input_mgr_1_1_driver_info__t.html#a1f45a367b0aa71fbebe813c0121e75f0"
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___q_u_a_d___a_e___plus__8_8hpp.html#a4cc131f118cd012226ab3667cd2cbb6b",
+"_g_p_i_o___defs___e_s_p32___q_u_i_n_l_e_d___u_n_o___e_t_h___e_s_p_s_v3_8hpp.html#adaf0753131bfc7ffd9f67c5061606ed1",
+"_g_p_i_o___defs___e_s_p32___w_t32_e_t_h01_8hpp.html#a6566dcd940899ee7eafce954ae14e683",
+"_input_effect_engine_8cpp.html#a04336285f38337195901f0ea7c47e769",
+"_web_mgr_8cpp.html#a1566cbab7ed3269dd88fd34a6385824e",
+"classc___file_mgr.html#ad02883207cdebd5dae72ae7851127d39",
+"classc___input_f_p_p_remote.html#a2a56acde47495178be59070c79d037d5",
+"classc___input_mgr.html#ad79a53f450decdbcdc7c63ef2278bd1d",
+"classc___wi_fi_driver.html#a11cbfc5b295d14c77c3a33ebf11d6338",
+"classfsm___wi_fi__state___connected_to_a_p.html#a00bfcb4d08df3ab2cb72fed9f615a4d7",
+"globals_vars_o.html",
+"structc___input_f_p_p_remote_play_item_1_1_file_control__t.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
